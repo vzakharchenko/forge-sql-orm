@@ -1,0 +1,84 @@
+{
+  "name": "forge-sql-orm",
+  "version": "1.0.0",
+  "description": "Mikro-ORM integration for Forge-SQL in Atlassian Forge applications.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "require": "./dist/index.js",
+    "import": "./dist/index.mjs",
+    "default": "./dist/index.mjs"
+  },
+  "homepage": "https://github.com/vzakharchenko/forge-sql-orm#readme",
+  "bugs": {
+    "url": "https://github.com/vzakharchenko/forge-sql-orm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vzakharchenko/forge-sql-orm.git"
+  },
+  "keywords": [
+    "atlassian-forge",
+    "forge-sql",
+    "mikro-orm",
+    "orm",
+    "database"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@mikro-orm/cli": "^6.4.7",
+    "@mikro-orm/entity-generator": "^6.4.7",
+    "@mikro-orm/reflection": "^6.4.7",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "@vitest/coverage-v8": "^3.0.7",
+    "@vitest/ui": "^3.0.7",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-vitest": "^0.5.4",
+    "globals": "^16.0.0",
+    "inquirer": "^12.4.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.12.0",
+    "prettier": "^3.5.2",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.25.0",
+    "vitest": "^3.0.7"
+  },
+  "license": "MIT",
+  "author": "Vasyl Zakharchenko",
+  "scripts": {
+    "test": "vitest --run --config vitest.config.mjs",
+    "test:coverage": "vitest --run --config vitest.config.mjs --coverage",
+    "test:watch": "vitest --watch",
+    "lint": "eslint . --ext .ts,.tsx,.mjs",
+    "lint:fix": "eslint . --ext .ts,.tsx,.mjs --fix",
+    "format": "prettier --write .",
+    "postinstall": "ts-node scripts/postinstall.ts",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc",
+    "publish:npm": "npm publish --access public"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@mikro-orm/core": "6.4.7",
+    "@mikro-orm/mysql": "6.4.7",
+    "moment": "^2.30.1"
+  },
+  "peerDependencies": {
+    "@forge/sql": "^2.4.0"
+  },
+  "bin": {
+    "forge-sql-orm": "scripts/cli.js"
+  }
+}

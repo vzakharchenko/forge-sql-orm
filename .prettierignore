@@ -1,0 +1,4 @@
+node_modules
+dist
+scripts/postinstall.ts
+package-lock.json

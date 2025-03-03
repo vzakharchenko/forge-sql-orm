@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="MySql" database="MySql" id="MySql-1d4d" >
+	<schema name="testDb" >
+		<table name="orders" prior="tbl" >
+			<column name="id" type="INT" jt="4" mandatory="y" />
+			<column name="user_id" type="INT" jt="4" mandatory="y" />
+			<column name="product" type="VARCHAR" length="200" jt="12" />
+			<index name="pk_orders" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_orders_users" to_schema="testDb" to_table="users" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="users" prior="tbl" >
+			<column name="id" type="INT" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT ]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="200" jt="12" />
+			<index name="pk_users" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+	</schema>
+	<layout name="Main Diagram" id="Diagram-1b29" show_relation="columns" >
+		<entity schema="testDb" name="orders" color="C1D8EE" x="323" y="204" />
+		<entity schema="testDb" name="users" color="C1D8EE" x="102" y="204" />
+		<callout x="51" y="51" pointer="Round" >
+			<comment><![CDATA[Create new tables by right-clicking the diagram.
+Double-click the table headers, columns, or foreign keys to edit.
+The schema structure will be saved to the design model file.]]></comment>
+		</callout>
+	</layout>
+</project>
