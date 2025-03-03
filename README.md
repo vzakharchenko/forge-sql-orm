@@ -12,13 +12,46 @@
 - ✅ **Automatic migration generation** from MySQL databases.
 
 ## Installation
+Forge-SQL-ORM is designed to work with @forge/sql and requires some additional setup to ensure compatibility within Atlassian Forge.
 
+✅ Step 1: Install Dependencies
 ```sh
 npm install forge-sql-orm -S
 npm install @forge/sql -S
 ```
+This will:
 
-Connection to ORM
+Install Forge-SQL-ORM (the ORM for @forge/sql).
+Install @forge/sql, the Forge database layer.
+
+✅ Step 2: Configure Post-Installation Patch
+By default, MikroORM and Knex include some features that are not compatible with Forge's restricted runtime.
+To fix this, we need to patch these libraries after installation.
+
+Run:
+```sh
+npm set-script postinstall "forge-sql-orm patch:mikroorm"
+```
+✅ Step 3: Apply the Patch
+After setting up the postinstall script, run:
+```sh
+npm i
+```
+This will:
+
+Trigger the postinstall hook, which applies the necessary patches to MikroORM and Knex.
+Ensure everything is correctly configured for running inside Forge.
+
+
+🔧 Why is the Patch Required?
+Atlassian Forge has a restricted execution environment, which does not allow:
+
+- Dynamic import(id) calls, commonly used in MikroORM.
+- Direct file system access, which MikroORM sometimes relies on.
+- Unsupported database dialects, such as PostgreSQL or SQLite.
+- The patch removes these unsupported features to ensure full compatibility.
+
+# Connection to ORM
 
 ```js
 import { Orders } from "./entities/Orders";
@@ -44,7 +77,7 @@ return await forgeSQL.fetch().executeSchemaSQL(formattedQuery, UsersSchema);
 - Raw Fetch Data
 
 ```js
-const users = (await forgeSQL.fetch().executeRawSQL) < Users > "SELECT * FROM users";
+const users = await forgeSQL.fetch().executeRawSQL<Users>("SELECT * FROM users");
 ```
 
 - Complex Query
@@ -98,7 +131,7 @@ await forgeSQL.crud().insert(UsersSchema, [
 - Insert Data with duplicates
 
 ```js
-// INSERT INTO users (id,name) VALUES (4,'Smith'), (4, 'Vasyl')  ON DUPLICATE KEY UPDATE name = VALUES(name)
+// INSERT INTO users (id,name) VALUES (4,'Smith'), (4, 'Vasyl') ON DUPLICATE KEY UPDATE name = VALUES(name)
 await forgeSQL.crud().insert(
   UsersSchema,
   [
@@ -344,8 +377,7 @@ const userId = await forgeSQL.crud().insert(UsersSchema, [user]);
 console.log("Inserted User ID:", userId);
 
 // Fetch Users
-const users =
-  (await forgeSQL.fetch().executeSchemaSQL) < Users > ("SELECT * FROM users", UsersSchema);
+const users = await forgeSQL.fetch().executeSchemaSQL("SELECT * FROM users", UsersSchema);
 console.log(users);
 ```
 
@@ -354,7 +386,7 @@ console.log(users);
 If you modify the database schema, you can generate an update migration:
 
 Modify the schema in DbSchema
-![](https://github.com/vzakharchenko/forge-sql-orm/blob/master/img/joinSchema.png?raw=true)
+![](https://github.com/vzakharchenko/forge-sql-orm/blob/master/img/joinSchema2.png?raw=true)
 or manually run:
 
 ```sh
@@ -492,6 +524,7 @@ Commands:
   generate:model [options]     Generate MikroORM models from the database.
   migrations:create [options]  Generate an initial migration for the entire database.
   migrations:update [options]  Generate a migration to update the database schema.
+  patch:mikroorm               Patch MikroORM and Knex dependencies to work properly with Forge
   help [command]               display help for command
 ```
 
@@ -534,7 +567,21 @@ Detect schema changes (new tables, columns, indexes)
 - Generate only required migrations
 - Increment migrationCount.ts
 - Update index.ts to include new migrations
-  📌 Manual Migration Execution
+
+📌 Using the patch:mikroorm Command
+  If needed, you can manually apply the patch at any time using:
+
+```sh
+npx forge-sql-orm patch:mikroorm
+```
+
+This command:
+
+- Removes unsupported database dialects (e.g., PostgreSQL, SQLite).
+- Fixes dynamic imports to work in Forge.
+- Ensures Knex and MikroORM work properly inside Forge.
+
+📌 Manual Migration Execution
   To manually execute migrations in your application:
 
 ```js
@@ -563,11 +610,11 @@ export FORGE_SQL_ORM_DBNAME=mydb
 3. use .env
 
 ```sh
-export FORGE_SQL_ORM_HOST=localhost
-export FORGE_SQL_ORM_PORT=3306
-export FORGE_SQL_ORM_USER=root
-export FORGE_SQL_ORM_PASSWORD=secret
-export FORGE_SQL_ORM_DBNAME=mydb
+FORGE_SQL_ORM_HOST=localhost
+FORGE_SQL_ORM_PORT=3306
+FORGE_SQL_ORM_USER=root
+FORGE_SQL_ORM_PASSWORD=secret
+FORGE_SQL_ORM_DBNAME=mydb
 ```
 
 4. Interactive prompts (if missing parameters)

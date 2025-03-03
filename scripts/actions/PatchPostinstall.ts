@@ -98,72 +98,77 @@ const PATCHES: Patch[] = [
 
 ];
 
-const execute = ()=>
-// 🔧 Apply patches
-PATCHES.forEach(({ file, search, replace, deleteLines, deleteFile, deleteFolder, description }) => {
-    if (file) {
-        const filePath = path.resolve(__dirname, "../", file);
-        if (fs.existsSync(filePath)) {
-            let content = fs.readFileSync(filePath, "utf8");
-            let originalContent = content;
 
-            // 🔄 Replace text
-            if (search && replace) {
-                if (typeof search === "string" ? content.includes(search) : search.test(content)) {
-                    content = content.replace(search, replace);
-                    console.log(`[PATCHED] ${description}`);
+
+
+
+/**
+ * Runs the MikroORM & Knex patching logic.
+ */
+export function runPostInstallPatch() {
+    console.log("🔧 Applying MikroORM & Knex patches...");
+    PATCHES.forEach(({ file, search, replace, deleteLines, deleteFile, deleteFolder, description }) => {
+        if (file) {
+            const filePath = path.resolve(file);
+            console.log(filePath)
+            if (fs.existsSync(filePath)) {
+                let content = fs.readFileSync(filePath, "utf8");
+                let originalContent = content;
+
+                // 🔄 Replace text
+                if (search && replace) {
+                    if (typeof search === "string" ? content.includes(search) : search.test(content)) {
+                        content = content.replace(search, replace);
+                        console.log(`[PATCHED] ${description}`);
+                    }
                 }
-            }
 
-            // 🗑️ Remove matching lines
-            if (deleteLines) {
-                deleteLines.forEach((pattern) => {
-                    content = content
-                        .split("\n")
-                        .filter((line) => !pattern.test(line))
-                        .join("\n");
-                });
+                // 🗑️ Remove matching lines
+                if (deleteLines) {
+                    deleteLines.forEach((pattern) => {
+                        content = content
+                            .split("\n")
+                            .filter((line) => !pattern.test(line))
+                            .join("\n");
+                    });
+                    if (content !== originalContent) {
+                        console.log(`[CLEANED] Removed matching lines in ${file}`);
+                    }
+                }
+
+                // 💾 Save changes only if file was modified
                 if (content !== originalContent) {
-                    console.log(`[CLEANED] Removed matching lines in ${file}`);
+                    fs.writeFileSync(filePath, content, "utf8");
                 }
+
+                // 🚮 Remove empty files
+                if (content.trim() === "") {
+                    fs.unlinkSync(filePath);
+                    console.log(`[REMOVED] ${filePath} (file is now empty)`);
+                }
+            } else {
+                console.warn(`[WARNING] File not found: ${file}`);
             }
+        }
 
-            // 💾 Save changes only if file was modified
-            if (content !== originalContent) {
-                fs.writeFileSync(filePath, content, "utf8");
+        // 🚮 Delete specific files
+        if (deleteFile) {
+            const deleteFilePath = path.resolve(__dirname, "../", deleteFile);
+            if (fs.existsSync(deleteFilePath)) {
+                fs.unlinkSync(deleteFilePath);
+                console.log(`[DELETED] ${description}`);
             }
+        }
 
-            // 🚮 Remove empty files
-            if (content.trim() === "") {
-                fs.unlinkSync(filePath);
-                console.log(`[REMOVED] ${filePath} (file is now empty)`);
+        // 🚮 Delete entire folders
+        if (deleteFolder) {
+            const deleteFolderPath = path.resolve(__dirname, "../", deleteFolder);
+            if (fs.existsSync(deleteFolderPath)) {
+                fs.rmSync(deleteFolderPath, {recursive: true, force: true});
+                console.log(`[DELETED] ${description}`);
             }
-        } else {
-            console.warn(`[WARNING] File not found: ${file}`);
         }
-    }
+    })
 
-    // 🚮 Delete specific files
-    if (deleteFile) {
-        const deleteFilePath = path.resolve(__dirname, "../", deleteFile);
-        if (fs.existsSync(deleteFilePath)) {
-            fs.unlinkSync(deleteFilePath);
-            console.log(`[DELETED] ${description}`);
-        }
-    }
-
-    // 🚮 Delete entire folders
-    if (deleteFolder) {
-        const deleteFolderPath = path.resolve(__dirname, "../", deleteFolder);
-        if (fs.existsSync(deleteFolderPath)) {
-            fs.rmSync(deleteFolderPath, { recursive: true, force: true });
-            console.log(`[DELETED] ${description}`);
-        }
-    }
-});
-
-for (let i = 0; i < 3; i++) {
-    execute();
+    console.log("🎉 MikroORM & Knex patching completed!");
 }
-
-console.log("✅ Post-install patches applied successfully!");
