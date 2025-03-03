@@ -51,6 +51,7 @@
     "tsup": "^8.4.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.25.0",
+    "vite": "^6.2.0",
     "vitest": "^3.0.7"
   },
   "license": "MIT",
@@ -64,7 +65,8 @@
     "format": "prettier --write .",
     "postinstall": "node ./scripts/cli.js patch:mikroorm",
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && vite build && npm run build:types",
+    "build:types": "tsc --emitDeclarationOnly",
     "publish:npm": "npm publish --access public"
   },
   "files": [

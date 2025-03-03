@@ -22,16 +22,16 @@ const PATCHES: Patch[] = [
     // 🗑️ Remove unused dialects (mssql, postgres, sqlite) in MikroORM
     {
         file: "node_modules/@mikro-orm/knex/MonkeyPatchable.d.ts",
-        deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^\s*Postgres.*$/gm, /^\s*Sqlite3Dialect.*$/gm, /^\s*BetterSqlite3.*$/gm],
+        deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^\s*Postgres.*$/gm, /^.*Sqlite3.*$/gm, /^.*BetterSqlite3.*$/gim],
         description: "Removing unused dialects from MonkeyPatchable.d.ts"
     },
     {
         file: "node_modules/@mikro-orm/knex/MonkeyPatchable.js",
-        deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^\s*Postgres.*$/gim, /^\s*Sqlite3Dialect.*$/gim, /^\s*BetterSqlite3.*$/gim],
+        deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^.*postgres.*$/gim, /^.*sqlite.*$/gim, /^.*Sqlite.*$/gim],
         description: "Removing unused dialects from MonkeyPatchable.js"
     },
     {
-        file: "/home/vzakharchenko/home/forge-sql-orm/node_modules/@mikro-orm/knex/dialects/index.js",
+        file: "node_modules/@mikro-orm/knex/dialects/index.js",
         deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^.*postgresql.*$/gim, /^.*sqlite.*$/gim],
         description: "Removing unused dialects from @mikro-orm/knex/dialects/index.js"
     },
@@ -94,7 +94,35 @@ const PATCHES: Patch[] = [
         search: /^.* from '@mikro-orm.*$/gim,
         replace: "            }).join(', '))} } from 'forge-sql-orm';`);",
         description: "Replacing entity generator imports with 'forge-sql-orm'"
-    }
+    },
+    {
+        file: "node_modules/knex/lib/dialects/index.js",
+        deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^.*postgresql.*$/gim, /^.*sqlite.*$/gim, /^.*oracle.*$/gim, /^.*oracledb.*$/gim, /^.*pgnative.*$/gim, /^.*postgres.*$/gim, /^.*redshift.*$/gim, /^.*sqlite3.*$/gim, /^.*cockroachdb.*$/gim],
+        description: "Removing unused dialects from @mikro-orm/knex/dialects/index.js"
+    },
+    {
+        file: "node_modules/@mikro-orm/core/utils/Utils.js",
+        search: /\s\|\|\s*\(require\.extensions\s*&&\s*!!require\.extensions\['\.ts'\]\);\s*/g,
+        replace: ";", // Replaces with semicolon to keep syntax valid
+        description: "Removing deprecated `require.extensions` check from MikroORM"
+    },
+    {
+        file: "node_modules/@mikro-orm/core/utils/Utils.js",
+        search: /^.*extensions.*$/gim,
+        replace: "{", // Replaces with semicolon to keep syntax valid
+        description: "Removing deprecated `require.extensions` check from MikroORM"
+    },
+    {
+        file: "node_modules/@mikro-orm/core/utils/Utils.js",
+        search: /^.*package.json.*$/gim,
+        replace: "return 0;", // Replaces with semicolon to keep syntax valid
+        description: "Removing deprecated `require.extensions` check from MikroORM"
+    },
+    {
+        file: "node_modules/@mikro-orm/knex/dialects/mysql/index.js",
+        deleteLines: [/^.*MariaDbKnexDialect.*$/gim],
+        description: "Removing MariaDbKnexDialect"
+    },
 
 ];
 
@@ -110,7 +138,6 @@ export function runPostInstallPatch() {
     PATCHES.forEach(({ file, search, replace, deleteLines, deleteFile, deleteFolder, description }) => {
         if (file) {
             const filePath = path.resolve(file);
-            console.log(filePath)
             if (fs.existsSync(filePath)) {
                 let content = fs.readFileSync(filePath, "utf8");
                 let originalContent = content;
