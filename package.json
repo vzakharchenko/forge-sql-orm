@@ -68,7 +68,11 @@
     "publish:npm": "npm publish --access public"
   },
   "files": [
-    "dist"
+    "dist",
+    "scripts",
+    "src",
+    "tsconfig.json",
+    "README.md"
   ],
   "dependencies": {
     "@mikro-orm/core": "6.4.7",
