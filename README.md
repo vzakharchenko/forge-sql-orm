@@ -51,6 +51,63 @@ Atlassian Forge has a restricted execution environment, which does not allow:
 - Unsupported database dialects, such as PostgreSQL or SQLite.
 - The patch removes these unsupported features to ensure full compatibility.
 
+
+## Step-by-Step Migration Workflow
+
+1. **Generate initial entity models from an existing database**
+
+   ```sh
+   npx forge-sql-orm generate:model --dbName testDb --output ./database/entities
+   ```
+
+   _(This is done only once when setting up the project)_
+
+2. **Create the first migration**
+
+   ```sh
+   npx forge-sql-orm migrations:create --dbName testDb --entitiesPath ./database/entities --output ./database/migration
+   ```
+
+   _(This initializes the database migration structure, also done once)_
+
+3. **Deploy to Forge and verify that migrations work**
+
+   - Deploy your **Forge app** with migrations.
+   - Run migrations using a **Forge web trigger** or **Forge scheduler**.
+
+4. **Modify the database (e.g., add a new column, index, etc.)**
+
+   - Use **DbSchema** or manually alter the database schema.
+
+5. **Update the migration**
+
+   ```sh
+   npx forge-sql-orm migrations:update --dbName testDb --entitiesPath ./database/entities --output ./database/migration
+   ```
+
+   - ⚠️ **Do NOT update entities before this step!**
+   - If entities are updated first, the migration will be empty!
+
+6. **Deploy to Forge and verify that the migration runs without issues**
+
+   - Run the updated migration on Forge.
+
+7. **Update the entity models**
+
+   ```sh
+   npx forge-sql-orm generate:model --dbName testDb --output ./database/entities
+   ```
+
+8. **Repeat steps 4-7 as needed**
+
+**⚠️ WARNING:**
+
+- **Do NOT swap steps 7 and 5!** If you update models before generating a migration, the migration will be empty!
+- Always generate the **migration first**, then update the **entities**.
+
+---
+
+
 # Connection to ORM
 
 ```js
@@ -153,61 +210,6 @@ await forgeSQL.crud().updateById({ id: 1, name: "Smith Updated" }, UsersSchema);
 ```js
 await forgeSQL.crud().deleteById(1, UsersSchema);
 ```
-
-## Step-by-Step Migration Workflow
-
-1. **Generate initial entity models from an existing database**
-
-   ```sh
-   npx forge-sql-orm generate:model --dbName testDb --output ./database/entities
-   ```
-
-   _(This is done only once when setting up the project)_
-
-2. **Create the first migration**
-
-   ```sh
-   npx forge-sql-orm migrations:create --dbName testDb --entitiesPath ./database/entities --output ./database/migration
-   ```
-
-   _(This initializes the database migration structure, also done once)_
-
-3. **Deploy to Forge and verify that migrations work**
-
-   - Deploy your **Forge app** with migrations.
-   - Run migrations using a **Forge web trigger** or **Forge scheduler**.
-
-4. **Modify the database (e.g., add a new column, index, etc.)**
-
-   - Use **DbSchema** or manually alter the database schema.
-
-5. **Update the migration**
-
-   ```sh
-   npx forge-sql-orm migrations:update --dbName testDb --entitiesPath ./database/entities --output ./database/migration
-   ```
-
-   - ⚠️ **Do NOT update entities before this step!**
-   - If entities are updated first, the migration will be empty!
-
-6. **Deploy to Forge and verify that the migration runs without issues**
-
-   - Run the updated migration on Forge.
-
-7. **Update the entity models**
-
-   ```sh
-   npx forge-sql-orm generate:model --dbName testDb --output ./database/entities
-   ```
-
-8. **Repeat steps 4-7 as needed**
-
-**⚠️ WARNING:**
-
-- **Do NOT swap steps 7 and 5!** If you update models before generating a migration, the migration will be empty!
-- Always generate the **migration first**, then update the **entities**.
-
----
 
 ## Quick Start
 

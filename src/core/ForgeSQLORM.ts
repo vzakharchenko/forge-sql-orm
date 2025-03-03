@@ -30,7 +30,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       this.mikroORM = MikroORM.initSync({
         dbName: "inmemory",
         schemaGenerator: {
-          disableForeignKeys: true,
+          disableForeignKeys: false,
         },
         discovery: {
           warnWhenNoEntities: true,
