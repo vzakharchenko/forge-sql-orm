@@ -1,6 +1,6 @@
 {
   "name": "forge-sql-orm",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Mikro-ORM integration for Forge-SQL in Atlassian Forge applications.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -78,6 +78,7 @@
     "README.md"
   ],
   "dependencies": {
+    "@forge/resolver": "^1.6.7",
     "@mikro-orm/core": "6.4.7",
     "@mikro-orm/mysql": "6.4.7",
     "moment": "^2.30.1"

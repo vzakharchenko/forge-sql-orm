@@ -8,8 +8,8 @@
 - ✅ **Supports complex SQL queries** with joins and filtering.
 - ✅ **Batch insert support** with duplicate key handling.
 - ✅ **Schema migration support**, allowing automatic schema evolution.
-- ✅ **Automatic entity generation** from MySQL databases.
-- ✅ **Automatic migration generation** from MySQL databases.
+- ✅ **Automatic entity generation** from MySQL/tidb databases.
+- ✅ **Automatic migration generation** from MySQL/tidb databases.
 
 ## Installation
 Forge-SQL-ORM is designed to work with @forge/sql and requires some additional setup to ensure compatibility within Atlassian Forge.
@@ -30,7 +30,7 @@ To fix this, we need to patch these libraries after installation.
 
 Run:
 ```sh
-npm set-script postinstall "forge-sql-orm patch:mikroorm"
+npm pkg set scripts.postinstall="forge-sql-orm patch:mikroorm"
 ```
 ✅ Step 3: Apply the Patch
 After setting up the postinstall script, run:
@@ -111,6 +111,7 @@ Atlassian Forge has a restricted execution environment, which does not allow:
 # Connection to ORM
 
 ```js
+import ForgeSQL from "forge-sql-orm";
 import { Orders } from "./entities/Orders";
 import { Users } from "./entities/Users";
 import ENTITIES from "./entities";
@@ -215,7 +216,7 @@ await forgeSQL.crud().deleteById(1, UsersSchema);
 
 ### 1. Designing the Database
 
-You can start by designing a **MySQL database** using tools like [DbSchema](https://dbschema.com/) or by using an existing MySQL database.
+You can start by designing a **MySQL/tidb database** using tools like [DbSchema](https://dbschema.com/) or by using an existing MySQL/tidb database.
 
 **Schema visualization:**
 ![](https://github.com/vzakharchenko/forge-sql-orm/blob/master/img/joinSchema.png?raw=true)

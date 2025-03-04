@@ -22,7 +22,8 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
         .filter((p) => p.kind === "scalar")
         .forEach((p) => {
           const fieldName = p.name;
-          const rawFieldName = p.fieldNames[0] ?? p.name;
+          const fieldNames = p.fieldNames;
+          const rawFieldName = fieldNames && Array.isArray(fieldNames)? fieldNames[0]: p.name;
 
           switch (p.type) {
             case "datetime":

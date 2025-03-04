@@ -133,9 +133,6 @@ const loadMigrationVersion = async (migrationPath: string): Promise<number> => {
   try {
     const migrationCountFilePath = path.resolve(path.join(migrationPath, "migrationCount.ts"));
     if (!fs.existsSync(migrationCountFilePath)) {
-      console.warn(
-        `⚠️ Warning: migrationCount.ts not found in ${migrationCountFilePath}, assuming no previous migrations.`,
-      );
       return 0;
     }
 

@@ -1,0 +1,18 @@
+{
+  "name": "jira-global-page-custom-ui",
+  "version": "1.1.4",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@forge/resolver": "1.6.7",
+    "@forge/sql": "^2.4.0",
+    "forge-sql-orm": "file:../.."
+  },
+  "scripts": {
+    "postinstall": "forge-sql-orm patch:mikroorm",
+    "models:create": "forge-sql-orm generate:model --output src/entities",
+    "migration:create": "forge-sql-orm migrations:create",
+    "migration:update": "forge-sql-orm migrations:update"
+  }
+}
