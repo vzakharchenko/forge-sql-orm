@@ -1,9 +1,7 @@
-{
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  },
+{"ts-node": {
+  "esm": true,
+  "experimentalSpecifierResolution": "node"
+},
   "include": [
     "./src"
   ],
@@ -15,7 +13,7 @@
       "DOM.Iterable",
       "ESNext"
     ],
-    "allowJs": false,
+    "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "sourceMap": true,

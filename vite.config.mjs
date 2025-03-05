@@ -3,7 +3,7 @@ import path from "node:path";
 import {viteStaticCopy} from "vite-plugin-static-copy";
 
 export default defineConfig(({ mode }) => {
-    const isCLI = mode === "cli"; // Передавать `--mode cli` при сборке CLI
+    const isCLI = mode === "cli";
     return {
         ssr: {
             external: ["@forge/sql"],
@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
             emitAssets: false,
         },
         build: {
-            outDir: isCLI ? "dist-cli" : "dist", // Разделяем выходные папки
+            outDir: isCLI ? "dist-cli" : "dist",
             lib: {
                 entry: isCLI
                     ? { cli: path.resolve("scripts/cli.ts") }
@@ -35,7 +35,11 @@ export default defineConfig(({ mode }) => {
             viteStaticCopy({
                 targets: [
                     {
-                        src: "scripts/forgeSqlCLI.js", // Копируем все файлы из scripts/
+                        src: "scripts/forgeSqlCLI.js",
+                        dest: ".",
+                    },
+                    {
+                        src: "scripts/tsm",
                         dest: ".",
                     }
                 ],

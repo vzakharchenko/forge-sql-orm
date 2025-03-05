@@ -113,7 +113,7 @@ const loadEntities = async (entitiesPath: string) => {
   try {
     const indexFilePath = path.resolve(path.join(entitiesPath, "index.ts"));
     if (!fs.existsSync(indexFilePath)) {
-      console.error(`❌ Error: index.ts not found in ${entitiesPath}`);
+      console.error(`❌ Error: index.ts not found in ${indexFilePath}`);
       process.exit(1);
     }
 

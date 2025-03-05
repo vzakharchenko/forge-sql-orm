@@ -38,12 +38,12 @@ npm run models:create
 npm run migration:create
 ```
 
-### Install frontend dependencies (inside `static/hello-world` directory)
+### Install frontend dependencies (inside `static/forge-orm-example[forge-orm-example](static/forge-orm-example)` directory)
 ```sh
 npm install
 ```
 
-### Build the frontend (inside `static/hello-world` directory)
+### Build the frontend (inside `static/forge-orm-example[forge-orm-example](static/forge-orm-example)` directory)
 ```sh
 npm run build
 ```
@@ -88,6 +88,7 @@ Go to `<environment>.atlassian.net` and open the `forge-sql-orm-example` app.
 ### Modifying the Database Schema
 1. If you need to add a new field (e.g., `email`), update the table structure:
 ```sh
+export MYSQL_ROOT_PASSWORD=admin
 docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "use forgesqlorm; ALTER TABLE users ADD email VARCHAR(255);"
 ```
 2. Update migrations:
