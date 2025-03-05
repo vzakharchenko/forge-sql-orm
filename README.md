@@ -491,18 +491,7 @@ console.log(results);
 
 ## Usage with MikroORM Generator
 
-If you prefer to use MikroORM's default entity generator, configure **package.json** as follows:
-
-```json
-{
-  "dependencies": {
-    "@mikro-orm/core": "npm:forge-sql-orm",
-    "@mikro-orm/mysql": "npm:forge-sql-orm"
-  }
-}
-```
-
-Then manually import your entities:
+If you prefer to use MikroORM's default entity generator, then manually import your entities:
 
 ```ts
 import { UserEntity, TaskEntity } from "./entities";
