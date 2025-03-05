@@ -18,6 +18,8 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 ```sh
 npm install forge-sql-orm -S
 npm install @forge/sql -S
+npm i @mikro-orm/entity-generator -D
+npm i mysql -D
 ```
 This will:
 
