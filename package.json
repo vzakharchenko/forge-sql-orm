@@ -68,7 +68,6 @@
     "build": "npm run clean && vite build && npm run build:types",
     "build:types": "tsc --emitDeclarationOnly",
     "build:cli": "vite build --mode cli",
-    "postinstall": "npm run dependency:fix",
     "dependency:fix": "forge-sql-orm patch:mikroorm",
     "prepublish:npm": "npm run build:cli && npm run build",
     "publish:npm": "npm publish --access public"

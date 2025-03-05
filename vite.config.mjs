@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
                     {
                         src: "scripts/forgeSqlCLI.js", // Копируем все файлы из scripts/
                         dest: ".",
-                    },
+                    }
                 ],
             }),
         ].filter(Boolean),

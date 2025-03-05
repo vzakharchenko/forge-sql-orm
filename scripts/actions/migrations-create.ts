@@ -2,6 +2,8 @@ import "reflect-metadata";
 import fs from "fs";
 import path from "path";
 import {MikroORM} from "@mikro-orm/mysql";
+import { execSync } from 'child_process';
+import { rmSync } from 'fs';
 
 /**
  * Cleans SQL statements by removing unnecessary database options.
@@ -171,9 +173,7 @@ export const createMigration = async (options: any) => {
       user: options.user,
       password: options.password,
       dbName: options.dbName,
-      entitiesTs: entities,
       entities: entities,
-      debug: true,
     });
 
     // Generate SQL schema

@@ -89,12 +89,12 @@ const PATCHES: Patch[] = [
         description: "Replacing `return new Seeder(this);` with `return null;`"
     },
     // 🔄 Patch for MikroORM Entity Generator to use 'forge-sql-orm'
-    {
-        file: "node_modules/@mikro-orm/entity-generator/SourceFile.js",
-        search: /^.* from '@mikro-orm.*$/gim,
-        replace: "            }).join(', '))} } from 'forge-sql-orm';`);",
-        description: "Replacing entity generator imports with 'forge-sql-orm'"
-    },
+    // {
+    //     file: "node_modules/@mikro-orm/entity-generator/SourceFile.js",
+    //     search: /^.* from '@mikro-orm.*$/gim,
+    //     replace: "            }).join(', '))} } from 'forge-sql-orm';`);",
+    //     description: "Replacing entity generator imports with 'forge-sql-orm'"
+    // },
     {
         file: "node_modules/knex/lib/dialects/index.js",
         deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^.*postgresql.*$/gim, /^.*sqlite.*$/gim, /^.*oracle.*$/gim, /^.*oracledb.*$/gim, /^.*pgnative.*$/gim, /^.*postgres.*$/gim, /^.*redshift.*$/gim, /^.*sqlite3.*$/gim, /^.*cockroachdb.*$/gim],
