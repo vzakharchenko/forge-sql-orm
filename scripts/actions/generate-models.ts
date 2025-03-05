@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { defineConfig, MikroORM, MongoNamingStrategy } from "../../src";
-import { EntityGenerator } from "../../src";
 import path from "path";
 import fs from "fs";
+import {defineConfig, MikroORM, MongoNamingStrategy} from "@mikro-orm/mysql";
+import {EntityGenerator} from "@mikro-orm/entity-generator";
 
 const regenerateIndexFile = (outputPath: string) => {
   const entitiesDir = path.resolve(outputPath);

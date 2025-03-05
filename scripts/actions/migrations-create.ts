@@ -1,7 +1,7 @@
 import "reflect-metadata";
-import { MikroORM } from "../../src";
 import fs from "fs";
 import path from "path";
+import {MikroORM} from "@mikro-orm/mysql";
 
 /**
  * Cleans SQL statements by removing unnecessary database options.
