@@ -171,7 +171,8 @@ export const createMigration = async (options: any) => {
       user: options.user,
       password: options.password,
       dbName: options.dbName,
-      entities,
+      entitiesTs: entities,
+      entities: entities,
       debug: true,
     });
 

@@ -1,6 +1,6 @@
 {
   "name": "forge-sql-orm",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Mikro-ORM integration for Forge-SQL in Atlassian Forge applications.",
   "main": "dist/ForgeSQLORM.js",
   "module": "dist/ForgeSQLORM.mjs",
@@ -52,6 +52,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.25.0",
     "vite": "^6.2.0",
+    "vite-plugin-static-copy": "^2.3.0",
     "vitest": "^3.0.7"
   },
   "license": "MIT",
@@ -68,8 +69,8 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:cli": "vite build --mode cli",
     "postinstall": "npm run dependency:fix",
-    "dependency:fix": "npm run build:cli && node ./dist-cli/cli.js patch:mikroorm",
-    "prepublish:npm": "npm run build:cli && ",
+    "dependency:fix": "forge-sql-orm patch:mikroorm",
+    "prepublish:npm": "npm run build:cli && npm run build",
     "publish:npm": "npm publish --access public"
   },
   "files": [
@@ -90,6 +91,6 @@
     "@forge/sql": "^2.4.0"
   },
   "bin": {
-    "forge-sql-orm": "dist-cli/cli.js"
+    "forge-sql-orm": "dist-cli/forgeSqlCLI.js"
   }
 }

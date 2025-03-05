@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import path from "node:path";
+import {viteStaticCopy} from "vite-plugin-static-copy";
 
 export default defineConfig(({ mode }) => {
     const isCLI = mode === "cli"; // Передавать `--mode cli` при сборке CLI
@@ -29,5 +30,16 @@ export default defineConfig(({ mode }) => {
                 },
             },
         },
+        plugins: [
+            isCLI &&
+            viteStaticCopy({
+                targets: [
+                    {
+                        src: "scripts/forgeSqlCLI.js", // Копируем все файлы из scripts/
+                        dest: ".",
+                    },
+                ],
+            }),
+        ].filter(Boolean),
     };
 });
