@@ -12,12 +12,14 @@
 - ✅ **Automatic entity generation** from MySQL/tidb databases.
 - ✅ **Automatic migration generation** from MySQL/tidb databases.
 
-🚀 Development in Progress 🚀
+🚀 **Development in Progress** 🚀
 
 I am currently working on implementing the following features:
-⏳ Optimistic Locking (In Progress) – Ensures data consistency by preventing conflicts when multiple users update the same record.
-🗑️ Soft Deletion Support – Allows marking records as deleted without actually removing them from the database, enabling easy recovery.
-🏗️ Complex Query Handling (JOIN, GROUP BY, etc.) without requiring an EntitySchema – Simplifies the execution of advanced SQL queries without the need to define additional schemas.
+- ⏳ **Optimistic Locking** *(In Progress)* – Ensures data consistency by preventing conflicts when multiple users update the same record.
+- 🗑️ **Soft Deletion Support** – Allows marking records as deleted without actually removing them from the database, enabling easy recovery.
+- 🏗️ **Complex Query Handling** *(JOIN, GROUP BY, etc.) without requiring an EntitySchema* – Simplifies the execution of advanced SQL queries without the need to define additional schemas.
+
+---
 
 ## Installation
 
