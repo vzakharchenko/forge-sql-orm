@@ -1,4 +1,5 @@
 # Forge SQL ORM
+[![forge-sql-orm CI](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml/badge.svg)](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml)
 
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [MikroORM](https://mikro-orm.io/docs/query-builder) and provides advanced capabilities for working with relational databases inside Forge.
 
