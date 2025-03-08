@@ -1,6 +1,6 @@
 {
   "name": "forge-sql-orm",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "Mikro-ORM integration for Forge-SQL in Atlassian Forge applications.",
   "main": "dist/ForgeSQLORM.js",
   "module": "dist/ForgeSQLORM.mjs",

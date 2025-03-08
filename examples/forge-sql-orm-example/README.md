@@ -91,7 +91,7 @@ Open the copied URL in your browser. You should see the message: `'Migrations su
 
 ### Open the application in Jira
 
-Go to `<environment>.atlassian.net` and open the `forge-sql-orm-example` app.
+Go to `<environment>.atlassian.net` and open the `Forge SQL ORM Data Sync` app.
 
 ### Using the Application
 
