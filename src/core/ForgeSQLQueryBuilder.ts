@@ -107,7 +107,7 @@ export interface QueryBuilderForgeSql {
   ): QueryBuilder<Entity, RootAlias>;
 
   /**
-   * Provides access to the underlying Knex instance for executing raw queries and building complex query parts.
+   * Provides access to the underlying Knex instance for building complex query parts.
    * enabling advanced query customization and performance tuning.
    * @returns The Knex instance, which can be used for query building.
    */

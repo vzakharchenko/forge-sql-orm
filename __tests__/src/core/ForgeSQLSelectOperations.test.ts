@@ -23,7 +23,7 @@ describe("ForgeSQLSelectOperations", () => {
   let forgeSqlOperation: ForgeSqlOperation;
 
   beforeEach(() => {
-    forgeSqlOperation = new ForgeSQLORM([TestEntity]);
+    forgeSqlOperation = new ForgeSQLORM([TestEntity], { logRawSqlQuery: true });
   });
 
   it("should call SQL prepare and execute on executeRawSQL", async () => {

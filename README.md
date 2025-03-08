@@ -495,6 +495,79 @@ console.log(results);
 
 ---
 
+## ForgeSqlOrmOptions
+
+The `ForgeSqlOrmOptions` object allows customization of ORM behavior. Currently, it supports the following options:
+
+| Option           | Type      | Description                                                                                                                        |
+| ---------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `logRawSqlQuery` | `boolean` | Enables logging of SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`. |
+
+### Example: Initializing `ForgeSQL` with Options
+
+```typescript
+import ForgeSQL from "forge-sql-orm";
+import { Orders } from "./entities/Orders";
+import { Users } from "./entities/Users";
+import ENTITIES from "./entities";
+
+const options = {
+  logRawSqlQuery: true, // Enable query logging for debugging purposes
+};
+
+const forgeSQL = new ForgeSQL(ENTITIES, options);
+```
+
+## Using `getKnex()` for Advanced SQL Queries
+
+The `getKnex()` method allows direct interaction with Knex.js, enabling execution of raw SQL queries and complex query building.
+
+### Example: Finding Duplicate Records in `UsersSchema`
+
+```typescript
+const fields: string[] = ["name", "email"];
+
+// Define selected fields, including a count of duplicate occurrences
+const selectFields: Array<string | Knex.Raw> = [
+  ...fields,
+  forgeSQL.getKnex().raw("COUNT(*) as count"),
+];
+
+// Create a QueryBuilder with grouping and filtering for duplicates
+let selectQueryBuilder = forgeSQL
+  .createQueryBuilder(UsersSchema)
+  .select(selectFields as unknown as string[])
+  .groupBy(fields)
+  .having("COUNT(*) > 1");
+
+// Generate the final SQL query with ordering by count
+const query = selectQueryBuilder.getKnexQuery().orderByRaw("count ASC").toSQL().sql;
+
+/* 
+  SQL Query:
+  SELECT `u0`.`name`, `u0`.`email`, COUNT(*) as count 
+  FROM `users` AS `u0` 
+  GROUP BY `u0`.`name`, `u0`.`email` 
+  HAVING COUNT(*) > 1 
+  ORDER BY count ASC;
+*/
+
+// Execute the SQL query and retrieve results
+const duplicateResult = await forgeSQL
+  .fetch()
+  .executeSchemaSQL<DuplicateResult>(query, DuplicateSchema);
+```
+
+🔹 **What does this example do?**
+
+1. Selects `name` and `email`, along with the count of duplicate occurrences (`COUNT(*) as count`).
+2. Groups the data by `name` and `email` to identify duplicates.
+3. Filters the results to include only groups with more than one record (`HAVING COUNT(*) > 1`).
+4. Sorts the final results in ascending order by count (`ORDER BY count ASC`).
+5. Executes the SQL query and returns the duplicate records.
+
+---
+
 ## Usage with MikroORM Generator
 
 If you prefer to use MikroORM's default entity generator, then manually import your entities:

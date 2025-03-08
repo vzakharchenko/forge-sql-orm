@@ -65,13 +65,15 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Returns the singleton instance of ForgeSQLORMImpl.
    * @param entities - List of entities (required only on first initialization).
+   * @param options - Options for configuring ForgeSQL ORM behavior.
    * @returns The singleton instance of ForgeSQLORMImpl.
    */
   static getInstance(
     entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
+    options?: ForgeSqlOrmOptions,
   ): ForgeSqlOperation {
     if (!ForgeSQLORMImpl.instance) {
-      ForgeSQLORMImpl.instance = new ForgeSQLORMImpl(entities);
+      ForgeSQLORMImpl.instance = new ForgeSQLORMImpl(entities, options);
     }
     return ForgeSQLORMImpl.instance;
   }
@@ -108,7 +110,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   }
 
   /**
-   * Provides access to the underlying Knex instance for executing raw queries and building complex query parts.
+   * Provides access to the underlying Knex instance for building complex query parts.
    * enabling advanced query customization and performance tuning.
    * @returns The Knex instance, which can be used for query building.
    */
@@ -123,8 +125,11 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
 class ForgeSQLORM {
   private readonly ormInstance: ForgeSqlOperation;
 
-  constructor(entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[]) {
-    this.ormInstance = ForgeSQLORMImpl.getInstance(entities);
+  constructor(
+    entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
+    options?: ForgeSqlOrmOptions,
+  ) {
+    this.ormInstance = ForgeSQLORMImpl.getInstance(entities, options);
   }
 
   /**
