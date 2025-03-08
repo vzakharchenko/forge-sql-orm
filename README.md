@@ -12,15 +12,18 @@
 - ✅ **Automatic migration generation** from MySQL/tidb databases.
 
 ## Installation
+
 Forge-SQL-ORM is designed to work with @forge/sql and requires some additional setup to ensure compatibility within Atlassian Forge.
 
 ✅ Step 1: Install Dependencies
+
 ```sh
 npm install forge-sql-orm -S
 npm install @forge/sql -S
 npm i @mikro-orm/entity-generator -D
 npm i mysql -D
 ```
+
 This will:
 
 Install Forge-SQL-ORM (the ORM for @forge/sql).
@@ -31,19 +34,22 @@ By default, MikroORM and Knex include some features that are not compatible with
 To fix this, we need to patch these libraries after installation.
 
 Run:
+
 ```sh
 npm pkg set scripts.postinstall="forge-sql-orm patch:mikroorm"
 ```
+
 ✅ Step 3: Apply the Patch
 After setting up the postinstall script, run:
+
 ```sh
 npm i
 ```
+
 This will:
 
 Trigger the postinstall hook, which applies the necessary patches to MikroORM and Knex.
 Ensure everything is correctly configured for running inside Forge.
-
 
 🔧 Why is the Patch Required?
 Atlassian Forge has a restricted execution environment, which does not allow:
@@ -52,7 +58,6 @@ Atlassian Forge has a restricted execution environment, which does not allow:
 - Direct file system access, which MikroORM sometimes relies on.
 - Unsupported database dialects, such as PostgreSQL or SQLite.
 - The patch removes these unsupported features to ensure full compatibility.
-
 
 ## Step-by-Step Migration Workflow
 
@@ -109,7 +114,6 @@ Atlassian Forge has a restricted execution environment, which does not allow:
 
 ---
 
-
 # Connection to ORM
 
 ```js
@@ -137,7 +141,7 @@ return await forgeSQL.fetch().executeSchemaSQL(formattedQuery, UsersSchema);
 - Raw Fetch Data
 
 ```js
-const users = await forgeSQL.fetch().executeRawSQL<Users>("SELECT * FROM users");
+const users = (await forgeSQL.fetch().executeRawSQL) < Users > "SELECT * FROM users";
 ```
 
 - Complex Query
@@ -563,7 +567,7 @@ Detect schema changes (new tables, columns, indexes)
 - Update index.ts to include new migrations
 
 📌 Using the patch:mikroorm Command
-  If needed, you can manually apply the patch at any time using:
+If needed, you can manually apply the patch at any time using:
 
 ```sh
 npx forge-sql-orm patch:mikroorm
@@ -576,7 +580,7 @@ This command:
 - Ensures Knex and MikroORM work properly inside Forge.
 
 📌 Manual Migration Execution
-  To manually execute migrations in your application:
+To manually execute migrations in your application:
 
 ```js
 import migrationRunner from "./src/database/migration";

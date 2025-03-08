@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import fs from "fs";
 import path from "path";
-import {MikroORM} from "@mikro-orm/mysql";
-import { execSync } from 'child_process';
-import { rmSync } from 'fs';
+import { MikroORM } from "@mikro-orm/mysql";
+import { execSync } from "child_process";
+import { rmSync } from "fs";
 
 /**
  * Cleans SQL statements by removing unnecessary database options.

@@ -20,6 +20,16 @@ export interface ForgeSqlOperation extends QueryBuilderForgeSql {
 }
 
 /**
+ * Options for configuring ForgeSQL ORM behavior.
+ */
+export interface ForgeSqlOrmOptions {
+  /**
+   * Enables logging of raw SQL queries in the Atlassian Forge Developer Console.
+   */
+  logRawSqlQuery?: boolean;
+}
+
+/**
  * Interface for schema-level SQL operations.
  */
 export interface SchemaSqlForgeSql {
@@ -96,5 +106,10 @@ export interface QueryBuilderForgeSql {
     loggerContext?: LoggingOptions,
   ): QueryBuilder<Entity, RootAlias>;
 
+  /**
+   * Provides access to the underlying Knex instance for executing raw queries and building complex query parts.
+   * enabling advanced query customization and performance tuning.
+   * @returns The Knex instance, which can be used for query building.
+   */
   getKnex(): Knex<any, any[]>;
 }

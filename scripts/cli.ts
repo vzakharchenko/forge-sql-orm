@@ -6,7 +6,7 @@ import inquirer from "inquirer";
 import { generateModels } from "./actions/generate-models";
 import { createMigration } from "./actions/migrations-create";
 import { updateMigration } from "./actions/migrations-update";
-import {runPostInstallPatch} from "./actions/PatchPostinstall";
+import { runPostInstallPatch } from "./actions/PatchPostinstall";
 
 // 🔄 Load environment variables from `.env` file
 dotenv.config();
@@ -207,15 +207,15 @@ program
 
 // Patch MikroORM and Knex
 program
-    .command("patch:mikroorm")
-    .description("Patch MikroORM and Knex dependencies to work properly with Forge")
-    .action(async () => {
-      console.log("Running MikroORM patch...");
-      await runPostInstallPatch();
-      await runPostInstallPatch();
-      await runPostInstallPatch();
-      console.log("✅ MikroORM patch applied successfully!");
-    });
+  .command("patch:mikroorm")
+  .description("Patch MikroORM and Knex dependencies to work properly with Forge")
+  .action(async () => {
+    console.log("Running MikroORM patch...");
+    await runPostInstallPatch();
+    await runPostInstallPatch();
+    await runPostInstallPatch();
+    console.log("✅ MikroORM patch applied successfully!");
+  });
 
 // 🔥 Execute CLI
 program.parse(process.argv);

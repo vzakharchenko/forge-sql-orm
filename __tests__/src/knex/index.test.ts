@@ -3,7 +3,7 @@ import knex from "../../../src/knex";
 
 // Test suite for knex
 describe("knex", () => {
-    it("simple test", () => {
-        expect(knex.sql).toBeDefined();
-    });
+  it("simple test", () => {
+    expect(knex.sql).toBeDefined();
+  });
 });

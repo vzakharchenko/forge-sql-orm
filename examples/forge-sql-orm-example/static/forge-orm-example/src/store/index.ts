@@ -5,9 +5,9 @@ import MetadataStore from "./MetadataStore";
 import StateStore from "./StateStore";
 
 export class RootStore {
-    usersStore = UsersStore;
-    usersMetadata = MetadataStore;
-    stateStore = StateStore;
+  usersStore = UsersStore;
+  usersMetadata = MetadataStore;
+  stateStore = StateStore;
 }
 
 export const store = new RootStore();

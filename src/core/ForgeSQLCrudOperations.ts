@@ -1,14 +1,16 @@
 import { UpdateQueryResponse, sql } from "@forge/sql";
-import { EntityProperty, EntitySchema } from "..";
+import { EntityProperty, EntitySchema, ForgeSqlOrmOptions } from "..";
 import type { types } from "@mikro-orm/core/types";
 import { transformValue } from "../utils/sqlUtils";
 import { CRUDForgeSQL, ForgeSqlOperation } from "./ForgeSQLQueryBuilder";
 
 export class ForgeSQLCrudOperations implements CRUDForgeSQL {
   private readonly forgeOperations: ForgeSqlOperation;
+  private readonly options: ForgeSqlOrmOptions;
 
-  constructor(forgeSqlOperations: ForgeSqlOperation) {
+  constructor(forgeSqlOperations: ForgeSqlOperation, options: ForgeSqlOrmOptions) {
     this.forgeOperations = forgeSqlOperations;
+    this.options = options;
   }
 
   /**
@@ -94,8 +96,9 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
     if (!models || models.length === 0) return 0;
 
     const query = await this.generateInsertScript(schema, models, updateIfExists);
-    console.debug("INSERT SQL: " + query.sql);
-    console.debug("INSERT VALUES: " + JSON.stringify(query.values));
+    if (this.options?.logRawSqlQuery) {
+      console.debug("INSERT SQL: " + query.sql);
+    }
     const sqlStatement = sql.prepare<UpdateQueryResponse>(query.sql);
     const updateQueryResponseResult = await sqlStatement.execute();
     return updateQueryResponseResult.rows.insertId;
@@ -133,8 +136,9 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
     queryBuilder.andWhere({ [primaryKey.name]: { $eq: id } });
 
     const query = queryBuilder.getFormattedQuery();
-    console.debug("DELETE SQL: " + query);
-
+    if (this.options?.logRawSqlQuery) {
+      console.debug("DELETE SQL: " + query);
+    }
     const sqlStatement = sql.prepare<UpdateQueryResponse>(query);
     const updateQueryResponseResult = await sqlStatement.execute();
     return updateQueryResponseResult.rows.affectedRows;
@@ -158,7 +162,9 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       queryBuilder.andWhere({ [pk.name]: { $eq: value } });
     });
     const query = queryBuilder.getFormattedQuery();
-    console.debug("UPDATE SQL: " + query);
+    if (this.options?.logRawSqlQuery) {
+      console.debug("UPDATE SQL: " + query);
+    }
     await this.forgeOperations.fetch().executeRawUpdateSQL(query);
   }
 }

@@ -1,9 +1,15 @@
 import { sql, UpdateQueryResponse } from "@forge/sql";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import { parseDateTime } from "../utils/sqlUtils";
-import { SchemaSqlForgeSql } from "./ForgeSQLQueryBuilder";
+import { ForgeSqlOrmOptions, SchemaSqlForgeSql } from "./ForgeSQLQueryBuilder";
 
 export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
+  private readonly options: ForgeSqlOrmOptions;
+
+  constructor(options: ForgeSqlOrmOptions) {
+    this.options = options;
+  }
+
   /**
    * Executes a schema-based SQL query and maps the result to the entity schema.
    * @param query - The SQL query to execute.
@@ -23,7 +29,7 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
         .forEach((p) => {
           const fieldName = p.name;
           const fieldNames = p.fieldNames;
-          const rawFieldName = fieldNames && Array.isArray(fieldNames)? fieldNames[0]: p.name;
+          const rawFieldName = fieldNames && Array.isArray(fieldNames) ? fieldNames[0] : p.name;
 
           switch (p.type) {
             case "datetime":
@@ -52,9 +58,10 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
    * @returns A list of results as objects.
    */
   async executeRawSQL<T extends object | unknown>(query: string): Promise<T[]> {
-    console.debug("Executing raw SQL: " + query);
+    if (this.options.logRawSqlQuery) {
+      console.debug("Executing raw SQL: " + query);
+    }
     const sqlStatement = await sql.prepare<T>(query).execute();
-    console.debug("Query result: " + JSON.stringify(sqlStatement));
     return sqlStatement.rows as T[];
   }
 
@@ -64,7 +71,9 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
    * @returns The update response containing affected rows.
    */
   async executeRawUpdateSQL(query: string): Promise<UpdateQueryResponse> {
-    console.debug("Executing update SQL: " + query);
+    if (this.options.logRawSqlQuery) {
+      console.debug("Executing update SQL: " + query);
+    }
     const sqlStatement = sql.prepare<UpdateQueryResponse>(query);
     const updateQueryResponseResults = await sqlStatement.execute();
     return updateQueryResponseResults.rows;

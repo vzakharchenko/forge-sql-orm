@@ -4,7 +4,12 @@ import type { AnyEntity, EntityClass, EntityClassGroup } from "@mikro-orm/core/t
 import type { QueryBuilder } from "@mikro-orm/knex/query";
 import { MemoryCacheAdapter, MikroORM, NullCacheAdapter } from "@mikro-orm/mysql";
 import { ForgeSQLCrudOperations } from "./ForgeSQLCrudOperations";
-import { CRUDForgeSQL, ForgeSqlOperation, SchemaSqlForgeSql } from "./ForgeSQLQueryBuilder";
+import {
+  CRUDForgeSQL,
+  ForgeSqlOperation,
+  ForgeSqlOrmOptions,
+  SchemaSqlForgeSql,
+} from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
 import type { Knex } from "knex";
 
@@ -20,9 +25,11 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Private constructor to enforce singleton behavior.
    * @param entities - The list of entities for ORM initialization.
+   * @param options - Options for configuring ForgeSQL ORM behavior.
    */
   private constructor(
     entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
+    options?: ForgeSqlOrmOptions,
   ) {
     console.debug("Initializing ForgeSQLORM...");
 
@@ -44,10 +51,11 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         },
         entities: entities,
         preferTs: false,
+        debug: false,
       });
-
-      this.crudOperations = new ForgeSQLCrudOperations(this);
-      this.fetchOperations = new ForgeSQLSelectOperations();
+      const newOptions: ForgeSqlOrmOptions = options ?? { logRawSqlQuery: false };
+      this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
+      this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
       console.error("ForgeSQLORM initialization failed:", error);
       throw error; // Prevents inconsistent state
@@ -99,6 +107,11 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     return this.mikroORM.em.createQueryBuilder(entityName, alias, undefined, loggerContext);
   }
 
+  /**
+   * Provides access to the underlying Knex instance for executing raw queries and building complex query parts.
+   * enabling advanced query customization and performance tuning.
+   * @returns The Knex instance, which can be used for query building.
+   */
   getKnex(): Knex<any, any[]> {
     return this.mikroORM.em.getKnex();
   }
