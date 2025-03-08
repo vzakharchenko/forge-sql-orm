@@ -588,9 +588,13 @@ import { UserEntity, TaskEntity } from "./entities";
 
 ---
 
-## The CLI provides commands to generate models and manage migrations.
+## Forge SQL ORM CLI Documentation
 
-🔹 Available Commands
+The CLI provides commands to generate models and manage migrations for MikroORM in Forge.
+
+---
+
+### 📌 Available Commands
 
 ```sh
 $ npx forge-sql-orm --help
@@ -598,58 +602,73 @@ $ npx forge-sql-orm --help
 Usage: forge-sql-orm [options] [command]
 
 Options:
-  -V, --version                output the version number
-  -h, --help                   display help for command
+  -V, --version                Output the version number
+  -h, --help                   Display help for command
 
 Commands:
   generate:model [options]     Generate MikroORM models from the database.
   migrations:create [options]  Generate an initial migration for the entire database.
   migrations:update [options]  Generate a migration to update the database schema.
-  patch:mikroorm               Patch MikroORM and Knex dependencies to work properly with Forge
-  help [command]               display help for command
+  patch:mikroorm               Patch MikroORM and Knex dependencies to work properly with Forge.
+  help [command]               Display help for a specific command.
 ```
 
-📌 Entity Generation
+---
+
+### 📌 Entity Generation
 
 ```sh
-npx forge-sql-orm generate:model --host localhost --port 3306 --user root --password secret --dbName mydb --output ./src/database/entities
+npx forge-sql-orm generate:model --host localhost --port 3306 --user root --password secret --dbName mydb --output ./src/database/entities --versionField updatedAt --saveEnv
 ```
 
 This command will:
+- Connect to `mydb` on `localhost:3306`.
+- Generate MikroORM entity classes.
+- Save them in `./src/database/entities`.
+- Create an `index.ts` file with all entities.
+- **`--versionField updatedAt`**: Specifies the field used for entity versioning.
+- **`--saveEnv`**: Saves configuration settings to `.env` for future use.
 
-- Connect to mydb on localhost:3306
-- Generate MikroORM entity classes
-- Save them in ./src/database/entities
-- Create an index.ts file with all entities
+#### 🔹 VersionField Explanation
+The `--versionField` option is crucial for handling entity versioning. It should be a field of type `datetime`, `integer`, or `decimal`. This field is used to track changes to entities, ensuring that updates follow proper versioning strategies.
 
-📌 Database Migrations
+**Example:**
+- `updatedAt` (datetime) - Commonly used for timestamp-based versioning.
+- `versionNumber` (integer) - Can be used for numeric version increments.
+
+If the specified field does not meet the required criteria, warnings will be logged.
+
+---
+
+### 📌 Database Migrations
 
 ```sh
-npx forge-sql-orm migrations:create --host localhost --port 3306 --user root --password secret --dbName mydb --output ./src/database/migration --entitiesPath ./src/database/entities
+npx forge-sql-orm migrations:create --host localhost --port 3306 --user root --password secret --dbName mydb --output ./src/database/migration --entitiesPath ./src/database/entities --saveEnv
 ```
 
 This command will:
+- Create the initial migration based on all detected entities.
+- Save migration files in `./src/database/migration`.
+- Create `index.ts` for automatic migration execution.
+- **`--saveEnv`**: Saves configuration settings to `.env` for future use.
 
-- Create initial migration from all detected entities
-- Save migration files in ./src/database/migration
-- Create migrationCount.ts to track versions
-- Create index.ts for automatic migration execution
+---
 
-📌 Update Schema Migration
+### 📌 Update Schema Migration
 
 ```sh
-npx forge-sql-orm migrations:update --host localhost --port 3306 --user root --password secret --dbName mydb --output ./src/database/migration --entitiesPath ./src/database/entities
+npx forge-sql-orm migrations:update --host localhost --port 3306 --user root --password secret --dbName mydb --output ./src/database/migration --entitiesPath ./src/database/entities --saveEnv
 ```
 
 This command will:
+- Detect schema changes (new tables, columns, indexes).
+- Generate only the required migrations.
+- Update `index.ts` to include new migrations.
+- **`--saveEnv`**: Saves configuration settings to `.env` for future use.
 
-Detect schema changes (new tables, columns, indexes)
+---
 
-- Generate only required migrations
-- Increment migrationCount.ts
-- Update index.ts to include new migrations
-
-📌 Using the patch:mikroorm Command
+### 📌 Using the patch:mikroorm Command
 If needed, you can manually apply the patch at any time using:
 
 ```sh
@@ -657,12 +676,43 @@ npx forge-sql-orm patch:mikroorm
 ```
 
 This command:
-
 - Removes unsupported database dialects (e.g., PostgreSQL, SQLite).
 - Fixes dynamic imports to work in Forge.
 - Ensures Knex and MikroORM work properly inside Forge.
 
-📌 Manual Migration Execution
+---
+
+### 📌 Configuration Methods
+You can define database credentials using:
+
+1️⃣ **Command-line arguments**:
+```sh
+--host, --port, --user, --password, --dbName, --output, --versionField, --saveEnv
+```
+
+2️⃣ **Environment variables**:
+```bash
+export FORGE_SQL_ORM_HOST=localhost
+export FORGE_SQL_ORM_PORT=3306
+export FORGE_SQL_ORM_USER=root
+export FORGE_SQL_ORM_PASSWORD=secret
+export FORGE_SQL_ORM_DBNAME=mydb
+```
+
+3️⃣ **Using a `.env` file**:
+```sh
+FORGE_SQL_ORM_HOST=localhost
+FORGE_SQL_ORM_PORT=3306
+FORGE_SQL_ORM_USER=root
+FORGE_SQL_ORM_PASSWORD=secret
+FORGE_SQL_ORM_DBNAME=mydb
+```
+
+4️⃣ **Interactive prompts** (if missing parameters, the CLI will ask for input).
+
+---
+
+### 📌 Manual Migration Execution
 To manually execute migrations in your application:
 
 ```js
@@ -674,33 +724,10 @@ await migrationRunner(runner);
 await runner.run(); // ✅ Apply migrations
 ```
 
-🔧 Configuration
-You can define database credentials using:
-
-1.  Command-line arguments: --host, --port, etc.
-    2️. Environment variables:
-
-```bash
-export FORGE_SQL_ORM_HOST=localhost
-export FORGE_SQL_ORM_PORT=3306
-export FORGE_SQL_ORM_USER=root
-export FORGE_SQL_ORM_PASSWORD=secret
-export FORGE_SQL_ORM_DBNAME=mydb
-```
-
-3. use .env
-
-```sh
-FORGE_SQL_ORM_HOST=localhost
-FORGE_SQL_ORM_PORT=3306
-FORGE_SQL_ORM_USER=root
-FORGE_SQL_ORM_PASSWORD=secret
-FORGE_SQL_ORM_DBNAME=mydb
-```
-
-4. Interactive prompts (if missing parameters)
+This approach allows you to apply migrations programmatically in a Forge application.
 
 ---
+
 
 📜 **License**
 This project is licensed under the **MIT License**.  
