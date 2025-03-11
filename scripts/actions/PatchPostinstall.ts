@@ -208,25 +208,23 @@ export function runPostInstallPatch() {
 
       // 🚮 Delete specific files
       if (deleteFile) {
-        const deleteFilePath = path.resolve(__dirname, deleteFile);
-        console.log('[DELETING FILE] '+deleteFile)
+        const deleteFilePath = path.resolve(deleteFile);
         if (fs.existsSync(deleteFilePath)) {
           fs.unlinkSync(deleteFilePath);
-          console.log(`[DELETED] ${description}`);
+          console.log(`[DELETED] ${deleteFilePath} ${description}`);
         } else {
-          console.log(`[SKIPPED] ${description}`);
+          console.log(`[SKIPPED] ${deleteFilePath} ${description}`);
         }
       }
 
       // 🚮 Delete entire folders
       if (deleteFolder) {
-        const deleteFolderPath = path.resolve(__dirname, deleteFolder);
-        console.log('[DELETING FOLDER] '+deleteFolderPath)
+        const deleteFolderPath = path.resolve(deleteFolder);
         if (fs.existsSync(deleteFolderPath)) {
           fs.rmSync(deleteFolderPath, { recursive: true, force: true });
-          console.log(`[DELETED] ${description}`);
+          console.log(`[DELETED] ${deleteFolderPath}  ${description}`);
         } else {
-          console.log(`[SKIPPED] ${description}`);
+          console.log(`[SKIPPED] ${deleteFolderPath} ${description}`);
         }
       }
     },
