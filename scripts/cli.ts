@@ -3,13 +3,46 @@
 import { Command } from "commander";
 import dotenv from "dotenv";
 import inquirer from "inquirer";
+import fs from "fs";
+import path from "path";
 import { generateModels } from "./actions/generate-models";
 import { createMigration } from "./actions/migrations-create";
 import { updateMigration } from "./actions/migrations-update";
 import { runPostInstallPatch } from "./actions/PatchPostinstall";
 
+const ENV_PATH = path.resolve(process.cwd(), ".env");
 // 🔄 Load environment variables from `.env` file
-dotenv.config();
+dotenv.config({ path: ENV_PATH });
+
+const saveEnvFile = (config: any) => {
+  let envContent = "";
+  const envFilePath = ENV_PATH;
+
+  if (fs.existsSync(envFilePath)) {
+    envContent = fs.readFileSync(envFilePath, "utf8");
+  }
+
+  const envVars = envContent
+    .split("\n")
+    .filter((line) => line.trim() !== "" && !line.startsWith("#"))
+    .reduce((acc: any, line) => {
+      const [key, ...value] = line.split("=");
+      acc[key] = value.join("=");
+      return acc;
+    }, {});
+
+  Object.entries(config).forEach(([key, value]) => {
+    envVars[`FORGE_SQL_ORM_${key.toUpperCase()}`] = value;
+  });
+
+  const updatedEnvContent = Object.entries(envVars)
+    .map(([key, value]) => `${key}=${value}`)
+    .join("\n");
+
+  fs.writeFileSync(envFilePath, updatedEnvContent, { encoding: "utf8" });
+
+  console.log("✅ Configuration saved to .env without overwriting other variables.");
+};
 
 /**
  * Prompts the user for missing parameters using Inquirer.js.
@@ -82,7 +115,7 @@ const askMissingParams = async (
   if (questions.length > 0) {
     // @ts-ignore - Ignore TypeScript warning for dynamic question type
     const answers = await inquirer.prompt(questions);
-    return { ...config, ...answers, port: parseInt(answers.port, 10) };
+    return { ...config, ...answers, port: parseInt(config.port ?? answers.port, 10) };
   }
 
   return config;
@@ -121,7 +154,11 @@ const getConfig = async (
     config = { ...config, ...customConfig() };
   }
 
-  return await askMissingParams(config, defaultOutput, customAskMissingParams);
+  const conf = await askMissingParams(config, defaultOutput, customAskMissingParams);
+  if (cmd.saveEnv) {
+    saveEnvFile(conf);
+  }
+  return conf;
 };
 
 // 📌 Initialize CLI
@@ -138,8 +175,26 @@ program
   .option("--password <string>", "Database password")
   .option("--dbName <string>", "Database name")
   .option("--output <string>", "Output path for entities")
+  .option("--versionField <string>", "Field name for versioning")
+  .option("--saveEnv", "Save configuration to .env file")
   .action(async (cmd) => {
-    const config = await getConfig(cmd, "./database/entities");
+    const config = await getConfig(
+      cmd,
+      "./database/entities",
+      () => ({
+        versionField: cmd.versionField || process.env.FORGE_SQL_ORM_VERSIONFIELD,
+      }),
+      (cfg, questions: unknown[]) => {
+        if (!cfg.versionField) {
+          questions.push({
+            type: "input",
+            name: "versionField",
+            message: "Enter the field name for versioning (leave empty to skip):",
+            default: "",
+          });
+        }
+      },
+    );
     await generateModels(config);
   });
 
@@ -154,12 +209,13 @@ program
   .option("--dbName <string>", "Database name")
   .option("--output <string>", "Output path for migrations")
   .option("--entitiesPath <string>", "Path to the folder containing entities")
+  .option("--saveEnv", "Save configuration to .env file")
   .action(async (cmd) => {
     const config = await getConfig(
       cmd,
       "./database/migration",
       () => ({
-        entitiesPath: cmd.entitiesPath || process.env.FORGE_SQL_ORM_ENTITIES_PATH,
+        entitiesPath: cmd.entitiesPath || process.env.FORGE_SQL_ORM_ENTITIESPATH,
       }),
       (cfg, questions: unknown[]) => {
         if (!cfg.entitiesPath)
@@ -185,12 +241,13 @@ program
   .option("--dbName <string>", "Database name")
   .option("--output <string>", "Output path for migrations")
   .option("--entitiesPath <string>", "Path to the folder containing entities")
+  .option("--saveEnv", "Save configuration to .env file")
   .action(async (cmd) => {
     const config = await getConfig(
       cmd,
       "./database/migration",
       () => ({
-        entitiesPath: cmd.entitiesPath || process.env.FORGE_SQL_ORM_ENTITIES_PATH,
+        entitiesPath: cmd.entitiesPath || process.env.FORGE_SQL_ORM_ENTITIESPATH,
       }),
       (cfg, questions: unknown[]) => {
         if (!cfg.entitiesPath)

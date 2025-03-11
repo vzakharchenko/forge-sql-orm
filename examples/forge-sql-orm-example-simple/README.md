@@ -61,20 +61,6 @@ This example allows you to:
 3. You can update user details.
 4. You can delete a user.
 
-### Modifying the Database Schema
-
-If you need to update the schema (e.g., add a new field `age`), manually modify the database:
-
-```sh
-export MYSQL_ROOT_PASSWORD=admin
-docker exec forge-sql-orm-basic-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "use forgesqlorm; ALTER TABLE users ADD age INT;"
-```
-
-Deploy the updated app:
-
-```sh
-forge deploy
-```
 
 ### Notes
 

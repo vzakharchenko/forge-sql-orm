@@ -1,8 +1,10 @@
 import { UpdateQueryResponse } from "@forge/sql";
-import type { EntityName, LoggingOptions } from "..";
+import type { EntityName, LoggingOptions, QBFilterQuery } from "..";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import type { QueryBuilder } from "@mikro-orm/knex/query";
 import type { Knex } from "knex";
+import { EntityKey } from "@mikro-orm/core";
+import {SqlParameters} from "@forge/sql/out/sql-statement";
 
 /**
  * Interface representing the main ForgeSQL operations.
@@ -27,6 +29,10 @@ export interface ForgeSqlOrmOptions {
    * Enables logging of raw SQL queries in the Atlassian Forge Developer Console.
    */
   logRawSqlQuery?: boolean;
+  /**
+   * Disable optimistic locking
+   */
+  disableOptimisticLocking?: boolean
 }
 
 /**
@@ -42,6 +48,14 @@ export interface SchemaSqlForgeSql {
   executeSchemaSQL<T extends object>(query: string, schema: EntitySchema<T>): Promise<T[]>;
 
   /**
+   * Executes a schema-bound SQL query and maps the only one result to the specified entity schema.
+   * @param query - The SQL query to execute.
+   * @param schema - The entity schema.
+   * @returns A list of mapped entity objects.
+   */
+  executeSchemaSQLOnlyOne<T extends object>(query: string, schema: EntitySchema<T>): Promise<T|undefined>;
+
+  /**
    * Executes a raw SQL query and returns the results.
    * @param query - The raw SQL query.
    * @returns A list of results as objects.
@@ -51,9 +65,11 @@ export interface SchemaSqlForgeSql {
   /**
    * Executes a raw SQL update query.
    * @param query - The raw SQL update query.
+   * @param params - Sql parameters.
    * @returns The update response containing affected rows.
    */
-  executeRawUpdateSQL(query: string): Promise<UpdateQueryResponse>;
+  executeRawUpdateSQL(query: string, params?: SqlParameters[]): Promise<UpdateQueryResponse>;
+
 }
 
 /**
@@ -83,10 +99,52 @@ export interface CRUDForgeSQL {
 
   /**
    * Updates a record by its ID.
-   * @param entity - The entity with updated values.
+   *   * If a version field is defined in the schema, versioning is applied:
+   *    * the current record version is retrieved, checked for concurrent modifications,
+   *    * and then incremented.
+   *    *
+   *    * @param entity - The entity with updated values.
+   *    * @param schema - The entity schema.
+   *    * @throws If the primary key is not included in the update fields.
+   *    */
+  updateById<T extends object>(entity: Partial<T>, schema: EntitySchema<T>): Promise<void>;
+
+  /**
+   * Updates specified fields of records based on provided conditions.
+   * If the "where" parameter is not provided, the WHERE clause is built from the entity fields
+   * that are not included in the list of fields to update.
+   *
+   * @param entity - The object containing values to update and potential criteria for filtering.
+   * @param fields - Array of field names to update.
    * @param schema - The entity schema.
+   * @param where - Optional filtering conditions for the WHERE clause.
+   * @returns The number of affected rows.
+   * @throws If no filtering criteria are provided (either via "where" or from the remaining entity fields).
    */
-  updateById<T extends object>(entity: T, schema: EntitySchema<T>): Promise<void>;
+   updateFields<T extends object>(
+      entity: Partial<T>,
+      fields: EntityKey<T>[],
+      schema: EntitySchema<T>,
+      where?: QBFilterQuery<T>,
+  ): Promise<number>
+
+  /**
+   * Updates specific fields of a record identified by its primary key.
+   *
+   * If a version field is defined in the schema, versioning is applied:
+   * the current record version is retrieved, checked for concurrent modifications,
+   * and then incremented.
+   *
+   * @param entity - The entity with updated values.
+   * @param fields - The list of field names to update.
+   * @param schema - The entity schema.
+   * @throws If the primary key is not included in the update fields.
+   */
+  updateFieldById<T extends object>(
+    entity: T,
+    fields: EntityKey<T>[],
+    schema: EntitySchema<T>,
+  ): Promise<void>;
 }
 
 /**

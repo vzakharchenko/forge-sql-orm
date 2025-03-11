@@ -5,26 +5,43 @@ import { parseDateTime, transformValue } from "../../../src/utils/sqlUtils";
 // Test suite for transformValue function
 describe("transformValue", () => {
   it("should wrap text and string values in single quotes", () => {
-    expect(transformValue({ type: "text", value: "hello" })).toBe("'hello'");
-    expect(transformValue({ type: "string", value: "world" })).toBe("'world'");
+    expect(transformValue({ type: "text", value: "hello" },true)).toBe("'hello'");
+    expect(transformValue({ type: "string", value: "world" },true)).toBe("'world'");
   });
 
   it("should format datetime values correctly", () => {
     const date = new Date("2024-03-03T12:34:56.789Z");
     const formatted = moment(date).format("YYYY-MM-DDTHH:mm:ss.SSS");
-    expect(transformValue({ type: "datetime", value: date })).toBe(`'${formatted}'`);
+    expect(transformValue({ type: "datetime", value: date },true)).toBe(`'${formatted}'`);
   });
 
   it("should format date values correctly", () => {
     const date = new Date("2024-03-03");
     const formatted = moment(date).format("YYYY-MM-DD");
-    expect(transformValue({ type: "date", value: date })).toBe(`'${formatted}'`);
+    expect(transformValue({ type: "date", value: date },true)).toBe(`'${formatted}'`);
   });
 
-  it("should format time values correctly", () => {
+it("text and string values in single quotes", () => {
+    expect(transformValue({ type: "text", value: "hello" })).toBe("hello");
+    expect(transformValue({ type: "string", value: "world" })).toBe("world");
+  });
+
+  it("should format datetime values correctly without wrap", () => {
+    const date = new Date("2024-03-03T12:34:56.789Z");
+    const formatted = moment(date).format("YYYY-MM-DDTHH:mm:ss.SSS");
+    expect(transformValue({ type: "datetime", value: date })).toBe(`${formatted}`);
+  });
+
+  it("should format date values correctly  without wrap", () => {
+    const date = new Date("2024-03-03");
+    const formatted = moment(date).format("YYYY-MM-DD");
+    expect(transformValue({ type: "date", value: date })).toBe(`${formatted}`);
+  });
+
+  it("should format time values correctly  without wrap", () => {
     const date = new Date("2024-03-03T12:34:56.789Z");
     const formatted = moment(date).format("HH:mm:ss.SSS");
-    expect(transformValue({ type: "time", value: date })).toBe(`'${formatted}'`);
+    expect(transformValue({ type: "time", value: date })).toBe(`${formatted}`);
   });
 
   it("should return the value as-is for unknown types", () => {

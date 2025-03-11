@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="forge-orm-example" database="MySql" id="MySql-b8b" >
+	<schema name="forgesqlorm" >
+		<table name="test_data" prior="tbl" >
+			<column name="id" type="INT" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT ]]></identity>
+			</column>
+			<column name="test_date_column" type="DATETIME" jt="93" />
+			<column name="test_name_column" type="VARCHAR" length="100" jt="12" />
+			<index name="pk_test_data" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="test_data_optimistic_date" prior="tbl" >
+			<column name="id" type="INT" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT ]]></identity>
+			</column>
+			<column name="test_date_column" type="DATETIME" jt="93" />
+			<column name="version" type="DATETIME" jt="93" mandatory="y" />
+			<column name="test_name_column" prior="test_name_column_" type="VARCHAR" length="255" jt="12" />
+			<index name="pk_test_data_optimistic_date" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="test_data_optimistic_number" prior="test_data_optimistic_" >
+			<column name="id" type="INT" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT ]]></identity>
+			</column>
+			<column name="test_date_column" type="DATETIME" jt="93" />
+			<column name="test_name_column" type="VARCHAR" length="100" jt="12" />
+			<column name="version" type="INT" jt="4" mandatory="y" />
+			<index name="pk_test_data_optimistic_number" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="test_data_optimistic_timestamp" prior="test_data_optimistic_time" >
+			<column name="id" type="INT" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT ]]></identity>
+			</column>
+			<column name="test_date_column" type="DATETIME" jt="93" />
+			<column name="test_name_column" type="VARCHAR" length="100" jt="12" />
+			<column name="version" type="TIMESTAMP" jt="93" mandatory="y" />
+			<index name="pk_test_data_optimistic_timestamp" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+	</schema>
+	<layout name="Default Diagram" id="Diagram-1293" show_relation="columns" >
+		<entity schema="forgesqlorm" name="test_data" color="C1D8EE" x="51" y="51" />
+		<entity schema="forgesqlorm" name="test_data_optimistic_date" color="C1D8EE" x="663" y="187" />
+		<entity schema="forgesqlorm" name="test_data_optimistic_number" color="C1D8EE" x="306" y="238" />
+		<entity schema="forgesqlorm" name="test_data_optimistic_timestamp" color="C1D8EE" x="697" y="374" />
+	</layout>
+</project>

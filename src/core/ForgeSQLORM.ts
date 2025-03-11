@@ -53,7 +53,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         preferTs: false,
         debug: false,
       });
-      const newOptions: ForgeSqlOrmOptions = options ?? { logRawSqlQuery: false };
+      const newOptions: ForgeSqlOrmOptions = options ?? { logRawSqlQuery: false, disableOptimisticLocking: false };
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
