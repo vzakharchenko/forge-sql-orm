@@ -167,7 +167,7 @@ describe("ForgeSQLCrudOperations", () => {
       .crud()
       .updateById({ id: 1, name: "Updated", version: 2 }, TestEntityVersionSchema);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity_version` set `id` = ?, `name` = ?, `version` = ? where `version` = ? and `id` = ?",
+      "update `test_entity_version` as `t0` set `id` = 1, `name` = 'Updated', `version` = 3 where `version` = 2 and `id` = 1",
     );
   });
 
@@ -181,7 +181,7 @@ describe("ForgeSQLCrudOperations", () => {
         TestEntityDateVersionSchema,
       );
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity_date_version` set `id` = ?, `name` = ?, `version` = ? where `version` = ? and `id` = ?",
+      "update `test_entity_date_version` as `t0` set `id` = 1, `name` = 'Updated', `version` = '2023-04-12T00:00:01.000' where `version` = '2010-01-01T00:00:00.000' and `id` = 1",
     );
   });
 
@@ -194,7 +194,34 @@ describe("ForgeSQLCrudOperations", () => {
         TestEntityDateVersionSchema,
       );
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity_date_version` set `id` = ?, `version` = ? where `version` = ? and `id` = ?",
+      "update `test_entity_date_version` as `t0` set `id` = 1, `version` = '2023-04-12T00:00:01.000' where `version` = '2010-01-01T00:00:00.000' and `id` = 1",
     );
+  });
+
+  it("should call SQL prepare and execute on updateFields2 only update", async () => {
+    await forgeSqlOperation
+      .crud()
+      .updateFields(
+        { id: 1, name: "Updated" },
+        ["name"],
+          TestEntitySchema,
+          { id: 10000 }
+      );
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+      "update `test_entity` as `t0` set `name` = 'Updated' where `id` = 10000",
+    );
+  });
+
+  it("should call SQL prepare and execute on updateFields only update Wrong Where", async () => {
+
+    await expect(
+        forgeSqlOperation
+            .crud()
+            .updateFields(
+                { name: "Updated" } ,
+                ["name"],
+                TestEntitySchema,
+            )
+    ).rejects.toThrow("Filtering criteria (WHERE clause) must be provided");
   });
 });

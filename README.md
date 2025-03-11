@@ -182,50 +182,86 @@ const results = await forgeSQL.fetch().executeSchemaSQL(query, innerJoinSchema);
 console.log(results);
 ```
 
-🛠 CRUD Operations
+Below is an example of how you can extend your README's CRUD Operations section with information and examples for both `updateFieldById` and `updateFields` methods:
 
-- Insert Data
+---
 
-```js
-// INSERT INTO users (id, name) VALUES (1,'Smith')
-const userId = await forgeSQL.crud().insert(UsersSchema, [{ id: 1, name: "Smith" }]);
-```
+🛠 **CRUD Operations**
 
-- Insert Bulk Data
+- **Insert Data**
 
-```js
-// INSERT INTO users (id,name) VALUES (2,'Smith'), (3,'Vasyl')
-await forgeSQL.crud().insert(UsersSchema, [
-  { id: 2, name: "Smith" },
-  { id: 3, name: "Vasyl" },
-]);
-```
+  ```js
+  // INSERT INTO users (id, name) VALUES (1, 'Smith')
+  const userId = await forgeSQL.crud().insert(UsersSchema, [{ id: 1, name: "Smith" }]);
+  ```
 
-- Insert Data with duplicates
+- **Insert Bulk Data**
 
-```js
-// INSERT INTO users (id,name) VALUES (4,'Smith'), (4, 'Vasyl') ON DUPLICATE KEY UPDATE name = VALUES(name)
-await forgeSQL.crud().insert(
-  UsersSchema,
-  [
-    { id: 4, name: "Smith" },
-    { id: 4, name: "Vasyl" },
-  ],
-  true,
-);
-```
+  ```js
+  // INSERT INTO users (id, name) VALUES (2, 'Smith'), (3, 'Vasyl')
+  await forgeSQL.crud().insert(UsersSchema, [
+    { id: 2, name: "Smith" },
+    { id: 3, name: "Vasyl" },
+  ]);
+  ```
 
-- Update Data
+- **Insert Data with Duplicates**
 
-```js
-await forgeSQL.crud().updateById({ id: 1, name: "Smith Updated" }, UsersSchema);
-```
+  ```js
+  // INSERT INTO users (id, name) VALUES (4, 'Smith'), (4, 'Vasyl') 
+  // ON DUPLICATE KEY UPDATE name = VALUES(name)
+  await forgeSQL.crud().insert(
+    UsersSchema,
+    [
+      { id: 4, name: "Smith" },
+      { id: 4, name: "Vasyl" },
+    ],
+    true,
+  );
+  ```
 
-- Delete Data
+- **Update Data by Primary Key**
 
-```js
-await forgeSQL.crud().deleteById(1, UsersSchema);
-```
+  ```js
+  // This uses the updateById method which wraps updateFieldById (with optimistic locking if configured)
+  await forgeSQL.crud().updateById({ id: 1, name: "Smith Updated" }, UsersSchema);
+  ```
+
+- **Update Specific Fields by Primary Key**
+
+  ```js
+  // Updates specific fields of a record identified by its primary key.
+  // Note: The primary key field (e.g. id) must be included in the fields array.
+  await forgeSQL.crud().updateFieldById({ id: 1, name: "Updated Name" }, ["id", "name"], UsersSchema);
+  ```
+
+- **Update Fields Without Primary Key and Versioning**
+
+  ```js
+  // Updates specified fields for records matching the given conditions.
+  // In this example, the "name" and "age" fields are updated for users where the email is 'smith@example.com'.
+  const affectedRows = await forgeSQL.crud().updateFields(
+    { name: "New Name", age: 35, email: "smith@example.com" },
+    ["name", "age"],
+    UsersSchema
+  );
+  console.log(`Rows affected: ${affectedRows}`);
+
+  // Alternatively, you can provide an explicit WHERE condition:
+  const affectedRowsWithWhere = await forgeSQL.crud().updateFields(
+    { name: "New Name", age: 35 },
+    ["name", "age"],
+    UsersSchema,
+    { email: "smith@example.com" }
+  );
+  console.log(`Rows affected: ${affectedRowsWithWhere}`);
+  ```
+
+- **Delete Data**
+
+  ```js
+  await forgeSQL.crud().deleteById(1, UsersSchema);
+  ```
 
 ## Quick Start
 
@@ -583,6 +619,54 @@ const duplicateResult = await forgeSQL
 3. Filters the results to include only groups with more than one record (`HAVING COUNT(*) > 1`).
 4. Sorts the final results in ascending order by count (`ORDER BY count ASC`).
 5. Executes the SQL query and returns the duplicate records.
+
+---
+
+Below is the plain text version of the additional section for Optimistic Locking. You can copy and paste it directly into your README:
+
+---
+
+## Optimistic Locking
+
+Optimistic locking is a concurrency control mechanism that prevents data conflicts when multiple transactions attempt to update the same record concurrently. Instead of using locks, this technique relies on a version field in your entity models. Each time an update occurs, the current version is checked, and if it doesn't match the stored version, the update is rejected. This ensures data consistency and helps avoid accidental overwrites.
+
+### How It Works
+
+- **Version Field:**  
+  A specific field in your entity schema is designated to track the version of the record. This field is marked with the flag `version: true`.
+
+- **Supported Types:**  
+  The version field must be of type `datetime`, `timestamp`, `integer`, or `decimal` and must be non-nullable. If the field's type does not meet these requirements, a warning message will be logged to the console during model generation.
+
+- **Automatic Configuration:**  
+  When generating models, you can specify a field (e.g., `updatedAt`) that automatically becomes the version field by using the `--versionField` flag. For example:
+  ```sh
+  npx forge-sql-orm generate:model --versionField updatedAt
+  ```
+  In this case, any model that includes a field named `updatedAt` meeting the required conditions will have it configured for optimistic locking.
+
+### Example
+
+Here’s how you can define an entity with optimistic locking using MikroORM:
+
+```js
+export class TestEntityVersion {
+  id!: number;
+  name?: string;
+  version!: number;
+}
+
+export const TestEntityVersionSchema = new EntitySchema({
+  class: TestEntityVersion,
+  properties: {
+    id: { primary: true, type: "integer", unsigned: false, autoincrement: false },
+    name: { type: "string", nullable: true },
+    version: { type: "integer", nullable: false, version: true },
+  },
+});
+```
+
+In this example, the `version` field is used to track changes. Every update will check the current version to ensure that no conflicting modifications occur.
 
 ---
 

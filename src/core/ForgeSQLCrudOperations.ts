@@ -285,12 +285,76 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
    * @param entity - The entity with updated values.
    * @param schema - The entity schema.
    */
-  async updateById<T extends object>(entity: T, schema: EntitySchema<T>): Promise<void> {
+  async updateById<T extends object>(entity: Partial<T>, schema: EntitySchema<T>): Promise<void> {
     const fields = schema.meta.props
         .filter((prop) => prop.kind === "scalar")
         .map((prop) => prop.name);
-    await this.updateFieldById(entity, fields, schema);
+    await this.updateFieldById(entity as T, fields, schema);
   }
+
+  /**
+   * Updates specified fields of records based on provided conditions.
+   * If the "where" parameter is not provided, the WHERE clause is built from the entity fields
+   * that are not included in the list of fields to update.
+   *
+   * @param entity - The object containing values to update and potential criteria for filtering.
+   * @param fields - Array of field names to update.
+   * @param schema - The entity schema.
+   * @param where - Optional filtering conditions for the WHERE clause.
+   * @returns The number of affected rows.
+   * @throws If no filtering criteria are provided (either via "where" or from the remaining entity fields).
+   */
+  async updateFields<T extends object>(
+      entity: Partial<T>,
+      fields: EntityKey<T>[],
+      schema: EntitySchema<T>,
+      where?: QBFilterQuery<T>,
+  ): Promise<number> {
+    // Extract update data from the entity based on the provided fields.
+    const updateData = this.filterEntityFields(entity, fields);
+    const updateModel = this.modifyModel(updateData as T, schema);
+
+    // Create the query builder for the entity.
+    let queryBuilder = this.forgeOperations
+        .createQueryBuilder(schema.meta.class)
+        .getKnexQuery();
+
+    // Set the update data.
+    queryBuilder.update(updateModel as T);
+
+    // Use the provided "where" conditions if available; otherwise, build conditions from the remaining entity fields.
+    if (where) {
+      queryBuilder.where(where);
+    } else {
+      const filterCriteria = (Object.keys(entity) as Array<keyof T>)
+          .filter((key: keyof T) => !fields.includes(key as EntityKey<T>))
+          .reduce((criteria, key) => {
+            if (entity[key] !== undefined) {
+              // Cast key to string to use it as an object key.
+              criteria[key as string] = entity[key];
+            }
+            return criteria;
+          }, {} as Record<string, unknown>);
+
+
+      if (Object.keys(filterCriteria).length === 0) {
+        throw new Error(
+            "Filtering criteria (WHERE clause) must be provided either via the 'where' parameter or through non-updated entity fields"
+        );
+      }
+      queryBuilder.where(filterCriteria);
+    }
+
+    if (this.options?.logRawSqlQuery) {
+      console.debug("UPDATE SQL (updateFields): " + queryBuilder.toSQL().sql);
+    }
+
+    // Execute the update query.
+    const sqlQuery = queryBuilder.toQuery();
+    const updateQueryResponse = await this.forgeOperations.fetch().executeRawUpdateSQL(sqlQuery);
+    return updateQueryResponse.affectedRows;
+  }
+
 
   /**
    * Updates specific fields of a record identified by its primary key.

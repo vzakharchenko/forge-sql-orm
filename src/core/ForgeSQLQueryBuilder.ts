@@ -1,5 +1,5 @@
 import { UpdateQueryResponse } from "@forge/sql";
-import type { EntityName, LoggingOptions } from "..";
+import type { EntityName, LoggingOptions, QBFilterQuery } from "..";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import type { QueryBuilder } from "@mikro-orm/knex/query";
 import type { Knex } from "knex";
@@ -107,7 +107,26 @@ export interface CRUDForgeSQL {
    *    * @param schema - The entity schema.
    *    * @throws If the primary key is not included in the update fields.
    *    */
-  updateById<T extends object>(entity: T, schema: EntitySchema<T>): Promise<void>;
+  updateById<T extends object>(entity: Partial<T>, schema: EntitySchema<T>): Promise<void>;
+
+  /**
+   * Updates specified fields of records based on provided conditions.
+   * If the "where" parameter is not provided, the WHERE clause is built from the entity fields
+   * that are not included in the list of fields to update.
+   *
+   * @param entity - The object containing values to update and potential criteria for filtering.
+   * @param fields - Array of field names to update.
+   * @param schema - The entity schema.
+   * @param where - Optional filtering conditions for the WHERE clause.
+   * @returns The number of affected rows.
+   * @throws If no filtering criteria are provided (either via "where" or from the remaining entity fields).
+   */
+   updateFields<T extends object>(
+      entity: Partial<T>,
+      fields: EntityKey<T>[],
+      schema: EntitySchema<T>,
+      where?: QBFilterQuery<T>,
+  ): Promise<number>
 
   /**
    * Updates specific fields of a record identified by its primary key.
