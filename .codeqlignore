@@ -1,0 +1,4 @@
+# .codeqlignore
+examples
+schemas
+img
