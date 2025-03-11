@@ -542,12 +542,6 @@ console.log(results);
 
 ## ForgeSqlOrmOptions
 
-Below is an updated documentation snippet in English, including details for the `disableOptimisticLocking` option:
-
----
-
-## ForgeSqlOrmOptions
-
 The `ForgeSqlOrmOptions` object allows customization of ORM behavior. Currently, it supports the following options:
 
 | Option                     | Type      | Description                                                                                                                                                                                                                     |
