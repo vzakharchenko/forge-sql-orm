@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => {
         viteStaticCopy({
           targets: [
             {
-              src: "scripts/forgeSqlCLI.js",
+              src: "scripts/forgeSqlOrmCLI.js",
               dest: ".",
             },
           ],
