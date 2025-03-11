@@ -7,7 +7,7 @@
   "dependencies": {
     "@forge/resolver": "1.6.7",
     "@forge/sql": "^2.4.0",
-    "forge-sql-orm": "1.0.26"
+    "forge-sql-orm": "1.0.28"
   },
   "scripts": {
     "postinstall": "forge-sql-orm patch:mikroorm",

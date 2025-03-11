@@ -61,11 +61,11 @@ const PATCHES: Patch[] = [
   },
   {
     deleteFolder: "node_modules/@mikro-orm/mysql/node_modules",
-    description: "Removing sqlite dialect from MikroORM",
+    description: "Removing node_modules from @mikro-orm/mysql",
   },
   {
     deleteFolder: "node_modules/@mikro-orm/knex/node_modules",
-    description: "Removing sqlite dialect from MikroORM",
+    description: "Removing node_modules from @mikro-orm/knex",
   },
   {
     deleteFolder: "node_modules/@mikro-orm/core/node_modules",
@@ -208,19 +208,25 @@ export function runPostInstallPatch() {
 
       // 🚮 Delete specific files
       if (deleteFile) {
-        const deleteFilePath = path.resolve(__dirname, "../", deleteFile);
+        const deleteFilePath = path.resolve(__dirname, deleteFile);
+        console.log('[DELETING FILE] '+deleteFile)
         if (fs.existsSync(deleteFilePath)) {
           fs.unlinkSync(deleteFilePath);
           console.log(`[DELETED] ${description}`);
+        } else {
+          console.log(`[SKIPPED] ${description}`);
         }
       }
 
       // 🚮 Delete entire folders
       if (deleteFolder) {
-        const deleteFolderPath = path.resolve(__dirname, "../", deleteFolder);
+        const deleteFolderPath = path.resolve(__dirname, deleteFolder);
+        console.log('[DELETING FOLDER] '+deleteFolderPath)
         if (fs.existsSync(deleteFolderPath)) {
           fs.rmSync(deleteFolderPath, { recursive: true, force: true });
           console.log(`[DELETED] ${description}`);
+        } else {
+          console.log(`[SKIPPED] ${description}`);
         }
       }
     },
