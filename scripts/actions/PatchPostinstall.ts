@@ -32,29 +32,7 @@ const PATCHES: Patch[] = [
     description: "Removing unused dialects from MonkeyPatchable.d.ts",
   },
   {
-    file: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/MonkeyPatchable.d.ts",
-    deleteLines: [
-      /^.*mssql.*$/gim,
-      /^.*MsSql.*$/gim,
-      /^\s*Postgres.*$/gm,
-      /^.*Sqlite3.*$/gm,
-      /^.*BetterSqlite3.*$/gim,
-    ],
-    description: "Removing unused dialects from MonkeyPatchable.d.ts",
-  },
-  {
     file: "node_modules/@mikro-orm/knex/MonkeyPatchable.js",
-    deleteLines: [
-      /^.*mssql.*$/gim,
-      /^.*MsSql.*$/gim,
-      /^.*postgres.*$/gim,
-      /^.*sqlite.*$/gim,
-      /^.*Sqlite.*$/gim,
-    ],
-    description: "Removing unused dialects from MonkeyPatchable.js",
-  },
-  {
-    file: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/MonkeyPatchable.js",
     deleteLines: [
       /^.*mssql.*$/gim,
       /^.*MsSql.*$/gim,
@@ -70,16 +48,7 @@ const PATCHES: Patch[] = [
     description: "Removing unused dialects from @mikro-orm/knex/dialects/index.js",
   },
   {
-    file: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/dialects/index.js",
-    deleteLines: [/^.*mssql.*$/gim, /^.*MsSql.*$/gim, /^.*postgresql.*$/gim, /^.*sqlite.*$/gim],
-    description: "Removing unused dialects from @mikro-orm/knex/dialects/index.js",
-  },
-  {
     deleteFolder: "node_modules/@mikro-orm/knex/dialects/mssql",
-    description: "Removing mssql dialect from MikroORM",
-  },
-  {
-    deleteFolder: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/dialects/mssql",
     description: "Removing mssql dialect from MikroORM",
   },
   {
@@ -87,15 +56,19 @@ const PATCHES: Patch[] = [
     description: "Removing postgresql dialect from MikroORM",
   },
   {
-    deleteFolder: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/dialects/postgresql",
-    description: "Removing postgresql dialect from MikroORM",
-  },
-  {
     deleteFolder: "node_modules/@mikro-orm/knex/dialects/sqlite",
     description: "Removing sqlite dialect from MikroORM",
   },
   {
-    deleteFolder: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/dialects/sqlite",
+    deleteFolder: "node_modules/@mikro-orm/mysql/node_modules",
+    description: "Removing sqlite dialect from MikroORM",
+  },
+  {
+    deleteFolder: "node_modules/@mikro-orm/knex/node_modules",
+    description: "Removing sqlite dialect from MikroORM",
+  },
+  {
+    deleteFolder: "node_modules/@mikro-orm/core/node_modules",
     description: "Removing sqlite dialect from MikroORM",
   },
 
@@ -142,13 +115,6 @@ const PATCHES: Patch[] = [
     replace: "return null;",
     description: "Replacing `return new Seeder(this);` with `return null;`",
   },
-  // 🔄 Patch for MikroORM Entity Generator to use 'forge-sql-orm'
-  // {
-  //     file: "node_modules/@mikro-orm/entity-generator/SourceFile.js",
-  //     search: /^.* from '@mikro-orm.*$/gim,
-  //     replace: "            }).join(', '))} } from 'forge-sql-orm';`);",
-  //     description: "Replacing entity generator imports with 'forge-sql-orm'"
-  // },
   {
     file: "node_modules/knex/lib/dialects/index.js",
     deleteLines: [
@@ -186,11 +152,6 @@ const PATCHES: Patch[] = [
   },
   {
     file: "node_modules/@mikro-orm/knex/dialects/mysql/index.js",
-    deleteLines: [/^.*MariaDbKnexDialect.*$/gim],
-    description: "Removing MariaDbKnexDialect",
-  },
-  {
-    file: "node_modules/@mikro-orm/mysql/node_modules/@mikro-orm/knex/dialects/mysql/index.js",
     deleteLines: [/^.*MariaDbKnexDialect.*$/gim],
     description: "Removing MariaDbKnexDialect",
   },

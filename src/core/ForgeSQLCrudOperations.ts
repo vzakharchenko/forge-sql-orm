@@ -3,7 +3,7 @@ import { EntityProperty, EntitySchema, ForgeSqlOrmOptions } from "..";
 import type { types } from "@mikro-orm/core/types";
 import { transformValue } from "../utils/sqlUtils";
 import { CRUDForgeSQL, ForgeSqlOperation } from "./ForgeSQLQueryBuilder";
-import { EntityKey, QBFilterQuery } from "@mikro-orm/core";
+import { EntityKey, QBFilterQuery } from "..";
 import Knex from "../knex";
 
 export class ForgeSQLCrudOperations implements CRUDForgeSQL {

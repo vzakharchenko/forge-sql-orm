@@ -1,4 +1,4 @@
-import type { EntityName, LoggingOptions } from "@mikro-orm/core";
+import type { EntityName, LoggingOptions } from "..";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import type { AnyEntity, EntityClass, EntityClassGroup } from "@mikro-orm/core/typings";
 import type { QueryBuilder } from "@mikro-orm/knex/query";
