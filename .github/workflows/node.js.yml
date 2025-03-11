@@ -31,8 +31,12 @@ jobs:
     - run: npm run build:cli
     - run: npm test
     - run: echo BUILD EXAMPLES
-    - run: cd examples/forge-sql-orm-example/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-dynamic && npm i
+    - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-simple && npm i
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
+    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
