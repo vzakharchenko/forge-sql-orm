@@ -127,3 +127,4 @@ dist-cli
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+dependency-chunks.html

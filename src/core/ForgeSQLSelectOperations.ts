@@ -2,6 +2,7 @@ import { sql, UpdateQueryResponse } from "@forge/sql";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import { parseDateTime } from "../utils/sqlUtils";
 import { ForgeSqlOrmOptions, SchemaSqlForgeSql } from "./ForgeSQLQueryBuilder";
+import {SqlParameters} from "@forge/sql/out/sql-statement";
 
 export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
   private readonly options: ForgeSqlOrmOptions;
@@ -9,6 +10,17 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
   constructor(options: ForgeSqlOrmOptions) {
     this.options = options;
   }
+
+  async executeSchemaSQLOnlyOne<T extends object>(query: string, schema: EntitySchema<T>): Promise<T|undefined> {
+        const results = await this.executeSchemaSQL(query, schema);
+        if (!results || results.length === 0){
+          return undefined;
+        }
+        if (results.length>1){
+          throw new Error('Expected 1 record but returned '+results.length)
+        }
+        return results[0];
+    }
 
   /**
    * Executes a schema-based SQL query and maps the result to the entity schema.
@@ -33,10 +45,10 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
 
           switch (p.type) {
             case "datetime":
-              newModel[fieldName] = parseDateTime(
-                rawModel[rawFieldName] as string,
-                "YYYY-MM-DDTHH:mm:ss.SSS",
-              );
+                newModel[fieldName] = parseDateTime(
+                    rawModel[rawFieldName] as string,
+                    "YYYY-MM-DDTHH:mm:ss.SSS",
+                );
               break;
             case "date":
               newModel[fieldName] = parseDateTime(rawModel[rawFieldName] as string, "YYYY-MM-DD");
@@ -68,13 +80,14 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
   /**
    * Executes a raw SQL update query.
    * @param query - The raw SQL update query.
+   * @param params - sql parameters.
    * @returns The update response containing affected rows.
    */
-  async executeRawUpdateSQL(query: string): Promise<UpdateQueryResponse> {
-    if (this.options.logRawSqlQuery) {
-      console.debug("Executing update SQL: " + query);
-    }
+  async executeRawUpdateSQL(query: string, params?: SqlParameters[]): Promise<UpdateQueryResponse> {
     const sqlStatement = sql.prepare<UpdateQueryResponse>(query);
+    if (params) {
+      sqlStatement.bindParams(params);
+    }
     const updateQueryResponseResults = await sqlStatement.execute();
     return updateQueryResponseResults.rows;
   }

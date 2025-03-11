@@ -12,9 +12,9 @@ import { runPostInstallPatch } from "./actions/PatchPostinstall";
 
 const ENV_PATH = path.resolve(process.cwd(), ".env");
 // 🔄 Load environment variables from `.env` file
-dotenv.config({path: ENV_PATH});
+dotenv.config({ path: ENV_PATH });
 
-const saveEnvFile = (config:any) => {
+const saveEnvFile = (config: any) => {
   let envContent = "";
   const envFilePath = ENV_PATH;
 
@@ -23,21 +23,21 @@ const saveEnvFile = (config:any) => {
   }
 
   const envVars = envContent
-      .split("\n")
-      .filter(line => line.trim() !== "" && !line.startsWith("#"))
-      .reduce((acc:any, line) => {
-        const [key, ...value] = line.split("=");
-        acc[key] = value.join("=");
-        return acc;
-      }, {});
+    .split("\n")
+    .filter((line) => line.trim() !== "" && !line.startsWith("#"))
+    .reduce((acc: any, line) => {
+      const [key, ...value] = line.split("=");
+      acc[key] = value.join("=");
+      return acc;
+    }, {});
 
   Object.entries(config).forEach(([key, value]) => {
     envVars[`FORGE_SQL_ORM_${key.toUpperCase()}`] = value;
   });
 
   const updatedEnvContent = Object.entries(envVars)
-      .map(([key, value]) => `${key}=${value}`)
-      .join("\n");
+    .map(([key, value]) => `${key}=${value}`)
+    .join("\n");
 
   fs.writeFileSync(envFilePath, updatedEnvContent, { encoding: "utf8" });
 
@@ -179,21 +179,22 @@ program
   .option("--saveEnv", "Save configuration to .env file")
   .action(async (cmd) => {
     const config = await getConfig(
-        cmd, "./database/entities",
-        ()=>({
-          versionField: cmd.versionField || process.env.FORGE_SQL_ORM_VERSIONFIELD,
-        }),
-        (cfg, questions: unknown[]) => {
-          if (!cfg.versionField){
-            questions.push({
-              type: "input",
-              name: "versionField",
-              message: "Enter the field name for versioning (leave empty to skip):",
-              default: "",
-            });
-          }
-        },
-        );
+      cmd,
+      "./database/entities",
+      () => ({
+        versionField: cmd.versionField || process.env.FORGE_SQL_ORM_VERSIONFIELD,
+      }),
+      (cfg, questions: unknown[]) => {
+        if (!cfg.versionField) {
+          questions.push({
+            type: "input",
+            name: "versionField",
+            message: "Enter the field name for versioning (leave empty to skip):",
+            default: "",
+          });
+        }
+      },
+    );
     await generateModels(config);
   });
 
@@ -240,7 +241,7 @@ program
   .option("--dbName <string>", "Database name")
   .option("--output <string>", "Output path for migrations")
   .option("--entitiesPath <string>", "Path to the folder containing entities")
-   .option("--saveEnv", "Save configuration to .env file")
+  .option("--saveEnv", "Save configuration to .env file")
   .action(async (cmd) => {
     const config = await getConfig(
       cmd,

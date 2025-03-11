@@ -1,4 +1,5 @@
 # Forge SQL ORM
+
 [![forge-sql-orm CI](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml/badge.svg)](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml)
 
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [MikroORM](https://mikro-orm.io/docs/query-builder) and provides advanced capabilities for working with relational databases inside Forge.
@@ -11,14 +12,12 @@
 - ✅ **Schema migration support**, allowing automatic schema evolution.
 - ✅ **Automatic entity generation** from MySQL/tidb databases.
 - ✅ **Automatic migration generation** from MySQL/tidb databases.
+- ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record.
 
 🚀 **Development in Progress** 🚀
-
 I am currently working on implementing the following features:
-- ⏳ **Optimistic Locking** *(In Progress)* – Ensures data consistency by preventing conflicts when multiple users update the same record.
 - 🗑️ **Soft Deletion Support** – Allows marking records as deleted without actually removing them from the database, enabling easy recovery.
-- 🏗️ **Complex Query Handling** *(JOIN, GROUP BY, etc.) without requiring an EntitySchema* – Simplifies the execution of advanced SQL queries without the need to define additional schemas.
-
+- 🏗️ **Complex Query Handling** _(JOIN, GROUP BY, etc.) without requiring an EntitySchema_ – Simplifies the execution of advanced SQL queries without the need to define additional schemas.
 ---
 
 ## Installation
@@ -507,11 +506,20 @@ console.log(results);
 
 ## ForgeSqlOrmOptions
 
+Below is an updated documentation snippet in English, including details for the `disableOptimisticLocking` option:
+
+---
+
+## ForgeSqlOrmOptions
+
 The `ForgeSqlOrmOptions` object allows customization of ORM behavior. Currently, it supports the following options:
 
-| Option           | Type      | Description                                                                                                                        |
-| ---------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `logRawSqlQuery` | `boolean` | Enables logging of SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`. |
+| Option                     | Type      | Description                                                                                                                                                                                                                     |
+| -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logRawSqlQuery`           | `boolean` | Enables logging of raw SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`.                                                                                         |
+| `disableOptimisticLocking` | `boolean` | Disables optimistic locking. When set to `true`, no additional condition (e.g., a version check) is added during record updates, which can improve performance. However, this may lead to conflicts when multiple transactions attempt to update the same record concurrently. |
+
+---
 
 ### Example: Initializing `ForgeSQL` with Options
 
@@ -622,6 +630,7 @@ npx forge-sql-orm generate:model --host localhost --port 3306 --user root --pass
 ```
 
 This command will:
+
 - Connect to `mydb` on `localhost:3306`.
 - Generate MikroORM entity classes.
 - Save them in `./src/database/entities`.
@@ -630,9 +639,11 @@ This command will:
 - **`--saveEnv`**: Saves configuration settings to `.env` for future use.
 
 #### 🔹 VersionField Explanation
+
 The `--versionField` option is crucial for handling entity versioning. It should be a field of type `datetime`, `integer`, or `decimal`. This field is used to track changes to entities, ensuring that updates follow proper versioning strategies.
 
 **Example:**
+
 - `updatedAt` (datetime) - Commonly used for timestamp-based versioning.
 - `versionNumber` (integer) - Can be used for numeric version increments.
 
@@ -647,6 +658,7 @@ npx forge-sql-orm migrations:create --host localhost --port 3306 --user root --p
 ```
 
 This command will:
+
 - Create the initial migration based on all detected entities.
 - Save migration files in `./src/database/migration`.
 - Create `index.ts` for automatic migration execution.
@@ -661,6 +673,7 @@ npx forge-sql-orm migrations:update --host localhost --port 3306 --user root --p
 ```
 
 This command will:
+
 - Detect schema changes (new tables, columns, indexes).
 - Generate only the required migrations.
 - Update `index.ts` to include new migrations.
@@ -669,6 +682,7 @@ This command will:
 ---
 
 ### 📌 Using the patch:mikroorm Command
+
 If needed, you can manually apply the patch at any time using:
 
 ```sh
@@ -676,6 +690,7 @@ npx forge-sql-orm patch:mikroorm
 ```
 
 This command:
+
 - Removes unsupported database dialects (e.g., PostgreSQL, SQLite).
 - Fixes dynamic imports to work in Forge.
 - Ensures Knex and MikroORM work properly inside Forge.
@@ -683,14 +698,17 @@ This command:
 ---
 
 ### 📌 Configuration Methods
+
 You can define database credentials using:
 
 1️⃣ **Command-line arguments**:
+
 ```sh
 --host, --port, --user, --password, --dbName, --output, --versionField, --saveEnv
 ```
 
 2️⃣ **Environment variables**:
+
 ```bash
 export FORGE_SQL_ORM_HOST=localhost
 export FORGE_SQL_ORM_PORT=3306
@@ -700,6 +718,7 @@ export FORGE_SQL_ORM_DBNAME=mydb
 ```
 
 3️⃣ **Using a `.env` file**:
+
 ```sh
 FORGE_SQL_ORM_HOST=localhost
 FORGE_SQL_ORM_PORT=3306
@@ -713,6 +732,7 @@ FORGE_SQL_ORM_DBNAME=mydb
 ---
 
 ### 📌 Manual Migration Execution
+
 To manually execute migrations in your application:
 
 ```js
@@ -727,7 +747,6 @@ await runner.run(); // ✅ Apply migrations
 This approach allows you to apply migrations programmatically in a Forge application.
 
 ---
-
 
 📜 **License**
 This project is licensed under the **MIT License**.  

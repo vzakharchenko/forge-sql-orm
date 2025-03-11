@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import path from "path";
 import fs from "fs";
-import {defineConfig, MikroORM, MongoNamingStrategy} from "@mikro-orm/mysql";
-import {EntityGenerator} from "@mikro-orm/entity-generator";
-import {EntityMetadata} from "@mikro-orm/core/typings";
+import { defineConfig, MikroORM, MongoNamingStrategy } from "@mikro-orm/mysql";
+import { EntityGenerator } from "@mikro-orm/entity-generator";
+import { EntityMetadata } from "@mikro-orm/core/typings";
 
 const regenerateIndexFile = (outputPath: string) => {
   const entitiesDir = path.resolve(outputPath);
@@ -46,25 +46,33 @@ export const generateModels = async (options: any) => {
         if (options.versionField) {
           const versionFieldName = Object.keys(m.properties).find((p) => {
             return (
-                p === options.versionField ||
-                m.properties[p]?.name === options.versionField ||
-                m.properties[p]?.fieldNames?.find((f) => f === options.versionField)
+              p === options.versionField ||
+              m.properties[p]?.name === options.versionField ||
+              m.properties[p]?.fieldNames?.find((f) => f === options.versionField)
             );
           });
           if (versionFieldName) {
             const property = m.properties[versionFieldName];
-            if (property.type !== "datetime" && property.type !== "integer" && property.type !== "decimal") {
+            if (
+              property.type !== "datetime" &&
+              property.type !== "integer" &&
+              property.type !== "decimal"
+            ) {
               console.warn(
-                  `Version field "${property.name}" can be only datetime or integer Table ${m.tableName} but now is "${property.type}"`
+                `Version field "${property.name}" can be only datetime or integer Table ${m.tableName} but now is "${property.type}"`,
               );
               return;
             }
             if (property.primary) {
-              console.warn(`Version field "${property.name}" can not be primary key Table ${m.tableName}`);
+              console.warn(
+                `Version field "${property.name}" can not be primary key Table ${m.tableName}`,
+              );
               return;
             }
             if (property.nullable) {
-              console.warn(`Version field "${property.name}" should not be nullable  Table ${m.tableName}`);
+              console.warn(
+                `Version field "${property.name}" should not be nullable  Table ${m.tableName}`,
+              );
               return;
             }
             property.version = true;
@@ -84,7 +92,7 @@ export const generateModels = async (options: any) => {
       scalarPropertiesForRelations: "always",
       save: true,
       path: options.output,
-      onInitialMetadata: onCreatingVersionField
+      onInitialMetadata: onCreatingVersionField,
     });
 
     regenerateIndexFile(options.output);
