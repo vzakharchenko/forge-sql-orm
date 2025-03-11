@@ -61,10 +61,12 @@
   "scripts": {
     "test": "vitest --run --config vitest.config.mjs",
     "test:coverage": "vitest --run --config vitest.config.mjs --coverage",
+
     "test:watch": "vitest --watch",
-    "lint": "eslint src examples/forge-sql-orm-example/src examples/forge-sql-orm-example-simple/src  --ext .ts,.tsx,.mjs",
-    "lint:fix": "eslint src --ext .ts,.tsx,.mjs --fix",
-    "format": "prettier --write .",
+
+    "lint": "eslint src  --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write src examples",
     "clean": "rm -rf dist",
     "build": "npm run clean && vite build && npm run build:types",
     "build:types": "tsc --emitDeclarationOnly",
