@@ -14,11 +14,6 @@
 - ✅ **Automatic migration generation** from MySQL/tidb databases.
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record.
 
-🚀 **Development in Progress** 🚀
-I am currently working on implementing the following features:
-- 🗑️ **Soft Deletion Support** – Allows marking records as deleted without actually removing them from the database, enabling easy recovery.
-- 🏗️ **Complex Query Handling** _(JOIN, GROUP BY, etc.) without requiring an EntitySchema_ – Simplifies the execution of advanced SQL queries without the need to define additional schemas.
----
 
 ## Installation
 
@@ -613,10 +608,6 @@ const duplicateResult = await forgeSQL
 3. Filters the results to include only groups with more than one record (`HAVING COUNT(*) > 1`).
 4. Sorts the final results in ascending order by count (`ORDER BY count ASC`).
 5. Executes the SQL query and returns the duplicate records.
-
----
-
-Below is the plain text version of the additional section for Optimistic Locking. You can copy and paste it directly into your README:
 
 ---
 
