@@ -600,10 +600,6 @@ const duplicateResult = await forgeSQL
 
 ---
 
-Below is the plain text version of the additional section for Optimistic Locking. You can copy and paste it directly into your README:
-
----
-
 ## Optimistic Locking
 
 Optimistic locking is a concurrency control mechanism that prevents data conflicts when multiple transactions attempt to update the same record concurrently. Instead of using locks, this technique relies on a version field in your entity models. Each time an update occurs, the current version is checked, and if it doesn't match the stored version, the update is rejected. This ensures data consistency and helps avoid accidental overwrites.
