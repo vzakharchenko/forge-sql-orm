@@ -1,15 +1,27 @@
 import { sql, UpdateQueryResponse } from "@forge/sql";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import { parseDateTime } from "../utils/sqlUtils";
-import { ForgeSqlOrmOptions, SchemaSqlForgeSql } from "./ForgeSQLQueryBuilder";
+import { ComplexQuerySchemaBuilder, ForgeSqlOrmOptions, SchemaSqlForgeSql} from "./ForgeSQLQueryBuilder";
 import {SqlParameters} from "@forge/sql/out/sql-statement";
+import {DynamicEntity, DynamicEntitySchemaBuilder} from "./ComplexQuerySchemaBuilder";
+import {EntityKey} from "@mikro-orm/core";
 
 export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
-  private readonly options: ForgeSqlOrmOptions;
+    private readonly options: ForgeSqlOrmOptions;
 
-  constructor(options: ForgeSqlOrmOptions) {
-    this.options = options;
-  }
+    constructor(options: ForgeSqlOrmOptions) {
+        this.options = options;
+    }
+
+    /**
+     * Creates a builder for constructing complex query schemas dynamically.
+     * This method is useful when working with dynamic entity structures where fields
+     * may not be known at compile time.
+     * @returns An instance of ComplexQuerySchemaBuilder configured for dynamic entities.
+     */
+    createComplexQuerySchema(): ComplexQuerySchemaBuilder<DynamicEntity> {
+        return new DynamicEntitySchemaBuilder();
+    }
 
   async executeSchemaSQLOnlyOne<T extends object>(query: string, schema: EntitySchema<T>): Promise<T|undefined> {
         const results = await this.executeSchemaSQL(query, schema);
@@ -34,7 +46,7 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
 
     return datas.map((r) => {
       const rawModel = r as Record<string, unknown>;
-      const newModel: Record<string, unknown> = {};
+        const newModel = Object.create(schema.meta.prototype) as T;
 
       schema.meta.props
         .filter((p) => p.kind === "scalar")
@@ -42,22 +54,21 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
           const fieldName = p.name;
           const fieldNames = p.fieldNames;
           const rawFieldName = fieldNames && Array.isArray(fieldNames) ? fieldNames[0] : p.name;
-
           switch (p.type) {
             case "datetime":
                 newModel[fieldName] = parseDateTime(
                     rawModel[rawFieldName] as string,
                     "YYYY-MM-DDTHH:mm:ss.SSS",
-                );
+                )  as unknown as T[EntityKey<T>];
               break;
             case "date":
-              newModel[fieldName] = parseDateTime(rawModel[rawFieldName] as string, "YYYY-MM-DD");
+              newModel[fieldName] = parseDateTime(rawModel[rawFieldName] as string, "YYYY-MM-DD")  as unknown as T[EntityKey<T>];
               break;
             case "time":
-              newModel[fieldName] = parseDateTime(rawModel[rawFieldName] as string, "HH:mm:ss.SSS");
+              newModel[fieldName] = parseDateTime(rawModel[rawFieldName] as string, "HH:mm:ss.SSS")  as unknown as T[EntityKey<T>];
               break;
             default:
-              newModel[fieldName] = rawModel[rawFieldName];
+              newModel[fieldName] = rawModel[rawFieldName]  as unknown as T[EntityKey<T>];
           }
         });
       return newModel as T;

@@ -7,13 +7,13 @@ import { Users, UsersSchema } from "./entities/Users";
 import { EntityProperty, EntitySchema, QueryOrder } from "@mikro-orm/core";
 import { DuplicateResponse, DynamicResponse, Metadata, SortType } from "./utils/Constants";
 import { getMetadata } from "./utils/MetadataUtils";
-import { createDuplicateSchema, DuplicateResult } from "./utils/EntityUtils";
+import { createDuplicateSchema } from "./utils/EntityUtils";
 import { Knex } from "@mikro-orm/mysql";
 
 const resolver = new Resolver();
 const forgeSQL = new ForgeSQL(ENTITIES);
 
-const DuplicateSchema: EntitySchema = createDuplicateSchema();
+const DuplicateSchema: EntitySchema = createDuplicateSchema(forgeSQL);
 
 resolver.define("create", async (req): Promise<number> => {
   const payload = req.payload.data as Users;
@@ -57,7 +57,7 @@ resolver.define("duplicate", async (): Promise<DuplicateResponse[]> => {
   // select `u0`.`name`, COUNT(*) as count from `users` as `u0` group by `u0`.`name` having (COUNT(*) > 1)
   const duplicateResult = await forgeSQL
     .fetch()
-    .executeSchemaSQL<DuplicateResult>(query, DuplicateSchema);
+    .executeSchemaSQL(query, DuplicateSchema);
 
   return duplicateResult.map(
     (d): DuplicateResponse => ({

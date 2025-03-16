@@ -4,18 +4,17 @@ import { migrationRunner, sql } from "@forge/sql";
 import migration from "./migration";
 import ENTITIES from "./entities";
 import { Users, UsersSchema } from "./entities/Users";
-import { EntitySchema, QueryOrder } from "@mikro-orm/core";
+import { QueryOrder } from "@mikro-orm/core";
 import { DuplicateResponse, UserResponse, SortType } from "./utils/Constants";
-import { createDuplicateSchema, DuplicateResult } from "./utils/EntityUtils";
 import { Knex } from "@mikro-orm/mysql";
+import {getValueByAlias, getValueBySchemaType} from "../../../src/utils/sqlUtils";
 
 const resolver = new Resolver();
-const forgeSQL = new ForgeSQL(ENTITIES);
-
-const DuplicateSchema: EntitySchema = createDuplicateSchema();
+const forgeSQL = new ForgeSQL(ENTITIES, {logRawSqlQuery:true});
 
 resolver.define("create", async (req): Promise<number> => {
   const payload = req.payload.data as Users;
+  console.log('payload='+JSON.stringify(payload))
   return await forgeSQL.crud().insert(UsersSchema, [payload]);
 });
 
@@ -56,16 +55,20 @@ resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
     query = selectQueryBuilder.getFormattedQuery();
   }
 
+  const complexQuerySchema = forgeSQL.fetch().createComplexQuerySchema();
+  complexQuerySchema.addField(UsersSchema.meta.properties.name)
+  complexQuerySchema.addField(UsersSchema.meta.properties.email)
+  complexQuerySchema.addField({name: 'count', type: "integer" })
   // select `u0`.`name`, COUNT(*) as count from `users` as `u0` group by `u0`.`name` having (COUNT(*) > 1)
   const duplicateResult = await forgeSQL
     .fetch()
-    .executeSchemaSQL<DuplicateResult>(query, DuplicateSchema);
+    .executeSchemaSQL(query, complexQuerySchema.createSchema());
 
   return duplicateResult.map(
     (d): DuplicateResponse => ({
-      count: d.count,
-      name: d.name,
-      email: d.email,
+      count: getValueByAlias(d, 'count') as number,
+      name: getValueBySchemaType(d, UsersSchema.meta.properties.name) as string,
+      email: getValueBySchemaType(d, UsersSchema.meta.properties.email) as string,
     }),
   );
 });

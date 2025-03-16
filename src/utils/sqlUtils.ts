@@ -1,6 +1,6 @@
-import { types } from "@mikro-orm/core/types";
 import moment from "moment";
 import { AnyString } from "@mikro-orm/core/typings";
+import {types} from "..";
 
 const wrapIfNeeded=(data:string, wrap:boolean):string => {
   return wrap?`'${data}'`:data;

@@ -14,7 +14,6 @@
 - ✅ **Automatic migration generation** from MySQL/tidb databases.
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record.
 
-
 ## Installation
 
 Forge-SQL-ORM is designed to work with @forge/sql and requires some additional setup to ensure compatibility within Atlassian Forge.
@@ -152,19 +151,9 @@ const users = (await forgeSQL.fetch().executeRawSQL) < Users > "SELECT * FROM us
 
 ```js
 // Define schema for join result
-class InnerJoinResult {
-    name!: string;
-    product!: string;
-}
-
-export const innerJoinSchema = new EntitySchema<InnerJoinResult>({
-    class: InnerJoinResult,
-    properties: {
-        name: { type: "string", fieldName: "name" },
-        product: { type: "string", fieldName: "product" }
-    },
-});
-innerJoinSchema.init();
+const innerJoinSchema = forgeSQL.fetch().createComplexQuerySchema();
+schemaBuilder.addField(Users.meta.properties.name);
+schemaBuilder.addField(Orders.meta.properties.product);
 
 // Execute query
 const query = forgeSQL.createQueryBuilder(Orders, "order")

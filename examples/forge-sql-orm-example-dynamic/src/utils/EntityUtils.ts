@@ -1,14 +1,12 @@
 import { UsersSchema } from "../entities/Users";
 import { EntitySchema, EntityProperty } from "@mikro-orm/core";
+import {ForgeSqlOperation} from "../../../../src";
+import {DynamicEntity} from "../../../../src/core/ComplexQuerySchemaBuilder";
 
-export class DuplicateResult {
-  [key: string]: any;
-}
+export const createDuplicateSchema = (forgeSQL: ForgeSqlOperation): EntitySchema<DynamicEntity> => {
 
-export const createDuplicateSchema = (): EntitySchema<DuplicateResult> => {
-  const duplicateProperties: Record<string, EntityProperty<DuplicateResult>> = {
-    count: { type: "integer" } as EntityProperty<DuplicateResult>,
-  };
+  const schemaBuilder = forgeSQL.fetch().createComplexQuerySchema();
+  schemaBuilder.addField({name: 'count',  type: "integer" });
 
   UsersSchema.meta.props
     .filter(
@@ -18,14 +16,7 @@ export const createDuplicateSchema = (): EntitySchema<DuplicateResult> => {
         !p.primary,
     )
     .forEach((p) => {
-      duplicateProperties[p.name] = { ...p } as EntityProperty<DuplicateResult>;
+      schemaBuilder.addField(p);
     });
-
-  const entitySchema = new EntitySchema<DuplicateResult>({
-    class: DuplicateResult,
-    properties: duplicateProperties,
-  });
-
-  entitySchema.init();
-  return entitySchema;
+  return schemaBuilder.createSchema();
 };
