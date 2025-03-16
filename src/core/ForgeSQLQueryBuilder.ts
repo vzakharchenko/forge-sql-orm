@@ -3,8 +3,9 @@ import type { EntityName, LoggingOptions, QBFilterQuery } from "..";
 import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
 import type { QueryBuilder } from "@mikro-orm/knex/query";
 import type { Knex } from "knex";
-import { EntityKey } from "@mikro-orm/core";
+import {EntityKey, EntityProperty} from "@mikro-orm/core";
 import {SqlParameters} from "@forge/sql/out/sql-statement";
+import {DynamicEntity} from "./ComplexQuerySchemaBuilder";
 
 /**
  * Interface representing the main ForgeSQL operations.
@@ -70,6 +71,13 @@ export interface SchemaSqlForgeSql {
    */
   executeRawUpdateSQL(query: string, params?: SqlParameters[]): Promise<UpdateQueryResponse>;
 
+  /**
+   * Creates a builder for constructing complex query schemas dynamically.
+   * This method is useful when working with dynamic entity structures where fields
+   * may not be known at compile time.
+   * @returns An instance of ComplexQuerySchemaBuilder configured for dynamic entities.
+   */
+  createComplexQuerySchema():ComplexQuerySchemaBuilder<DynamicEntity>
 }
 
 /**
@@ -170,4 +178,20 @@ export interface QueryBuilderForgeSql {
    * @returns The Knex instance, which can be used for query building.
    */
   getKnex(): Knex<any, any[]>;
+}
+
+export interface ComplexQuerySchemaBuilder<T> {
+  /**
+   * Adds a field from an entity schema to the builder.
+   * @param field - The entity property to be added.
+   * @param alias - (Optional) Alias for the field name.
+   * @returns The updated instance of the builder.
+   */
+  addField<K>(field: Partial<EntityProperty<K>>, alias?: string): this
+
+  /**
+   * Creates and returns a new entity schema based on the added fields.
+   * @returns A new EntitySchema<T> instance.
+   */
+  createSchema(): EntitySchema<T>;
 }
