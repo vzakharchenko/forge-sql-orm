@@ -34,7 +34,7 @@ describe("ForgeSQLSelectOperations", () => {
 
     expect(sql.prepare).toHaveBeenCalledWith("SELECT * FROM test_entity");
     expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([{ id: 1, name: "Test" }]);
+    expect(result).toEqual([{ id: 1, name: "Test",  data: 't'}]);
   });
 
   it("should call SQL prepare and execute on executeSchemaSQL", async () => {
@@ -72,10 +72,10 @@ describe("ForgeSQLSelectOperations", () => {
       "name": "Test",
     }]);
     const dynamicEntity = result[0];
-    expect(getValueByAlias(dynamicEntity,'ID1')).toEqual(1);
-    expect(getValueByAlias(dynamicEntity, 'ID2')).toEqual(1);
-    expect(getValueByAlias(dynamicEntity, 'dataField')).toEqual("t");
-    expect(getValueBySchemaType(dynamicEntity,TestEntitySchema.meta.properties.name)).toEqual(
+    expect(dynamicEntity.getSchemaByAliasField('ID1')).toEqual(1);
+    expect(dynamicEntity.getSchemaByAliasField('ID2')).toEqual(1);
+    expect(dynamicEntity.getSchemaByAliasField('dataField')).toEqual('t');
+    expect(dynamicEntity.getSchemaBySchemaField(TestEntitySchema.meta.properties.name)).toEqual(
         'Test'
     );
   });

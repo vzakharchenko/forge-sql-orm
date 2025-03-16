@@ -1,7 +1,6 @@
 import moment from "moment";
 import { AnyString } from "@mikro-orm/core/typings";
-import {EntityProperty, types} from "..";
-import {EntityKey} from "@mikro-orm/core";
+import {types} from "..";
 
 const wrapIfNeeded=(data:string, wrap:boolean):string => {
   return wrap?`'${data}'`:data;
@@ -33,14 +32,3 @@ export const parseDateTime = (value: string, format: string): Date => {
   }
   return m.toDate();
 };
-
-
-export const getValueBySchemaType = <TYPE, K>(entity: Partial<K>, field: Partial<EntityProperty<K>>): TYPE | undefined => {
-  // @ts-ignore
-  return entity[field.name] as TYPE | undefined;
-}
-
-
-export const getValueByAlias = <TYPE, K>(entity: Partial<K>, alias: string): TYPE | undefined => {
-  return entity[alias as unknown as EntityKey<K>] as TYPE | undefined;
-}
