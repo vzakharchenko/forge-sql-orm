@@ -6,7 +6,6 @@
 
 ## Key Features
 
-- ✅ **Supports foreign keys** at the entity level.
 - ✅ **Supports complex SQL queries** with joins and filtering.
 - ✅ **Batch insert support** with duplicate key handling.
 - ✅ **Schema migration support**, allowing automatic schema evolution.
