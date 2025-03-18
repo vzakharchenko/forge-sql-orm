@@ -31,9 +31,12 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
     options?: ForgeSqlOrmOptions,
   ) {
-    console.debug("Initializing ForgeSQLORM...");
 
     try {
+      const newOptions: ForgeSqlOrmOptions = options ?? { logRawSqlQuery: false, disableOptimisticLocking: false };
+      if (newOptions.logRawSqlQuery){
+        console.debug("Initializing ForgeSQLORM...");
+      }
       this.mikroORM = MikroORM.initSync({
         dbName: "inmemory",
         schemaGenerator: {
@@ -53,7 +56,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         preferTs: false,
         debug: false,
       });
-      const newOptions: ForgeSqlOrmOptions = options ?? { logRawSqlQuery: false, disableOptimisticLocking: false };
+
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {

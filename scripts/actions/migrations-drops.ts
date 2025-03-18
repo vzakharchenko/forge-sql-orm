@@ -6,23 +6,21 @@ import { execSync } from "child_process";
 import { rmSync } from "fs";
 
 /**
+ * Generates a migration ID using current date
+ * @returns Migration ID string with current date
+ */
+function generateMigrationUUID(version:number): string {
+  const now = new Date();
+  const timestamp = now.getTime();
+  return `MIGRATION_V${version}_${timestamp}`;
+}
+
+/**
  * Cleans SQL statements by removing unnecessary database options.
  * @param sql - The raw SQL statement.
  * @returns The cleaned SQL statement.
  */
 function cleanSQLStatement(sql: string): string {
-  // Add IF NOT EXISTS to CREATE TABLE statements
-  sql = sql.replace(/create\s+table\s+(\w+)/gi, "create table if not exists $1");
-
-  // Add IF NOT EXISTS to CREATE INDEX statements
-  sql = sql.replace(/create\s+index\s+(\w+)/gi, "create index if not exists $1");
-
-  // Add IF NOT EXISTS to ADD INDEX statements
-  sql = sql.replace(/alter\s+table\s+(\w+)\s+add\s+index\s+(\w+)/gi, "alter table $1 add index if not exists $2");
-
-  // Add IF NOT EXISTS to ADD CONSTRAINT statements
-  sql = sql.replace(/alter\s+table\s+(\w+)\s+add\s+constraint\s+(\w+)/gi, "alter table $1 add constraint if not exists $2");
-
   // Remove unnecessary database options
   return sql.replace(/\s+default\s+character\s+set\s+utf8mb4\s+engine\s*=\s*InnoDB;?/gi, "").trim();
 }
@@ -34,22 +32,25 @@ function cleanSQLStatement(sql: string): string {
  * @returns TypeScript migration file content.
  */
 function generateMigrationFile(createStatements: string[], version: number): string {
-  const versionPrefix = `v${version}_MIGRATION`;
-
+  const uniqId = generateMigrationUUID(version);
   // Clean each SQL statement and generate migration lines with .enqueue()
   const migrationLines = createStatements
     .map(
       (stmt, index) =>
-        `        .enqueue("${versionPrefix}${index}", \"${cleanSQLStatement(stmt)}\")`, // eslint-disable-line no-useless-escape
+        `        .enqueue("${uniqId}_${index}", \"${cleanSQLStatement(stmt)}\")`, // eslint-disable-line no-useless-escape
     )
     .join("\n");
+
+  // Add migration to clear migrations table
+  const clearMigrationsLine = `        .enqueue("${uniqId}", "DELETE FROM __migrations")`;
 
   // Migration template
   return `import { MigrationRunner } from "@forge/sql/out/migration";
 
 export default (migrationRunner: MigrationRunner): MigrationRunner => {
     return migrationRunner
-${migrationLines};
+${migrationLines}
+${clearMigrationsLine};
 };`;
 }
 
@@ -106,15 +107,11 @@ export default async (
  * @param schema - The full database schema as SQL.
  * @returns Filtered list of SQL statements.
  */
-const extractCreateStatements = (schema: string): string[] => {
+const extractDropStatements = (schema: string): string[] => {
   const statements = schema.split(";").map((s) => s.trim());
-
-  return statements.filter(
-    (stmt) =>
-      stmt.startsWith("create table") ||
-      (stmt.startsWith("alter table") && (stmt.includes("add index") || stmt.includes("add constraint"))) ||
-      stmt.startsWith("primary"),
-  );
+  return statements.filter((s)=>{
+    return s.toLowerCase().startsWith("drop");
+  });
 };
 
 /**
@@ -164,21 +161,11 @@ const loadMigrationVersion = async (migrationPath: string): Promise<number> => {
  * Creates a full database migration.
  * @param options - Database connection settings and output paths.
  */
-export const createMigration = async (options: any) => {
+export const dropMigration = async (options: any) => {
   try {
-    let version = await loadMigrationVersion(options.output);
-
-    if (version > 0) {
-      if (options.force) {
-        console.warn(`⚠️ Warning: Migration already exists. Creating new migration with force flag...`);
-      } else {
-        console.error(`❌ Error: Migration has already been created. Use --force flag to override.`);
-        process.exit(1);
-      }
-    }
 
     // Start from version 1 if no previous migrations exist
-    version = 1;
+    const version = 1;
 
     // Load entities dynamically from index.ts
     const entities = await loadEntities(options.entitiesPath);
@@ -194,8 +181,8 @@ export const createMigration = async (options: any) => {
     });
 
     // Generate SQL schema
-    const createSchemaSQL = await orm.schema.getCreateSchemaSQL({ wrap: true });
-    const statements = extractCreateStatements(createSchemaSQL);
+    const dropSchemaSQL = await orm.schema.getDropSchemaSQL({ wrap: true });
+    const statements = extractDropStatements(dropSchemaSQL);
 
     // Generate and save migration files
     const migrationFile = generateMigrationFile(statements, version);
