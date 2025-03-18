@@ -112,8 +112,8 @@ export const handlerMigration = async () => {
     console.info("Migrations applied:", successfulMigrations);
 
     const migrationHistory = (await migrationRunner.list())
-        .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-        .join("\n");
+      .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
+      .join("\n");
 
     console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
 
