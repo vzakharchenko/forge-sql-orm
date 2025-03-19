@@ -101,24 +101,30 @@ resolver.define("fetch", async (req): Promise<DynamicResponse[]> => {
 export const handler = resolver.getDefinitions();
 
 export const handlerMigration = async () => {
-  console.log("Provisioning the database");
-  await sql._provision();
+  try {
+    console.log("Provisioning the database");
+    await sql._provision();
 
-  console.info("Running schema migrations");
-  const migrations = await migration(migrationRunner);
-  const successfulMigrations = await migrations.run();
-  console.info("Migrations applied:", successfulMigrations);
 
-  const migrationHistory = (await migrationRunner.list())
-    .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-    .join("\n");
+    console.info("Running schema migrations");
+    const migrations = await migration(migrationRunner);
+    const successfulMigrations = await migrations.run();
+    console.info("Migrations applied:", successfulMigrations);
 
-  console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
+    const migrationHistory = (await migrationRunner.list())
+      .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
+      .join("\n");
 
-  return {
-    headers: { "Content-Type": ["application/json"] },
-    statusCode: 200,
-    statusText: "OK",
-    body: "Migrations successfully executed",
-  };
+    console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
+
+    return {
+      headers: { "Content-Type": ["application/json"] },
+      statusCode: 200,
+      statusText: "OK",
+      body: "Migrations successfully executed",
+    };
+  } catch (e) {
+    console.error(JSON.stringify(e))
+  }
+
 };

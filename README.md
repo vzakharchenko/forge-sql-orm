@@ -5,12 +5,12 @@
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [MikroORM](https://mikro-orm.io/docs/query-builder) and provides advanced capabilities for working with relational databases inside Forge.
 
 ## Key Features
-
 - ✅ **Supports complex SQL queries** with joins and filtering.
 - ✅ **Batch insert support** with duplicate key handling.
 - ✅ **Schema migration support**, allowing automatic schema evolution.
 - ✅ **Automatic entity generation** from MySQL/tidb databases.
 - ✅ **Automatic migration generation** from MySQL/tidb databases.
+- ✅ **Drop Migrations** Generate a migration to drop all tables and clear migrations history for subsequent schema recreation
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record.
 
 ## Installation
@@ -165,11 +165,7 @@ const results = await forgeSQL.fetch().executeSchemaSQL(query, innerJoinSchema);
 console.log(results);
 ```
 
-Below is an example of how you can extend your README's CRUD Operations section with information and examples for both `updateFieldById` and `updateFields` methods:
-
----
-
-🛠 **CRUD Operations**
+## CRUD Operations
 
 - **Insert Data**
 
@@ -475,6 +471,71 @@ export const UsersSchema = new EntitySchema({
 });
 
 ```
+---
+
+## Drop Migrations
+
+The Drop Migrations feature allows you to completely reset your database schema in Atlassian Forge SQL. This is useful when you need to:
+- Start fresh with a new schema
+- Reset all tables and their data
+- Clear migration history
+- Ensure your local models match the deployed database
+
+### Important Requirements
+
+Before using Drop Migrations, ensure that:
+1. Your local entity models exactly match the current database schema deployed in Atlassian Forge SQL
+2. You have a backup of your data if needed
+3. You understand that this operation will delete all tables and data
+
+### Usage
+
+1. First, ensure your local models match the deployed database:
+   ```bash
+   npx forge-sql-orm generate:model --output ./database/entities
+   ```
+
+2. Generate the drop migration:
+   ```bash
+   npx forge-sql-orm migrations:drop --entitiesPath ./database/entities --output ./database/migration
+   ```
+
+3. Deploy and run the migration in your Forge app:
+   ```js
+   import migrationRunner from "./database/migration";
+   import { MigrationRunner } from "@forge/sql/out/migration";
+
+   const runner = new MigrationRunner();
+   await migrationRunner(runner);
+   await runner.run();
+   ```
+
+4. After dropping all tables, you can create a new migration to recreate the schema:
+   ```bash
+   npx forge-sql-orm migrations:create --entitiesPath ./database/entities --output ./database/migration --force
+   ```
+   The `--force` parameter is required here because we're creating a new migration after dropping all tables.
+
+### Example Migration Output
+
+The generated drop migration will look like this:
+```js
+import { MigrationRunner } from "@forge/sql/out/migration";
+
+export default (migrationRunner: MigrationRunner): MigrationRunner => {
+    return migrationRunner
+        .enqueue("v1_MIGRATION0", "DROP TABLE IF EXISTS `users`")
+        .enqueue("v1_MIGRATION1", "DROP TABLE IF EXISTS `orders`")
+        .enqueue("MIGRATION_V1_1234567890", "DELETE FROM __migrations");
+};
+```
+
+### ⚠️ Important Notes
+
+- This operation is **irreversible** - all data will be lost
+- Make sure your local models are up-to-date with the deployed database
+- Consider backing up your data before running drop migrations
+- The migration will clear the `__migrations` table to allow for fresh migration history
 
 ---
 
@@ -620,7 +681,7 @@ Optimistic locking is a concurrency control mechanism that prevents data conflic
 
 ### Example
 
-Here’s how you can define an entity with optimistic locking using MikroORM:
+Here's how you can define an entity with optimistic locking using MikroORM:
 
 ```js
 export class TestEntityVersion {

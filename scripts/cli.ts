@@ -9,6 +9,7 @@ import { generateModels } from "./actions/generate-models";
 import { createMigration } from "./actions/migrations-create";
 import { updateMigration } from "./actions/migrations-update";
 import { runPostInstallPatch } from "./actions/PatchPostinstall";
+import { dropMigration } from "./actions/migrations-drops";
 
 const ENV_PATH = path.resolve(process.cwd(), ".env");
 // 🔄 Load environment variables from `.env` file
@@ -209,6 +210,7 @@ program
   .option("--dbName <string>", "Database name")
   .option("--output <string>", "Output path for migrations")
   .option("--entitiesPath <string>", "Path to the folder containing entities")
+  .option("--force", "Force creation even if migrations exist")
   .option("--saveEnv", "Save configuration to .env file")
   .action(async (cmd) => {
     const config = await getConfig(
@@ -216,6 +218,7 @@ program
       "./database/migration",
       () => ({
         entitiesPath: cmd.entitiesPath || process.env.FORGE_SQL_ORM_ENTITIESPATH,
+        force: cmd.force || false,
       }),
       (cfg, questions: unknown[]) => {
         if (!cfg.entitiesPath)
@@ -260,6 +263,38 @@ program
       },
     );
     await updateMigration(config);
+  });
+
+// ✅ Command: Drop all migrations
+program
+  .command("migrations:drop")
+  .description("Generate a migration to drop all tables and clear migrations history.")
+  .option("--host <string>", "Database host")
+  .option("--port <number>", "Database port")
+  .option("--user <string>", "Database user")
+  .option("--password <string>", "Database password")
+  .option("--dbName <string>", "Database name")
+  .option("--output <string>", "Output path for migrations")
+  .option("--entitiesPath <string>", "Path to the folder containing entities")
+  .option("--saveEnv", "Save configuration to .env file")
+  .action(async (cmd) => {
+    const config = await getConfig(
+      cmd,
+      "./database/migration",
+      () => ({
+        entitiesPath: cmd.entitiesPath || process.env.FORGE_SQL_ORM_ENTITIESPATH,
+      }),
+      (cfg, questions: unknown[]) => {
+        if (!cfg.entitiesPath)
+          questions.push({
+            type: "input",
+            name: "entitiesPath",
+            message: "Enter the path to entities:",
+            default: "./database/entities",
+          });
+      },
+    );
+    await dropMigration(config);
   });
 
 // Patch MikroORM and Knex
