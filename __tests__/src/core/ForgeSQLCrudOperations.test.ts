@@ -8,20 +8,24 @@ vi.mock("@forge/sql", () => ({
     prepare: vi.fn((query: string) => {
       if (
         query ===
-        "select `t0`.`id`, `t0`.`version` from `test_entity_version` as `t0` where `t0`.`id` = 1"
+        "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?"
       ) {
         const testEntityVersion = new TestEntityVersion();
         testEntityVersion.id = 1;
         testEntityVersion.name = "test";
         testEntityVersion.version = 5;
-        return {
+        const mockResult = {
           query: query || "MOCK_QUERY",
           _params: [],
           remoteSqlApi: "",
           params: [],
-          bindParams: vi.fn(),
+          bindParams: vi.fn().mockImplementation((params) => {
+            mockResult.params = params;
+            return mockResult;
+          }),
           execute: () => ({ rows: [testEntityVersion] }),
         };
+        return mockResult;
       } else if (
         query ===
         "select `t0`.`id`, `t0`.`version` from `test_entity_date_version` as `t0` where `t0`.`id` = 1"
@@ -30,186 +34,247 @@ vi.mock("@forge/sql", () => ({
         testEntityVersion.id = 1;
         testEntityVersion.name = "test";
         testEntityVersion.version = new Date("01.01.2000 00:00:00");
-        return {
+        const mockResult = {
           query: query || "MOCK_QUERY",
           _params: [],
           remoteSqlApi: "",
           params: [],
-          bindParams: vi.fn(),
+          bindParams: vi.fn().mockImplementation((params) => {
+            mockResult.params = params;
+            return mockResult;
+          }),
           execute: () => ({ rows: [testEntityVersion] }),
         };
+        return mockResult;
       } else if (query.startsWith("update")) {
-        return {
+        const mockResult = {
           query: query || "MOCK_QUERY",
           _params: [],
           remoteSqlApi: "",
           params: [],
-          bindParams: vi.fn(),
+          bindParams: vi.fn().mockImplementation((params) => {
+            mockResult.params = params;
+            return mockResult;
+          }),
           execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1 } }),
         };
+        return mockResult;
       }
-      return {
+      const mockResult = {
         query: query || "MOCK_QUERY",
         _params: [],
         remoteSqlApi: "",
         params: [],
-        bindParams: vi.fn(),
+        bindParams: vi.fn().mockImplementation((params) => {
+          mockResult.params = params;
+          return mockResult;
+        }),
         execute: vi.fn().mockResolvedValue({ rows: [] }),
       };
+      return mockResult;
     }),
   },
 }));
 
 import { sql } from "@forge/sql";
 import ForgeSQLORM, { ForgeSqlOperation } from "../../../src";
-import { TestEntity, TestEntitySchema } from "../../entities/TestEntity";
-import { TestEntityVersion, TestEntityVersionSchema } from "../../entities/TestEntityVersion";
+import {testEntity} from "../../entities/TestEntity";
+import {testEntityVersion, TestEntityVersion} from "../../entities/TestEntityVersion";
 import {
+  testEntityDateVersion,
   TestEntityDateVersion,
-  TestEntityDateVersionSchema,
 } from "../../entities/TestEntityDateVersion";
+import {eq} from "drizzle-orm";
+import {testEntityTimeStampVersion} from "../../entities/TestEntityTimeStampVersion";
 
 describe("ForgeSQLCrudOperations", () => {
   let forgeSqlOperation: ForgeSqlOperation;
 
   beforeEach(() => {
-    forgeSqlOperation = new ForgeSQLORM([TestEntity, TestEntityVersion, TestEntityDateVersion], {
+    forgeSqlOperation = new ForgeSQLORM( {
       logRawSqlQuery: true,
+      additionalMetadata: {
+        "test_entity_version": {
+          tableName: 'test_entity_version',
+          versionField: {
+            fieldName: 'version'
+          }
+        },
+        "test_entity_date_version": {
+          tableName: 'test_entity_date_version',
+          versionField: {
+            fieldName: 'version'
+          }
+        },
+        "test_entity_timestamp_version": {
+          tableName: 'test_entity_timestamp_version',
+          versionField: {
+            fieldName: 'version'
+          }
+        }
+      }
     });
   });
 
   it("should call SQL prepare and execute on insert", async () => {
-    await forgeSqlOperation.crud().insert(TestEntitySchema, [{ id: 1, name: "Test" }]);
+    await forgeSqlOperation.crud().insert(testEntity, [{ id: 1, name: "Test" }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "INSERT INTO test_entity (id,name) VALUES (1,'Test')",
+      "insert into `test_entity` (`id`, `name`) values (?, ?)",
     );
 
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test");
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on insert with empty versioning number", async () => {
     await forgeSqlOperation
       .crud()
-      .insert(TestEntityVersionSchema, [{ id: 1, name: "Test" } as TestEntityVersion]);
+      .insert(testEntityVersion, [{ id: 1, name: "Test" }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "INSERT INTO test_entity_version (id,name,version) VALUES (1,'Test',0)",
+      "insert into `test_entity_version` (`id`, `name`, `version`) values (?, ?, ?)",
     );
-
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", 1);
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
+
   it("should call SQL prepare and execute on insert with not empty versioning number", async () => {
     await forgeSqlOperation
-      .crud()
-      .insert(TestEntityVersionSchema, [
-        { id: 1, name: "Test", version: 11111 } as TestEntityVersion,
-      ]);
+        .crud()
+        .insert(testEntityVersion, [{ id: 1, name: "Test", version: 11111 }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "INSERT INTO test_entity_version (id,name,version) VALUES (1,'Test',0)",
+        "insert into `test_entity_version` (`id`, `name`, `version`) values (?, ?, ?)",
     );
-
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", 1);
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on insert with empty versioning date", async () => {
     await forgeSqlOperation
       .crud()
-      .insert(TestEntityDateVersionSchema, [{ id: 1, name: "Test" } as TestEntityDateVersion]);
+      .insert(testEntityDateVersion, [{ id: 1, name: "Test" }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "INSERT INTO test_entity_date_version (id,name,version) VALUES (1,'Test','2023-04-12T00:00:01.000')",
+        "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
     );
-
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on insert notEmpty empty versioning date", async () => {
     await forgeSqlOperation
       .crud()
-      .insert(TestEntityDateVersionSchema, [
+      .insert(testEntityDateVersion, [
         { id: 1, name: "Test", version: new OriginalDate() } as TestEntityDateVersion,
       ]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "INSERT INTO test_entity_date_version (id,name,version) VALUES (1,'Test','2023-04-12T00:00:01.000')",
+        "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
     );
-
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on deleteById", async () => {
-    await forgeSqlOperation.crud().deleteById(1, TestEntitySchema);
+    await forgeSqlOperation.crud().deleteById(1, testEntity);
 
-    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(expect.any(String));
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "delete from `test_entity` where `test_entity`.`id` = ?",
+    );
 
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1);
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
+  it("should call SQL prepare and execute on deleteById Versioning Field number", async () => {
+    await forgeSqlOperation.crud().deleteById(1, testEntityVersion);
+
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?",
+    );
+
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "delete from `test_entity_version` where (`test_entity_version`.`id` = ? and `test_entity_version`.`version` = ?)",
+    );
+
+  });
+
   it("should call SQL prepare and execute on updateById", async () => {
-    await forgeSqlOperation.crud().updateById({ id: 1, name: "Updated" }, TestEntitySchema);
+    await forgeSqlOperation.crud().updateById({ id: 1, name: "Updated" }, testEntity);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(expect.any(String));
-
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "update `test_entity` set `id` = ?, `name` = ? where `test_entity`.`id` = ?",
+    );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Updated", 1);
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on updateById With version", async () => {
     await forgeSqlOperation
       .crud()
-      .updateById({ id: 1, name: "Updated", version: 2 }, TestEntityVersionSchema);
+      .updateById({ id: 1, name: "Updated", version: 2 }, testEntityVersion);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity_version` as `t0` set `id` = 1, `name` = 'Updated', `version` = 3 where `version` = 2 and `id` = 1",
+        "update `test_entity_version` set `id` = ?, `name` = ?, `version` = ? where (`test_entity_version`.`id` = ? and `test_entity_version`.`version` = ?)",
     );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Updated",3, 1,2);
+    expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on updateById With version Date", async () => {
-    let fields = TestEntityDateVersionSchema.meta.props.map((p) => p.name);
     await forgeSqlOperation
       .crud()
-      .updateFieldById(
-        { id: 1, name: "Updated", version: new Date("01.01.2010 00:00:00") },
-        fields,
-        TestEntityDateVersionSchema,
+      .updateById(
+        { id: 1, version: new Date("01.01.2010 00:00:00") },
+        testEntityDateVersion,
       );
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity_date_version` as `t0` set `id` = 1, `name` = 'Updated', `version` = '2023-04-12T00:00:01.000' where `version` = '2010-01-01T00:00:00.000' and `id` = 1",
+        "update `test_entity_date_version` set `id` = ?, `version` = ? where (`test_entity_date_version`.`id` = ? and `test_entity_date_version`.`version` = ?)",
     );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "2023-04-12T00:00:01.000",1, "2010-01-01T00:00:00.000");
+    expect(preparedStatement.execute).toHaveBeenCalled();
+  });
+  it("should call SQL prepare and execute on updateById With version TimeStamp", async () => {
+    await forgeSqlOperation
+      .crud()
+      .updateById(
+        { id: 1, version: new Date("01.01.2010 00:00:00") },
+          testEntityTimeStampVersion,
+      );
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "update `test_entity_timestamp_version` set `id` = ?, `version` = ? where (`test_entity_timestamp_version`.`id` = ? and `test_entity_timestamp_version`.`version` = ?)",
+    );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1,"2023-04-12T00:00:01.000",1, "2010-01-01T00:00:00.000");
+    expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
-  it("should call SQL prepare and execute on updateById only update", async () => {
-    await forgeSqlOperation
-      .crud()
-      .updateFieldById(
-        { id: 1, name: "Updated", version: new Date("01.01.2010 00:00:00") },
-        ["id"],
-        TestEntityDateVersionSchema,
-      );
-    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity_date_version` as `t0` set `id` = 1, `version` = '2023-04-12T00:00:01.000' where `version` = '2010-01-01T00:00:00.000' and `id` = 1",
-    );
-  });
 
   it("should call SQL prepare and execute on updateFields2 only update", async () => {
     await forgeSqlOperation
       .crud()
       .updateFields(
         { id: 1, name: "Updated" },
-        ["name"],
-          TestEntitySchema,
-          { id: 10000 }
+          testEntity,
+          eq(testEntity.id, 10000)
       );
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-      "update `test_entity` as `t0` set `name` = 'Updated' where `id` = 10000",
+      "update `test_entity` set `id` = ?, `name` = ? where `test_entity`.`id` = ?",
     );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Updated",10000);
+    expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
   it("should call SQL prepare and execute on updateFields only update Wrong Where", async () => {
@@ -219,9 +284,8 @@ describe("ForgeSQLCrudOperations", () => {
             .crud()
             .updateFields(
                 { name: "Updated" } ,
-                ["name"],
-                TestEntitySchema,
+                testEntity,
             )
-    ).rejects.toThrow("Filtering criteria (WHERE clause) must be provided");
+    ).rejects.toThrow("WHERE conditions must be provided");
   });
 });

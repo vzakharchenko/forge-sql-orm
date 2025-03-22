@@ -8,7 +8,6 @@ import path from "path";
 import { generateModels } from "./actions/generate-models";
 import { createMigration } from "./actions/migrations-create";
 import { updateMigration } from "./actions/migrations-update";
-import { runPostInstallPatch } from "./actions/PatchPostinstall";
 import { dropMigration } from "./actions/migrations-drops";
 
 const ENV_PATH = path.resolve(process.cwd(), ".env");
@@ -295,18 +294,6 @@ program
       },
     );
     await dropMigration(config);
-  });
-
-// Patch MikroORM and Knex
-program
-  .command("patch:mikroorm")
-  .description("Patch MikroORM and Knex dependencies to work properly with Forge")
-  .action(async () => {
-    console.log("Running MikroORM patch...");
-    await runPostInstallPatch();
-    await runPostInstallPatch();
-    await runPostInstallPatch();
-    console.log("✅ MikroORM patch applied successfully!");
   });
 
 // 🔥 Execute CLI

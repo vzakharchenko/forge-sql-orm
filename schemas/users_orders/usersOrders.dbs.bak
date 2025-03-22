@@ -1,12 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="MySql" database="MySql" id="MySql-1d4d" >
 	<schema name="testDb" >
+		<table name="__drizzle_migrations" spec="" >
+			<column name="id" type="BIGINT" jt="-5" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="TEXT" jt="-1" mandatory="y" />
+			<column name="created_at" type="BIGINT" jt="-5" />
+			<index name="pk___drizzle_migrations" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci]]></options>
+		</table>
+		<table name="__drizzle_migrations__" spec="" >
+			<column name="id" type="BIGINT" jt="-5" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="TEXT" jt="-1" mandatory="y" />
+			<column name="created_at" type="BIGINT" jt="-5" />
+			<index name="pk___drizzle_migrations_0" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci]]></options>
+		</table>
 		<table name="orders" prior="tbl" >
 			<column name="id" type="INT" jt="4" mandatory="y" />
 			<column name="user_id" type="INT" jt="4" mandatory="y" />
 			<column name="product" type="VARCHAR" length="200" jt="12" />
+			<column name="version" type="DATETIME" jt="93" mandatory="y" />
+			<column name="test" type="REAL" jt="8" />
 			<index name="pk_orders" unique="PRIMARY_KEY" >
 				<column name="id" />
+			</index>
+			<index name="idx_orders_user_id" unique="NORMAL" >
+				<column name="user_id" />
 			</index>
 			<fk name="fk_orders_users" to_schema="testDb" to_table="users" >
 				<fk_column name="user_id" pk="id" />
@@ -17,6 +44,8 @@
 			<column name="id" type="INT" jt="4" mandatory="y" >
 				<identity><![CDATA[AUTO_INCREMENT ]]></identity>
 			</column>
+			<column name="email" type="VARCHAR" length="255" jt="12" />
+			<column name="version" type="INT" jt="4" mandatory="y" />
 			<column name="name" type="VARCHAR" length="200" jt="12" />
 			<index name="pk_users" unique="PRIMARY_KEY" >
 				<column name="id" />

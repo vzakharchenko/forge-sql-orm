@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { resolve } from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 
-const manualChunks = (id:string) => {
+const manualChunks = (id: string) => {
   if (id.includes("node_modules")) {
     if (id.includes("client-core/src")) {
       return "client-core-vendor";
@@ -37,11 +37,13 @@ export default defineConfig(async (env: ConfigEnv): Promise<UserConfig> => {
   return {
     define: envKeys,
     base: "./",
-    plugins: [react(),
+    plugins: [
+      react(),
       visualizer({
         open: false,
         filename: `dependency-chunks.html`,
-      }),],
+      }),
+    ],
     server: {
       port: 3099,
     },
@@ -50,9 +52,9 @@ export default defineConfig(async (env: ConfigEnv): Promise<UserConfig> => {
       emptyOutDir: true,
       rollupOptions: {
         output: {
-          manualChunks
-        }
+          manualChunks,
         },
+      },
     },
   };
 });

@@ -1,564 +1,451 @@
-import { sql, UpdateQueryResponse } from "@forge/sql";
-import { EntityProperty, EntitySchema, ForgeSqlOrmOptions } from "..";
-import type { types } from "@mikro-orm/core/types";
-import { transformValue } from "../utils/sqlUtils";
+import { ForgeSqlOrmOptions } from "..";
 import { CRUDForgeSQL, ForgeSqlOperation } from "./ForgeSQLQueryBuilder";
-import { EntityKey, QBFilterQuery } from "..";
-import Knex from "../knex";
+import { AnyMySqlTable } from "drizzle-orm/mysql-core/index";
+import { AnyColumn, InferInsertModel } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { SQL } from "drizzle-orm";
+import { getPrimaryKeys, getTableMetadata } from "../utils/sqlUtils";
 
+/**
+ * Class implementing CRUD operations for ForgeSQL ORM.
+ * Provides methods for inserting, updating, and deleting records with support for optimistic locking.
+ */
 export class ForgeSQLCrudOperations implements CRUDForgeSQL {
   private readonly forgeOperations: ForgeSqlOperation;
   private readonly options: ForgeSqlOrmOptions;
 
+  /**
+   * Creates a new instance of ForgeSQLCrudOperations.
+   * @param forgeSqlOperations - The ForgeSQL operations instance
+   * @param options - Configuration options for the ORM
+   */
   constructor(forgeSqlOperations: ForgeSqlOperation, options: ForgeSqlOrmOptions) {
     this.forgeOperations = forgeSqlOperations;
     this.options = options;
   }
 
   /**
-   * Generates an SQL INSERT statement for the provided models.
-   * If a version field exists in the schema, its value is set accordingly.
-   *
-   * @param schema - The entity schema.
-   * @param models - The list of entities to insert.
-   * @param updateIfExists - Whether to update the row if it already exists.
-   * @returns An object containing the SQL query, column names, and values.
-   */
-  private async generateInsertScript<T extends object>(
-      schema: EntitySchema<T>,
-      models: T[],
-      updateIfExists: boolean,
-  ): Promise<{
-    sql: string;
-    query: string;
-    fields: string[];
-    values: { type: keyof typeof types; value: unknown }[];
-  }> {
-    const columnNames = new Set<string>();
-    const modelFieldValues: Record<string, { type: keyof typeof types; value: unknown }>[] = [];
-
-    // Build field values for each model.
-    models.forEach((model) => {
-      const fieldValues: Record<string, { type: keyof typeof types; value: unknown }> = {};
-      schema.meta.props.forEach((prop) => {
-        const value = model[prop.name];
-        if (prop.kind === "scalar" && value !== undefined) {
-          const columnName = this.getRealFieldNameFromSchema(prop);
-          columnNames.add(columnName);
-          fieldValues[columnName] = { type: prop.type as keyof typeof types, value };
-        }
-      });
-      modelFieldValues.push(fieldValues);
-    });
-
-    // If a version field exists, set or update its value.
-    const versionField = this.getVersionField(schema);
-    if (versionField) {
-      modelFieldValues.forEach((mv) => {
-        const versionRealName = this.getRealFieldNameFromSchema(versionField);
-        if (mv[versionRealName]) {
-          mv[versionRealName].value = transformValue(
-              { value: this.createVersionField(versionField), type: versionField.name },
-              true,
-          );
-        } else {
-          mv[versionRealName] = {
-            type: versionField.type as keyof typeof types,
-            value: transformValue(
-                { value: this.createVersionField(versionField), type: versionField.name },
-                true,
-            ),
-          };
-          columnNames.add(versionField.name);
-        }
-      });
-    }
-
-    const columns = Array.from(columnNames);
-
-    // Flatten values for each row in the order of columns.
-    const values = modelFieldValues.flatMap((fieldValueMap) =>
-        columns.map(
-            (column) =>
-                fieldValueMap[column] || {
-                  type: "string",
-                  value: null,
-                },
-        ),
-    );
-
-    // Build the VALUES clause.
-    const insertValues = modelFieldValues
-        .map((fieldValueMap) => {
-          const rowValues = columns
-              .map((column) =>
-                  transformValue(
-                      fieldValueMap[column] || { type: "string", value: null },
-                      true,
-                  ),
-              )
-              .join(",");
-          return `(${rowValues})`;
-        })
-        .join(", ");
-    // Build the VALUES ? clause.
-    const insertEmptyValues = modelFieldValues
-        .map(() => {
-          const rowValues = columns
-              .map(() =>
-                  '?',
-              )
-              .join(",");
-          return `(${rowValues})`;
-        })
-        .join(", ");
-
-    const updateClause = updateIfExists
-        ? ` ON DUPLICATE KEY UPDATE ${columns.map((col) => `${col} = VALUES(${col})`).join(",")}`
-        : "";
-
-    return {
-      sql: `INSERT INTO ${schema.meta.collection} (${columns.join(",")}) VALUES ${insertValues}${updateClause}`,
-      query: `INSERT INTO ${schema.meta.collection} (${columns.join(",")}) VALUES ${insertEmptyValues}${updateClause}`,
-      fields: columns,
-      values,
-    };
-  }
-
-  /**
-   * Inserts records into the database.
+   * Inserts records into the database with optional versioning support.
    * If a version field exists in the schema, versioning is applied.
    *
-   * @param schema - The entity schema.
-   * @param models - The list of entities to insert.
-   * @param updateIfExists - Whether to update the row if it already exists.
-   * @returns The ID of the inserted row.
+   * @template T - The type of the table schema
+   * @param {T} schema - The entity schema
+   * @param {Partial<InferInsertModel<T>>[]} models - Array of entities to insert
+   * @param {boolean} [updateIfExists=false] - Whether to update existing records
+   * @returns {Promise<number>} The number of inserted rows
+   * @throws {Error} If the insert operation fails
    */
-  async insert<T extends object>(
-      schema: EntitySchema<T>,
-      models: T[],
-      updateIfExists: boolean = false,
+  async insert<T extends AnyMySqlTable>(
+    schema: T,
+    models: Partial<InferInsertModel<T>>[],
+    updateIfExists: boolean = false,
   ): Promise<number> {
-    if (!models || models.length === 0) return 0;
+    if (!models?.length) return 0;
 
-    const query = await this.generateInsertScript(schema, models, updateIfExists);
+    const { tableName, columns } = getTableMetadata(schema);
+    const versionMetadata = this.validateVersionField(tableName, columns);
+
+    // Prepare models with version field if needed
+    const preparedModels = models.map((model) =>
+      this.prepareModelWithVersion(model, versionMetadata, columns),
+    );
+
+    // Build insert query
+    const queryBuilder = this.forgeOperations
+      .getDrizzleQueryBuilder()
+      .insert(schema)
+      .values(preparedModels);
+
+    // Add onDuplicateKeyUpdate if needed
+    const finalQuery = updateIfExists
+      ? queryBuilder.onDuplicateKeyUpdate({
+          set: Object.fromEntries(
+            Object.keys(preparedModels[0]).map((key) => [key, (schema as any)[key]]),
+          ) as any,
+        })
+      : queryBuilder;
+
+    // Execute query
+    const query = finalQuery.toSQL();
     if (this.options?.logRawSqlQuery) {
-      console.debug("INSERT SQL: " + query.query);
+      console.debug("INSERT SQL:", query.sql);
     }
-    const sqlStatement = sql.prepare<UpdateQueryResponse>(query.sql);
-    const result = await sqlStatement.execute();
-    return result.rows.insertId;
+
+    const result = await this.forgeOperations.fetch().executeRawUpdateSQL(query.sql, query.params);
+
+    return result.insertId;
   }
 
   /**
-   * Retrieves the primary key properties from the entity schema.
+   * Deletes a record by its primary key with optional version check.
+   * If versioning is enabled, ensures the record hasn't been modified since last read.
    *
-   * @param schema - The entity schema.
-   * @returns An array of primary key properties.
-   * @throws If no primary keys are found.
+   * @template T - The type of the table schema
+   * @param {unknown} id - The ID of the record to delete
+   * @param {T} schema - The entity schema
+   * @returns {Promise<number>} Number of affected rows
+   * @throws {Error} If the delete operation fails
+   * @throws {Error} If multiple primary keys are found
    */
-  private getPrimaryKeys<T extends object>(schema: EntitySchema<T>): EntityProperty<T, unknown>[] {
-    const primaryKeys = schema.meta.props.filter((prop) => prop.primary);
-    if (!primaryKeys.length) {
-      throw new Error(`No primary keys found for schema: ${schema.meta.className}`);
-    }
-    return primaryKeys;
-  }
-
-  /**
-   * Deletes a record by its primary key.
-   *
-   * @param id - The ID of the record to delete.
-   * @param schema - The entity schema.
-   * @returns The number of rows affected.
-   * @throws If the entity has more than one primary key.
-   */
-  async deleteById<T extends object>(id: unknown, schema: EntitySchema<T>): Promise<number> {
+  async deleteById<T extends AnyMySqlTable>(id: unknown, schema: T): Promise<number> {
+    const { tableName, columns } = getTableMetadata(schema);
     const primaryKeys = this.getPrimaryKeys(schema);
-    if (primaryKeys.length > 1) {
-      throw new Error("Only one primary key is supported");
+
+    if (primaryKeys.length !== 1) {
+      throw new Error("Only single primary key is supported");
     }
 
-    const primaryKey = primaryKeys[0];
-    const queryBuilder = this.forgeOperations.createQueryBuilder(schema.meta.class).delete();
-    queryBuilder.andWhere({ [primaryKey.name]: { $eq: id } });
+    const [primaryKeyName, primaryKeyColumn] = primaryKeys[0];
+    const versionMetadata = this.validateVersionField(tableName, columns);
 
-    const query = queryBuilder.getFormattedQuery();
+    // Build delete conditions
+    const conditions: SQL<unknown>[] = [eq(primaryKeyColumn, id)];
+
+    // Add version check if needed
+    if (versionMetadata && columns) {
+      const versionField = columns[versionMetadata.fieldName];
+      if (versionField) {
+        const oldModel = await this.getOldModel({ [primaryKeyName]: id }, schema, [
+          versionMetadata.fieldName,
+          versionField,
+        ]);
+        conditions.push(eq(versionField, (oldModel as any)[versionMetadata.fieldName]));
+      }
+    }
+
+    // Execute delete query
+    const queryBuilder = this.forgeOperations
+      .getDrizzleQueryBuilder()
+      .delete(schema)
+      .where(and(...conditions));
+
     if (this.options?.logRawSqlQuery) {
-      console.debug("DELETE SQL: " + queryBuilder.getQuery());
+      console.debug("DELETE SQL:", queryBuilder.toSQL().sql);
     }
-    const sqlStatement = sql.prepare<UpdateQueryResponse>(query);
-    const result = await sqlStatement.execute();
-    return result.rows.affectedRows;
+
+    const result = await this.forgeOperations
+      .fetch()
+      .executeRawUpdateSQL(queryBuilder.toSQL().sql, queryBuilder.toSQL().params);
+
+    return result.affectedRows;
   }
 
   /**
-   * Retrieves the version field from the entity schema.
-   * The version field must be of type datetime, integer, or decimal, not a primary key, and not nullable.
+   * Updates a record by its primary key with optimistic locking support.
+   * If versioning is enabled:
+   * - Retrieves the current version
+   * - Checks for concurrent modifications
+   * - Increments the version on successful update
    *
-   * @param schema - The entity schema.
-   * @returns The version field property if it exists.
+   * @template T - The type of the table schema
+   * @param {Partial<InferInsertModel<T>>} entity - The entity with updated values
+   * @param {T} schema - The entity schema
+   * @returns {Promise<number>} Number of affected rows
+   * @throws {Error} If the primary key is not provided
+   * @throws {Error} If optimistic locking check fails
+   * @throws {Error} If multiple primary keys are found
    */
-  getVersionField<T>(schema: EntitySchema<T>) {
-    if (this.options.disableOptimisticLocking){
-      return undefined;
-    }
-    return schema.meta.props
-        .filter((prop) => prop.version)
-        .filter((prop) => {
-          const validType =
-              prop.type === "datetime" || prop.type === "integer" || prop.type === "decimal";
-          if (!validType) {
-            console.warn(
-                `Version field "${prop.name}" in table ${schema.meta.tableName} must be datetime, integer, or decimal, but is "${prop.type}"`,
-            );
-          }
-          return validType;
-        })
-        .filter((prop) => {
-          if (prop.primary) {
-            console.warn(
-                `Version field "${prop.name}" in table ${schema.meta.tableName} cannot be a primary key`,
-            );
-            return false;
-          }
-          return true;
-        })
-        .find((prop) => {
-          if (prop.nullable) {
-            console.warn(
-                `Version field "${prop.name}" in table ${schema.meta.tableName} should not be nullable`,
-            );
-            return false;
-          }
-          return true;
-        });
-  }
+  async updateById<T extends AnyMySqlTable>(
+    entity: Partial<InferInsertModel<T>>,
+    schema: T,
+  ): Promise<number> {
+    const { tableName, columns } = getTableMetadata(schema);
+    const primaryKeys = this.getPrimaryKeys(schema);
 
-  /**
-   * Increments the version field of an entity.
-   * For datetime types, sets the current date; for numeric types, increments by 1.
-   *
-   * @param versionField - The version field property.
-   * @param updateModel - The entity to update.
-   */
-  incrementVersionField<T>(versionField: EntityProperty<T, any>, updateModel: T): void {
-    const key = versionField.name as keyof T;
-    switch (versionField.type) {
-      case "datetime": {
-        updateModel[key] = new Date() as unknown as T[keyof T];
-        break;
-      }
-      case "decimal":
-      case "integer": {
-        updateModel[key] = ((updateModel[key] as number) + 1) as unknown as T[keyof T];
-        break;
-      }
-      default:
-        throw new Error(`Unsupported version field type: ${versionField.type}`);
+    if (primaryKeys.length !== 1) {
+      throw new Error("Only single primary key is supported");
     }
-  }
 
-  /**
-   * Creates the initial version field value for an entity.
-   * For datetime types, returns the current date; for numeric types, returns 0.
-   *
-   * @param versionField - The version field property.
-   */
-  createVersionField<T>(versionField: EntityProperty<T>): unknown {
-    switch (versionField.type) {
-      case "datetime": {
-        return new Date() as unknown as T[keyof T];
-      }
-      case "decimal":
-      case "integer": {
-        return 0;
-      }
-      default:
-        throw new Error(`Unsupported version field type: ${versionField.type}`);
+    const [primaryKeyName, primaryKeyColumn] = primaryKeys[0];
+    const versionMetadata = this.validateVersionField(tableName, columns);
+
+    // Validate primary key
+    if (!(primaryKeyName in entity)) {
+      throw new Error(`Primary key ${primaryKeyName} must be provided in the entity`);
     }
-  }
 
-  /**
-   * Updates a record by its primary key using the provided entity data.
-   *
-   * @param entity - The entity with updated values.
-   * @param schema - The entity schema.
-   */
-  async updateById<T extends object>(entity: Partial<T>, schema: EntitySchema<T>): Promise<void> {
-    const fields = schema.meta.props
-        .filter((prop) => prop.kind === "scalar")
-        .map((prop) => prop.name);
-    await this.updateFieldById(entity as T, fields, schema);
+    // Get current version if needed
+    const currentVersion = await this.getCurrentVersion(
+      entity,
+      primaryKeyName,
+      versionMetadata,
+      columns,
+      schema,
+    );
+
+    // Prepare update data with version
+    const updateData = this.prepareUpdateData(entity, versionMetadata, columns, currentVersion);
+
+    // Build update conditions
+    const conditions: SQL<unknown>[] = [
+      eq(primaryKeyColumn, entity[primaryKeyName as keyof typeof entity]),
+    ];
+    if (versionMetadata && columns) {
+      const versionField = columns[versionMetadata.fieldName];
+      if (versionField) {
+        conditions.push(eq(versionField, currentVersion));
+      }
+    }
+
+    // Execute update query
+    const queryBuilder = this.forgeOperations
+      .getDrizzleQueryBuilder()
+      .update(schema)
+      .set(updateData)
+      .where(and(...conditions));
+
+    if (this.options?.logRawSqlQuery) {
+      console.debug("UPDATE SQL:", queryBuilder.toSQL().sql);
+    }
+
+    const result = await this.forgeOperations
+      .fetch()
+      .executeRawUpdateSQL(queryBuilder.toSQL().sql, queryBuilder.toSQL().params);
+
+    // Check optimistic locking
+    if (versionMetadata && result.affectedRows === 0) {
+      throw new Error(
+        `Optimistic locking failed: record with primary key ${entity[primaryKeyName as keyof typeof entity]} has been modified`,
+      );
+    }
+
+    return result.affectedRows;
   }
 
   /**
    * Updates specified fields of records based on provided conditions.
-   * If the "where" parameter is not provided, the WHERE clause is built from the entity fields
-   * that are not included in the list of fields to update.
+   * This method does not support versioning and should be used with caution.
    *
-   * @param entity - The object containing values to update and potential criteria for filtering.
-   * @param fields - Array of field names to update.
-   * @param schema - The entity schema.
-   * @param where - Optional filtering conditions for the WHERE clause.
-   * @returns The number of affected rows.
-   * @throws If no filtering criteria are provided (either via "where" or from the remaining entity fields).
+   * @template T - The type of the table schema
+   * @param {Partial<InferInsertModel<T>>} updateData - The data to update
+   * @param {T} schema - The entity schema
+   * @param {SQL<unknown>} where - The WHERE conditions
+   * @returns {Promise<number>} Number of affected rows
+   * @throws {Error} If WHERE conditions are not provided
+   * @throws {Error} If the update operation fails
    */
-  async updateFields<T extends object>(
-      entity: Partial<T>,
-      fields: EntityKey<T>[],
-      schema: EntitySchema<T>,
-      where?: QBFilterQuery<T>,
+  async updateFields<T extends AnyMySqlTable>(
+    updateData: Partial<InferInsertModel<T>>,
+    schema: T,
+    where?: SQL<unknown>,
   ): Promise<number> {
-    // Extract update data from the entity based on the provided fields.
-    const updateData = this.filterEntityFields(entity, fields);
-    const updateModel = this.modifyModel(updateData as T, schema);
-
-    // Create the query builder for the entity.
-    let queryBuilder = this.forgeOperations
-        .createQueryBuilder(schema.meta.class)
-        .getKnexQuery();
-
-    // Set the update data.
-    queryBuilder.update(updateModel as T);
-
-    // Use the provided "where" conditions if available; otherwise, build conditions from the remaining entity fields.
-    if (where) {
-      queryBuilder.where(where);
-    } else {
-      const filterCriteria = (Object.keys(entity) as Array<keyof T>)
-          .filter((key: keyof T) => !fields.includes(key as EntityKey<T>))
-          .reduce((criteria, key) => {
-            if (entity[key] !== undefined) {
-              // Cast key to string to use it as an object key.
-              criteria[key as string] = entity[key];
-            }
-            return criteria;
-          }, {} as Record<string, unknown>);
-
-
-      if (Object.keys(filterCriteria).length === 0) {
-        throw new Error(
-            "Filtering criteria (WHERE clause) must be provided either via the 'where' parameter or through non-updated entity fields"
-        );
-      }
-      queryBuilder.where(filterCriteria);
+    if (!where) {
+      throw new Error("WHERE conditions must be provided");
     }
 
-    if (this.options?.logRawSqlQuery) {
-      console.debug("UPDATE SQL (updateFields): " + queryBuilder.toSQL().sql);
-    }
-
-    // Execute the update query.
-    const sqlQuery = queryBuilder.toQuery();
-    const updateQueryResponse = await this.forgeOperations.fetch().executeRawUpdateSQL(sqlQuery);
-    return updateQueryResponse.affectedRows;
-  }
-
-
-  /**
-   * Updates specific fields of a record identified by its primary key.
-   * If a version field exists in the schema, versioning is applied.
-   *
-   * @param entity - The entity with updated values.
-   * @param fields - The list of field names to update.
-   * @param schema - The entity schema.
-   * @throws If the primary key is not included in the update fields.
-   */
-  async updateFieldById<T extends object>(
-      entity: T,
-      fields: EntityKey<T>[],
-      schema: EntitySchema<T>,
-  ): Promise<void> {
-    const primaryKeys = this.getPrimaryKeys(schema);
-    primaryKeys.forEach((pk) => {
-      if (!fields.includes(pk.name)) {
-        throw new Error("Update fields must include primary key: " + pk.name);
-      }
-    });
-
-    // Prepare updated entity and query builder.
-    const updatedEntity = this.filterEntityFields(entity, fields);
-    let queryBuilder = this.forgeOperations.createQueryBuilder(schema.meta.class).getKnexQuery();
-    const versionField = this.getVersionField(schema);
-    const useVersion = Boolean(versionField);
-    let updateModel = { ...updatedEntity };
-
-    if (useVersion && versionField) {
-      // If the version field is missing from the entity, load the old record.
-      let oldModel = entity;
-      if (entity[versionField.name] === undefined || entity[versionField.name] === null) {
-        oldModel = await this.getOldModel(primaryKeys, entity, schema, versionField);
-      }
-      const primaryFieldNames = primaryKeys.map((pk) => pk.name);
-      const fieldsToRetain = primaryFieldNames.concat(versionField.name);
-      const fromEntries = Object.fromEntries(fieldsToRetain.map((key) => [key, oldModel[key]]));
-      updateModel = { ...updatedEntity, ...fromEntries };
-
-      // Increment the version field.
-      this.incrementVersionField(versionField, updateModel as T);
-
-      updateModel = this.modifyModel(updateModel as T, schema);
-      queryBuilder.update(updateModel as T);
-      if (oldModel[versionField.name]!==undefined || oldModel[versionField.name]!==null && this.isValid(oldModel[versionField.name])) {
-        queryBuilder.andWhere(this.optWhere(oldModel, versionField));
-      }
-    } else {
-      updateModel = this.modifyModel(updatedEntity as T, schema);
-      queryBuilder.update(updateModel as T);
-    }
-
-    this.addPrimaryWhere(queryBuilder as unknown as Knex.QueryBuilder<any, any>, primaryKeys, updateModel as T);
-    const sqlQuery = queryBuilder.toQuery();
-
-    if (this.options?.logRawSqlQuery) {
-      console.debug("UPDATE SQL: " + queryBuilder.toSQL().sql);
-    }
-    const updateQueryResponse = await this.forgeOperations.fetch().executeRawUpdateSQL(sqlQuery);
-    if (versionField && !updateQueryResponse.affectedRows) {
-      throw new Error(
-          "Optimistic locking failed: the record with primary key(s) " +
-          primaryKeys.map((p) => updateModel[p.name]).join(", ") +
-          " has been modified by another process.",
-      );
-    }
-  }
-
-  /**
-   * Constructs an optional WHERE clause for the version field.
-   *
-   * @param updateModel - The model containing the current version field value.
-   * @param versionField - The version field property.
-   * @returns A filter query for the version field.
-   */
-  private optWhere<T>(
-      updateModel: T,
-      versionField: EntityProperty<T>,
-  ): QBFilterQuery<unknown> {
-    const currentVersionValue = transformValue(
-        { value: updateModel[versionField.name], type: versionField.type },
-        false,
-    );
-    return { [versionField.name]: currentVersionValue };
-  }
-
-  /**
-   * Retrieves the current state of a record from the database.
-   *
-   * @param primaryKeys - The primary key properties.
-   * @param entity - The entity with updated values.
-   * @param schema - The entity schema.
-   * @param versionField - The version field property.
-   * @returns The existing record from the database.
-   * @throws If the record does not exist or if multiple records are found.
-   */
-  private async getOldModel<T>(
-      primaryKeys: EntityProperty<T, unknown>[],
-      entity: T,
-      schema: EntitySchema<T>,
-      versionField: EntityProperty<T>,
-  ): Promise<T> {
-    const primaryFieldNames = primaryKeys.map((pk) => pk.name);
-    const fieldsToSelect = primaryFieldNames.concat(versionField.name);
     const queryBuilder = this.forgeOperations
-        .createQueryBuilder(schema as EntitySchema)
-        .select(fieldsToSelect);
-    this.addPrimaryWhere(queryBuilder, primaryKeys, entity);
-    const formattedQuery = queryBuilder.getFormattedQuery();
-    const models: T[] = await this.forgeOperations.fetch().executeSchemaSQL(formattedQuery, schema as EntitySchema);
+      .getDrizzleQueryBuilder()
+      .update(schema)
+      .set(updateData)
+      .where(where);
 
-    if (!models || models.length === 0) {
-      throw new Error(`Cannot modify record because it does not exist in table ${schema.meta.tableName}`);
+    if (this.options?.logRawSqlQuery) {
+      console.debug("UPDATE SQL:", queryBuilder.toSQL().sql);
     }
-    if (models.length > 1) {
-      throw new Error(
-          `Cannot modify record because multiple rows with the same ID were found in table ${schema.meta.tableName}. Please verify the table metadata.`,
+
+    const result = await this.forgeOperations
+      .fetch()
+      .executeRawUpdateSQL(queryBuilder.toSQL().sql, queryBuilder.toSQL().params);
+
+    return result.affectedRows;
+  }
+
+  // Helper methods
+
+  /**
+   * Gets primary keys from the schema.
+   * @template T - The type of the table schema
+   * @param {T} schema - The table schema
+   * @returns {[string, AnyColumn][]} Array of primary key name and column pairs
+   * @throws {Error} If no primary keys are found
+   */
+  private getPrimaryKeys<T extends AnyMySqlTable>(schema: T): [string, AnyColumn][] {
+    const primaryKeys = getPrimaryKeys(schema);
+    if (!primaryKeys) {
+      throw new Error(`No primary keys found for schema: ${schema}`);
+    }
+
+    return primaryKeys;
+  }
+
+  /**
+   * Validates and retrieves version field metadata.
+   * @param {string} tableName - The name of the table
+   * @param {Record<string, AnyColumn>} columns - The table columns
+   * @returns {Object | undefined} Version field metadata if valid, undefined otherwise
+   */
+  private validateVersionField(
+    tableName: string,
+    columns: Record<string, AnyColumn>,
+  ): { fieldName: string; type: string } | undefined {
+    if (this.options.disableOptimisticLocking) {
+      return undefined;
+    }
+    const versionMetadata = this.options.additionalMetadata?.[tableName]?.versionField;
+    if (!versionMetadata) return undefined;
+
+    const versionField = columns[versionMetadata.fieldName];
+    if (!versionField) {
+      console.warn(
+        `Version field "${versionMetadata.fieldName}" not found in table ${tableName}. Versioning will be skipped.`,
       );
+      return undefined;
     }
-    return models[0];
+
+    if (!versionField.notNull) {
+      console.warn(
+        `Version field "${versionMetadata.fieldName}" in table ${tableName} is nullable. Versioning may not work correctly.`,
+      );
+      return undefined;
+    }
+
+    const fieldType = versionField.getSQLType();
+    const isSupportedType =
+      fieldType === "datetime" ||
+      fieldType === "timestamp" ||
+      fieldType === "int" ||
+      fieldType === "number" ||
+      fieldType === "decimal";
+
+    if (!isSupportedType) {
+      console.warn(
+        `Version field "${versionMetadata.fieldName}" in table ${tableName} has unsupported type "${fieldType}". ` +
+          `Only datetime, timestamp, int, and decimal types are supported for versioning. Versioning will be skipped.`,
+      );
+      return undefined;
+    }
+
+    return { fieldName: versionMetadata.fieldName, type: fieldType };
   }
 
   /**
-   * Adds primary key conditions to the query builder.
-   *
-   * @param queryBuilder - The Knex query builder instance.
-   * @param primaryKeys - The primary key properties.
-   * @param entity - The entity containing primary key values.
-   * @throws If any primary key value is missing.
+   * Gets the current version of an entity.
+   * @template T - The type of the table schema
+   * @param {Partial<InferInsertModel<T>>} entity - The entity
+   * @param {string} primaryKeyName - The name of the primary key
+   * @param {Object | undefined} versionMetadata - Version field metadata
+   * @param {Record<string, AnyColumn>} columns - The table columns
+   * @param {T} schema - The table schema
+   * @returns {Promise<unknown>} The current version value
    */
-  private addPrimaryWhere<T>(
-      queryBuilder: Knex.QueryBuilder<any, any>,
-      primaryKeys: EntityProperty<T, unknown>[],
-      entity: T,
-  ) {
-    primaryKeys.forEach((pk) => {
-      const fieldName = this.getRealFieldNameFromSchema(pk);
-      const value = entity[fieldName];
-      if (value === null || value === undefined) {
-        throw new Error(`Primary key ${fieldName} must exist in the model`);
+  private async getCurrentVersion<T extends AnyMySqlTable>(
+    entity: Partial<InferInsertModel<T>>,
+    primaryKeyName: string,
+    versionMetadata: { fieldName: string; type: string } | undefined,
+    columns: Record<string, AnyColumn>,
+    schema: T,
+  ): Promise<unknown> {
+    if (!versionMetadata || !columns) return undefined;
+
+    const versionField = columns[versionMetadata.fieldName];
+    if (!versionField) return undefined;
+
+    if (versionMetadata.fieldName in entity) {
+      return entity[versionMetadata.fieldName as keyof typeof entity];
+    }
+
+    const oldModel = await this.getOldModel(
+      { [primaryKeyName]: entity[primaryKeyName as keyof typeof entity] },
+      schema,
+      [versionMetadata.fieldName, versionField],
+    );
+
+    return (oldModel as any)[versionMetadata.fieldName];
+  }
+
+  /**
+   * Prepares a model for insertion with version field.
+   * @template T - The type of the table schema
+   * @param {Partial<InferInsertModel<T>>} model - The model to prepare
+   * @param {Object | undefined} versionMetadata - Version field metadata
+   * @param {Record<string, AnyColumn>} columns - The table columns
+   * @returns {InferInsertModel<T>} The prepared model
+   */
+  private prepareModelWithVersion<T extends AnyMySqlTable>(
+    model: Partial<InferInsertModel<T>>,
+    versionMetadata: { fieldName: string; type: string } | undefined,
+    columns: Record<string, AnyColumn>,
+  ): InferInsertModel<T> {
+    if (!versionMetadata || !columns) return model as InferInsertModel<T>;
+
+    const versionField = columns[versionMetadata.fieldName];
+    if (!versionField) return model as InferInsertModel<T>;
+
+    const modelWithVersion = { ...model };
+    const fieldType = versionField.getSQLType();
+    const versionValue = fieldType === "datetime" || fieldType === "timestamp" ? new Date() : 1;
+    modelWithVersion[versionMetadata.fieldName as keyof typeof modelWithVersion] =
+      versionValue as any;
+
+    return modelWithVersion as InferInsertModel<T>;
+  }
+
+  /**
+   * Prepares update data with version field.
+   * @template T - The type of the table schema
+   * @param {Partial<InferInsertModel<T>>} entity - The entity to update
+   * @param {Object | undefined} versionMetadata - Version field metadata
+   * @param {Record<string, AnyColumn>} columns - The table columns
+   * @param {unknown} currentVersion - The current version value
+   * @returns {Partial<InferInsertModel<T>>} The prepared update data
+   */
+  private prepareUpdateData<T extends AnyMySqlTable>(
+    entity: Partial<InferInsertModel<T>>,
+    versionMetadata: { fieldName: string; type: string } | undefined,
+    columns: Record<string, AnyColumn>,
+    currentVersion: unknown,
+  ): Partial<InferInsertModel<T>> {
+    const updateData = { ...entity };
+
+    if (versionMetadata && columns) {
+      const versionField = columns[versionMetadata.fieldName];
+      if (versionField) {
+        const fieldType = versionField.getSQLType();
+        updateData[versionMetadata.fieldName as keyof typeof updateData] =
+          fieldType === "datetime" || fieldType === "timestamp"
+            ? new Date()
+            : (((currentVersion as number) + 1) as any);
       }
-      queryBuilder.andWhere({ [fieldName]: value });
-    });
-  }
-
-  /**
-   * Filters the entity to include only the specified fields.
-   *
-   * @param entity - The original entity.
-   * @param fields - The list of fields to retain.
-   * @returns A partial entity object containing only the specified fields.
-   */
-  filterEntityFields = <T extends object>(entity: T, fields: (keyof T)[]): Partial<T> =>
-      fields.reduce((result, field) => {
-        if (field in entity) {
-          result[field] = entity[field];
-        }
-        return result;
-      }, {} as Partial<T>);
-
-  /**
-   * Transforms and modifies the updated entity model based on the schema.
-   *
-   * @param updatedEntity - The updated entity.
-   * @param schema - The entity schema.
-   * @returns The modified entity.
-   */
-  private modifyModel<T>(updatedEntity: T, schema: EntitySchema<T>): T {
-    const modifiedModel: Record<string, any> = {};
-    schema.meta.props
-        .filter((p) => p.kind === "scalar")
-        .forEach((p) => {
-          const value = updatedEntity[p.name];
-          if (value !== undefined && value !== null) {
-            const fieldName = this.getRealFieldNameFromSchema(p);
-            modifiedModel[fieldName] = transformValue({ value, type: p.type }, false);
-          }
-        });
-    return modifiedModel as T;
-  }
-
-  /**
-   * Returns the real field name from the entity property based on the schema.
-   *
-   * @param p - The entity property.
-   * @returns The real field name.
-   */
-  private getRealFieldNameFromSchema<T>(p: EntityProperty<T>): EntityKey<T> {
-    return p.fieldNames && p.fieldNames.length
-        ? (p.fieldNames[0] as EntityKey<T>)
-        : p.name;
-  }
-
-  /**
-   * Validates the provided value.
-   *
-   * @param value - The value to validate.
-   * @returns True if the value is valid, false otherwise.
-   */
-  isValid(value: any): boolean {
-    if (value instanceof Date) {
-      return !isNaN(value.getTime());
     }
-    return true;
+
+    return updateData;
+  }
+
+  /**
+   * Retrieves an existing model by primary key.
+   * @template T - The type of the table schema
+   * @param {Record<string, unknown>} primaryKeyValues - The primary key values
+   * @param {T} schema - The table schema
+   * @param {[string, AnyColumn]} versionField - The version field name and column
+   * @returns {Promise<Awaited<T> extends Array<any> ? Awaited<T>[number] | undefined : Awaited<T> | undefined>} The existing model
+   * @throws {Error} If the record is not found
+   */
+  private async getOldModel<T extends AnyMySqlTable>(
+    primaryKeyValues: Record<string, unknown>,
+    schema: T,
+    versionField: [string, AnyColumn],
+  ): Promise<
+    Awaited<T> extends Array<any> ? Awaited<T>[number] | undefined : Awaited<T> | undefined
+  > {
+    const [versionFieldName, versionFieldColumn] = versionField;
+    const primaryKeys = this.getPrimaryKeys(schema);
+    const [primaryKeyName, primaryKeyColumn] = primaryKeys[0];
+
+    const resultQuery = this.forgeOperations
+      .getDrizzleQueryBuilder()
+      .select({
+        [primaryKeyName]: primaryKeyColumn as any,
+        [versionFieldName]: versionFieldColumn as any,
+      })
+      .from(schema)
+      .where(eq(primaryKeyColumn, primaryKeyValues[primaryKeyName]));
+
+    const model = await this.forgeOperations.fetch().executeQueryOnlyOne(resultQuery);
+
+    if (!model) {
+      throw new Error(`Record not found in table ${schema}`);
+    }
+
+    return model as Awaited<T> extends Array<any> ? Awaited<T>[number] : Awaited<T>;
   }
 }

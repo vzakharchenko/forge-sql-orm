@@ -2,93 +2,61 @@ import Resolver from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
 import { migrationRunner, sql } from "@forge/sql";
 import migration from "./migration";
-import ENTITIES from "./entities";
-import { Users, UsersSchema } from "./entities/Users";
-import { QueryOrder } from "@mikro-orm/core";
 import { DuplicateResponse, UserResponse, SortType } from "./utils/Constants";
-import { Knex } from "@mikro-orm/mysql";
-import {getValueByAlias, getValueBySchemaType} from "../../../src/utils/sqlUtils";
+import { asc, desc, InferInsertModel, sql as rawSql } from "drizzle-orm";
+import { users } from "./entities";
+import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
 
 const resolver = new Resolver();
-const forgeSQL = new ForgeSQL(ENTITIES, {logRawSqlQuery:true});
+const forgeSQL = new ForgeSQL({ logRawSqlQuery: true });
 
 resolver.define("create", async (req): Promise<number> => {
-  const payload = req.payload.data as Users;
-  console.log('payload='+JSON.stringify(payload))
-  return await forgeSQL.crud().insert(UsersSchema, [payload]);
+  const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
+  return await forgeSQL.crud().insert(users, [payload]);
 });
 
 resolver.define("delete", async (req): Promise<number> => {
   const id = req.payload.id as number;
-  return await forgeSQL.crud().deleteById(id, UsersSchema);
+  return await forgeSQL.crud().deleteById(id, users);
 });
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
-  const fields: string[] = ["name", "email"];
-
-  const sortType = req.payload.sortType as SortType | undefined;
-
-  const selectFields: Array<string | Knex.Raw> = [
-    ...fields,
-    forgeSQL.getKnex().raw("COUNT(*) as count"),
-  ];
-  let query;
-  let selectQueryBuilder = forgeSQL
-    .createQueryBuilder(UsersSchema)
-    .select(selectFields as unknown as string[])
-    .groupBy(fields)
-    .having("COUNT(*) > 1");
-
-  if (sortType?.name) {
-    const currentSort =
-      sortType.sortType === "ASC" ? QueryOrder.ASC_NULLS_FIRST : QueryOrder.DESC_NULLS_LAST;
-    if (sortType?.name === "count") {
-      const orderDirection = sortType.sortType === "ASC" ? "ASC" : "DESC";
-      query = selectQueryBuilder.getKnexQuery().orderByRaw(`count ${orderDirection}`).toSQL().sql;
-    } else {
-      const orderBy: Record<string, QueryOrder> = {
-        [sortType.name]: currentSort,
-      };
-      query = selectQueryBuilder.orderBy(orderBy).getFormattedQuery();
-    }
-  } else {
-    query = selectQueryBuilder.getFormattedQuery();
-  }
-
-  const complexQuerySchema = forgeSQL.fetch().createComplexQuerySchema();
-  complexQuerySchema.addField(UsersSchema.meta.properties.name)
-  complexQuerySchema.addField(UsersSchema.meta.properties.email)
-  complexQuerySchema.addField({name: 'count', type: "integer" })
-  // select `u0`.`name`, COUNT(*) as count from `users` as `u0` group by `u0`.`name` having (COUNT(*) > 1)
-  const duplicateResult = await forgeSQL
-    .fetch()
-    .executeSchemaSQL(query, complexQuerySchema.createSchema());
+  const duplicateResult = await forgeSQL.fetch().executeQuery(
+    forgeSQL
+      .getDrizzleQueryBuilder()
+      .select({
+        name: users.name,
+        email: users.email,
+        count: rawSql`COUNT(*) as \`count\``,
+      })
+      .from(users)
+      .groupBy(users.name, users.email)
+      .having(rawSql`COUNT(*) > 1`),
+  );
 
   return duplicateResult.map(
     (d): DuplicateResponse => ({
-      count: getValueByAlias(d, 'count') as number,
-      name: getValueBySchemaType(d, UsersSchema.meta.properties.name) as string,
-      email: getValueBySchemaType(d, UsersSchema.meta.properties.email) as string,
+      count: d.count as number,
+      name: d.name as string,
+      email: d.email as string,
     }),
   );
 });
 
 resolver.define("fetch", async (req): Promise<UserResponse[]> => {
   const sortType = req.payload.sortType as SortType | undefined;
+  const baseQuery = forgeSQL.getDrizzleQueryBuilder().select().from(users);
 
-  let select = forgeSQL.createQueryBuilder(UsersSchema).select("*");
+  // Apply sorting if specified
+  const query = sortType?.name
+    ? baseQuery.orderBy(
+        sortType.sortType === "ASC"
+          ? asc(users[sortType.name as keyof typeof users] as MySqlColumn)
+          : desc(users[sortType.name as keyof typeof users] as MySqlColumn),
+      )
+    : baseQuery;
 
-  if (sortType?.name) {
-    const orderBy: Record<string, QueryOrder> = {
-      [sortType.name]:
-        sortType.sortType === "ASC" ? QueryOrder.ASC_NULLS_FIRST : QueryOrder.DESC_NULLS_LAST,
-    };
-    select = select.orderBy(orderBy);
-  }
-
-  const query = select.getFormattedQuery();
-  const result = await forgeSQL.fetch().executeSchemaSQL<Users>(query, UsersSchema);
-
+  const result = await forgeSQL.fetch().executeQuery(query);
   return result.map(
     (r): UserResponse => ({
       id: r.id,

@@ -61,7 +61,6 @@ This example allows you to:
 3. You can update user details.
 4. You can delete a user.
 
-
 ### Notes
 
 - Use `forge deploy` to persist code changes.

@@ -1,8 +1,3 @@
-import type { EntityName, LoggingOptions } from "..";
-import type { EntitySchema } from "@mikro-orm/core/metadata/EntitySchema";
-import type { AnyEntity, EntityClass, EntityClassGroup } from "@mikro-orm/core/typings";
-import type { QueryBuilder } from "@mikro-orm/knex/query";
-import { MemoryCacheAdapter, MikroORM, NullCacheAdapter } from "@mikro-orm/mysql";
 import { ForgeSQLCrudOperations } from "./ForgeSQLCrudOperations";
 import {
   CRUDForgeSQL,
@@ -11,52 +6,36 @@ import {
   SchemaSqlForgeSql,
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
-import type { Knex } from "knex";
+import { drizzle } from "drizzle-orm/mysql2";
+import { MySql2Database } from "drizzle-orm/mysql2/driver";
 
 /**
- * Implementation of ForgeSQLORM that interacts with MikroORM.
+ * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
+ * This class provides a bridge between Forge SQL and Drizzle ORM, allowing
+ * to use Drizzle's query builder while executing queries through Forge SQL.
  */
 class ForgeSQLORMImpl implements ForgeSqlOperation {
   private static instance: ForgeSQLORMImpl | null = null;
-  private readonly mikroORM: MikroORM;
+  private readonly drizzle: MySql2Database<Record<string, unknown>>;
   private readonly crudOperations: CRUDForgeSQL;
   private readonly fetchOperations: SchemaSqlForgeSql;
 
   /**
    * Private constructor to enforce singleton behavior.
-   * @param entities - The list of entities for ORM initialization.
    * @param options - Options for configuring ForgeSQL ORM behavior.
    */
-  private constructor(
-    entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
-    options?: ForgeSqlOrmOptions,
-  ) {
-
+  private constructor(options?: ForgeSqlOrmOptions) {
     try {
-      const newOptions: ForgeSqlOrmOptions = options ?? { logRawSqlQuery: false, disableOptimisticLocking: false };
-      if (newOptions.logRawSqlQuery){
+      const newOptions: ForgeSqlOrmOptions = options ?? {
+        logRawSqlQuery: false,
+        disableOptimisticLocking: false,
+      };
+      if (newOptions.logRawSqlQuery) {
         console.debug("Initializing ForgeSQLORM...");
       }
-      this.mikroORM = MikroORM.initSync({
-        dbName: "inmemory",
-        schemaGenerator: {
-          disableForeignKeys: false,
-        },
-        discovery: {
-          warnWhenNoEntities: true,
-        },
-        resultCache: {
-          adapter: NullCacheAdapter,
-        },
-        metadataCache: {
-          enabled: false,
-          adapter: MemoryCacheAdapter,
-        },
-        entities: entities,
-        preferTs: false,
-        debug: false,
-      });
-
+      // Initialize Drizzle instance for query building only
+      // This instance should not be used for direct database connections
+      this.drizzle = drizzle("");
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
@@ -67,16 +46,12 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
 
   /**
    * Returns the singleton instance of ForgeSQLORMImpl.
-   * @param entities - List of entities (required only on first initialization).
    * @param options - Options for configuring ForgeSQL ORM behavior.
    * @returns The singleton instance of ForgeSQLORMImpl.
    */
-  static getInstance(
-    entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
-    options?: ForgeSqlOrmOptions,
-  ): ForgeSqlOperation {
+  static getInstance(options?: ForgeSqlOrmOptions): ForgeSqlOperation {
     if (!ForgeSQLORMImpl.instance) {
-      ForgeSQLORMImpl.instance = new ForgeSQLORMImpl(entities, options);
+      ForgeSQLORMImpl.instance = new ForgeSQLORMImpl(options);
     }
     return ForgeSQLORMImpl.instance;
   }
@@ -98,41 +73,28 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   }
 
   /**
-   * Creates a new query builder for the given entity.
-   * @param entityName - The entity name or an existing query builder.
-   * @param alias - The alias for the entity.
-   * @param loggerContext - Logging options.
-   * @returns The query builder instance.
+   * Returns a Drizzle query builder instance.
+   *
+   * ⚠️ IMPORTANT: This method should be used ONLY for query building purposes.
+   * The returned instance should NOT be used for direct database connections or query execution.
+   * All database operations should be performed through Forge SQL's executeRawSQL or executeRawUpdateSQL methods.
+   *
+   * @returns A Drizzle query builder instance for query construction only.
    */
-  createQueryBuilder<Entity extends object, RootAlias extends string = never>(
-    entityName: EntityName<Entity> | QueryBuilder<Entity>,
-    alias?: RootAlias,
-    loggerContext?: LoggingOptions,
-  ): QueryBuilder<Entity, RootAlias> {
-    return this.mikroORM.em.createQueryBuilder(entityName, alias, undefined, loggerContext);
-  }
-
-  /**
-   * Provides access to the underlying Knex instance for building complex query parts.
-   * enabling advanced query customization and performance tuning.
-   * @returns The Knex instance, which can be used for query building.
-   */
-  getKnex(): Knex<any, any[]> {
-    return this.mikroORM.em.getKnex();
+  getDrizzleQueryBuilder(): MySql2Database<Record<string, unknown>> {
+    return this.drizzle;
   }
 }
 
 /**
  * Public class that acts as a wrapper around the private ForgeSQLORMImpl.
+ * Provides a clean interface for working with Forge SQL and Drizzle ORM.
  */
 class ForgeSQLORM {
   private readonly ormInstance: ForgeSqlOperation;
 
-  constructor(
-    entities: (EntityClass<AnyEntity> | EntityClassGroup<AnyEntity> | EntitySchema)[],
-    options?: ForgeSqlOrmOptions,
-  ) {
-    this.ormInstance = ForgeSQLORMImpl.getInstance(entities, options);
+  constructor(options?: ForgeSqlOrmOptions) {
+    this.ormInstance = ForgeSQLORMImpl.getInstance(options);
   }
 
   /**
@@ -151,20 +113,17 @@ class ForgeSQLORM {
     return this.ormInstance.fetch();
   }
 
-  getKnex(): Knex<any, any[]> {
-    return this.ormInstance.getKnex();
-  }
-
   /**
-   * Proxies the `createQueryBuilder` method from `ForgeSQLORMImpl`.
-   * @returns A new query builder instance.
+   * Returns a Drizzle query builder instance.
+   *
+   * ⚠️ IMPORTANT: This method should be used ONLY for query building purposes.
+   * The returned instance should NOT be used for direct database connections or query execution.
+   * All database operations should be performed through Forge SQL's executeRawSQL or executeRawUpdateSQL methods.
+   *
+   * @returns A Drizzle query builder instance for query construction only.
    */
-  createQueryBuilder<Entity extends object, RootAlias extends string = never>(
-    entityName: EntityName<Entity> | QueryBuilder<Entity>,
-    alias?: RootAlias,
-    loggerContext?: LoggingOptions,
-  ): QueryBuilder<Entity, RootAlias> {
-    return this.ormInstance.createQueryBuilder(entityName, alias, loggerContext);
+  getDrizzleQueryBuilder(): MySql2Database<Record<string, unknown>> {
+    return this.ormInstance.getDrizzleQueryBuilder();
   }
 }
 

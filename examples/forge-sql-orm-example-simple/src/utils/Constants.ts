@@ -1,7 +1,7 @@
 export interface UserResponse {
   id: number;
-  name?: string;
-  email?: string;
+  name?: string | null;
+  email?: string | null;
 }
 
 export interface DuplicateResponse {
