@@ -1,9 +1,29 @@
 import "reflect-metadata";
 import fs from "fs";
 import path from "path";
-import { MikroORM } from "@mikro-orm/mysql";
+
 import { execSync } from "child_process";
-import { rmSync } from "fs";
+
+/**
+ * Loads the current migration version from `migrationCount.ts`.
+ * @param migrationPath - Path to the migration folder.
+ * @returns The latest migration version.
+ */
+const loadMigrationVersion = async (migrationPath: string): Promise<number> => {
+  try {
+    const migrationCountFilePath = path.resolve(path.join(migrationPath, "migrationCount.ts"));
+    if (!fs.existsSync(migrationCountFilePath)) {
+      return 0;
+    }
+
+    const { MIGRATION_VERSION } = await import(migrationCountFilePath);
+    console.log(`✅ Current migration version: ${MIGRATION_VERSION}`);
+    return MIGRATION_VERSION as number;
+  } catch (error) {
+    console.error(`❌ Error loading migrationCount:`, error);
+    process.exit(1);
+  }
+};
 
 /**
  * Cleans SQL statements by removing unnecessary database options.
@@ -40,7 +60,7 @@ function generateMigrationFile(createStatements: string[], version: number): str
   const migrationLines = createStatements
     .map(
       (stmt, index) =>
-        `        .enqueue("${versionPrefix}${index}", \"${cleanSQLStatement(stmt)}\")`, // eslint-disable-line no-useless-escape
+        `        .enqueue("${versionPrefix}${index}", "${cleanSQLStatement(stmt).replace(/\s+/g, ' ')}")`, // eslint-disable-line no-useless-escape
     )
     .join("\n");
 
@@ -107,57 +127,20 @@ export default async (
  * @returns Filtered list of SQL statements.
  */
 const extractCreateStatements = (schema: string): string[] => {
-  const statements = schema.split(";").map((s) => s.trim());
+  // Split by statement-breakpoint and semicolon
+  const statements = schema
+    .split(/--> statement-breakpoint|;/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
 
   return statements.filter(
     (stmt) =>
-      stmt.startsWith("create table") ||
-      (stmt.startsWith("alter table") && (stmt.includes("add index") || stmt.includes("add constraint"))) ||
-      stmt.startsWith("primary"),
+      stmt.toLowerCase().startsWith("create table") ||
+      stmt.toLowerCase().startsWith("alter table") ||
+        stmt.toLowerCase().includes("add index") ||
+        stmt.toLowerCase().includes("add unique index") ||
+         stmt.toLowerCase().includes("add constraint")
   );
-};
-
-/**
- * Dynamically loads `entities` from `index.ts` in the specified directory.
- * @param entitiesPath - Path to the directory containing `index.ts`.
- * @returns Array of entity classes.
- */
-const loadEntities = async (entitiesPath: string) => {
-  try {
-    const indexFilePath = path.resolve(path.join(entitiesPath, "index.ts"));
-    if (!fs.existsSync(indexFilePath)) {
-      console.error(`❌ Error: index.ts not found in ${indexFilePath}`);
-      process.exit(1);
-    }
-
-    const { default: entities } = await import(indexFilePath);
-    console.log(`✅ Loaded ${entities.length} entities from ${entitiesPath}`);
-    return entities;
-  } catch (error) {
-    console.error(`❌ Error loading index.ts from ${entitiesPath}:`, error);
-    process.exit(1);
-  }
-};
-
-/**
- * Loads the current migration version from `migrationCount.ts`.
- * @param migrationPath - Path to the migration folder.
- * @returns The latest migration version.
- */
-const loadMigrationVersion = async (migrationPath: string): Promise<number> => {
-  try {
-    const migrationCountFilePath = path.resolve(path.join(migrationPath, "migrationCount.ts"));
-    if (!fs.existsSync(migrationCountFilePath)) {
-      return 0;
-    }
-
-    const { MIGRATION_VERSION } = await import(migrationCountFilePath);
-    console.log(`✅ Current migration version: ${MIGRATION_VERSION}`);
-    return MIGRATION_VERSION as number;
-  } catch (error) {
-    console.error(`❌ Error loading migrationCount:`, error);
-    process.exit(1);
-  }
 };
 
 /**
@@ -179,28 +162,28 @@ export const createMigration = async (options: any) => {
 
     // Start from version 1 if no previous migrations exist
     version = 1;
+    // Generate SQL using drizzle-kit
+    await execSync(
+      `npx drizzle-kit generate --name=init --dialect mysql --out ${options.output} --schema ${options.entitiesPath}`,
+      { encoding: 'utf-8' }
+    );
+    const initSqlFile = path.join(options.output, '0000_init.sql');
+    const sql = fs.readFileSync(initSqlFile, 'utf-8');
 
-    // Load entities dynamically from index.ts
-    const entities = await loadEntities(options.entitiesPath);
-
-    // Initialize MikroORM
-    const orm = MikroORM.initSync({
-      host: options.host,
-      port: options.port,
-      user: options.user,
-      password: options.password,
-      dbName: options.dbName,
-      entities: entities,
-    });
-
-    // Generate SQL schema
-    const createSchemaSQL = await orm.schema.getCreateSchemaSQL({ wrap: true });
-    const statements = extractCreateStatements(createSchemaSQL);
+    // Extract and clean statements
+    const createStatements = extractCreateStatements(sql);
 
     // Generate and save migration files
-    const migrationFile = generateMigrationFile(statements, version);
-    saveMigrationFiles(migrationFile, version, options.output);
+    const migrationFile = generateMigrationFile(createStatements, 1);
+    saveMigrationFiles(migrationFile, 1, options.output);
 
+
+      fs.rmSync(initSqlFile, { force: true });
+      console.log(`✅ Removed SQL file: ${initSqlFile}`);
+    // Remove meta directory after processing
+    let metaDir =  path.join(options.output, 'meta');
+    fs.rmSync(metaDir, { recursive: true, force: true });
+    console.log(`✅ Removed: ${metaDir}`);
     console.log(`✅ Migration successfully created!`);
     process.exit(0);
   } catch (error) {

@@ -1,9 +1,38 @@
 import "reflect-metadata";
 import fs from "fs";
 import path from "path";
-import { MikroORM } from "@mikro-orm/mysql";
-import { execSync } from "child_process";
-import { rmSync } from "fs";
+import { MySqlTable, TableConfig } from "drizzle-orm/mysql-core";
+
+interface DrizzleColumn {
+  type: string;
+  notNull: boolean;
+  autoincrement?: boolean;
+  columnType?: any;
+  name: string;
+  getSQLType: () => string;
+}
+
+interface DrizzleSchema {
+  [tableName: string]: {
+    columns: {
+      [columnName: string]: DrizzleColumn;
+    };
+    indexes: {
+      [indexName: string]: {
+        columns: string[];
+        unique: boolean;
+      };
+    };
+    foreignKeys: {
+      [fkName: string]: {
+        column: string;
+        referencedTable: string;
+        referencedColumn: string;
+        getName: () => string;
+      };
+    };
+  };
+}
 
 /**
  * Generates a migration ID using current date
@@ -13,16 +42,6 @@ function generateMigrationUUID(version:number): string {
   const now = new Date();
   const timestamp = now.getTime();
   return `MIGRATION_V${version}_${timestamp}`;
-}
-
-/**
- * Cleans SQL statements by removing unnecessary database options.
- * @param sql - The raw SQL statement.
- * @returns The cleaned SQL statement.
- */
-function cleanSQLStatement(sql: string): string {
-  // Remove unnecessary database options
-  return sql.replace(/\s+default\s+character\s+set\s+utf8mb4\s+engine\s*=\s*InnoDB;?/gi, "").trim();
 }
 
 /**
@@ -37,20 +56,16 @@ function generateMigrationFile(createStatements: string[], version: number): str
   const migrationLines = createStatements
     .map(
       (stmt, index) =>
-        `        .enqueue("${uniqId}_${index}", \"${cleanSQLStatement(stmt)}\")`, // eslint-disable-line no-useless-escape
+        `        .enqueue("${uniqId}_${index}", \"${stmt}\")`, // eslint-disable-line no-useless-escape
     )
     .join("\n");
-
-  // Add migration to clear migrations table
-  const clearMigrationsLine = `        .enqueue("${uniqId}", "DELETE FROM __migrations")`;
 
   // Migration template
   return `import { MigrationRunner } from "@forge/sql/out/migration";
 
 export default (migrationRunner: MigrationRunner): MigrationRunner => {
     return migrationRunner
-${migrationLines}
-${clearMigrationsLine};
+${migrationLines};
 };`;
 }
 
@@ -103,89 +118,85 @@ export default async (
 }
 
 /**
- * Extracts only the relevant SQL statements for migration.
- * @param schema - The full database schema as SQL.
- * @returns Filtered list of SQL statements.
- */
-const extractDropStatements = (schema: string): string[] => {
-  const statements = schema.split(";").map((s) => s.trim());
-  return statements.filter((s)=>{
-    return s.toLowerCase().startsWith("drop");
-  });
-};
-
-/**
- * Dynamically loads `entities` from `index.ts` in the specified directory.
- * @param entitiesPath - Path to the directory containing `index.ts`.
- * @returns Array of entity classes.
- */
-const loadEntities = async (entitiesPath: string) => {
-  try {
-    const indexFilePath = path.resolve(path.join(entitiesPath, "index.ts"));
-    if (!fs.existsSync(indexFilePath)) {
-      console.error(`❌ Error: index.ts not found in ${indexFilePath}`);
-      process.exit(1);
-    }
-
-    const { default: entities } = await import(indexFilePath);
-    console.log(`✅ Loaded ${entities.length} entities from ${entitiesPath}`);
-    return entities;
-  } catch (error) {
-    console.error(`❌ Error loading index.ts from ${entitiesPath}:`, error);
-    process.exit(1);
-  }
-};
-
-/**
- * Loads the current migration version from `migrationCount.ts`.
- * @param migrationPath - Path to the migration folder.
- * @returns The latest migration version.
- */
-const loadMigrationVersion = async (migrationPath: string): Promise<number> => {
-  try {
-    const migrationCountFilePath = path.resolve(path.join(migrationPath, "migrationCount.ts"));
-    if (!fs.existsSync(migrationCountFilePath)) {
-      return 0;
-    }
-
-    const { MIGRATION_VERSION } = await import(migrationCountFilePath);
-    console.log(`✅ Current migration version: ${MIGRATION_VERSION}`);
-    return MIGRATION_VERSION as number;
-  } catch (error) {
-    console.error(`❌ Error loading migrationCount:`, error);
-    process.exit(1);
-  }
-};
-
-/**
  * Creates a full database migration.
  * @param options - Database connection settings and output paths.
  */
 export const dropMigration = async (options: any) => {
   try {
-
     // Start from version 1 if no previous migrations exist
     const version = 1;
 
-    // Load entities dynamically from index.ts
-    const entities = await loadEntities(options.entitiesPath);
+    // Import Drizzle schema using absolute path
+    const schemaPath = path.resolve(options.entitiesPath, 'schema.ts');
+    if (!fs.existsSync(schemaPath)) {
+      throw new Error(`Schema file not found at: ${schemaPath}`);
+    }
 
-    // Initialize MikroORM
-    const orm = MikroORM.initSync({
-      host: options.host,
-      port: options.port,
-      user: options.user,
-      password: options.password,
-      dbName: options.dbName,
-      entities: entities,
+    const schemaModule = await import(schemaPath);
+    if (!schemaModule) {
+      throw new Error(`Invalid schema file at: ${schemaPath}. Schema must export tables.`);
+    }
+
+    // Process exported tables
+    const drizzleSchema: DrizzleSchema = {};
+
+    // Get all exports that are tables
+    const tables = Object.values(schemaModule) as MySqlTable<TableConfig>[];
+
+    tables.forEach(table => {
+      const symbols = Object.getOwnPropertySymbols(table);
+      const nameSymbol = symbols.find(s => s.toString().includes('Name'));
+      const columnsSymbol = symbols.find(s => s.toString().includes('Columns'));
+      const indexesSymbol = symbols.find(s => s.toString().includes('Indexes'));
+      const foreignKeysSymbol = symbols.find(s => s.toString().includes('ForeignKeys'));
+
+      if (table && nameSymbol && columnsSymbol) {
+        // @ts-ignore
+        drizzleSchema[table[nameSymbol]] = {
+          // @ts-ignore
+          columns: table[columnsSymbol],
+          // @ts-ignore
+          indexes: indexesSymbol ? table[indexesSymbol] || {} : {},
+          // @ts-ignore
+          foreignKeys: foreignKeysSymbol ? table[foreignKeysSymbol] || {} : {}
+        };
+      }
     });
 
-    // Generate SQL schema
-    const dropSchemaSQL = await orm.schema.getDropSchemaSQL({ wrap: true });
-    const statements = extractDropStatements(dropSchemaSQL);
+    if (Object.keys(drizzleSchema).length === 0) {
+      throw new Error(`No valid tables found in schema at: ${schemaPath}`);
+    }
+
+    console.log('Found tables:', Object.keys(drizzleSchema));
+
+    // Generate drop statements
+    const dropStatements: string[] = [];
+
+    // Process each table
+    for (const [tableName, tableInfo] of Object.entries(drizzleSchema)) {
+      // Drop foreign keys first
+      for (const fk of Object.values(tableInfo.foreignKeys)) {
+        // @ts-ignore
+        const fkName = fk.getName();
+        dropStatements.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY \`${fkName}\`;`);
+      }
+
+      // Drop indexes
+      for (const [indexName, index] of Object.entries(tableInfo.indexes)) {
+        // Skip primary key
+        if (indexName === 'PRIMARY') continue;
+        dropStatements.push(`DROP INDEX \`${indexName}\` ON \`${tableName}\`;`);
+      }
+
+      // Drop table
+      dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
+    }
+
+    // Add migration to clear migrations table
+    dropStatements.push(`DELETE FROM __migrations;`);
 
     // Generate and save migration files
-    const migrationFile = generateMigrationFile(statements, version);
+    const migrationFile = generateMigrationFile(dropStatements, version);
     saveMigrationFiles(migrationFile, version, options.output);
 
     console.log(`✅ Migration successfully created!`);

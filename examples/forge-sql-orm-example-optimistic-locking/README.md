@@ -9,8 +9,8 @@ Optimistic locking is a strategy used to handle concurrent data updates in multi
 1. **Read** – A user retrieves a record and notes the current version.
 2. **Modify** – The user makes changes.
 3. **Write** – When saving, the system checks if the record’s version in the database still matches the version the user originally read.
-    - If it matches, the update succeeds and the version is incremented/updated.
-    - If it does not match, the update fails, indicating that another user has already changed the record. The user must then refresh or re-read the data to get the latest version before trying again.
+   - If it matches, the update succeeds and the version is incremented/updated.
+   - If it does not match, the update fails, indicating that another user has already changed the record. The user must then refresh or re-read the data to get the latest version before trying again.
 
 In this example, the Forge SQL ORM supports optimistic locking using either **DateTime** or **numeric** fields as versioning fields.
 
@@ -38,13 +38,13 @@ npm install
 npm install
 ```
 
-###  3. Build the frontend (inside `static/forge-orm-basic[forge-orm-basic](static/forge-orm-basic)` directory)
+### 3. Build the frontend (inside `static/forge-orm-basic[forge-orm-basic](static/forge-orm-basic)` directory)
 
 ```sh
 npm run build
 ```
 
-### 4.  Register your application on the Atlassian platform (only once)
+### 4. Register your application on the Atlassian platform (only once)
 
 ```sh
 forge register
@@ -70,21 +70,22 @@ The application is available as a global Jira page titled **Forge SQL ORM Optimi
 
 - **Tabs:**  
   Use the tabs to select the desired entity:
-    - **Entity Without Version Column (No Locking)**
-    - **Entity with Numeric Version Column**
-    - **Entity with Date-Based Version Column**
-    - **Entity with Timestamp-Based Version Column**
+
+  - **Entity Without Version Column (No Locking)**
+  - **Entity with Numeric Version Column**
+  - **Entity with Date-Based Version Column**
+  - **Entity with Timestamp-Based Version Column**
 
 - **Update Records:**  
   Each entity displays records with an **Update** button next to them. Click the button to open a form that lets you modify the record.  
   If you open the same record in two different browser tabs, you'll see how optimistic locking prevents outdated updates:
-    1. In one tab, modify the record and click **Update**.
-    2. In the other tab, attempt to update the same record.
-    3. The second update will fail if the record was modified already, indicating that the version is out of date.
+
+  1. In one tab, modify the record and click **Update**.
+  2. In the other tab, attempt to update the same record.
+  3. The second update will fail if the record was modified already, indicating that the version is out of date.
 
 - **Reset All:**  
   A **Reset All** button is provided to revert all data to its initial state, allowing you to start fresh with each test.
-
 
 ### Notes
 

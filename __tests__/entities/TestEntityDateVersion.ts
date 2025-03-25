@@ -1,4 +1,5 @@
-import { EntitySchema } from "../../src";
+import { mySqlDateTimeString } from "../../src";
+import { mysqlTable, int, varchar } from 'drizzle-orm/mysql-core';
 
 export class TestEntityDateVersion {
   id!: number;
@@ -6,11 +7,9 @@ export class TestEntityDateVersion {
   version!: Date;
 }
 
-export const TestEntityDateVersionSchema = new EntitySchema({
-  class: TestEntityDateVersion,
-  properties: {
-    id: { primary: true, type: "integer", unsigned: false, autoincrement: false },
-    name: { type: "string", nullable: true },
-    version: { type: "datetime", nullable: false, version: true },
-  },
+export const testEntityDateVersion = mysqlTable('test_entity_date_version', {
+  id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }).notNull(),
+  version: mySqlDateTimeString('version').notNull(),
 });
+
