@@ -7,11 +7,11 @@
   "dependencies": {
     "@forge/resolver": "1.6.8",
     "@forge/sql": "^2.4.1",
-    "forge-sql-orm": "file:../.."
+    "forge-sql-orm": "1.1.31"
   },
   "scripts": {
     "models:create": "forge-sql-orm generate:model --output src/entities",
-    "migration:create": "forge-sql-orm migrations:create --force",
+    "migration:create": "forge-sql-orm migrations:create",
     "migration:update": "forge-sql-orm migrations:update",
     "migration:drop": "forge-sql-orm migrations:drop"
   },
