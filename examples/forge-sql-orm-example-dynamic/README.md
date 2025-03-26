@@ -21,7 +21,7 @@ npm install
 ```sh
 export MYSQL_ROOT_PASSWORD=admin
 docker run -d --name forge-sql-orm-example-db -p 3366:3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} --security-opt seccomp=unconfined --restart=always mysql
-# wait 30 sec 
+# wait 30 sec
 docker exec forge-sql-orm-example-db mysql -uroot -padmin -e "create database forgesqlorm"
 ```
 

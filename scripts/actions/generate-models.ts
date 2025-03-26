@@ -92,37 +92,29 @@ function replaceMySQLTypes(schemaContent: string): string {
   // Replace types in the content
   let modifiedContent = schemaContent
     // Handle datetime with column name and mode option
-    .replace(/datetime\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\)/g, 'mySqlDateTimeString(\'$1\')')
+    .replace(/datetime\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlDateTimeString(\'$1\')')
     // Handle datetime with column name only
     .replace(/datetime\(['"]([^'"]+)['"]\)/g, 'mySqlDateTimeString(\'$1\')')
     // Handle datetime with mode option only
-    .replace(/datetime\(\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\s*\)/g, 'mySqlDateTimeString()')
-    // Handle simple datetime call
-    .replace(/datetime\(\)/g, 'mySqlDateTimeString()')
+    .replace(/datetime\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlDateTimeString()')
     // Handle time with column name and mode option
-    .replace(/time\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\)/g, 'mySqlTimeString(\'$1\')')
+    .replace(/time\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlTimeString(\'$1\')')
     // Handle time with column name only
     .replace(/time\(['"]([^'"]+)['"]\)/g, 'mySqlTimeString(\'$1\')')
     // Handle time with mode option only
-    .replace(/time\(\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\s*\)/g, 'mySqlTimeString()')
-    // Handle simple time call
-    .replace(/time\(\)/g, 'mySqlTimeString()')
+    .replace(/time\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlTimeString()')
     // Handle date with column name and mode option
-    .replace(/date\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\)/g, 'mySqlDateString(\'$1\')')
+    .replace(/date\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlDateString(\'$1\')')
     // Handle date with column name only
     .replace(/date\(['"]([^'"]+)['"]\)/g, 'mySqlDateString(\'$1\')')
     // Handle date with mode option only
-    .replace(/date\(\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\s*\)/g, 'mySqlDateString()')
-    // Handle simple date call
-    .replace(/date\(\)/g, 'mySqlDateString()')
+    .replace(/date\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlDateString()')
     // Handle timestamp with column name and mode option
-    .replace(/timestamp\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\)/g, 'mySqlTimestampString(\'$1\')')
+    .replace(/timestamp\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlTimestampString(\'$1\')')
     // Handle timestamp with column name only
     .replace(/timestamp\(['"]([^'"]+)['"]\)/g, 'mySqlTimestampString(\'$1\')')
     // Handle timestamp with mode option only
-    .replace(/timestamp\(\s*{\s*mode:\s*['"]([^'"]+)['"]\s*}\s*\)/g, 'mySqlTimestampString()')
-    // Handle simple timestamp call
-    .replace(/timestamp\(\)/g, 'mySqlTimestampString()');
+    .replace(/timestamp\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlTimestampString()');
 
   // Add imports if they don't exist
   if (!modifiedContent.includes('import { mySqlDateTimeString')) {

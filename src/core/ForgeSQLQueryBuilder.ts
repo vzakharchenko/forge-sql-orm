@@ -200,6 +200,12 @@ export interface ForgeSqlOrmOptions {
    * @default false
    */
   logRawSqlQuery?: boolean;
+  /**
+   * Enables logging of raw SQL queries in the Atlassian Forge Developer Console.
+   * Useful for debugging and monitoring SQL operations.
+   * @default false
+   */
+  logRawSqlQueryParams?: boolean;
 
   /**
    * Disables optimistic locking for all operations.
