@@ -87,37 +87,37 @@ interface JournalData {
  */
 function replaceMySQLTypes(schemaContent: string): string {
   // Add imports at the top of the file
-  const imports = `import { mySqlDateTimeString, mySqlTimeString, mySqlDateString, mySqlTimestampString } from "forge-sql-orm";\n\n`;
-  
+  const imports = `import { forgeDateTimeString, forgeTimeString, forgeDateString, forgeTimestampString } from "forge-sql-orm";\n\n`;
+
   // Replace types in the content
   let modifiedContent = schemaContent
     // Handle datetime with column name and mode option
-    .replace(/datetime\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlDateTimeString(\'$1\')')
+    .replace(/datetime\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeDateTimeString(\'$1\')')
     // Handle datetime with column name only
-    .replace(/datetime\(['"]([^'"]+)['"]\)/g, 'mySqlDateTimeString(\'$1\')')
+    .replace(/datetime\(['"]([^'"]+)['"]\)/g, 'forgeDateTimeString(\'$1\')')
     // Handle datetime with mode option only
-    .replace(/datetime\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlDateTimeString()')
+    .replace(/datetime\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeDateTimeString()')
     // Handle time with column name and mode option
-    .replace(/time\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlTimeString(\'$1\')')
+    .replace(/time\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeTimeString(\'$1\')')
     // Handle time with column name only
-    .replace(/time\(['"]([^'"]+)['"]\)/g, 'mySqlTimeString(\'$1\')')
+    .replace(/time\(['"]([^'"]+)['"]\)/g, 'forgeTimeString(\'$1\')')
     // Handle time with mode option only
-    .replace(/time\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlTimeString()')
+    .replace(/time\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeTimeString()')
     // Handle date with column name and mode option
-    .replace(/date\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlDateString(\'$1\')')
+    .replace(/date\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeDateString(\'$1\')')
     // Handle date with column name only
-    .replace(/date\(['"]([^'"]+)['"]\)/g, 'mySqlDateString(\'$1\')')
+    .replace(/date\(['"]([^'"]+)['"]\)/g, 'forgeDateString(\'$1\')')
     // Handle date with mode option only
-    .replace(/date\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlDateString()')
+    .replace(/date\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeDateString()')
     // Handle timestamp with column name and mode option
-    .replace(/timestamp\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'mySqlTimestampString(\'$1\')')
+    .replace(/timestamp\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeTimestampString(\'$1\')')
     // Handle timestamp with column name only
-    .replace(/timestamp\(['"]([^'"]+)['"]\)/g, 'mySqlTimestampString(\'$1\')')
+    .replace(/timestamp\(['"]([^'"]+)['"]\)/g, 'forgeTimestampString(\'$1\')')
     // Handle timestamp with mode option only
-    .replace(/timestamp\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'mySqlTimestampString()');
+    .replace(/timestamp\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeTimestampString()');
 
   // Add imports if they don't exist
-  if (!modifiedContent.includes('import { mySqlDateTimeString')) {
+  if (!modifiedContent.includes('import { forgeDateTimeString')) {
     modifiedContent = imports + modifiedContent;
   }
 
