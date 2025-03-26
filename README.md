@@ -225,14 +225,14 @@ export const testEntityTimeStampVersion = mysqlTable('test_entity', {
 });
 
 // ✅ Use Forge-SQL-ORM custom types instead
-import { mySqlDateTimeString, mySqlDateString, mySqlTimestampString, mySqlTimeString } from 'forge-sql-orm'
+import { forgeDateTimeString, forgeDateString, mySqlTimestampString, mySqlTimeString } from 'forge-sql-orm'
 
 export const testEntityTimeStampVersion = mysqlTable('test_entity', {
   id: int('id').primaryKey().autoincrement(),
-  time_stamp: mySqlTimestampString('times_tamp').notNull(),
-  date_time: mySqlDateTimeString('date_time').notNull(),
-  time: mySqlTimeString('time').notNull(),
-  date: mySqlDateString('date').notNull(),
+  time_stamp: forgeTimestampString('times_tamp').notNull(),
+  date_time: forgeDateTimeString('date_time').notNull(),
+  time: forgeTimeString('time').notNull(),
+  date: forgeDateString('date').notNull(),
 });
 ```
 
@@ -256,10 +256,10 @@ Our custom types provide:
 
 ### Available Custom Types
 
-- `mySqlDateTimeString` - For datetime fields (YYYY-MM-DD HH:MM:SS[.fraction])
-- `mySqlTimestampString` - For timestamp fields (YYYY-MM-DD HH:MM:SS[.fraction])
-- `mySqlDateString` - For date fields (YYYY-MM-DD)
-- `mySqlTimeString` - For time fields (HH:MM:SS[.fraction])
+- `forgeDateTimeString` - For datetime fields (YYYY-MM-DD HH:MM:SS[.fraction])
+- `forgeTimestampString` - For timestamp fields (YYYY-MM-DD HH:MM:SS[.fraction])
+- `forgeDateString` - For date fields (YYYY-MM-DD)
+- `forgeTimeString` - For time fields (HH:MM:SS[.fraction])
 
 Each type ensures that the data is properly formatted according to Forge SQL's requirements while providing a clean, type-safe interface for your application code.
 

@@ -1,7 +1,13 @@
-# Forge SQL ORM Basic Example
+# Forge SQL ORM Drizzle Driver Example
 
-This application demonstrates basic CRUD operations using Forge SQL ORM. Unlike the [dynamic example](../forge-sql-orm-example), this version works with a predefined database schema and does not automatically reflect changes in the UI when the database schema is modified.
+This example demonstrates how to use Drizzle ORM directly with Atlassian Forge SQL using the custom driver from forge-sql-orm. Unlike other examples ([forge-sql-orm-example-simple](../forge-sql-orm-example-simple) and [dynamic example](../forge-sql-orm-example)) that use the full Forge-SQL-ORM functionality, this example shows a minimal setup using only the Drizzle driver.
 
+## Key Differences
+- Uses Drizzle ORM directly without additional Forge-SQL-ORM features
+- Provides basic CRUD operations with type safety
+- Demonstrates minimal setup required for using Drizzle with Forge SQL
+
+If you need advanced features like optimistic locking or automatic versioning, check out the [full ORM example](../forge-sql-orm-example-simple) instead.
 See the [Forge documentation](https://developer.atlassian.com/platform/forge/) for more details.
 
 ## Requirements

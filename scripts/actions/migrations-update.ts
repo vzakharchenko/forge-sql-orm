@@ -572,12 +572,12 @@ export const updateMigration = async (options: any) => {
 
         // Save migration files only if there are actual changes
         if (saveMigrationFiles(migrationFile, version, options.output)) {
-          console.log(`✅ Migration successfully updated!`);
+      console.log(`✅ Migration successfully updated!`);
         }
-        process.exit(0);
-      } else {
-        console.log(`⚠️ No new migration changes detected.`);
-        process.exit(0);
+      process.exit(0);
+    } else {
+      console.log(`⚠️ No new migration changes detected.`);
+      process.exit(0);
       }
     } finally {
       await connection.end();
