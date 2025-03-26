@@ -2,7 +2,7 @@ import moment from "moment";
 import { AnyColumn } from "drizzle-orm";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core/index";
 import { PrimaryKeyBuilder } from "drizzle-orm/mysql-core/primary-keys";
-import { AnyIndexBuilder, IndexBuilder } from "drizzle-orm/mysql-core/indexes";
+import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
 import { CheckBuilder } from "drizzle-orm/mysql-core/checks";
 import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
 import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
@@ -27,6 +27,14 @@ export interface MetadataInfo {
   uniqueConstraints: UniqueConstraintBuilder[];
   /** Array of all extra builders */
   extras: any[];
+}
+
+/**
+ * Interface for config builder data
+ */
+interface ConfigBuilderData {
+  value?: any;
+  [key: string]: any;
 }
 
 /**
@@ -57,11 +65,9 @@ export function extractAlias(query: string): string {
  * Gets primary keys from the schema.
  * @template T - The type of the table schema
  * @param {T} table - The table schema
- * @returns {[string, AnyColumn][] | undefined} Array of primary key name and column pairs or undefined if no primary keys found
+ * @returns {[string, AnyColumn][]} Array of primary key name and column pairs
  */
-export function getPrimaryKeys<T extends AnyMySqlTable>(
-  table: T,
-): [string, AnyColumn][] | undefined {
+export function getPrimaryKeys<T extends AnyMySqlTable>(table: T): [string, AnyColumn][] {
   const { columns, primaryKeys } = getTableMetadata(table);
 
   // First try to find primary keys in columns
@@ -91,11 +97,10 @@ export function getPrimaryKeys<T extends AnyMySqlTable>(
         });
     });
 
-    const result = Array.from(primaryKeyColumns);
-    return result.length > 0 ? result : undefined;
+    return Array.from(primaryKeyColumns);
   }
 
-  return undefined;
+  return [];
 }
 
 /**
@@ -108,7 +113,6 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
   const nameSymbol = symbols.find((s) => s.toString().includes("Name"));
   const columnsSymbol = symbols.find((s) => s.toString().includes("Columns"));
   const extraSymbol = symbols.find((s) => s.toString().includes("ExtraConfigBuilder"));
-  const foreignKeysSymbol = symbols.find((s) => s.toString().includes("MySqlInlineForeignKeys)"));
 
   // Initialize builders arrays
   const builders = {
@@ -119,42 +123,48 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
     uniqueConstraints: [] as UniqueConstraintBuilder[],
     extras: [] as any[],
   };
-  if (foreignKeysSymbol) {
-    // @ts-ignore
-    const foreignKeys: any[] = table[foreignKeysSymbol];
-    if (foreignKeys) {
-      for (const foreignKey of foreignKeys) {
-        builders.foreignKeys.push(foreignKey);
-      }
-    }
-  }
 
   // Process extra configuration if available
   if (extraSymbol) {
     // @ts-ignore
     const extraConfigBuilder = table[extraSymbol];
     if (extraConfigBuilder && typeof extraConfigBuilder === "function") {
-      const configBuilders = extraConfigBuilder(table);
-      let configBuildersArray: any[] = [];
-      if (!Array.isArray(configBuilders)) {
-        configBuildersArray = Object.values(configBuilders);
-      } else {
-        configBuildersArray = configBuilders as any[];
+      const configBuilderData = extraConfigBuilder(table);
+      if (configBuilderData) {
+        // Convert configBuilderData to array if it's an object
+        const configBuilders = Array.isArray(configBuilderData)
+          ? configBuilderData
+          : Object.values(configBuilderData).map(
+              (item) => (item as ConfigBuilderData).value || item,
+            );
+
+        // Process each builder
+        configBuilders.forEach((builder) => {
+          if (!builder?.constructor) return;
+
+          const builderName = builder.constructor.name.toLowerCase();
+
+          // Map builder types to their corresponding arrays
+          const builderMap = {
+            indexbuilder: builders.indexes,
+            checkbuilder: builders.checks,
+            foreignkeybuilder: builders.foreignKeys,
+            primarykeybuilder: builders.primaryKeys,
+            uniqueconstraintbuilder: builders.uniqueConstraints,
+          };
+
+          // Add builder to appropriate array if it matches any type
+          for (const [type, array] of Object.entries(builderMap)) {
+            if (builderName.includes(type)) {
+              array.push(builder);
+              break;
+            }
+          }
+
+          // Always add to extras array
+          builders.extras.push(builder);
+        });
       }
-      configBuildersArray.forEach((builder) => {
-        if (builder instanceof IndexBuilder) {
-          builders.indexes.push(builder);
-        } else if (builder instanceof CheckBuilder) {
-          builders.checks.push(builder);
-        } else if (builder instanceof ForeignKeyBuilder) {
-          builders.foreignKeys.push(builder);
-        } else if (builder instanceof PrimaryKeyBuilder) {
-          builders.primaryKeys.push(builder);
-        } else if (builder instanceof UniqueConstraintBuilder) {
-          builders.uniqueConstraints.push(builder);
-        }
-        builders.extras.push(builder);
-      });
     }
   }
 

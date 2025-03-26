@@ -100,7 +100,7 @@ async function findDuplicates<T extends AnyMySqlTable>(table: T): Promise<Duplic
   const tableMetadata = getTableMetadata(table);
   const primaryKeys = getPrimaryKeys(table);
   if (!primaryKeys) {
-    throw new Error('Primary key does not found')
+    throw new Error("Primary key does not found");
   }
   // Create select fields excluding primary keys
   const selectFields: SelectedFields = {};
@@ -153,7 +153,7 @@ resolver.define("fetch", async (req): Promise<DynamicResponse[]> => {
   const { columns } = getTableMetadata(users);
   const primaryKeys = getPrimaryKeys(users);
   if (!primaryKeys) {
-    throw new Error('Primary key does not found')
+    throw new Error("Primary key does not found");
   }
   const baseQuery = forgeSQL.getDrizzleQueryBuilder().select().from(users);
 

@@ -192,6 +192,9 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
     }
     const sqlStatement = sql.prepare<T>(query);
     if (params) {
+      if (this.options.logRawSqlQuery && this.options.logRawSqlQueryParams) {
+        console.debug("Executing with SQL Params: " + JSON.stringify(params));
+      }
       sqlStatement.bindParams(...params);
     }
     const result = await sqlStatement.execute();

@@ -1,6 +1,6 @@
 {
   "name": "forge-sql-orm",
-  "version": "1.1.31",
+  "version": "2.0.0",
   "description": "Drizzle ORM integration for Forge-SQL in Atlassian Forge applications.",
   "main": "dist/ForgeSQLORM.js",
   "module": "dist/ForgeSQLORM.mjs",
@@ -40,7 +40,7 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^5.2.4",
+    "eslint-plugin-prettier": "^5.2.5",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-vitest": "^0.5.4",
     "globals": "^16.0.0",
@@ -82,15 +82,10 @@
     "tsconfig.json",
     "README.md"
   ],
-  "dependencies": {
-    "@forge/resolver": "^1.6.9",
-    "@forge/sql": "^2.4.2",
-    "drizzle-orm": "^0.41.0",
-    "moment": "^2.30.1",
-    "uuid": "^11.1.0"
-  },
   "peerDependencies": {
-    "@forge/sql": "^2.4.1"
+    "@forge/sql": "^2.4.1",
+    "drizzle-orm": "^0.41.0",
+    "moment": "^2.30.1"
   },
   "bin": {
     "forge-sql-orm": "dist-cli/forgeSqlOrmCLI.js"
