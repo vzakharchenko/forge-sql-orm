@@ -1,3 +1,4 @@
+import moment from "moment";
 import { sql } from "@forge/sql";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ForgeSQLORM from "../../../src/core/ForgeSQLORM";
@@ -235,18 +236,18 @@ describe("ForgeSQLSelectOperations", () => {
     expect(result).toEqual([
        {
          "count": "0",
-        "name": "Test1",
-        "version": new Date('2024-09-19T03:40:34.999Z'),
+         "name": "Test1",
+         "version": moment.utc('2024-09-19T03:40:34.999Z').toDate(),
   },
      {
-       "count": "1",
-      "name": "Test2",
-          "version": new Date('2023-09-19T03:40:34.999Z'),
+          "count": "1",
+          "name": "Test2",
+          "version": moment.utc('2023-09-19T03:40:34.999Z').toDate(),
     },
      {
-       "count": "2",
-      "name": "Test3",
-          "version": new Date('2022-09-19T03:40:34.999Z'),
+          "count": "2",
+          "name": "Test3",
+          "version": moment.utc('2022-09-19T03:40:34.999Z').toDate(),
     },
   ]);
   });
