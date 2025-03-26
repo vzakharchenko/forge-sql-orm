@@ -229,7 +229,7 @@ export interface ForgeSqlOrmOptions {
  * Custom type for MySQL datetime fields.
  * Handles conversion between JavaScript Date objects and MySQL datetime strings.
  */
-export const mySqlDateTimeString = customType<{
+export const forgeDateTimeString = customType<{
   data: Date;
   driver: string;
   config: { format?: string };
@@ -250,7 +250,7 @@ export const mySqlDateTimeString = customType<{
  * Custom type for MySQL timestamp fields.
  * Handles conversion between JavaScript Date objects and MySQL timestamp strings.
  */
-export const mySqlTimestampString = customType<{
+export const forgeTimestampString = customType<{
   data: Date;
   driver: string;
   config: { format?: string };
@@ -271,7 +271,7 @@ export const mySqlTimestampString = customType<{
  * Custom type for MySQL date fields.
  * Handles conversion between JavaScript Date objects and MySQL date strings.
  */
-export const mySqlDateString = customType<{
+export const forgeDateString = customType<{
   data: Date;
   driver: string;
   config: { format?: string };
@@ -292,7 +292,7 @@ export const mySqlDateString = customType<{
  * Custom type for MySQL time fields.
  * Handles conversion between JavaScript Date objects and MySQL time strings.
  */
-export const mySqlTimeString = customType<{
+export const forgeTimeString = customType<{
   data: Date;
   driver: string;
   config: { format?: string };

@@ -225,7 +225,7 @@ export const testEntityTimeStampVersion = mysqlTable('test_entity', {
 });
 
 // ✅ Use Forge-SQL-ORM custom types instead
-import { forgeDateTimeString, forgeDateString, mySqlTimestampString, mySqlTimeString } from 'forge-sql-orm'
+import { forgeDateTimeString, forgeDateString, forgeTimestampString, forgeTimeString } from 'forge-sql-orm'
 
 export const testEntityTimeStampVersion = mysqlTable('test_entity', {
   id: int('id').primaryKey().autoincrement(),
