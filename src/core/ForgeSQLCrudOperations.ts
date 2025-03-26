@@ -66,11 +66,6 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       : queryBuilder;
 
     // Execute query
-    const query = finalQuery.toSQL();
-    if (this.options?.logRawSqlQuery) {
-      console.debug("INSERT SQL:", query.sql);
-    }
-
     const result = await finalQuery;
     return result[0].insertId;
   }
@@ -118,12 +113,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       .delete(schema)
       .where(and(...conditions));
 
-    if (this.options?.logRawSqlQuery) {
-      console.debug("DELETE SQL:", queryBuilder.toSQL().sql);
-    }
-
     const result =await queryBuilder;
-    result
 
     return result[0].affectedRows;
   }
@@ -192,10 +182,6 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       .set(updateData)
       .where(and(...conditions));
 
-    if (this.options?.logRawSqlQuery) {
-      console.debug("UPDATE SQL:", queryBuilder.toSQL().sql);
-    }
-
     const result = await queryBuilder;
     // Check optimistic locking
     if (versionMetadata && result[0].affectedRows === 0) {
@@ -233,10 +219,6 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       .update(schema)
       .set(updateData)
       .where(where);
-
-    if (this.options?.logRawSqlQuery) {
-      console.debug("UPDATE SQL:", queryBuilder.toSQL().sql);
-    }
 
     const result = await queryBuilder;
     return result[0].affectedRows;

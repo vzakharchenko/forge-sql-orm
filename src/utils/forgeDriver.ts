@@ -30,8 +30,5 @@ export const forgeDriver = {
             console.error("SQL Error:", JSON.stringify(error));
             throw error;
         }
-    },
-    transaction: async (transactionFn: (tx: any) => Promise<void>) => {
-        // Implementation will be added later
-    },
+    }
 } as unknown as AnyMySql2Connection;

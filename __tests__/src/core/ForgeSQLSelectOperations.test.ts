@@ -218,9 +218,9 @@ describe("ForgeSQLSelectOperations", () => {
       bindParams: vi.fn(),
       execute: vi.fn().mockResolvedValue({
         rows: [
-          { name: "Test1", version: '2024-09-19 06:40:34.999999',count: '0' },
-          { name: "Test2" , version: '2023-09-19 06:40:34.999999',count: '1'},
-          { name: "Test3" , version: '2022-09-19 06:40:34.999999',count: '2'}
+          { name: "Test1", version: moment.utc('2024-09-19 06:40:34.999999').toDate() ,count: '0' },
+          { name: "Test2" , version: moment.utc('2023-09-19 06:40:34.999999').toDate(),count: '1'},
+          { name: "Test3" , version: moment.utc('2022-09-19 06:40:34.999999').toDate(),count: '2'}
         ]
       }),
     } as any));
@@ -237,17 +237,17 @@ describe("ForgeSQLSelectOperations", () => {
        {
          "count": "0",
          "name": "Test1",
-         "version": moment.utc('2024-09-19T03:40:34.999Z').toDate(),
+         "version": moment.utc('2024-09-19T06:40:34.999Z').toDate(),
   },
      {
           "count": "1",
           "name": "Test2",
-          "version": moment.utc('2023-09-19T03:40:34.999Z').toDate(),
+          "version": moment.utc('2023-09-19T06:40:34.999Z').toDate(),
     },
      {
           "count": "2",
           "name": "Test3",
-          "version": moment.utc('2022-09-19T03:40:34.999Z').toDate(),
+          "version": moment.utc('2022-09-19T06:40:34.999Z').toDate(),
     },
   ]);
   });
