@@ -12,3 +12,4 @@ export const testEntity = mysqlTable('test_entity', {
     (table) => [
         primaryKey({columns: [table.id], name: "users_id"}),
     ]);
+

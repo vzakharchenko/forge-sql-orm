@@ -118,17 +118,6 @@ export interface CRUDForgeSQL {
  */
 export interface SchemaSqlForgeSql {
   /**
-   * Executes a Drizzle query and returns the result.
-   * @template T - The type of the query builder
-   * @param {T} query - The Drizzle query to execute
-   * @returns {Promise<Awaited<T>>} The query result
-   * @throws {Error} If the query execution fails
-   */
-  executeQuery<T extends MySqlSelectDynamic<AnyMySqlSelectQueryBuilder>>(
-    query: T,
-  ): Promise<Awaited<T>>;
-
-  /**
    * Executes a Drizzle query and returns a single result.
    * @template T - The type of the query builder
    * @param {T} query - The Drizzle query to execute

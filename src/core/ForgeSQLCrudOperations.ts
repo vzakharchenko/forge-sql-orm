@@ -38,7 +38,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
   async insert<T extends AnyMySqlTable>(
     schema: T,
     models: Partial<InferInsertModel<T>>[],
-    updateIfExists: boolean = false,
+      updateIfExists: boolean = false,
   ): Promise<number> {
     if (!models?.length) return 0;
 
@@ -71,9 +71,8 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       console.debug("INSERT SQL:", query.sql);
     }
 
-    const result = await this.forgeOperations.fetch().executeRawUpdateSQL(query.sql, query.params);
-
-    return result.insertId;
+    const result = await finalQuery;
+    return result[0].insertId;
   }
 
   /**
@@ -123,11 +122,10 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       console.debug("DELETE SQL:", queryBuilder.toSQL().sql);
     }
 
-    const result = await this.forgeOperations
-      .fetch()
-      .executeRawUpdateSQL(queryBuilder.toSQL().sql, queryBuilder.toSQL().params);
+    const result =await queryBuilder;
+    result
 
-    return result.affectedRows;
+    return result[0].affectedRows;
   }
 
   /**
@@ -198,18 +196,15 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       console.debug("UPDATE SQL:", queryBuilder.toSQL().sql);
     }
 
-    const result = await this.forgeOperations
-      .fetch()
-      .executeRawUpdateSQL(queryBuilder.toSQL().sql, queryBuilder.toSQL().params);
-
+    const result = await queryBuilder;
     // Check optimistic locking
-    if (versionMetadata && result.affectedRows === 0) {
+    if (versionMetadata && result[0].affectedRows === 0) {
       throw new Error(
         `Optimistic locking failed: record with primary key ${entity[primaryKeyName as keyof typeof entity]} has been modified`,
       );
     }
 
-    return result.affectedRows;
+    return result[0].affectedRows;
   }
 
   /**
@@ -243,11 +238,8 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       console.debug("UPDATE SQL:", queryBuilder.toSQL().sql);
     }
 
-    const result = await this.forgeOperations
-      .fetch()
-      .executeRawUpdateSQL(queryBuilder.toSQL().sql, queryBuilder.toSQL().params);
-
-    return result.affectedRows;
+    const result = await queryBuilder;
+    return result[0].affectedRows;
   }
 
   // Helper methods

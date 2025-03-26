@@ -5,6 +5,7 @@
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [Drizzle ORM](https://orm.drizzle.team) and provides advanced capabilities for working with relational databases inside Forge.
 
 ## Key Features
+- ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Batch insert support** with duplicate key handling
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -14,6 +15,23 @@
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
 - ✅ **Type Safety** Full TypeScript support with proper type inference
 
+## Usage Approaches
+
+### 1. Direct Drizzle Usage
+```typescript
+import { drizzle } from "drizzle-orm/mysql-core";
+import { forgeDriver } from "forge-sql-orm";
+const db = drizzle(forgeDriver);
+```
+Best for: Simple CRUD operations without optimistic locking
+
+### 2. Full Forge-SQL-ORM Usage
+```typescript
+import ForgeSQL from "forge-sql-orm";
+const forgeSQL = new ForgeSQL();
+```
+Best for: Advanced features like optimistic locking and automatic versioning
+
 ## Installation
 
 Forge-SQL-ORM is designed to work with @forge/sql and requires some additional setup to ensure compatibility within Atlassian Forge.
@@ -22,8 +40,7 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 
 ```sh
 npm install forge-sql-orm -S
-npm install @forge/sql -S
-npm install drizzle-orm mysql2
+npm install @forge/sql drizzle-orm -S
 npm install mysql2 @types/mysql2 -D
 ```
 
@@ -32,6 +49,38 @@ This will:
 - Install @forge/sql, the Forge database layer
 - Install Drizzle ORM and its MySQL driver
 - Install TypeScript types for MySQL
+
+## Direct Drizzle Usage with Custom Driver
+
+If you prefer to use Drizzle ORM directly without the additional features of Forge-SQL-ORM (like optimistic locking), you can use the custom driver:
+
+```typescript
+import { drizzle } from "drizzle-orm/mysql-core";
+import { forgeDriver } from "forge-sql-orm";
+
+// Initialize drizzle with the custom driver
+const db = drizzle(forgeDriver);
+
+// Use drizzle directly
+const users = await db.select().from(users);
+```
+
+##  Drizzle Usage with forge-sql-orm
+
+If you prefer to use Drizzle ORM  with the additional features of Forge-SQL-ORM (like optimistic locking), you can use the custom driver:
+
+```typescript
+import ForgeSQL from "forge-sql-orm";
+const forgeSQL = new ForgeSQL();
+forgeSQL.crud().insert(...);
+forgeSQL.crud().updateById(...);
+const db = forgeSQL.getDrizzleQueryBuilder();
+
+// Use drizzle
+const users = await db.select().from(users);
+```
+
+This approach gives you direct access to all Drizzle ORM features while still using the @forge/sql backend.
 
 ## Step-by-Step Migration Workflow
 
@@ -155,6 +204,68 @@ export default (migrationRunner: MigrationRunner): MigrationRunner => {
 
 ---
 
+## Date and Time Types
+
+When working with date and time fields in your models, you should use the custom types provided by Forge-SQL-ORM to ensure proper handling of date/time values. This is necessary because Forge SQL has specific format requirements for date/time values:
+
+| Date type | Required Format | Example |
+|-----------|----------------|---------|
+| DATE | YYYY-MM-DD | 2024-09-19 |
+| TIME | HH:MM:SS[.fraction] | 06:40:34 |
+| TIMESTAMP | YYYY-MM-DD HH:MM:SS[.fraction] | 2024-09-19 06:40:34.999999 |
+
+```typescript
+// ❌ Don't use standard Drizzle date/time types
+export const testEntityTimeStampVersion = mysqlTable('test_entity', {
+  id: int('id').primaryKey().autoincrement(),
+  time_stamp: timestamp('times_tamp').notNull(),
+  date_time: datetime('date_time').notNull(),
+  time: time('time').notNull(),
+  date: date('date').notNull(),
+});
+
+// ✅ Use Forge-SQL-ORM custom types instead
+import { mySqlDateTimeString, mySqlDateString, mySqlTimestampString, mySqlTimeString } from 'forge-sql-orm'
+
+export const testEntityTimeStampVersion = mysqlTable('test_entity', {
+  id: int('id').primaryKey().autoincrement(),
+  time_stamp: mySqlTimestampString('times_tamp').notNull(),
+  date_time: mySqlDateTimeString('date_time').notNull(),
+  time: mySqlTimeString('time').notNull(),
+  date: mySqlDateString('date').notNull(),
+});
+```
+
+### Why Custom Types?
+
+The custom types in Forge-SQL-ORM handle the conversion between JavaScript Date objects and Forge SQL's required string formats automatically. Without these custom types, you would need to manually format dates like this:
+
+```typescript
+// Without custom types, you'd need to do this manually:
+const date = moment().format("YYYY-MM-DD");
+const time = moment().format("HH:mm:ss.SSS");
+const timestamp = moment().format("YYYY-MM-DDTHH:mm:ss.SSS");
+```
+
+Our custom types provide:
+- Automatic conversion between JavaScript Date objects and Forge SQL's required string formats
+- Consistent date/time handling across your application
+- Type safety for date/time fields
+- Proper handling of timezone conversions
+- Support for all Forge SQL date/time types (datetime, timestamp, date, time)
+
+### Available Custom Types
+
+- `mySqlDateTimeString` - For datetime fields (YYYY-MM-DD HH:MM:SS[.fraction])
+- `mySqlTimestampString` - For timestamp fields (YYYY-MM-DD HH:MM:SS[.fraction])
+- `mySqlDateString` - For date fields (YYYY-MM-DD)
+- `mySqlTimeString` - For time fields (HH:MM:SS[.fraction])
+
+Each type ensures that the data is properly formatted according to Forge SQL's requirements while providing a clean, type-safe interface for your application code.
+
+
+
+
 # Connection to ORM
 
 ```js
@@ -162,20 +273,35 @@ import ForgeSQL from "forge-sql-orm";
 
 const forgeSQL = new ForgeSQL();
 ```
+or 
+
+```typescript
+import { drizzle } from "drizzle-orm/mysql-core";
+import { forgeDriver } from "forge-sql-orm";
+
+// Initialize drizzle with the custom driver
+const db = drizzle(forgeDriver);
+
+// Use drizzle directly
+const users = await db.select().from(users);
+```
 
 ## Fetch Data
 
 ### Basic Fetch Operations
 
 ```js
-// Using executeQuery for single result
+// Using forgeSQL.getDrizzleQueryBuilder()
 const user = await forgeSQL
-  .fetch()
-  .executeQuery(
-    forgeSQL.getDrizzleQueryBuilder()
-      .select("*").from(Users)
-      .where(eq(Users.id, 1))
-  );
+  .getDrizzleQueryBuilder()
+  .select("*").from(Users)
+  .where(eq(Users.id, 1));
+
+// OR using direct drizzle with custom driver
+const db = drizzle(forgeDriver);
+const user = await db
+  .select("*").from(Users)
+  .where(eq(Users.id, 1));
 // Returns: { id: 1, name: "John Doe" }
 
 // Using executeQueryOnlyOne for single result with error handling
@@ -191,34 +317,47 @@ const user = await forgeSQL
 // Throws error if multiple records found
 // Returns undefined if no records found
 
-// Using executeQuery with aliases
+// Using with aliases
+// With forgeSQL
 const usersAlias = alias(Users, "u");
 const result = await forgeSQL
-  .fetch()
-  .executeQuery(
-    forgeSQL
-      .getDrizzleQueryBuilder()
-      .select({
-        userId: rawSql`${usersAlias.id} as \`userId\``,
-        userName: rawSql`${usersAlias.name} as \`userName\``
-      }).from(usersAlias)
-  );
+  .getDrizzleQueryBuilder()
+  .select({
+    userId: rawSql`${usersAlias.id} as \`userId\``,
+    userName: rawSql`${usersAlias.name} as \`userName\``
+  }).from(usersAlias);
+
+// OR with direct drizzle
+const db = drizzle(forgeDriver);
+const result = await db
+  .select({
+    userId: rawSql`${usersAlias.id} as \`userId\``,
+    userName: rawSql`${usersAlias.name} as \`userName\``
+  }).from(usersAlias);
 // Returns: { userId: 1, userName: "John Doe" }
 
-// Using executeQuery with joins
+// Using joins
+// With forgeSQL
 const orderWithUser = await forgeSQL
-  .fetch()
-  .executeQuery(
-    forgeSQL
-      .getDrizzleQueryBuilder()
-      .select({
-        orderId: rawSql`${Orders.id} as \`orderId\``,
-        product: Orders.product,
-        userName: rawSql`${Users.name} as \`userName\``
-      }).from(Orders)
-      .innerJoin(Users, eq(Orders.userId, Users.id))
-      .where(eq(Orders.id, 1))
-  );
+  .getDrizzleQueryBuilder()
+  .select({
+    orderId: rawSql`${Orders.id} as \`orderId\``,
+    product: Orders.product,
+    userName: rawSql`${Users.name} as \`userName\``
+  }).from(Orders)
+  .innerJoin(Users, eq(Orders.userId, Users.id))
+  .where(eq(Orders.id, 1));
+
+// OR with direct drizzle
+const db = drizzle(forgeDriver);
+const orderWithUser = await db
+  .select({
+    orderId: rawSql`${Orders.id} as \`orderId\``,
+    product: Orders.product,
+    userName: rawSql`${Users.name} as \`userName\``
+  }).from(Orders)
+  .innerJoin(Users, eq(Orders.userId, Users.id))
+  .where(eq(Orders.id, 1));
 // Returns: { orderId: 1, product: "Product 1", userName: "John Doe" }
 ```
 
@@ -226,18 +365,25 @@ const orderWithUser = await forgeSQL
 
 ```js
 // Finding duplicates
+// With forgeSQL
 const duplicates = await forgeSQL
-  .fetch()
-  .executeQuery(
-    forgeSQL
-      .getDrizzleQueryBuilder()
-      .select({
-        name: Users.name,
-        count: rawSql`COUNT(*) as \`count\``
-      }).from(Users)
-      .groupBy(Users.name)
-      .having(rawSql`COUNT(*) > 1`)
-  );
+  .getDrizzleQueryBuilder()
+  .select({
+    name: Users.name,
+    count: rawSql`COUNT(*) as \`count\``
+  }).from(Users)
+  .groupBy(Users.name)
+  .having(rawSql`COUNT(*) > 1`);
+
+// OR with direct drizzle
+const db = drizzle(forgeDriver);
+const duplicates = await db
+  .select({
+    name: Users.name,
+    count: rawSql`COUNT(*) as \`count\``
+  }).from(Users)
+  .groupBy(Users.name)
+  .having(rawSql`COUNT(*) > 1`);
 // Returns: { name: "John Doe", count: 2 }
 
 // Using executeQueryOnlyOne for unique results

@@ -4,5 +4,6 @@ export * from "./core/ForgeSQLQueryBuilder";
 export * from "./core/ForgeSQLCrudOperations";
 export * from "./core/ForgeSQLSelectOperations";
 export * from "./utils/sqlUtils";
+export * from "./utils/forgeDriver";
 
 export default ForgeSQLORM;

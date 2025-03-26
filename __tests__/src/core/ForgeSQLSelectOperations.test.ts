@@ -6,13 +6,14 @@ import {testEntity} from "../../entities/TestEntity";
 import {testDataEntity} from "../../entities/TestDataEntity";
 import { eq } from "drizzle-orm";
 import {sql as rawSql} from "drizzle-orm";
+import {testEntityDateVersion} from "../../entities/TestEntityDateVersion";
 
 vi.mock("@forge/sql", () => ({
   sql: {
     prepare: vi.fn((query: string) => {
-      let procedureMock = vi.fn().mockResolvedValue({ rows: [{ id: 1, name: "Test", data: 't' }] });
+      let procedureMock = vi.fn().mockResolvedValue({ rows: [{ id: 1, data: 't' , name: "Test"}] });
       if (query === "select `test_data_entity`.`id` as `ID1`, `test_entity`.`id` as ID2, `test_data_entity`.`data`, `test_entity`.`name` from `test_data_entity` inner join `test_entity` on `test_data_entity`.`id` = `test_entity`.`id`") {
-         procedureMock = vi.fn().mockResolvedValue({ rows: [{ ID1: 1, ID2: 2, name: "Test", data: 't' }] });
+         procedureMock = vi.fn().mockResolvedValue({ rows: [{ ID1: 1, ID2: 2, data: 't', name: "Test" }] });
       }
       const executeMock = procedureMock;
       return {
@@ -56,9 +57,7 @@ describe("ForgeSQLSelectOperations", () => {
       })
       .from(testDataEntity)
       .innerJoin(testEntity, eq(testDataEntity.id, testEntity.id));
-    const result = await forgeSqlOperation
-      .fetch()
-      .executeQuery(query);
+    const result = await query;
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
     expect(sql.prepare).toHaveBeenCalledWith(
       "select `test_data_entity`.`id` as `ID1`, `test_entity`.`id` as ID2, `test_data_entity`.`data`, `test_entity`.`name` from `test_data_entity` inner join `test_entity` on `test_data_entity`.`id` = `test_entity`.`id`"
@@ -194,9 +193,7 @@ describe("ForgeSQLSelectOperations", () => {
       .groupBy(testEntity.name)
       .having(rawSql`COUNT(*) > 1`);
 
-    const result = await forgeSqlOperation
-      .fetch()
-      .executeQuery(query);
+    const result = await query
 
     expect(result).toEqual([{
       name: "Test1",
@@ -208,6 +205,50 @@ describe("ForgeSQLSelectOperations", () => {
       },
       { name: "Test3", count: 3 }
       ]);
+  });
+
+  it("should find duplicates in testEntity2", async () => {
+    const drizzle = forgeSqlOperation.getDrizzleQueryBuilder();
+
+    // Mock multiple results with duplicates
+    vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+      query: "MOCK_QUERY",
+      params: [],
+      bindParams: vi.fn(),
+      execute: vi.fn().mockResolvedValue({
+        rows: [
+          { name: "Test1", version: '2024-09-19 06:40:34.999999',count: '0' },
+          { name: "Test2" , version: '2023-09-19 06:40:34.999999',count: '1'},
+          { name: "Test3" , version: '2022-09-19 06:40:34.999999',count: '2'}
+        ]
+      }),
+    } as any));
+
+    const result = await drizzle
+      .select({
+        name: testEntityDateVersion.name,
+        version: testEntityDateVersion.version,
+        count: rawSql`COUNT(*) as count`
+      })
+      .from(testEntityDateVersion)
+        .groupBy(testEntityDateVersion.name, testEntityDateVersion.version)
+    expect(result).toEqual([
+       {
+         "count": "0",
+        "name": "Test1",
+        "version": new Date('2024-09-19T03:40:34.999Z'),
+  },
+     {
+       "count": "1",
+      "name": "Test2",
+          "version": new Date('2023-09-19T03:40:34.999Z'),
+    },
+     {
+       "count": "2",
+      "name": "Test3",
+          "version": new Date('2022-09-19T03:40:34.999Z'),
+    },
+  ]);
   });
 
   it("should find duplicates in testEntity without aliases", async () => {
@@ -236,9 +277,7 @@ describe("ForgeSQLSelectOperations", () => {
         .groupBy(testEntity.name)
         .having(rawSql`COUNT(*) > 1`);
 
-    const result = await forgeSqlOperation
-        .fetch()
-        .executeQuery(query);
+    const result = await query;
 
     expect(result).toEqual([
       { name: "Test1", 'count': 2 },
@@ -272,9 +311,7 @@ describe("ForgeSQLSelectOperations", () => {
       .from(testEntity)
       .innerJoin(testDataEntity, eq(testEntity.id, testDataEntity.id));
 
-    const result = await forgeSqlOperation
-      .fetch()
-      .executeQuery(query);
+    const result = await  query
 
     expect(result).toEqual([
       { id: 1, name: "Test1", data: "t" },

@@ -7,7 +7,7 @@ import {
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
 import { drizzle } from "drizzle-orm/mysql2";
-import { MySql2Database } from "drizzle-orm/mysql2/driver";
+import { forgeDriver } from "../utils/forgeDriver";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -16,7 +16,7 @@ import { MySql2Database } from "drizzle-orm/mysql2/driver";
  */
 class ForgeSQLORMImpl implements ForgeSqlOperation {
   private static instance: ForgeSQLORMImpl | null = null;
-  private readonly drizzle: MySql2Database<Record<string, unknown>>;
+  private readonly drizzle;
   private readonly crudOperations: CRUDForgeSQL;
   private readonly fetchOperations: SchemaSqlForgeSql;
 
@@ -33,14 +33,13 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       if (newOptions.logRawSqlQuery) {
         console.debug("Initializing ForgeSQLORM...");
       }
-      // Initialize Drizzle instance for query building only
-      // This instance should not be used for direct database connections
-      this.drizzle = drizzle("");
+      // Initialize Drizzle instance with our custom driver
+      this.drizzle = drizzle(forgeDriver);
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
       console.error("ForgeSQLORM initialization failed:", error);
-      throw error; // Prevents inconsistent state
+      throw error;
     }
   }
 
@@ -81,7 +80,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *
    * @returns A Drizzle query builder instance for query construction only.
    */
-  getDrizzleQueryBuilder(): MySql2Database<Record<string, unknown>> {
+  getDrizzleQueryBuilder() {
     return this.drizzle;
   }
 }
@@ -122,7 +121,7 @@ class ForgeSQLORM {
    *
    * @returns A Drizzle query builder instance for query construction only.
    */
-  getDrizzleQueryBuilder(): MySql2Database<Record<string, unknown>> {
+  getDrizzleQueryBuilder() {
     return this.ormInstance.getDrizzleQueryBuilder();
   }
 }

@@ -21,10 +21,12 @@
   },
   "keywords": [
     "atlassian-forge",
+    "atlassian-forge-drizzle",
     "forge-sql",
     "forge",
     "drizzle",
     "drizzle-orm",
+    "drizzle-driver",
     "orm",
     "database"
   ],

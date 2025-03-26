@@ -3,7 +3,7 @@ import ForgeSQL from "forge-sql-orm";
 import { migrationRunner, sql } from "@forge/sql";
 import migration from "./migration";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
-import { getTableMetadata } from "../../../src";
+import { getTableMetadata } from "forge-sql-orm";
 import { InferInsertModel } from "drizzle-orm";
 import {
   additionalMetadata,
@@ -68,7 +68,6 @@ resolver.define("fetchOrCreateIfNotExists", async (): Promise<CreatedResponse> =
     testDataOptimisticDateId: await createIfNotExists(testDataOptimisticDate),
     testDataOptimisticTimeStampId: await createIfNotExists(testDataOptimisticTimestamp),
   };
-  console.log(JSON.stringify(newVar));
   return newVar;
 });
 
@@ -101,7 +100,6 @@ resolver.define("clearAll", async (req): Promise<void> => {
 resolver.define("update", async (req): Promise<string> => {
   try {
     const { objectName, data } = req.payload;
-    console.log("data=" + JSON.stringify(data));
     switch (objectName) {
       case "WITHOUT_VERSIONING": {
         await forgeSQL.crud().updateById(data as InferInsertModel<typeof testData>, testData);

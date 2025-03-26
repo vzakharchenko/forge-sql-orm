@@ -117,11 +117,19 @@ describe("ForgeSQLCrudOperations", () => {
   });
 
   it("should call SQL prepare and execute on insert", async () => {
-    await forgeSqlOperation.crud().insert(testEntity, [{ id: 1, name: "Test" }]);
-
+    vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+      query: "MOCK_QUERY",
+      params: [],
+      bindParams: vi.fn(),
+      execute: vi.fn().mockResolvedValue( {"rows":{"fieldCount":0,"affectedRows":1,"insertId":30006,"info":"","serverStatus":2,"warningStatus":0,"changedRows":0},"metadata":{"dbExecutionTime":5,"responseSize":111,"fields":[]}}),
+    } as any));
+    let number = await forgeSqlOperation.crud().insert(testEntity, [{ id: 1, name: "Test" }]);
+    expect(number).toEqual(30006);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
       "insert into `test_entity` (`id`, `name`) values (?, ?)",
     );
+
+
 
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
     expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test");
