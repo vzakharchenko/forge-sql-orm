@@ -36,6 +36,9 @@ jobs:
     - run: cd examples/forge-sql-orm-example-dynamic && npm i
     - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple && npm i
+    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-simple && npm i
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm run build
