@@ -2,37 +2,7 @@ import "reflect-metadata";
 import fs from "fs";
 import path from "path";
 import { MySqlTable, TableConfig } from "drizzle-orm/mysql-core";
-
-interface DrizzleColumn {
-  type: string;
-  notNull: boolean;
-  autoincrement?: boolean;
-  columnType?: any;
-  name: string;
-  getSQLType: () => string;
-}
-
-interface DrizzleSchema {
-  [tableName: string]: {
-    columns: {
-      [columnName: string]: DrizzleColumn;
-    };
-    indexes: {
-      [indexName: string]: {
-        columns: string[];
-        unique: boolean;
-      };
-    };
-    foreignKeys: {
-      [fkName: string]: {
-        column: string;
-        referencedTable: string;
-        referencedColumn: string;
-        getName: () => string;
-      };
-    };
-  };
-}
+import { getTableMetadata, generateDropTableStatements } from "../../src";
 
 /**
  * Generates a migration ID using current date
@@ -137,63 +107,23 @@ export const dropMigration = async (options: any) => {
       throw new Error(`Invalid schema file at: ${schemaPath}. Schema must export tables.`);
     }
 
-    // Process exported tables
-    const drizzleSchema: DrizzleSchema = {};
-
     // Get all exports that are tables
     const tables = Object.values(schemaModule) as MySqlTable<TableConfig>[];
 
-    tables.forEach(table => {
-      const symbols = Object.getOwnPropertySymbols(table);
-      const nameSymbol = symbols.find(s => s.toString().includes('Name'));
-      const columnsSymbol = symbols.find(s => s.toString().includes('Columns'));
-      const indexesSymbol = symbols.find(s => s.toString().includes('Indexes'));
-      const foreignKeysSymbol = symbols.find(s => s.toString().includes('ForeignKeys'));
-
-      if (table && nameSymbol && columnsSymbol) {
-        // @ts-ignore
-        drizzleSchema[table[nameSymbol]] = {
-          // @ts-ignore
-          columns: table[columnsSymbol],
-          // @ts-ignore
-          indexes: indexesSymbol ? table[indexesSymbol] || {} : {},
-          // @ts-ignore
-          foreignKeys: foreignKeysSymbol ? table[foreignKeysSymbol] || {} : {}
-        };
-      }
-    });
-
-    if (Object.keys(drizzleSchema).length === 0) {
+    if (tables.length === 0) {
       throw new Error(`No valid tables found in schema at: ${schemaPath}`);
     }
 
-    console.log('Found tables:', Object.keys(drizzleSchema));
+    // Get table names for logging
+    const tableNames = tables.map(table => {
+      const metadata = getTableMetadata(table);
+      return metadata.tableName;
+    }).filter(Boolean);
+
+    console.log('Found tables:', tableNames);
 
     // Generate drop statements
-    const dropStatements: string[] = [];
-
-    // Process each table
-    for (const [tableName, tableInfo] of Object.entries(drizzleSchema)) {
-      // Drop foreign keys first
-      for (const fk of Object.values(tableInfo.foreignKeys)) {
-        // @ts-ignore
-        const fkName = fk.getName();
-        dropStatements.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY \`${fkName}\`;`);
-      }
-
-      // Drop indexes
-      for (const [indexName, index] of Object.entries(tableInfo.indexes)) {
-        // Skip primary key
-        if (indexName === 'PRIMARY') continue;
-        dropStatements.push(`DROP INDEX \`${indexName}\` ON \`${tableName}\`;`);
-      }
-
-      // Drop table
-      dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
-    }
-
-    // Add migration to clear migrations table
-    dropStatements.push(`DELETE FROM __migrations;`);
+    const dropStatements = generateDropTableStatements(tables);
 
     // Generate and save migration files
     const migrationFile = generateMigrationFile(dropStatements, version);

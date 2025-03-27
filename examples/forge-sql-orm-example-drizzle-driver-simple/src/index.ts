@@ -1,10 +1,10 @@
 import Resolver from "@forge/resolver";
-import {forgeDriver} from "forge-sql-orm";
-import {migrationRunner, sql} from "@forge/sql";
+import {dropSchemaMigrations,applySchemaMigrations, forgeDriver} from "forge-sql-orm";
 import migration from "./migration";
 import {DuplicateResponse, SortType, UserResponse} from "./utils/Constants";
 import {asc, desc, eq, InferInsertModel, sql as rawSql} from "drizzle-orm";
 import {users} from "./entities";
+import * as schema from "./entities/schema";
 import {MySqlColumn} from "drizzle-orm/mysql-core/columns";
 import {drizzle} from "drizzle-orm/mysql2";
 
@@ -70,23 +70,9 @@ resolver.define("fetch", async (req): Promise<UserResponse[]> => {
 export const handler = resolver.getDefinitions();
 
 export const handlerMigration = async () => {
-  console.log("Provisioning the database");
-  await sql._provision();
-  console.info("Running schema migrations");
-  const migrations = await migration(migrationRunner);
-  const successfulMigrations = await migrations.run();
-  console.info("Migrations applied:", successfulMigrations);
-
-  const migrationHistory = (await migrationRunner.list())
-    .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-    .join("\n");
-
-  console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
-
-  return {
-    headers: { "Content-Type": ["application/json"] },
-    statusCode: 200,
-    statusText: "OK",
-    body: "Migrations successfully executed",
-  };
+ return applySchemaMigrations(migration)
 };
+
+export const dropMigrations = () =>{
+    return dropSchemaMigrations(Object.values(schema));
+}

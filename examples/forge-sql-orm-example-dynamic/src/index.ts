@@ -1,6 +1,5 @@
 import Resolver from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
-import { migrationRunner, sql } from "@forge/sql";
 import migration from "./migration";
 import {
   DuplicateResponse,
@@ -14,7 +13,8 @@ import { InferInsertModel, sql as rawSql, desc, asc } from "drizzle-orm";
 import { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
-import { getPrimaryKeys, getTableMetadata } from "forge-sql-orm";
+import { getPrimaryKeys, getTableMetadata, dropSchemaMigrations, applySchemaMigrations } from "forge-sql-orm";
+import * as schema from './entities/schema'
 
 // Initialize resolver and ForgeSQL
 const resolver = new Resolver();
@@ -183,38 +183,13 @@ resolver.define("fetch", async (req): Promise<DynamicResponse[]> => {
 
 // ============= Migration Handler =============
 
-/**
- * Handles database migrations
- * @returns Promise with migration execution result
- */
+
 export const handlerMigration = async () => {
-  try {
-    console.log("Provisioning the database");
-    await sql._provision();
-
-    console.info("Running schema migrations");
-    const migrations = await migration(migrationRunner);
-    const successfulMigrations = await migrations.run();
-    console.info("Migrations applied:", successfulMigrations);
-
-    const migrationHistory = (await migrationRunner.list())
-      .map(
-        (migration) => `${migration.id}, ${migration.name}, ${migration.migratedAt.toUTCString()}`,
-      )
-      .join("\n");
-
-    console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
-
-    return {
-      headers: { "Content-Type": ["application/json"] },
-      statusCode: 200,
-      statusText: "OK",
-      body: "Migrations successfully executed",
-    };
-  } catch (error) {
-    console.error("Migration error:", error);
-    throw error;
-  }
+  return applySchemaMigrations(migration)
 };
+
+export const dropMigrations = () =>{
+  return dropSchemaMigrations(Object.values(schema));
+}
 
 export const handler = resolver.getDefinitions();

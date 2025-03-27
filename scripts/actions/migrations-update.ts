@@ -386,7 +386,7 @@ function generateSchemaChanges(
         // Create index
         const columns = dbIndex.columns.map(col => `\`${col}\``).join(', ');
         const unique = dbIndex.unique ? 'UNIQUE ' : '';
-        changes.push(`CREATE if not exists ${unique}INDEX   \`${indexName}\` ON \`${tableName}\` (${columns});`);
+        changes.push(`CREATE  ${unique}INDEX if not exists  \`${indexName}\` ON \`${tableName}\` (${columns});`);
       }
 
       // Create foreign keys for new table
@@ -452,7 +452,7 @@ function generateSchemaChanges(
           // Index exists in database but not in schema - create it
           const columns = dbIndex.columns.map(col => `\`${col}\``).join(', ');
           const unique = dbIndex.unique ? 'UNIQUE ' : '';
-          changes.push(`CREATE if not exists ${unique}INDEX \`${indexName}\` ON \`${tableName}\` (${columns});`);
+          changes.push(`CREATE ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`);
           continue;
         }
 
@@ -464,7 +464,7 @@ function generateSchemaChanges(
           changes.push(`DROP INDEX \`${indexName}\` ON \`${tableName}\`;`);
           const columns = dbIndex.columns.map(col => `\`${col}\``).join(', ');
           const unique = dbIndex.unique ? 'UNIQUE ' : '';
-          changes.push(`CREATE if not exists  ${unique}INDEX \`${indexName}\` ON \`${tableName}\` (${columns});`);
+          changes.push(`CREATE  ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`);
         }
       }
 
