@@ -2,12 +2,12 @@ import "reflect-metadata";
 import fs from "fs";
 import path from "path";
 import mysql from "mysql2/promise";
-import { MySqlTable, TableConfig } from "drizzle-orm/mysql-core";
-import { RowDataPacket } from 'mysql2';
-import { getTableMetadata, MetadataInfo } from "../../src/utils/sqlUtils";
-import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
-import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
-import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
+import {MySqlTable, TableConfig} from "drizzle-orm/mysql-core";
+import {RowDataPacket} from 'mysql2';
+import {getTableMetadata} from "../../src/utils/sqlUtils";
+import {AnyIndexBuilder} from "drizzle-orm/mysql-core/indexes";
+import {ForeignKeyBuilder} from "drizzle-orm/mysql-core/foreign-keys";
+import {UniqueConstraintBuilder} from "drizzle-orm/mysql-core/unique-constraint";
 
 interface DrizzleColumn {
   type: string;
@@ -296,7 +296,7 @@ function normalizeMySQLType(mysqlType: string): string {
  */
 function getForeignKeyName(fk: ForeignKeyBuilder): string {
   // @ts-ignore - Internal property access
-  return fk.getName();
+  return fk.name;
 }
 
 /**
@@ -327,6 +327,12 @@ function getUniqueConstraintName(uc: UniqueConstraintBuilder): string {
 function getIndexColumns(index: AnyIndexBuilder): string[] {
   // @ts-ignore - Internal property access
   return index.columns.map(col => col.name);
+}
+
+function compareForeignKey(fk: ForeignKeyBuilder, {columns}: { columns: string[]; unique: boolean }) {
+  // @ts-ignore
+  const fcolumns:string[] = fk.columns.map(c=>c.name);
+  return fcolumns.sort().join(",") === columns.sort().join(",");
 }
 
 /**
@@ -429,7 +435,7 @@ function generateSchemaChanges(
         }
 
         // Check if this is a foreign key index
-        const isForeignKeyIndex = metadata.foreignKeys.some(fk => getForeignKeyName(fk) === indexName);
+        const isForeignKeyIndex = metadata.foreignKeys.some(fk => getForeignKeyName(fk) === indexName || compareForeignKey(fk, dbIndex));
         if (isForeignKeyIndex) {
           continue;
         }
@@ -465,7 +471,7 @@ function generateSchemaChanges(
       // First check foreign keys that exist in database but not in schema
       for (const [fkName, dbFK] of Object.entries(dbTable.foreignKeys)) {
         // Find if this column is referenced in Drizzle schema
-        const drizzleFK = metadata.foreignKeys.find(fk => getForeignKeyName(fk) === fkName);
+        const drizzleFK = metadata.foreignKeys.find(fk => getForeignKeyName(fk) === fkName || compareForeignKey(fk, {columns: [dbFK.column], unique: false}));
 
         if (!drizzleFK) {
           // Foreign key exists in database but not in schema - drop it
@@ -477,7 +483,10 @@ function generateSchemaChanges(
       // Then check for new foreign keys that exist in schema but not in database
       for (const drizzleForeignKey of metadata.foreignKeys) {
         // Find if this foreign key exists in database
-        const isDbFk = Object.keys(dbTable.foreignKeys).find(fk => fk === getForeignKeyName(drizzleForeignKey));
+        const isDbFk = Object.keys(dbTable.foreignKeys).find(fk => {
+          let foreignKey = dbTable.foreignKeys[fk];
+          return fk === getForeignKeyName(drizzleForeignKey) || compareForeignKey(drizzleForeignKey, {columns:[foreignKey.column],unique:false});
+        });
 
         if (!isDbFk) {
           // Foreign key exists in schema but not in database - create it
@@ -498,7 +507,8 @@ function generateSchemaChanges(
 export const updateMigration = async (options: any) => {
   try {
     let version = await loadMigrationVersion(options.output);
-    const prevVersion = version;
+    version=2;
+    const prevVersion = 1;
 
     if (version < 1) {
       console.log(

@@ -104,6 +104,62 @@ export function getPrimaryKeys<T extends AnyMySqlTable>(table: T): [string, AnyC
 }
 
 /**
+ * Processes foreign keys from both foreignKeysSymbol and extraSymbol
+ * @param table - The table schema
+ * @param foreignKeysSymbol - Symbol for foreign keys
+ * @param extraSymbol - Symbol for extra configuration
+ * @returns Array of foreign key builders
+ */
+function processForeignKeys(
+  table: AnyMySqlTable,
+  foreignKeysSymbol: symbol | undefined,
+  extraSymbol: symbol | undefined
+): ForeignKeyBuilder[] {
+  const foreignKeys: ForeignKeyBuilder[] = [];
+
+  // Process foreign keys from foreignKeysSymbol
+  if (foreignKeysSymbol) {
+    // @ts-ignore
+    const fkArray: any[] = table[foreignKeysSymbol];
+    if (fkArray) {
+      fkArray.forEach(fk => {
+        if (fk.reference) {
+          const item = fk.reference(fk);
+          foreignKeys.push(item);
+        }
+      });
+    }
+  }
+
+  // Process foreign keys from extraSymbol
+  if (extraSymbol) {
+    // @ts-ignore
+    const extraConfigBuilder = table[extraSymbol];
+    if (extraConfigBuilder && typeof extraConfigBuilder === "function") {
+      const configBuilderData = extraConfigBuilder(table);
+      if (configBuilderData) {
+        const configBuilders = Array.isArray(configBuilderData)
+          ? configBuilderData
+          : Object.values(configBuilderData).map(
+              (item) => (item as ConfigBuilderData).value || item,
+            );
+
+        configBuilders.forEach((builder) => {
+          if (!builder?.constructor) return;
+
+          const builderName = builder.constructor.name.toLowerCase();
+          if (builderName.includes('foreignkeybuilder')) {
+            foreignKeys.push(builder);
+          }
+        });
+      }
+    }
+  }
+
+  return foreignKeys;
+}
+
+/**
  * Extracts table metadata from the schema.
  * @param {AnyMySqlTable} table - The table schema
  * @returns {MetadataInfo} Object containing table metadata
@@ -112,6 +168,7 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
   const symbols = Object.getOwnPropertySymbols(table);
   const nameSymbol = symbols.find((s) => s.toString().includes("Name"));
   const columnsSymbol = symbols.find((s) => s.toString().includes("Columns"));
+  const foreignKeysSymbol = symbols.find((s) => s.toString().includes("ForeignKeys)"));
   const extraSymbol = symbols.find((s) => s.toString().includes("ExtraConfigBuilder"));
 
   // Initialize builders arrays
@@ -123,6 +180,9 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
     uniqueConstraints: [] as UniqueConstraintBuilder[],
     extras: [] as any[],
   };
+
+  // Process foreign keys
+  builders.foreignKeys = processForeignKeys(table, foreignKeysSymbol, extraSymbol);
 
   // Process extra configuration if available
   if (extraSymbol) {
@@ -148,7 +208,6 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
           const builderMap = {
             indexbuilder: builders.indexes,
             checkbuilder: builders.checks,
-            foreignkeybuilder: builders.foreignKeys,
             primarykeybuilder: builders.primaryKeys,
             uniqueconstraintbuilder: builders.uniqueConstraints,
           };
