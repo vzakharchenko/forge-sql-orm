@@ -1,6 +1,6 @@
 {
   "name": "forge-sql-orm",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Drizzle ORM integration for Forge-SQL in Atlassian Forge applications.",
   "main": "dist/ForgeSQLORM.js",
   "module": "dist/ForgeSQLORM.mjs",
