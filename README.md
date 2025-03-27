@@ -342,4 +342,284 @@ const orderWithUser = await forgeSQL
   .select({
     orderId: rawSql`${Orders.id} as \`orderId\``,
     product: Orders.product,
-    userName: rawSql`${Users.name} as \`
+    userName: rawSql`${Users.name} as \`userName\``
+  }).from(Orders)
+  .innerJoin(Users, eq(Orders.userId, Users.id))
+  .where(eq(Orders.id, 1));
+
+// OR with direct drizzle
+const db = drizzle(forgeDriver);
+const orderWithUser = await db
+  .select({
+    orderId: rawSql`${Orders.id} as \`orderId\``,
+    product: Orders.product,
+    userName: rawSql`${Users.name} as \`userName\``
+  }).from(Orders)
+  .innerJoin(Users, eq(Orders.userId, Users.id))
+  .where(eq(Orders.id, 1));
+// Returns: { orderId: 1, product: "Product 1", userName: "John Doe" }
+```
+
+### Complex Queries with Aggregations
+
+```js
+// Finding duplicates
+// With forgeSQL
+const duplicates = await forgeSQL
+  .getDrizzleQueryBuilder()
+  .select({
+    name: Users.name,
+    count: rawSql`COUNT(*) as \`count\``
+  }).from(Users)
+  .groupBy(Users.name)
+  .having(rawSql`COUNT(*) > 1`);
+
+// OR with direct drizzle
+const db = drizzle(forgeDriver);
+const duplicates = await db
+  .select({
+    name: Users.name,
+    count: rawSql`COUNT(*) as \`count\``
+  }).from(Users)
+  .groupBy(Users.name)
+  .having(rawSql`COUNT(*) > 1`);
+// Returns: { name: "John Doe", count: 2 }
+
+// Using executeQueryOnlyOne for unique results
+const userStats = await forgeSQL
+  .fetch()
+  .executeQueryOnlyOne(
+    forgeSQL
+      .getDrizzleQueryBuilder()
+      .select({
+        totalUsers: rawSql`COUNT(*) as \`totalUsers\``,
+        uniqueNames: rawSql`COUNT(DISTINCT name) as \`uniqueNames\``
+      }).from(Users)
+  );
+// Returns: { totalUsers: 100, uniqueNames: 80 }
+// Throws error if multiple records found
+```
+
+### Raw SQL Queries
+
+```js
+// Using executeRawSQL for direct SQL queries
+const users = await forgeSQL
+  .fetch()
+  .executeRawSQL<Users>("SELECT * FROM users");
+```
+
+## CRUD Operations
+
+### Insert Operations
+
+  ```js
+// Single insert
+const userId = await forgeSQL.crud().insert(Users, [{ id: 1, name: "Smith" }]);
+
+// Bulk insert
+await forgeSQL.crud().insert(Users, [
+    { id: 2, name: "Smith" },
+    { id: 3, name: "Vasyl" },
+  ]);
+
+// Insert with duplicate handling
+  await forgeSQL.crud().insert(
+  Users,
+    [
+      { id: 4, name: "Smith" },
+      { id: 4, name: "Vasyl" },
+    ],
+  true
+  );
+  ```
+
+### Update Operations
+
+  ```js
+// Update by ID with optimistic locking
+await forgeSQL.crud().updateById({ id: 1, name: "Smith Updated" }, Users);
+
+// Update specific fields
+await forgeSQL.crud().updateById(
+  { id: 1,  age: 35 },
+  Users
+);
+
+// Update with custom WHERE condition
+await forgeSQL.crud().updateFields(
+    { name: "New Name", age: 35 },
+  Users,
+  eq(Users.email, "smith@example.com")
+);
+```
+
+### Delete Operations
+
+```js
+// Delete by ID
+await forgeSQL.crud().deleteById(1, Users);
+```
+
+## Optimistic Locking
+
+Optimistic locking is a concurrency control mechanism that prevents data conflicts when multiple transactions attempt to update the same record concurrently. Instead of using locks, this technique relies on a version field in your entity models.
+
+### Supported Version Field Types
+
+- `datetime` - Timestamp-based versioning
+- `timestamp` - Timestamp-based versioning
+- `integer` - Numeric version increment
+- `decimal` - Numeric version increment
+
+### Configuration
+
+```typescript
+const options = {
+  additionalMetadata: {
+    users: {
+      tableName: "users",
+      versionField: {
+        fieldName: "updatedAt",
+      }
+    }
+  }
+};
+
+const forgeSQL = new ForgeSQL(options);
+```
+
+### Example Usage
+
+```typescript
+// The version field will be automatically handled
+await forgeSQL.crud().updateById(
+  { 
+    id: 1, 
+    name: "Updated Name",
+    updatedAt: new Date() // Will be automatically set if not provided
+  }, 
+  Users
+);
+```
+
+## ForgeSqlOrmOptions
+
+The `ForgeSqlOrmOptions` object allows customization of ORM behavior:
+
+| Option                     | Type      | Description                                                                                                                                                                                                                     |
+| -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logRawSqlQuery`           | `boolean` | Enables logging of raw SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`.                                                                                         |
+| `disableOptimisticLocking` | `boolean` | Disables optimistic locking. When set to `true`, no additional condition (e.g., a version check) is added during record updates, which can improve performance. However, this may lead to conflicts when multiple transactions attempt to update the same record concurrently. |
+| `additionalMetadata`       | `object`  | Allows adding custom metadata to all entities. This is useful for tracking common fields across all tables (e.g., `createdAt`, `updatedAt`, `createdBy`, etc.). The metadata will be automatically added to all generated entities. |
+
+## CLI Commands
+
+```sh
+$ npx forge-sql-orm --help
+
+Usage: forge-sql-orm [options] [command]
+
+Options:
+  -V, --version                Output the version number
+  -h, --help                   Display help for command
+
+Commands:
+  generate:model [options]     Generate Drizzle models from the database
+  migrations:create [options]  Generate an initial migration for the entire database
+  migrations:update [options]  Generate a migration to update the database schema
+  migrations:drop [options]    Generate a migration to drop all tables
+  help [command]               Display help for a specific command
+```
+
+## Web Triggers for Migrations
+
+Forge-SQL-ORM provides two web triggers for managing database migrations in Atlassian Forge:
+
+### 1. Apply Migrations Trigger
+
+This trigger allows you to apply database migrations through a web endpoint. It's useful for:
+- Manually triggering migrations 
+- Running migrations as part of your deployment process
+- Testing migrations in different environments
+
+```typescript
+// Example usage in your Forge app
+import { applySchemaMigrations } from "forge-sql-orm";
+import migration from "./migration";
+
+export const handlerMigration = async () => {
+  return applySchemaMigrations(migration);
+};
+```
+
+Configure in `manifest.yml`:
+```yaml
+  webtrigger:
+     - key: invoke-schema-migration
+       function: runSchemaMigration
+       security:
+          egress:
+             allowDataEgress: false
+             allowedResponses:
+                - statusCode: 200
+                  body: '{"body": "Migrations successfully executed"}'
+  sql:
+     - key: main
+       engine: mysql
+  function:
+     - key: runSchemaMigration
+       handler: index.handlerMigration
+```
+
+### 2. Drop Migrations Trigger
+
+⚠️ **WARNING**: This trigger will permanently delete all data in the specified tables and clear the migrations history. This operation cannot be undone!
+
+This trigger allows you to completely reset your database schema. It's useful for:
+- Development environments where you need to start fresh
+- Testing scenarios requiring a clean database
+- Resetting the database before applying new migrations
+
+**Important**: The trigger will only drop tables that are defined in your models. Any tables that exist in the database but are not defined in your models will remain untouched.
+
+```typescript
+// Example usage in your Forge app
+import { dropSchemaMigrations } from "forge-sql-orm";
+import * as schema from "./entities/schema";
+
+export const dropMigrations = () => {
+  return dropSchemaMigrations(Object.values(schema));
+};
+```
+
+Configure in `manifest.yml`:
+```yaml
+  webtrigger:
+     - key: drop-schema-migration
+       function: dropMigrations
+  sql:
+     - key: main
+       engine: mysql
+  function:
+     - key: dropMigrations
+       handler: index.dropMigrations
+```
+
+### Important Notes
+
+**Security Considerations**:
+   - The drop migrations trigger should be restricted to development environments
+   - Consider implementing additional authentication for these endpoints
+   - Use the `security` section in `manifest.yml` to control access
+
+**Best Practices**:
+   - Always backup your data before using the drop migrations trigger
+   - Test migrations in a development environment first
+   - Use these triggers as part of your deployment pipeline
+   - Monitor the execution logs in the Forge Developer Console
+
+
+## License
+This project is licensed under the **MIT License**.  
+Feel free to use it for commercial and personal projects.
