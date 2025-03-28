@@ -79,7 +79,7 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 
 ```sh
 npm install forge-sql-orm @forge/sql drizzle-orm momment -S
-npm install mysql2 drizzle-kit  -D
+npm install mysql2 drizzle-kit inquirer@8.0.0  -D
 ```
 
 This will:
