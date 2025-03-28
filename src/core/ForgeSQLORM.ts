@@ -87,6 +87,22 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     return this.drizzle;
   }
 
+  /**
+   * Creates a select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   * 
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .select({user: users, order: orders})
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
   select<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
@@ -96,6 +112,22 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     return this.drizzle.select(mapSelectFieldsWithAlias(fields));
   }
 
+  /**
+   * Creates a distinct select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   * 
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A distinct select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .selectDistinct({user: users, order: orders})
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
@@ -117,11 +149,44 @@ class ForgeSQLORM implements ForgeSqlOperation {
     this.ormInstance = ForgeSQLORMImpl.getInstance(options);
   }
 
+  /**
+   * Creates a select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   * 
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .select({user: users, order: orders})
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
   select<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
     return this.ormInstance.getDrizzleQueryBuilder().select(mapSelectFieldsWithAlias(fields));
   }
+
+  /**
+   * Creates a distinct select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   * 
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A distinct select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .selectDistinct({user: users, order: orders})
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
