@@ -1,5 +1,4 @@
-import {forgeDateTimeString, forgeTimestampString} from "forge-sql-orm";
-
+import { forgeDateTimeString, forgeTimestampString } from "forge-sql-orm";
 
 import {
   mysqlTable,

@@ -6,8 +6,11 @@ import {
   SchemaSqlForgeSql,
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle, MySql2PreparedQueryHKT } from "drizzle-orm/mysql2";
 import { forgeDriver } from "../utils/forgeDriver";
+import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
+import { mapSelectFieldsWithAlias } from "../utils/sqlUtils";
+import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -34,7 +37,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         console.debug("Initializing ForgeSQLORM...");
       }
       // Initialize Drizzle instance with our custom driver
-      this.drizzle = drizzle(forgeDriver);
+      this.drizzle = drizzle(forgeDriver, { logger: newOptions.logRawSqlQuery });
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
@@ -83,17 +86,48 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   getDrizzleQueryBuilder() {
     return this.drizzle;
   }
+
+  select<TSelection extends SelectedFields>(
+    fields: TSelection,
+  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+    if (!fields) {
+      throw new Error("fields is empty");
+    }
+    return this.drizzle.select(mapSelectFieldsWithAlias(fields));
+  }
+
+  selectDistinct<TSelection extends SelectedFields>(
+    fields: TSelection,
+  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+    if (!fields) {
+      throw new Error("fields is empty");
+    }
+    return this.drizzle.selectDistinct(mapSelectFieldsWithAlias(fields));
+  }
 }
 
 /**
  * Public class that acts as a wrapper around the private ForgeSQLORMImpl.
  * Provides a clean interface for working with Forge SQL and Drizzle ORM.
  */
-class ForgeSQLORM {
+class ForgeSQLORM implements ForgeSqlOperation {
   private readonly ormInstance: ForgeSqlOperation;
 
   constructor(options?: ForgeSqlOrmOptions) {
     this.ormInstance = ForgeSQLORMImpl.getInstance(options);
+  }
+
+  select<TSelection extends SelectedFields>(
+    fields: TSelection,
+  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+    return this.ormInstance.getDrizzleQueryBuilder().select(mapSelectFieldsWithAlias(fields));
+  }
+  selectDistinct<TSelection extends SelectedFields>(
+    fields: TSelection,
+  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+    return this.ormInstance
+      .getDrizzleQueryBuilder()
+      .selectDistinct(mapSelectFieldsWithAlias(fields));
   }
 
   /**

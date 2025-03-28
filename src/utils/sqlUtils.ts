@@ -1,11 +1,15 @@
 import moment from "moment";
-import { AnyColumn } from "drizzle-orm";
+import { AnyColumn, Column, isTable, sql } from "drizzle-orm";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core/index";
 import { PrimaryKeyBuilder } from "drizzle-orm/mysql-core/primary-keys";
 import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
 import { CheckBuilder } from "drizzle-orm/mysql-core/checks";
 import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
 import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
+import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
+import { MySqlTable } from "drizzle-orm/mysql-core";
+import { getTableName } from "drizzle-orm/table";
+import { isSQLWrapper } from "drizzle-orm/sql/sql";
 
 /**
  * Interface representing table metadata information
@@ -113,7 +117,7 @@ export function getPrimaryKeys<T extends AnyMySqlTable>(table: T): [string, AnyC
 function processForeignKeys(
   table: AnyMySqlTable,
   foreignKeysSymbol: symbol | undefined,
-  extraSymbol: symbol | undefined
+  extraSymbol: symbol | undefined,
 ): ForeignKeyBuilder[] {
   const foreignKeys: ForeignKeyBuilder[] = [];
 
@@ -122,7 +126,7 @@ function processForeignKeys(
     // @ts-ignore
     const fkArray: any[] = table[foreignKeysSymbol];
     if (fkArray) {
-      fkArray.forEach(fk => {
+      fkArray.forEach((fk) => {
         if (fk.reference) {
           const item = fk.reference(fk);
           foreignKeys.push(item);
@@ -148,7 +152,7 @@ function processForeignKeys(
           if (!builder?.constructor) return;
 
           const builderName = builder.constructor.name.toLowerCase();
-          if (builderName.includes('foreignkeybuilder')) {
+          if (builderName.includes("foreignkeybuilder")) {
             foreignKeys.push(builder);
           }
         });
@@ -242,7 +246,7 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
 export function generateDropTableStatements(tables: AnyMySqlTable[]): string[] {
   const dropStatements: string[] = [];
 
-  tables.forEach(table => {
+  tables.forEach((table) => {
     const tableMetadata = getTableMetadata(table);
     if (tableMetadata.tableName) {
       dropStatements.push(`DROP TABLE IF EXISTS \`${tableMetadata.tableName}\`;`);
@@ -253,4 +257,50 @@ export function generateDropTableStatements(tables: AnyMySqlTable[]): string[] {
   dropStatements.push(`DELETE FROM __migrations;`);
 
   return dropStatements;
+}
+
+export function mapSelectTableToAlias(table: MySqlTable): any {
+  const { columns, tableName } = getTableMetadata(table);
+  const selectionsTableFields: Record<string, unknown> = {};
+  Object.keys(columns).forEach((name) => {
+    const column = columns[name] as AnyColumn;
+    const fieldAlias = sql.raw(`${tableName}_${column.name}`);
+    selectionsTableFields[name] = sql`${column} as \`${fieldAlias}\``;
+  });
+  return selectionsTableFields;
+}
+
+function isDrizzleColumn(column: any): boolean {
+  return column && typeof column === "object" && "table" in column;
+}
+
+export function mapSelectAllFieldsToAlias(selections: any, name: string, fields: any): any {
+  if (isTable(fields)) {
+    selections[name] = mapSelectTableToAlias(fields as MySqlTable);
+  } else if (isDrizzleColumn(fields)) {
+    const column = fields as Column;
+    let aliasName = sql.raw(`${getTableName(column.table)}_${column.name}`);
+    selections[name] = sql`${column} as \`${aliasName}\``;
+  } else if (isSQLWrapper(fields)) {
+    selections[name] = fields;
+  } else {
+    const innerSelections: any = {};
+    Object.entries(fields).forEach(([iname, ifields]) => {
+      mapSelectAllFieldsToAlias(innerSelections, iname, ifields);
+    });
+    selections[name] = innerSelections;
+  }
+  return selections;
+}
+export function mapSelectFieldsWithAlias<TSelection extends SelectedFields>(
+  fields: TSelection,
+): TSelection {
+  if (!fields) {
+    throw new Error("fields is empty");
+  }
+  const selections: any = {};
+  Object.entries(fields).forEach(([name, fields]) => {
+    mapSelectAllFieldsToAlias(selections, name, fields);
+  });
+  return selections;
 }

@@ -13,8 +13,13 @@ import { InferInsertModel, sql as rawSql, desc, asc } from "drizzle-orm";
 import { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
-import { getPrimaryKeys, getTableMetadata, dropSchemaMigrations, applySchemaMigrations } from "forge-sql-orm";
-import * as schema from './entities/schema'
+import {
+  getPrimaryKeys,
+  getTableMetadata,
+  dropSchemaMigrations,
+  applySchemaMigrations,
+} from "forge-sql-orm";
+import * as schema from "./entities/schema";
 
 // Initialize resolver and ForgeSQL
 const resolver = new Resolver();
@@ -183,13 +188,12 @@ resolver.define("fetch", async (req): Promise<DynamicResponse[]> => {
 
 // ============= Migration Handler =============
 
-
 export const handlerMigration = async () => {
-  return applySchemaMigrations(migration)
+  return applySchemaMigrations(migration);
 };
 
-export const dropMigrations = () =>{
+export const dropMigrations = () => {
   return dropSchemaMigrations(Object.values(schema));
-}
+};
 
 export const handler = resolver.getDefinitions();
