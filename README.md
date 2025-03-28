@@ -71,27 +71,6 @@ await db
 - The solution automatically creates unique aliases for each field by prefixing them with the table name
 - This ensures that fields with the same name from different tables remain distinct in the query results
 
-## Решение проблемы маппинга полей при сложных запросах(innerjoin, join и так далее) 
-Добавь сюда про проблему в атлассиан что если при джойне табллиц совпадают названия полей, в этом случае atlassian forge все схлопывает в одно поле со значением null. Это решение делает уникальные алиасы на каждое select поле.
-т.е. можно использовать вот так используя forge-sql-orm
- 
-import ForgeSQL from "forge-sql-orm";
-
-const forgeSQL = new ForgeSQL();
-
-await forgeSQL.select({user: users, order:orders}).from(orders).innerjoin(users, eq(rders.userId ,users.id))
-
-
-import { drizzle } from "drizzle-orm/mysql-core";
-import { forgeDriver , mapSelectFieldsWithAlias} from "forge-sql-orm";
-const db = drizzle(forgeDriver);
-
-await db.select(mapSelectFieldsWithAlias({user: users, order:orders})).from(orders).innerjoin(users, eq(rders.userId ,users.id))
-
-
-Нужно уточнить что это проблема не drizzle orm а логика работы атлассиан forge sql
-при сложных запросах где участвует несколько таблиц желательно не использовать select() без выбора select полей
-
 ## Installation
 
 Forge-SQL-ORM is designed to work with @forge/sql and requires some additional setup to ensure compatibility within Atlassian Forge.
