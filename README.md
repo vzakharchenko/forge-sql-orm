@@ -23,14 +23,74 @@ import { drizzle } from "drizzle-orm/mysql-core";
 import { forgeDriver } from "forge-sql-orm";
 const db = drizzle(forgeDriver);
 ```
-Best for: Simple CRUD operations without optimistic locking
+Best for: Simple CRUD operations without optimistic locking. Note that you need to manually set `mapSelectFieldsWithAlias` for select fields to prevent field name collisions in Atlassian Forge SQL.
 
 ### 2. Full Forge-SQL-ORM Usage
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 const forgeSQL = new ForgeSQL();
 ```
-Best for: Advanced features like optimistic locking and automatic versioning
+Best for: Advanced features like optimistic locking, automatic versioning, and automatic field name collision prevention in complex queries.
+
+## Field Name Collision Prevention in Complex Queries
+
+When working with complex queries involving multiple tables (joins, inner joins, etc.), Atlassian Forge SQL has a specific behavior where fields with the same name from different tables get collapsed into a single field with a null value. This is not a Drizzle ORM issue but rather a characteristic of Atlassian Forge SQL's behavior.
+
+Forge-SQL-ORM provides two ways to handle this:
+
+### Using Forge-SQL-ORM
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+// Automatic field name collision prevention
+await forgeSQL
+  .select({user: users, order: orders})
+  .from(orders)
+  .innerJoin(users, eq(orders.userId, users.id));
+```
+
+### Using Direct Drizzle
+```typescript
+import { drizzle } from "drizzle-orm/mysql-core";
+import { forgeDriver, mapSelectFieldsWithAlias } from "forge-sql-orm";
+
+const db = drizzle(forgeDriver);
+
+// Manual field name collision prevention
+await db
+  .select(mapSelectFieldsWithAlias({user: users, order: orders}))
+  .from(orders)
+  .innerJoin(users, eq(orders.userId, users.id));
+```
+
+### Important Notes
+- This is a specific behavior of Atlassian Forge SQL, not Drizzle ORM
+- For complex queries involving multiple tables, it's recommended to always specify select fields and avoid using `select()` without field selection
+- The solution automatically creates unique aliases for each field by prefixing them with the table name
+- This ensures that fields with the same name from different tables remain distinct in the query results
+
+## Решение проблемы маппинга полей при сложных запросах(innerjoin, join и так далее) 
+Добавь сюда про проблему в атлассиан что если при джойне табллиц совпадают названия полей, в этом случае atlassian forge все схлопывает в одно поле со значением null. Это решение делает уникальные алиасы на каждое select поле.
+т.е. можно использовать вот так используя forge-sql-orm
+ 
+import ForgeSQL from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+await forgeSQL.select({user: users, order:orders}).from(orders).innerjoin(users, eq(rders.userId ,users.id))
+
+
+import { drizzle } from "drizzle-orm/mysql-core";
+import { forgeDriver , mapSelectFieldsWithAlias} from "forge-sql-orm";
+const db = drizzle(forgeDriver);
+
+await db.select(mapSelectFieldsWithAlias({user: users, order:orders})).from(orders).innerjoin(users, eq(rders.userId ,users.id))
+
+
+Нужно уточнить что это проблема не drizzle orm а логика работы атлассиан forge sql
+при сложных запросах где участвует несколько таблиц желательно не использовать select() без выбора select полей
 
 ## Installation
 
@@ -40,7 +100,7 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 
 ```sh
 npm install forge-sql-orm @forge/sql drizzle-orm momment -S
-npm install mysql2 drizzle-kit -D
+npm install mysql2 drizzle-kit  -D
 ```
 
 This will:
@@ -293,13 +353,13 @@ const users = await db.select().from(users);
 // Using forgeSQL.getDrizzleQueryBuilder()
 const user = await forgeSQL
   .getDrizzleQueryBuilder()
-  .select("*").from(Users)
+  .select().from(Users)
   .where(eq(Users.id, 1));
 
 // OR using direct drizzle with custom driver
 const db = drizzle(forgeDriver);
 const user = await db
-  .select("*").from(Users)
+  .select().from(Users)
   .where(eq(Users.id, 1));
 // Returns: { id: 1, name: "John Doe" }
 
@@ -309,7 +369,7 @@ const user = await forgeSQL
   .executeQueryOnlyOne(
     forgeSQL
       .getDrizzleQueryBuilder()
-      .select("*").from(Users)
+      .select().from(Users)
       .where(eq(Users.id, 1))
   );
 // Returns: { id: 1, name: "John Doe" }
@@ -322,67 +382,69 @@ const usersAlias = alias(Users, "u");
 const result = await forgeSQL
   .getDrizzleQueryBuilder()
   .select({
-    userId: rawSql`${usersAlias.id} as \`userId\``,
-    userName: rawSql`${usersAlias.name} as \`userName\``
+    userId: sql<string>`${usersAlias.id} as \`userId\``,
+    userName: sql<string>`${usersAlias.name} as \`userName\``
   }).from(usersAlias);
 
 // OR with direct drizzle
 const db = drizzle(forgeDriver);
 const result = await db
   .select({
-    userId: rawSql`${usersAlias.id} as \`userId\``,
-    userName: rawSql`${usersAlias.name} as \`userName\``
+    userId: sql<string>`${usersAlias.id} as \`userId\``,
+    userName: sql<string>`${usersAlias.name} as \`userName\``
   }).from(usersAlias);
 // Returns: { userId: 1, userName: "John Doe" }
+```
 
-// Using joins
+### Complex Queries
+```js
+
+// Using joins with automatic field name collision prevention
 // With forgeSQL
 const orderWithUser = await forgeSQL
-  .getDrizzleQueryBuilder()
-  .select({
-    orderId: rawSql`${Orders.id} as \`orderId\``,
-    product: Orders.product,
-    userName: rawSql`${Users.name} as \`userName\``
-  }).from(Orders)
-  .innerJoin(Users, eq(Orders.userId, Users.id))
-  .where(eq(Orders.id, 1));
+  .select({user: users, order: orders})
+  .from(orders)
+  .innerJoin(users, eq(orders.userId, users.id));
 
 // OR with direct drizzle
 const db = drizzle(forgeDriver);
 const orderWithUser = await db
-  .select({
-    orderId: rawSql`${Orders.id} as \`orderId\``,
-    product: Orders.product,
-    userName: rawSql`${Users.name} as \`userName\``
-  }).from(Orders)
-  .innerJoin(Users, eq(Orders.userId, Users.id))
-  .where(eq(Orders.id, 1));
-// Returns: { orderId: 1, product: "Product 1", userName: "John Doe" }
-```
+  .select(mapSelectFieldsWithAlias({user: users, order: orders}))
+  .from(orders)
+  .innerJoin(users, eq(orders.userId, users.id));
+// Returns: { 
+//   user_id: 1, 
+//   user_name: "John Doe",
+//   order_id: 1,
+//   order_product: "Product 1"
+// }
 
-### Complex Queries with Aggregations
+// Using distinct select with automatic field name collision prevention
+const uniqueOrdersWithUsers = await forgeSQL
+  .selectDistinct({user: users, order: orders})
+  .from(orders)
+  .innerJoin(users, eq(orders.userId, users.id));
 
-```js
 // Finding duplicates
 // With forgeSQL
 const duplicates = await forgeSQL
   .getDrizzleQueryBuilder()
   .select({
     name: Users.name,
-    count: rawSql`COUNT(*) as \`count\``
+    count: sql<number>`COUNT(*) as \`count\``
   }).from(Users)
   .groupBy(Users.name)
-  .having(rawSql`COUNT(*) > 1`);
+  .having(sql`COUNT(*) > 1`);
 
 // OR with direct drizzle
 const db = drizzle(forgeDriver);
 const duplicates = await db
   .select({
     name: Users.name,
-    count: rawSql`COUNT(*) as \`count\``
+    count: sql<number>`COUNT(*) as \`count\``
   }).from(Users)
   .groupBy(Users.name)
-  .having(rawSql`COUNT(*) > 1`);
+  .having(sql`COUNT(*) > 1`);
 // Returns: { name: "John Doe", count: 2 }
 
 // Using executeQueryOnlyOne for unique results
@@ -392,8 +454,8 @@ const userStats = await forgeSQL
     forgeSQL
       .getDrizzleQueryBuilder()
       .select({
-        totalUsers: rawSql`COUNT(*) as \`totalUsers\``,
-        uniqueNames: rawSql`COUNT(DISTINCT name) as \`uniqueNames\``
+        totalUsers: sql`COUNT(*) as \`totalUsers\``,
+        uniqueNames: sql`COUNT(DISTINCT name) as \`uniqueNames\``
       }).from(Users)
   );
 // Returns: { totalUsers: 100, uniqueNames: 80 }

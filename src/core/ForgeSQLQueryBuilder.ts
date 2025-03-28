@@ -1,11 +1,20 @@
 import { UpdateQueryResponse } from "@forge/sql";
 import { SqlParameters } from "@forge/sql/out/sql-statement";
 import { MySql2Database } from "drizzle-orm/mysql2/driver";
-import { AnyMySqlSelectQueryBuilder, AnyMySqlTable, customType } from "drizzle-orm/mysql-core";
-import { MySqlSelectDynamic } from "drizzle-orm/mysql-core/query-builders/select.types";
+import {
+  AnyMySqlSelectQueryBuilder,
+  AnyMySqlTable,
+  customType,
+  MySqlSelectBuilder,
+} from "drizzle-orm/mysql-core";
+import {
+  MySqlSelectDynamic,
+  type SelectedFields,
+} from "drizzle-orm/mysql-core/query-builders/select.types";
 import { InferInsertModel, SQL } from "drizzle-orm";
 import moment from "moment/moment";
 import { parseDateTime } from "../utils/sqlUtils";
+import { MySql2PreparedQueryHKT } from "drizzle-orm/mysql2/index";
 
 // ============= Core Types =============
 
@@ -37,6 +46,14 @@ export interface QueryBuilderForgeSql {
    * @returns {MySql2Database<Record<string, unknown>>} The Drizzle database instance for building queries
    */
   getDrizzleQueryBuilder(): MySql2Database<Record<string, unknown>>;
+
+  select<TSelection extends SelectedFields>(
+    fields: TSelection,
+  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>;
+
+  selectDistinct<TSelection extends SelectedFields>(
+    fields: TSelection,
+  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>;
 }
 
 // ============= CRUD Operations =============
@@ -189,12 +206,6 @@ export interface ForgeSqlOrmOptions {
    * @default false
    */
   logRawSqlQuery?: boolean;
-  /**
-   * Enables logging of raw SQL queries in the Atlassian Forge Developer Console.
-   * Useful for debugging and monitoring SQL operations.
-   * @default false
-   */
-  logRawSqlQueryParams?: boolean;
 
   /**
    * Disables optimistic locking for all operations.

@@ -4,7 +4,7 @@ import migration from "./migration";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { InferInsertModel } from "drizzle-orm";
 import { getTableMetadata, dropSchemaMigrations, applySchemaMigrations } from "forge-sql-orm";
-import * as schema from './entities/schema'
+import * as schema from "./entities/schema";
 import {
   additionalMetadata,
   testData,
@@ -145,10 +145,9 @@ resolver.define("update", async (req): Promise<string> => {
 export const handler = resolver.getDefinitions();
 
 export const handlerMigration = async () => {
-  return applySchemaMigrations(migration)
+  return applySchemaMigrations(migration);
 };
 
-export const dropMigrations = () =>{
+export const dropMigrations = () => {
   return dropSchemaMigrations(Object.values(schema));
-}
-
+};

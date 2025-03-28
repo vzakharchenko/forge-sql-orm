@@ -1,7 +1,9 @@
-import {migrationRunner, sql} from "@forge/sql";
-import {MigrationRunner} from "@forge/sql/out/migration";
+import { migrationRunner, sql } from "@forge/sql";
+import { MigrationRunner } from "@forge/sql/out/migration";
 
-export const applySchemaMigrations = async (migration: (migrationRunner:MigrationRunner )=>Promise<MigrationRunner>) => {
+export const applySchemaMigrations = async (
+  migration: (migrationRunner: MigrationRunner) => Promise<MigrationRunner>,
+) => {
   console.log("Provisioning the database");
   await sql._provision();
   console.info("Running schema migrations");
@@ -10,8 +12,8 @@ export const applySchemaMigrations = async (migration: (migrationRunner:Migratio
   console.info("Migrations applied:", successfulMigrations);
 
   const migrationHistory = (await migrationRunner.list())
-      .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-      .join("\n");
+    .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
+    .join("\n");
 
   console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
 
@@ -22,4 +24,3 @@ export const applySchemaMigrations = async (migration: (migrationRunner:Migratio
     body: "Migrations successfully executed",
   };
 };
-

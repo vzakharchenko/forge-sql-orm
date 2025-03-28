@@ -1,11 +1,11 @@
 import Resolver from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
-import {dropSchemaMigrations, applySchemaMigrations} from "forge-sql-orm";
+import { dropSchemaMigrations, applySchemaMigrations } from "forge-sql-orm";
 import migration from "./migration";
-import {DuplicateResponse, SortType, UserResponse} from "./utils/Constants";
-import {asc, desc, InferInsertModel, sql as rawSql} from "drizzle-orm";
-import {users} from "./entities";
-import {MySqlColumn} from "drizzle-orm/mysql-core/columns";
+import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
+import { asc, desc, InferInsertModel, sql as rawSql } from "drizzle-orm";
+import { users } from "./entities";
+import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
 import * as schema from "./entities/schema";
 
 const resolver = new Resolver();
@@ -13,7 +13,7 @@ const forgeSQL = new ForgeSQL({ logRawSqlQuery: true });
 
 resolver.define("create", async (req): Promise<number> => {
   const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
-    return await forgeSQL.crud().insert(users, [payload]);
+  return await forgeSQL.crud().insert(users, [payload]);
 });
 
 resolver.define("delete", async (req): Promise<number> => {
@@ -23,15 +23,15 @@ resolver.define("delete", async (req): Promise<number> => {
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   const duplicateResult = await forgeSQL
-      .getDrizzleQueryBuilder()
-      .select({
-        name: users.name,
-        email: users.email,
-        count: rawSql`COUNT(*) as \`count\``,
-      })
-      .from(users)
-      .groupBy(users.name, users.email)
-      .having(rawSql`COUNT(*) > 1`)
+    .getDrizzleQueryBuilder()
+    .select({
+      name: users.name,
+      email: users.email,
+      count: rawSql`COUNT(*) as \`count\``,
+    })
+    .from(users)
+    .groupBy(users.name, users.email)
+    .having(rawSql`COUNT(*) > 1`);
 
   return duplicateResult.map(
     (d): DuplicateResponse => ({
@@ -68,9 +68,9 @@ resolver.define("fetch", async (req): Promise<UserResponse[]> => {
 export const handler = resolver.getDefinitions();
 
 export const handlerMigration = async () => {
-    applySchemaMigrations(migration)
+  applySchemaMigrations(migration);
 };
 
-export const dropMigrations = () =>{
-    return dropSchemaMigrations(Object.values(schema));
-}
+export const dropMigrations = () => {
+  return dropSchemaMigrations(Object.values(schema));
+};

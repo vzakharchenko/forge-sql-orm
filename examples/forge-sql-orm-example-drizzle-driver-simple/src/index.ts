@@ -1,39 +1,39 @@
 import Resolver from "@forge/resolver";
-import {dropSchemaMigrations,applySchemaMigrations, forgeDriver} from "forge-sql-orm";
+import { dropSchemaMigrations, applySchemaMigrations, forgeDriver } from "forge-sql-orm";
 import migration from "./migration";
-import {DuplicateResponse, SortType, UserResponse} from "./utils/Constants";
-import {asc, desc, eq, InferInsertModel, sql as rawSql} from "drizzle-orm";
-import {users} from "./entities";
+import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
+import { asc, desc, eq, InferInsertModel, sql as rawSql } from "drizzle-orm";
+import { users } from "./entities";
 import * as schema from "./entities/schema";
-import {MySqlColumn} from "drizzle-orm/mysql-core/columns";
-import {drizzle} from "drizzle-orm/mysql2";
+import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
+import { drizzle } from "drizzle-orm/mysql2";
 
 const resolver = new Resolver();
 
-const db = drizzle(forgeDriver, {logger: true});
+const db = drizzle(forgeDriver, { logger: true });
 
 resolver.define("create", async (req): Promise<number> => {
   const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
-    let result = await db.insert(users).values(payload);
-    return result[0].insertId;
+  let result = await db.insert(users).values(payload);
+  return result[0].insertId;
 });
 
 resolver.define("delete", async (req): Promise<number> => {
   const id = req.payload.id as number;
-    const result = await db.delete(users).where(eq(users.id,id));
-    return result[0].affectedRows;
+  const result = await db.delete(users).where(eq(users.id, id));
+  return result[0].affectedRows;
 });
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   const duplicateResult = await db
-      .select({
-        name: users.name,
-        email: users.email,
-        count: rawSql`COUNT(*) as \`count\``,
-      })
-      .from(users)
-      .groupBy(users.name, users.email)
-      .having(rawSql`COUNT(*) > 1`)
+    .select({
+      name: users.name,
+      email: users.email,
+      count: rawSql`COUNT(*) as \`count\``,
+    })
+    .from(users)
+    .groupBy(users.name, users.email)
+    .having(rawSql`COUNT(*) > 1`);
 
   return duplicateResult.map(
     (d): DuplicateResponse => ({
@@ -70,9 +70,9 @@ resolver.define("fetch", async (req): Promise<UserResponse[]> => {
 export const handler = resolver.getDefinitions();
 
 export const handlerMigration = async () => {
- return applySchemaMigrations(migration)
+  return applySchemaMigrations(migration);
 };
 
-export const dropMigrations = () =>{
-    return dropSchemaMigrations(Object.values(schema));
-}
+export const dropMigrations = () => {
+  return dropSchemaMigrations(Object.values(schema));
+};

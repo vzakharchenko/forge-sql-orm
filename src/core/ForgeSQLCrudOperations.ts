@@ -38,7 +38,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
   async insert<T extends AnyMySqlTable>(
     schema: T,
     models: Partial<InferInsertModel<T>>[],
-      updateIfExists: boolean = false,
+    updateIfExists: boolean = false,
   ): Promise<number> {
     if (!models?.length) return 0;
 
@@ -113,7 +113,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       .delete(schema)
       .where(and(...conditions));
 
-    const result =await queryBuilder;
+    const result = await queryBuilder;
 
     return result[0].affectedRows;
   }

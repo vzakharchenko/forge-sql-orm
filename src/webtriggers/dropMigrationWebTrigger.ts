@@ -1,14 +1,7 @@
 import { sql } from "@forge/sql";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
-import { generateDropTableStatements as generateStatements, getTableMetadata } from "../utils/sqlUtils";
-import {getHttpResponse, TriggerResponse} from "./index";
-
-export interface DropTablesResponse {
-  message: string;
-  droppedTables: string[];
-  warning?: string;
-}
-
+import { generateDropTableStatements as generateStatements } from "../utils/sqlUtils";
+import { getHttpResponse, TriggerResponse } from "./index";
 
 /**
  * ⚠️ WARNING: This web trigger will permanently delete all data in the specified tables.
@@ -19,7 +12,7 @@ export interface DropTablesResponse {
  * @returns Trigger response with execution status and list of dropped tables
  */
 export async function dropSchemaMigrations(
-  tables: AnyMySqlTable[]
+  tables: AnyMySqlTable[],
 ): Promise<TriggerResponse<string>> {
   try {
     // Generate drop statements
@@ -31,17 +24,12 @@ export async function dropSchemaMigrations(
       await sql.executeDDL(statement);
     }
 
-    // Get list of dropped tables
-    const droppedTables = tables
-      .map(table => {
-        const metadata = getTableMetadata(table);
-        return metadata.tableName;
-      })
-      .filter(Boolean);
-
-    return getHttpResponse<string>(200,  "⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.");
+    return getHttpResponse<string>(
+      200,
+      "⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.",
+    );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return getHttpResponse<string>(500, errorMessage);
   }
 }
