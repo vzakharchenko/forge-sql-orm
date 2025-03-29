@@ -19,7 +19,7 @@
 
 ### 1. Direct Drizzle Usage
 ```typescript
-import { drizzle } from "drizzle-orm/mysql-core";
+import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
 const db = drizzle(forgeDriver);
 ```
@@ -53,7 +53,7 @@ await forgeSQL
 
 ### Using Direct Drizzle
 ```typescript
-import { drizzle } from "drizzle-orm/mysql-core";
+import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver, mapSelectFieldsWithAlias } from "forge-sql-orm";
 
 const db = drizzle(forgeDriver);
