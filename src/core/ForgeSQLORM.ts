@@ -6,7 +6,7 @@ import {
   SchemaSqlForgeSql,
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
-import { drizzle, MySql2PreparedQueryHKT } from "drizzle-orm/mysql2";
+import { drizzle, MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "../utils/forgeDriver";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { mapSelectFieldsWithAlias } from "../utils/sqlUtils";
@@ -83,14 +83,14 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *
    * @returns A Drizzle query builder instance for query construction only.
    */
-  getDrizzleQueryBuilder() {
+  getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> {
     return this.drizzle;
   }
 
   /**
    * Creates a select query with unique field aliases to prevent field name collisions in joins.
    * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
-   * 
+   *
    * @template TSelection - The type of the selected fields
    * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
    * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A select query builder with unique field aliases
@@ -105,7 +105,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    */
   select<TSelection extends SelectedFields>(
     fields: TSelection,
-  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
     if (!fields) {
       throw new Error("fields is empty");
     }
@@ -115,7 +115,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Creates a distinct select query with unique field aliases to prevent field name collisions in joins.
    * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
-   * 
+   *
    * @template TSelection - The type of the selected fields
    * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
    * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A distinct select query builder with unique field aliases
@@ -130,7 +130,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    */
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
-  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
     if (!fields) {
       throw new Error("fields is empty");
     }
@@ -152,7 +152,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Creates a select query with unique field aliases to prevent field name collisions in joins.
    * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
-   * 
+   *
    * @template TSelection - The type of the selected fields
    * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
    * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A select query builder with unique field aliases
@@ -167,14 +167,14 @@ class ForgeSQLORM implements ForgeSqlOperation {
    */
   select<TSelection extends SelectedFields>(
     fields: TSelection,
-  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
     return this.ormInstance.getDrizzleQueryBuilder().select(mapSelectFieldsWithAlias(fields));
   }
 
   /**
    * Creates a distinct select query with unique field aliases to prevent field name collisions in joins.
    * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
-   * 
+   *
    * @template TSelection - The type of the selected fields
    * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
    * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A distinct select query builder with unique field aliases
@@ -189,7 +189,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    */
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
-  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT> {
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
     return this.ormInstance
       .getDrizzleQueryBuilder()
       .selectDistinct(mapSelectFieldsWithAlias(fields));

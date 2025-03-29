@@ -6,7 +6,7 @@ import { asc, desc, eq, InferInsertModel, sql as rawSql } from "drizzle-orm";
 import { users } from "./entities";
 import * as schema from "./entities/schema";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/mysql-proxy";
 
 const resolver = new Resolver();
 

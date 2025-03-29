@@ -68,7 +68,7 @@ resolver.define("fetch", async (req): Promise<UserResponse[]> => {
 export const handler = resolver.getDefinitions();
 
 export const handlerMigration = async () => {
-  applySchemaMigrations(migration);
+  return applySchemaMigrations(migration);
 };
 
 export const dropMigrations = () => {

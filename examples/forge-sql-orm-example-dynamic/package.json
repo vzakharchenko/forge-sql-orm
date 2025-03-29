@@ -5,9 +5,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/resolver": "1.6.8",
-    "@forge/sql": "^2.4.1",
-    "forge-sql-orm": "2.0.8"
+    "@forge/resolver": "1.6.9",
+    "@forge/sql": "^2.4.2",
+    "forge-sql-orm": "file:../.."
   },
   "scripts": {
     "models:create": "forge-sql-orm generate:model --output src/entities",
@@ -18,6 +18,6 @@
   },
   "devDependencies": {
     "dotenv": "^16.4.7",
-    "inquirer": "8.2.4"
+    "inquirer": "12.5.0"
   }
 }

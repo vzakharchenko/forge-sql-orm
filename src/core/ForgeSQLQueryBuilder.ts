@@ -1,6 +1,5 @@
 import { UpdateQueryResponse } from "@forge/sql";
 import { SqlParameters } from "@forge/sql/out/sql-statement";
-import { MySql2Database } from "drizzle-orm/mysql2/driver";
 import {
   AnyMySqlSelectQueryBuilder,
   AnyMySqlTable,
@@ -14,7 +13,7 @@ import {
 import { InferInsertModel, SQL } from "drizzle-orm";
 import moment from "moment/moment";
 import { parseDateTime } from "../utils/sqlUtils";
-import { MySql2PreparedQueryHKT } from "drizzle-orm/mysql2/index";
+import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy/index";
 
 // ============= Core Types =============
 
@@ -45,15 +44,15 @@ export interface QueryBuilderForgeSql {
    * Creates a new query builder for the given entity.
    * @returns {MySql2Database<Record<string, unknown>>} The Drizzle database instance for building queries
    */
-  getDrizzleQueryBuilder(): MySql2Database<Record<string, unknown>>;
+  getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>>;
 
   select<TSelection extends SelectedFields>(
     fields: TSelection,
-  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>;
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
-  ): MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>;
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 }
 
 // ============= CRUD Operations =============

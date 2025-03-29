@@ -24,16 +24,6 @@ modules:
             - statusCode: 200
               body: '{"body": "Migrations successfully executed"}'
     - key: drop-schema-migration
-      function: dropSchemaMigration
-      security:
-        egress:
-          allowDataEgress: false
-          allowedResponses:
-            - statusCode: 200
-              body: '{"body": "Migrations successfully executed"}'
-            - statusCode: 500
-              body: '{"body": "Migrations successfully executed"}'
-    - key: drop-schema-migration
       function: dropMigrations
   sql:
     - key: main

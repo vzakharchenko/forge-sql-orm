@@ -93,7 +93,7 @@ This will:
 If you prefer to use Drizzle ORM directly without the additional features of Forge-SQL-ORM (like optimistic locking), you can use the custom driver:
 
 ```typescript
-import { drizzle } from "drizzle-orm/mysql-core";
+import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
 
 // Initialize drizzle with the custom driver
@@ -314,7 +314,7 @@ const forgeSQL = new ForgeSQL();
 or 
 
 ```typescript
-import { drizzle } from "drizzle-orm/mysql-core";
+import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
 
 // Initialize drizzle with the custom driver

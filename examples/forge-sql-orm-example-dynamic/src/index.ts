@@ -122,14 +122,11 @@ async function findDuplicates<T extends AnyMySqlTable>(table: T): Promise<Duplic
   selectFields["count"] = rawSql`COUNT(*) as \`count\``;
 
   // Build and execute query
-  const query = forgeSQL
-    .getDrizzleQueryBuilder()
+  const duplicateResult = await forgeSQL
     .select(selectFields)
     .from(table)
     .groupBy(...groupByFields)
     .having(rawSql`COUNT(*) > 1`);
-
-  const duplicateResult = await forgeSQL.fetch().executeQuery(query);
 
   // Transform results
   return duplicateResult.map(
@@ -170,7 +167,7 @@ resolver.define("fetch", async (req): Promise<DynamicResponse[]> => {
         )
       : baseQuery;
 
-  const result = await forgeSQL.fetch().executeQuery(query);
+  const result = await query;
 
   // Transform results
   return result.map((record): DynamicResponse => {
