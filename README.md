@@ -652,7 +652,6 @@ Configure in `manifest.yml`:
 **Security Considerations**:
    - The drop migrations trigger should be restricted to development environments
    - Consider implementing additional authentication for these endpoints
-   - Use the `security` section in `manifest.yml` to control access
 
 **Best Practices**:
    - Always backup your data before using the drop migrations trigger
