@@ -3,7 +3,12 @@ import ForgeSQL from "forge-sql-orm";
 import migration from "./migration";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { InferInsertModel } from "drizzle-orm";
-import { getTableMetadata, dropSchemaMigrations, applySchemaMigrations } from "forge-sql-orm";
+import {
+  getTableMetadata,
+  dropSchemaMigrations,
+  applySchemaMigrations,
+  fetchSchemaWebTrigger,
+} from "forge-sql-orm";
 import * as schema from "./entities/schema";
 import {
   additionalMetadata,
@@ -150,4 +155,8 @@ export const handlerMigration = async () => {
 
 export const dropMigrations = () => {
   return dropSchemaMigrations(Object.values(schema));
+};
+
+export const fetchMigrations = () => {
+  return fetchSchemaWebTrigger();
 };

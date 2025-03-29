@@ -46,10 +46,42 @@ export interface QueryBuilderForgeSql {
    */
   getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>>;
 
+  /**
+   * Creates a select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   *
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @returns {MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>} A select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .select({user: users, order: orders})
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
   select<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 
+  /**
+   * Creates a distinct select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   *
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @returns {MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>} A distinct select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .selectDistinct({user: users, order: orders})
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;

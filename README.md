@@ -11,7 +11,8 @@
 - ✅ **Automatic entity generation** from MySQL/tidb databases
 - ✅ **Automatic migration generation** from MySQL/tidb databases
 - ✅ **Drop Migrations** Generate a migration to drop all tables and clear migrations history for subsequent schema recreation
-- ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying and dropping migrations with proper error handling and security controls
+- ✅ **Schema Fetching** Development-only web trigger to retrieve current database schema and generate SQL statements for schema recreation
+- ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying migrations, dropping tables (development-only), and fetching schema (development-only) with proper error handling and security controls
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
 - ✅ **Type Safety** Full TypeScript support with proper type inference
 
@@ -70,6 +71,7 @@ await db
 - For complex queries involving multiple tables, it's recommended to always specify select fields and avoid using `select()` without field selection
 - The solution automatically creates unique aliases for each field by prefixing them with the table name
 - This ensures that fields with the same name from different tables remain distinct in the query results
+
 
 ## Installation
 
@@ -575,7 +577,7 @@ Commands:
 
 ## Web Triggers for Migrations
 
-Forge-SQL-ORM provides two web triggers for managing database migrations in Atlassian Forge:
+Forge-SQL-ORM provides web triggers for managing database migrations in Atlassian Forge:
 
 ### 1. Apply Migrations Trigger
 
@@ -647,10 +649,57 @@ Configure in `manifest.yml`:
        handler: index.dropMigrations
 ```
 
+### 3. Fetch Schema Trigger
+
+⚠️ **DEVELOPMENT ONLY**: This trigger is designed for development environments only and should not be used in production.
+
+This trigger retrieves the current database schema from Atlassian Forge SQL and generates SQL statements that can be used to recreate the database structure. It's useful for:
+- Development environment setup
+- Schema documentation
+- Database structure verification
+- Creating backup scripts
+
+**Security Considerations**:
+- This trigger exposes your database structure
+- It temporarily disables foreign key checks
+- It may expose sensitive table names and structures
+- Should only be used in development environments
+
+```typescript
+// Example usage in your Forge app
+import { fetchSchemaWebTrigger } from "forge-sql-orm";
+
+export const fetchSchema = async () => {
+  return fetchSchemaWebTrigger();
+};
+```
+
+Configure in `manifest.yml`:
+```yaml
+  webtrigger:
+     - key: fetch-schema
+       function: fetchSchema
+  sql:
+     - key: main
+       engine: mysql
+  function:
+     - key: fetchSchema
+       handler: index.fetchSchema
+```
+
+The response will contain SQL statements like:
+```sql
+SET foreign_key_checks = 0;
+CREATE TABLE IF NOT EXISTS users (...);
+CREATE TABLE IF NOT EXISTS orders (...);
+SET foreign_key_checks = 1;
+```
+
 ### Important Notes
 
 **Security Considerations**:
    - The drop migrations trigger should be restricted to development environments
+   - The fetch schema trigger should only be used in development
    - Consider implementing additional authentication for these endpoints
 
 **Best Practices**:
@@ -658,7 +707,6 @@ Configure in `manifest.yml`:
    - Test migrations in a development environment first
    - Use these triggers as part of your deployment pipeline
    - Monitor the execution logs in the Forge Developer Console
-
 
 ## License
 This project is licensed under the **MIT License**.  

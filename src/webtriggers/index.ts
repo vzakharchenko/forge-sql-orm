@@ -1,5 +1,6 @@
 export * from "./dropMigrationWebTrigger";
 export * from "./applyMigrationsWebTrigger";
+export * from "./fetchSchemaWebTrigger";
 
 export interface TriggerResponse<BODY> {
   body?: BODY;

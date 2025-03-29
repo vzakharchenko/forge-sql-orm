@@ -1,6 +1,6 @@
 import Resolver from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
-import { dropSchemaMigrations, applySchemaMigrations } from "forge-sql-orm";
+import { dropSchemaMigrations, applySchemaMigrations, fetchSchemaWebTrigger } from "forge-sql-orm";
 import migration from "./migration";
 import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
 import { asc, desc, InferInsertModel, sql as rawSql } from "drizzle-orm";
@@ -73,4 +73,8 @@ export const handlerMigration = async () => {
 
 export const dropMigrations = () => {
   return dropSchemaMigrations(Object.values(schema));
+};
+
+export const fetchMigrations = () => {
+  return fetchSchemaWebTrigger();
 };

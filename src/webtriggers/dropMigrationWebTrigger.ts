@@ -4,12 +4,28 @@ import { generateDropTableStatements as generateStatements } from "../utils/sqlU
 import { getHttpResponse, TriggerResponse } from "./index";
 
 /**
- * ⚠️ WARNING: This web trigger will permanently delete all data in the specified tables.
- * DO NOT use this in production environment as it will cause irreversible data loss.
+ * ⚠️ DEVELOPMENT ONLY WEB TRIGGER ⚠️
  *
- * Generates SQL statements to drop tables and executes them
+ * This web trigger is designed for development environments only and will permanently delete all data in the specified tables.
+ * It generates and executes SQL statements to drop tables and their associated constraints.
+ *
+ * @warning This trigger should NEVER be used in production environments because:
+ * - It permanently deletes all data in the specified tables
+ * - The operation cannot be undone
+ * - It may affect application functionality
+ * - It could lead to data loss and system instability
+ *
  * @param tables - Array of table schemas to drop
- * @returns Trigger response with execution status and list of dropped tables
+ * @returns {Promise<TriggerResponse<string>>} A response containing:
+ * - On success: 200 status with warning message about permanent deletion
+ * - On failure: 500 status with error message
+ *
+ * @example
+ * ```typescript
+ * // Example usage in development only
+ * await dropSchemaMigrations([users, orders]);
+ * // ⚠️ Warning: This will permanently delete all data in users and orders tables
+ * ```
  */
 export async function dropSchemaMigrations(
   tables: AnyMySqlTable[],

@@ -1,7 +1,10 @@
-import { int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core/index";
+import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { Table } from "drizzle-orm";
 
 export const migrations = mysqlTable("__migrations", {
-  id: int("id").primaryKey().autoincrement(),
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
-  created_at: timestamp("created_at").defaultNow().notNull(),
+  migratedAt: timestamp("migratedAt").defaultNow().notNull(),
 });
+
+export const forgeSystemTables: Table[] = [migrations];

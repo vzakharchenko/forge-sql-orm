@@ -17,6 +17,7 @@ import {
   getPrimaryKeys,
   getTableMetadata,
   dropSchemaMigrations,
+  fetchSchemaWebTrigger,
   applySchemaMigrations,
 } from "forge-sql-orm";
 import * as schema from "./entities/schema";
@@ -191,6 +192,10 @@ export const handlerMigration = async () => {
 
 export const dropMigrations = () => {
   return dropSchemaMigrations(Object.values(schema));
+};
+
+export const fetchMigrations = () => {
+  return fetchSchemaWebTrigger();
 };
 
 export const handler = resolver.getDefinitions();
