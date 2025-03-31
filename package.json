@@ -80,7 +80,6 @@
   "files": [
     "dist",
     "dist-cli",
-    "src",
     "node_modules",
     "tsconfig.json",
     "README.md"
