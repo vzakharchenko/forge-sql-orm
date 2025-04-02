@@ -2,13 +2,14 @@ import moment from "moment";
 import {sql} from "@forge/sql";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import ForgeSQLORM from "../../../src/core/ForgeSQLORM";
-import {ForgeSqlOperation} from "../../../src";
+import {forgeDriver, ForgeSqlOperation, patchDbWithSelectAliased} from "../../../src";
 import {testEntity} from "../../entities/TestEntity";
 import {testDataEntity} from "../../entities/TestDataEntity";
 import {eq, sql as rawSql} from "drizzle-orm";
 import {testEntityDateVersion} from "../../entities/TestEntityDateVersion";
 import {testEntityJoin1} from "../../entities/TestEntityJoin1";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
+import { drizzle } from "drizzle-orm/mysql-proxy";
 
 vi.mock("@forge/sql", () => ({
     sql: {
@@ -329,8 +330,14 @@ describe("ForgeSQLSelectOperations", () => {
             bindParams: vi.fn(),
             execute: vi.fn().mockResolvedValue({
                 rows: [
-                    {test_entity_join1_id: 1, name: "Test1", data: "t1", name2: "Test21", data2: "t21", count:1},
-                    {test_entity_join1_id: 2, name: "Test2", data: "t2", name2: "Test22", data2: "t22", count:2}
+                    {test_entity_join1_id: 1, name: "Test1", data: "t1", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test21", data2: "t21", count:1},
+                    {test_entity_join1_id: 2, name: "Test2", data: "t2", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test22", data2: "t22", count:2}
                 ]
             }),
         } as any));
@@ -346,11 +353,139 @@ describe("ForgeSQLSelectOperations", () => {
 
         const result = await query
         expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-            "select `test_entity_join1`.`id` as `test_entity_join1_id`, `test_entity_join1`.`name` as `test_entity_join1_name`, `test_entity_join1`.`email` as `test_entity_join1_email`, `test_entity_join2`.`name` as `test_entity_join2_name`, `test_entity_join2`.`email` as `test_entity_join2_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
+            "select `test_entity_join1`.`id` as `a_test_entity_join1_id`, `test_entity_join1`.`name` as `a_test_entity_join1_name`, `test_entity_join1`.`email` as `a_test_entity_join1_email`, `test_entity_join1`.`custom_type` as `a_test_entity_join1_custom_type`, `test_entity_join2`.`name` as `a_test_entity_join2_name`, `test_entity_join2`.`email` as `a_test_entity_join2_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
         );
         expect(result).toEqual([
-            {table1: {id: 1, name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
-            {table1: {id: 2, name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
+            {table1: {id: 1,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
+            {table1: {id: 2,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
+        ]);
+    });
+
+    it("should execute inner join with the same fields distinct", async () => {
+        // Mock result without aliases
+        vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+            query: "MOCK_QUERY",
+            params: [],
+            bindParams: vi.fn(),
+            execute: vi.fn().mockResolvedValue({
+                rows: [
+                    {test_entity_join1_id: 1, name: "Test1", data: "t1", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test21", data2: "t21", count:1},
+                    {test_entity_join1_id: 2, name: "Test2", data: "t2", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test22", data2: "t22", count:2}
+                ]
+            }),
+        } as any));
+
+        const query = forgeSqlOperation.selectDistinct(
+            {
+                table1: testEntityJoin1,
+              table2: {name: testEntityJoin2.name, email: testEntityJoin2.email},
+                count: rawSql<number>`COUNT(*)`
+            })
+            .from(testEntityJoin1)
+            .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id));
+
+        const result = await query
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "select distinct `test_entity_join1`.`id` as `a_test_entity_join1_id`, `test_entity_join1`.`name` as `a_test_entity_join1_name`, `test_entity_join1`.`email` as `a_test_entity_join1_email`, `test_entity_join1`.`custom_type` as `a_test_entity_join1_custom_type`, `test_entity_join2`.`name` as `a_test_entity_join2_name`, `test_entity_join2`.`email` as `a_test_entity_join2_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
+        );
+        expect(result).toEqual([
+            {table1: {id: 1,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
+            {table1: {id: 2,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
+        ]);
+    });
+
+
+    it("should execute inner join with the same fields dirrect drizzle", async () => {
+        // Mock result without aliases
+        vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+            query: "MOCK_QUERY",
+            params: [],
+            bindParams: vi.fn(),
+            execute: vi.fn().mockResolvedValue({
+                rows: [
+                    {test_entity_join1_id: 1, name: "Test1", data: "t1", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test21", data2: "t21", count:1},
+                    {test_entity_join1_id: 2, name: "Test2", data: "t2", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test22", data2: "t22", count:2}
+                ]
+            }),
+        } as any));
+
+        const db = patchDbWithSelectAliased(drizzle(forgeDriver, { logger: true }));
+        const query = db.selectAliased(
+            {
+                table1: testEntityJoin1,
+                table2: {name: testEntityJoin2.name, email: testEntityJoin2.email},
+                count: rawSql<number>`COUNT(*)`
+            })
+            .from(testEntityJoin1)
+            .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id));
+
+        const result = await query
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "select `test_entity_join1`.`id` as `a_test_entity_join1_id`, `test_entity_join1`.`name` as `a_test_entity_join1_name`, `test_entity_join1`.`email` as `a_test_entity_join1_email`, `test_entity_join1`.`custom_type` as `a_test_entity_join1_custom_type`, `test_entity_join2`.`name` as `a_test_entity_join2_name`, `test_entity_join2`.`email` as `a_test_entity_join2_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
+        );
+        expect(result).toEqual([
+            {table1: {id: 1,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
+            {table1: {id: 2,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
+        ]);
+    });
+
+    it("should execute inner join with the same fields dirrect drizzle distinct", async () => {
+        // Mock result without aliases
+        vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+            query: "MOCK_QUERY",
+            params: [],
+            bindParams: vi.fn(),
+            execute: vi.fn().mockResolvedValue({
+                rows: [
+                    {test_entity_join1_id: 1, name: "Test1", data: "t1", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test21", data2: "t21", count:1},
+                    {test_entity_join1_id: 2, name: "Test2", data: "t2", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test22", data2: "t22", count:2}
+                ]
+            }),
+        } as any));
+
+        const db = patchDbWithSelectAliased(drizzle(forgeDriver, { logger: true }));
+        const query = db.selectAliasedDistinct(
+            {
+                table1: testEntityJoin1,
+                table2: {name: testEntityJoin2.name, email: testEntityJoin2.email},
+                count: rawSql<number>`COUNT(*)`
+            })
+            .from(testEntityJoin1)
+            .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id));
+
+        const result = await query
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "select distinct `test_entity_join1`.`id` as `a_test_entity_join1_id`, `test_entity_join1`.`name` as `a_test_entity_join1_name`, `test_entity_join1`.`email` as `a_test_entity_join1_email`, `test_entity_join1`.`custom_type` as `a_test_entity_join1_custom_type`, `test_entity_join2`.`name` as `a_test_entity_join2_name`, `test_entity_join2`.`email` as `a_test_entity_join2_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
+        );
+        expect(result).toEqual([
+            {table1: {id: 1,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
+            {table1: {id: 2,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
         ]);
     });
 });

@@ -9,8 +9,8 @@ import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
 import { drizzle, MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "../utils/forgeDriver";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
-import { mapSelectFieldsWithAlias } from "../utils/sqlUtils";
 import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
+import {patchDbWithSelectAliased} from "../lib/drizzle/extensions/selectAliased";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -37,7 +37,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         console.debug("Initializing ForgeSQLORM...");
       }
       // Initialize Drizzle instance with our custom driver
-      this.drizzle = drizzle(forgeDriver, { logger: newOptions.logRawSqlQuery });
+      this.drizzle =  patchDbWithSelectAliased(drizzle(forgeDriver, { logger: newOptions.logRawSqlQuery }));
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
@@ -109,7 +109,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     if (!fields) {
       throw new Error("fields is empty");
     }
-    return this.drizzle.select(mapSelectFieldsWithAlias(fields));
+    return this.drizzle.selectAliased(fields);
   }
 
   /**
@@ -134,7 +134,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     if (!fields) {
       throw new Error("fields is empty");
     }
-    return this.drizzle.selectDistinct(mapSelectFieldsWithAlias(fields));
+    return this.drizzle.selectAliasedDistinct(fields);
   }
 }
 
@@ -168,7 +168,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   select<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
-    return this.ormInstance.getDrizzleQueryBuilder().select(mapSelectFieldsWithAlias(fields));
+    return this.ormInstance.select(fields);
   }
 
   /**
@@ -191,8 +191,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
     return this.ormInstance
-      .getDrizzleQueryBuilder()
-      .selectDistinct(mapSelectFieldsWithAlias(fields));
+      .selectDistinct(fields);
   }
 
   /**

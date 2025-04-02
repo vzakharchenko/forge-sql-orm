@@ -24,7 +24,7 @@ import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
 const db = drizzle(forgeDriver);
 ```
-Best for: Simple CRUD operations without optimistic locking. Note that you need to manually set `mapSelectFieldsWithAlias` for select fields to prevent field name collisions in Atlassian Forge SQL.
+Best for: Simple CRUD operations without optimistic locking. Note that you need to manually patch drizzle `patchDbWithSelectAliased` for select fields to prevent field name collisions in Atlassian Forge SQL.
 
 ### 2. Full Forge-SQL-ORM Usage
 ```typescript
@@ -55,13 +55,13 @@ await forgeSQL
 ### Using Direct Drizzle
 ```typescript
 import { drizzle } from "drizzle-orm/mysql-proxy";
-import { forgeDriver, mapSelectFieldsWithAlias } from "forge-sql-orm";
+import { forgeDriver, patchDbWithSelectAliased } from "forge-sql-orm";
 
-const db = drizzle(forgeDriver);
+const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 
 // Manual field name collision prevention
 await db
-  .select(mapSelectFieldsWithAlias({user: users, order: orders}))
+  .selectAliased({user: users, order: orders})
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
 ```
@@ -96,10 +96,10 @@ If you prefer to use Drizzle ORM directly without the additional features of For
 
 ```typescript
 import { drizzle } from "drizzle-orm/mysql-proxy";
-import { forgeDriver } from "forge-sql-orm";
+import { forgeDriver, patchDbWithSelectAliased } from "forge-sql-orm";
 
-// Initialize drizzle with the custom driver
-const db = drizzle(forgeDriver);
+// Initialize drizzle with the custom driver and patch it for aliased selects
+const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 
 // Use drizzle directly
 const users = await db.select().from(users);
@@ -379,7 +379,6 @@ const result = await db
 
 ### Complex Queries
 ```js
-
 // Using joins with automatic field name collision prevention
 // With forgeSQL
 const orderWithUser = await forgeSQL
@@ -388,9 +387,9 @@ const orderWithUser = await forgeSQL
   .innerJoin(users, eq(orders.userId, users.id));
 
 // OR with direct drizzle
-const db = drizzle(forgeDriver);
+const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 const orderWithUser = await db
-  .select(mapSelectFieldsWithAlias({user: users, order: orders}))
+  .selectAliased({user: users, order: orders})
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
 // Returns: { 
@@ -400,33 +399,11 @@ const orderWithUser = await db
 //   order_product: "Product 1"
 // }
 
-// Using distinct select with automatic field name collision prevention
-const uniqueOrdersWithUsers = await forgeSQL
-  .selectDistinct({user: users, order: orders})
-  .from(orders)
-  .innerJoin(users, eq(orders.userId, users.id));
-
-// Finding duplicates
-// With forgeSQL
-const duplicates = await forgeSQL
-  .getDrizzleQueryBuilder()
-  .select({
-    name: Users.name,
-    count: sql<number>`COUNT(*) as \`count\``
-  }).from(Users)
-  .groupBy(Users.name)
-  .having(sql`COUNT(*) > 1`);
-
-// OR with direct drizzle
-const db = drizzle(forgeDriver);
-const duplicates = await db
-  .select({
-    name: Users.name,
-    count: sql<number>`COUNT(*) as \`count\``
-  }).from(Users)
-  .groupBy(Users.name)
-  .having(sql`COUNT(*) > 1`);
-// Returns: { name: "John Doe", count: 2 }
+// Using distinct with aliases
+const uniqueUsers = await db
+  .selectAliasedDistinct({user: users})
+  .from(users);
+// Returns unique users with aliased fields
 
 // Using executeQueryOnlyOne for unique results
 const userStats = await forgeSQL

@@ -4,6 +4,7 @@ import {
   applySchemaMigrations,
   fetchSchemaWebTrigger,
   forgeDriver,
+    patchDbWithSelectAliased
 } from "forge-sql-orm";
 import migration from "./migration";
 import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
@@ -15,7 +16,7 @@ import { drizzle } from "drizzle-orm/mysql-proxy";
 
 const resolver = new Resolver();
 
-const db = drizzle(forgeDriver, { logger: true });
+const db = patchDbWithSelectAliased(drizzle(forgeDriver, { logger: true }));
 
 resolver.define("create", async (req): Promise<number> => {
   const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
@@ -31,7 +32,7 @@ resolver.define("delete", async (req): Promise<number> => {
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   const duplicateResult = await db
-    .select({
+    .selectAliased({
       name: users.name,
       email: users.email,
       count: rawSql`COUNT(*) as \`count\``,
