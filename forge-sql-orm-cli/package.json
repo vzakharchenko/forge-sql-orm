@@ -46,8 +46,8 @@
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.6",
     "inquirer": "^12.5.2",
-    "reflect-metadata": "^0.2.2",
-    "mysql2": "^3.14.0"
+    "mysql2": "^3.14.0",
+    "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {
     "drizzle-orm": "^0.41.0",
@@ -57,6 +57,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.14.0",
     "@vitest/coverage-v8": "^3.1.1",
+    "esbuild": "^0.25.2",
     "reflect-metadata": "^0.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
