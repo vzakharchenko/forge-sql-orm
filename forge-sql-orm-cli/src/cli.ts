@@ -162,7 +162,7 @@ const getConfig = async (
 };
 
 // 📌 Initialize CLI
-const program = new Command();
+export const program = new Command();
 program.version("1.0.0");
 
 // ✅ Command: Generate database models (Entities)
@@ -297,4 +297,4 @@ program
   });
 
 // 🔥 Execute CLI
-program.parse(process.argv);
+  program.parse(process.argv);

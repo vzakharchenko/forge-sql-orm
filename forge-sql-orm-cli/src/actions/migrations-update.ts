@@ -2,12 +2,12 @@ import "reflect-metadata";
 import fs from "fs";
 import path from "path";
 import mysql from "mysql2/promise";
-import {MySqlTable, TableConfig} from "drizzle-orm/mysql-core";
-import {RowDataPacket} from 'mysql2';
-import {getTableMetadata} from "../../src/utils/sqlUtils";
-import {AnyIndexBuilder} from "drizzle-orm/mysql-core/indexes";
-import {ForeignKeyBuilder} from "drizzle-orm/mysql-core/foreign-keys";
-import {UniqueConstraintBuilder} from "drizzle-orm/mysql-core/unique-constraint";
+import { MySqlTable, TableConfig } from "drizzle-orm/mysql-core";
+import { RowDataPacket } from "mysql2";
+import { getTableMetadata } from "forge-sql-orm";
+import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
+import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
+import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
 
 interface DrizzleColumn {
   type: string;
@@ -50,15 +50,21 @@ interface DatabaseForeignKey extends RowDataPacket {
 
 interface TableSchema {
   columns: Record<string, DatabaseColumn>;
-  indexes: Record<string, {
-    columns: string[];
-    unique: boolean;
-  }>;
-  foreignKeys: Record<string, {
-    column: string;
-    referencedTable: string;
-    referencedColumn: string;
-  }>;
+  indexes: Record<
+    string,
+    {
+      columns: string[];
+      unique: boolean;
+    }
+  >;
+  foreignKeys: Record<
+    string,
+    {
+      column: string;
+      referencedTable: string;
+      referencedColumn: string;
+    }
+  >;
 }
 
 interface DatabaseSchema {
@@ -76,10 +82,7 @@ function generateMigrationFile(createStatements: string[], version: number): str
 
   // Clean each SQL statement and generate migration lines with .enqueue()
   const migrationLines = createStatements
-    .map(
-      (stmt, index) =>
-        `        .enqueue("${versionPrefix}${index}", "${stmt}")`, // eslint-disable-line no-useless-escape
-    )
+    .map((stmt, index) => `        .enqueue("${versionPrefix}${index}", "${stmt}")`)
     .join("\n");
 
   // Migration template
@@ -98,27 +101,33 @@ ${migrationLines};
  * @param outputDir - Directory where migration files are stored
  * @returns Array of SQL statements that don't exist in previous migration
  */
-function filterWithPreviousMigration(newStatements: string[], prevVersion: number, outputDir: string): string[] {
+function filterWithPreviousMigration(
+  newStatements: string[],
+  prevVersion: number,
+  outputDir: string,
+): string[] {
   const prevMigrationPath = path.join(outputDir, `migrationV${prevVersion}.ts`);
 
   if (!fs.existsSync(prevMigrationPath)) {
-    return newStatements.map(s=>s.replace(/\s+/g, ' '));
+    return newStatements.map((s) => s.replace(/\s+/g, " "));
   }
 
   // Read previous migration file
-  const prevContent = fs.readFileSync(prevMigrationPath, 'utf-8');
+  const prevContent = fs.readFileSync(prevMigrationPath, "utf-8");
 
   // Extract SQL statements from the file
   const prevStatements = prevContent
-    .split('\n')
-    .filter(line => line.includes('.enqueue('))
-    .map(line => {
+    .split("\n")
+    .filter((line) => line.includes(".enqueue("))
+    .map((line) => {
       const match = line.match(/\.enqueue\([^,]+,\s*"([^"]+)"/);
-      return match ? match[1].replace(/\s+/g, ' ').trim() : '';
+      return match ? match[1].replace(/\s+/g, " ").trim() : "";
     });
 
   // Filter out statements that already exist in previous migration
-  return  newStatements.filter(s=>!prevStatements.includes(s.replace(/\s+/g, ' '))).map(s=>s.replace(/\s+/g, ' '));
+  return newStatements
+    .filter((s) => !prevStatements.includes(s.replace(/\s+/g, " ")))
+    .map((s) => s.replace(/\s+/g, " "));
 }
 
 /**
@@ -128,11 +137,7 @@ function filterWithPreviousMigration(newStatements: string[], prevVersion: numbe
  * @param outputDir - Directory where the migration files will be saved.
  * @returns boolean indicating if migration was saved
  */
-function saveMigrationFiles(
-  migrationCode: string,
-  version: number,
-  outputDir: string
-): boolean {
+function saveMigrationFiles(migrationCode: string, version: number, outputDir: string): boolean {
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -206,24 +211,34 @@ const loadMigrationVersion = async (migrationPath: string): Promise<number> => {
  * @param dbName - Database name
  * @returns Database schema object with indexes and foreign keys
  */
-async function getDatabaseSchema(connection: mysql.Connection, dbName: string): Promise<DatabaseSchema> {
+async function getDatabaseSchema(
+  connection: mysql.Connection,
+  dbName: string,
+): Promise<DatabaseSchema> {
   // Get columns
-  const [columns] = await connection.execute<DatabaseColumn[]>(`
+  const [columns] = await connection.execute<DatabaseColumn[]>(
+    `
     SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, EXTRA
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_SCHEMA = ?
-  `, [dbName]);
+  `,
+    [dbName],
+  );
 
   // Get indexes
-  const [indexes] = await connection.execute<DatabaseIndex[]>(`
+  const [indexes] = await connection.execute<DatabaseIndex[]>(
+    `
     SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME, NON_UNIQUE
     FROM INFORMATION_SCHEMA.STATISTICS
     WHERE TABLE_SCHEMA = ?
     ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX
-  `, [dbName]);
+  `,
+    [dbName],
+  );
 
   // Get foreign keys
-  const [foreignKeys] = await connection.execute<DatabaseForeignKey[]>(`
+  const [foreignKeys] = await connection.execute<DatabaseForeignKey[]>(
+    `
     SELECT 
       TABLE_NAME,
       COLUMN_NAME,
@@ -233,40 +248,42 @@ async function getDatabaseSchema(connection: mysql.Connection, dbName: string): 
     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
     WHERE TABLE_SCHEMA = ?
     AND REFERENCED_TABLE_NAME IS NOT NULL
-  `, [dbName]);
+  `,
+    [dbName],
+  );
 
   const schema: DatabaseSchema = {};
 
   // Process columns
-  columns.forEach(row => {
+  columns.forEach((row) => {
     if (!schema[row.TABLE_NAME]) {
       schema[row.TABLE_NAME] = {
         columns: {},
         indexes: {},
-        foreignKeys: {}
+        foreignKeys: {},
       };
     }
     schema[row.TABLE_NAME].columns[row.COLUMN_NAME] = row;
   });
 
   // Process indexes
-  indexes.forEach(row => {
+  indexes.forEach((row) => {
     if (!schema[row.TABLE_NAME].indexes[row.INDEX_NAME]) {
       schema[row.TABLE_NAME].indexes[row.INDEX_NAME] = {
         columns: [],
-        unique: !row.NON_UNIQUE
+        unique: !row.NON_UNIQUE,
       };
     }
     schema[row.TABLE_NAME].indexes[row.INDEX_NAME].columns.push(row.COLUMN_NAME);
   });
 
   // Process foreign keys
-  foreignKeys.forEach(row => {
+  foreignKeys.forEach((row) => {
     if (!schema[row.TABLE_NAME].foreignKeys[row.CONSTRAINT_NAME]) {
       schema[row.TABLE_NAME].foreignKeys[row.CONSTRAINT_NAME] = {
         column: row.COLUMN_NAME,
         referencedTable: row.REFERENCED_TABLE_NAME,
-        referencedColumn: row.REFERENCED_COLUMN_NAME
+        referencedColumn: row.REFERENCED_COLUMN_NAME,
       };
     }
   });
@@ -281,10 +298,10 @@ async function getDatabaseSchema(connection: mysql.Connection, dbName: string): 
  */
 function normalizeMySQLType(mysqlType: string): string {
   // Remove length/precision information
-  let normalized = mysqlType.replace(/\([^)]*\)/, '').toLowerCase();
+  let normalized = mysqlType.replace(/\([^)]*\)/, "").toLowerCase();
 
   // Remove 'mysql' prefix from Drizzle types
-  normalized = normalized.replace(/^mysql/, '');
+  normalized = normalized.replace(/^mysql/, "");
 
   return normalized;
 }
@@ -326,12 +343,15 @@ function getUniqueConstraintName(uc: UniqueConstraintBuilder): string {
  */
 function getIndexColumns(index: AnyIndexBuilder): string[] {
   // @ts-ignore - Internal property access
-  return index.columns.map(col => col.name);
+  return index.columns.map((col) => col.name);
 }
 
-function compareForeignKey(fk: ForeignKeyBuilder, {columns}: { columns: string[]; unique: boolean }) {
+function compareForeignKey(
+  fk: ForeignKeyBuilder,
+  { columns }: { columns: string[]; unique: boolean },
+) {
   // @ts-ignore
-  const fcolumns:string[] = fk.columns.map(c=>c.name);
+  const fcolumns: string[] = fk.columns.map((c) => c.name);
   return fcolumns.sort().join(",") === columns.sort().join(",");
 }
 
@@ -345,7 +365,7 @@ function compareForeignKey(fk: ForeignKeyBuilder, {columns}: { columns: string[]
 function generateSchemaChanges(
   drizzleSchema: DrizzleSchema,
   dbSchema: DatabaseSchema,
-  schemaModule: Record<string, any>
+  schemaModule: Record<string, any>,
 ): string[] {
   const changes: string[] = [];
 
@@ -358,25 +378,25 @@ function generateSchemaChanges(
       const columns = Object.entries(dbTable.columns)
         .map(([colName, col]) => {
           const type = col.COLUMN_TYPE;
-          const nullable = col.IS_NULLABLE === 'YES' ? 'NULL' : 'NOT NULL';
-          const autoIncrement = col.EXTRA.includes('auto_increment') ? 'AUTO_INCREMENT' : '';
+          const nullable = col.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
+          const autoIncrement = col.EXTRA.includes("auto_increment") ? "AUTO_INCREMENT" : "";
           return `\`${colName}\` ${type} ${nullable} ${autoIncrement}`.trim();
         })
-        .join(',\n  ');
+        .join(",\n  ");
 
       changes.push(`CREATE TABLE if not exists \`${tableName}\` (\n  ${columns}\n);`);
 
       // Create indexes for new table
       for (const [indexName, dbIndex] of Object.entries(dbTable.indexes)) {
         // Skip primary key and foreign key indexes
-        if (indexName === 'PRIMARY') {
+        if (indexName === "PRIMARY") {
           continue;
         }
 
         // Check if any column in this index is a foreign key
-        const isForeignKeyIndex = dbIndex.columns.some(colName => {
+        const isForeignKeyIndex = dbIndex.columns.some((colName) => {
           const column = dbTable.columns[colName];
-          return column && column.COLUMN_KEY === 'MUL' && column.EXTRA.includes('foreign key');
+          return column && column.COLUMN_KEY === "MUL" && column.EXTRA.includes("foreign key");
         });
 
         if (isForeignKeyIndex) {
@@ -384,26 +404,30 @@ function generateSchemaChanges(
         }
 
         // Create index
-        const columns = dbIndex.columns.map(col => `\`${col}\``).join(', ');
-        const unique = dbIndex.unique ? 'UNIQUE ' : '';
-        changes.push(`CREATE  ${unique}INDEX if not exists  \`${indexName}\` ON \`${tableName}\` (${columns});`);
+        const columns = dbIndex.columns.map((col) => `\`${col}\``).join(", ");
+        const unique = dbIndex.unique ? "UNIQUE " : "";
+        changes.push(
+          `CREATE  ${unique}INDEX if not exists  \`${indexName}\` ON \`${tableName}\` (${columns});`,
+        );
       }
 
       // Create foreign keys for new table
       for (const [fkName, dbFK] of Object.entries(dbTable.foreignKeys)) {
-        changes.push(`ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`);
+        changes.push(
+          `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`,
+        );
       }
       continue;
     }
 
     // Check for column changes in existing tables
     for (const [colName, dbCol] of Object.entries(dbTable.columns)) {
-      const drizzleCol = Object.values(drizzleColumns).find(c => c.name === colName);
+      const drizzleCol = Object.values(drizzleColumns).find((c) => c.name === colName);
 
       if (!drizzleCol) {
         // Column exists in database but not in schema - create it
         const type = dbCol.COLUMN_TYPE;
-        const nullable = dbCol.IS_NULLABLE === 'YES' ? 'NULL' : 'NOT NULL';
+        const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
         changes.push(`ALTER TABLE \`${tableName}\` ADD COLUMN \`${colName}\` ${type} ${nullable};`);
         continue;
       }
@@ -414,13 +438,15 @@ function generateSchemaChanges(
 
       if (normalizedDbType !== normalizedDrizzleType) {
         const type = dbCol.COLUMN_TYPE; // Use database type as source of truth
-        const nullable = dbCol.IS_NULLABLE === 'YES' ? 'NULL' : 'NOT NULL';
-        changes.push(`ALTER TABLE \`${tableName}\` MODIFY COLUMN \`${colName}\` ${type} ${nullable};`);
+        const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
+        changes.push(
+          `ALTER TABLE \`${tableName}\` MODIFY COLUMN \`${colName}\` ${type} ${nullable};`,
+        );
       }
     }
 
     // Check for index changes
-    const table = Object.values(schemaModule).find(t => {
+    const table = Object.values(schemaModule).find((t) => {
       const metadata = getTableMetadata(t);
       return metadata.tableName === tableName;
     });
@@ -430,19 +456,23 @@ function generateSchemaChanges(
       // First check indexes that exist in database but not in schema
       for (const [indexName, dbIndex] of Object.entries(dbTable.indexes)) {
         // Skip primary key and foreign key indexes
-        if (indexName === 'PRIMARY') {
+        if (indexName === "PRIMARY") {
           continue;
         }
 
         // Check if this is a foreign key index
-        const isForeignKeyIndex = metadata.foreignKeys.some(fk => getForeignKeyName(fk) === indexName || compareForeignKey(fk, dbIndex));
+        const isForeignKeyIndex = metadata.foreignKeys.some(
+          (fk) => getForeignKeyName(fk) === indexName || compareForeignKey(fk, dbIndex),
+        );
         if (isForeignKeyIndex) {
           continue;
         }
 
         // Check if this is a unique constraint
-        const existsUniqIndex = metadata.uniqueConstraints.find(uc => getUniqueConstraintName(uc) === indexName);
-        let drizzleIndex = metadata.indexes.find(i => getIndexName(i) === indexName);
+        const existsUniqIndex = metadata.uniqueConstraints.find(
+          (uc) => getUniqueConstraintName(uc) === indexName,
+        );
+        let drizzleIndex = metadata.indexes.find((i) => getIndexName(i) === indexName);
 
         if (!drizzleIndex && existsUniqIndex) {
           drizzleIndex = existsUniqIndex as unknown as AnyIndexBuilder;
@@ -450,32 +480,45 @@ function generateSchemaChanges(
 
         if (!drizzleIndex) {
           // Index exists in database but not in schema - create it
-          const columns = dbIndex.columns.map(col => `\`${col}\``).join(', ');
-          const unique = dbIndex.unique ? 'UNIQUE ' : '';
-          changes.push(`CREATE ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`);
+          const columns = dbIndex.columns.map((col) => `\`${col}\``).join(", ");
+          const unique = dbIndex.unique ? "UNIQUE " : "";
+          changes.push(
+            `CREATE ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`,
+          );
           continue;
         }
 
         // Check if index columns changed
-        const dbColumns = dbIndex.columns.join(', ');
-        const drizzleColumns = getIndexColumns(drizzleIndex).join(', ');
-        if (dbColumns !== drizzleColumns || dbIndex.unique !== drizzleIndex instanceof UniqueConstraintBuilder) {
+        const dbColumns = dbIndex.columns.join(", ");
+        const drizzleColumns = getIndexColumns(drizzleIndex).join(", ");
+        if (
+          dbColumns !== drizzleColumns ||
+          dbIndex.unique !== drizzleIndex instanceof UniqueConstraintBuilder
+        ) {
           // Drop and recreate index using database values
           changes.push(`DROP INDEX \`${indexName}\` ON \`${tableName}\`;`);
-          const columns = dbIndex.columns.map(col => `\`${col}\``).join(', ');
-          const unique = dbIndex.unique ? 'UNIQUE ' : '';
-          changes.push(`CREATE  ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`);
+          const columns = dbIndex.columns.map((col) => `\`${col}\``).join(", ");
+          const unique = dbIndex.unique ? "UNIQUE " : "";
+          changes.push(
+            `CREATE  ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`,
+          );
         }
       }
 
       // First check foreign keys that exist in database but not in schema
       for (const [fkName, dbFK] of Object.entries(dbTable.foreignKeys)) {
         // Find if this column is referenced in Drizzle schema
-        const drizzleFK = metadata.foreignKeys.find(fk => getForeignKeyName(fk) === fkName || compareForeignKey(fk, {columns: [dbFK.column], unique: false}));
+        const drizzleFK = metadata.foreignKeys.find(
+          (fk) =>
+            getForeignKeyName(fk) === fkName ||
+            compareForeignKey(fk, { columns: [dbFK.column], unique: false }),
+        );
 
         if (!drizzleFK) {
           // Foreign key exists in database but not in schema - drop it
-          changes.push(`ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`);
+          changes.push(
+            `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`,
+          );
           continue;
         }
       }
@@ -483,9 +526,12 @@ function generateSchemaChanges(
       // Then check for new foreign keys that exist in schema but not in database
       for (const drizzleForeignKey of metadata.foreignKeys) {
         // Find if this foreign key exists in database
-        const isDbFk = Object.keys(dbTable.foreignKeys).find(fk => {
+        const isDbFk = Object.keys(dbTable.foreignKeys).find((fk) => {
           let foreignKey = dbTable.foreignKeys[fk];
-          return fk === getForeignKeyName(drizzleForeignKey) || compareForeignKey(drizzleForeignKey, {columns:[foreignKey.column],unique:false});
+          return (
+            fk === getForeignKeyName(drizzleForeignKey) ||
+            compareForeignKey(drizzleForeignKey, { columns: [foreignKey.column], unique: false })
+          );
         });
 
         if (!isDbFk) {
@@ -497,9 +543,11 @@ function generateSchemaChanges(
             // @ts-ignore
             const columns = drizzleForeignKey?.columns;
             const columnNames = columns?.length
-              ? columns.map((c:any) => c.name).join(', ')
-              : 'unknown columns';
-            console.warn(`⚠️ Drizzle model for table '${tableName}' does not provide a name for FOREIGN KEY constraint on columns: ${columnNames}`);
+              ? columns.map((c: any) => c.name).join(", ")
+              : "unknown columns";
+            console.warn(
+              `⚠️ Drizzle model for table '${tableName}' does not provide a name for FOREIGN KEY constraint on columns: ${columnNames}`,
+            );
           }
         }
       }
@@ -540,7 +588,7 @@ export const updateMigration = async (options: any) => {
       const dbSchema = await getDatabaseSchema(connection, options.dbName);
 
       // Import Drizzle schema using absolute path
-      const schemaPath = path.resolve(options.entitiesPath, 'schema.ts');
+      const schemaPath = path.resolve(options.entitiesPath, "schema.ts");
       if (!fs.existsSync(schemaPath)) {
         throw new Error(`Schema file not found at: ${schemaPath}`);
       }
@@ -556,7 +604,7 @@ export const updateMigration = async (options: any) => {
       // Get all exports that are tables
       const tables = Object.values(schemaModule) as MySqlTable<TableConfig>[];
 
-      tables.forEach(table => {
+      tables.forEach((table) => {
         const metadata = getTableMetadata(table);
         if (metadata.tableName) {
           // Convert AnyColumn to DrizzleColumn
@@ -568,7 +616,7 @@ export const updateMigration = async (options: any) => {
               autoincrement: (column as any).autoincrement,
               columnType: column.columnType,
               name: column.name,
-              getSQLType: () => column.getSQLType()
+              getSQLType: () => column.getSQLType(),
             };
           });
           drizzleSchema[metadata.tableName] = columns;
@@ -579,10 +627,14 @@ export const updateMigration = async (options: any) => {
         throw new Error(`No valid tables found in schema at: ${schemaPath}`);
       }
 
-      console.log('Found tables:', Object.keys(drizzleSchema));
+      console.log("Found tables:", Object.keys(drizzleSchema));
 
       // Generate SQL changes
-      const createStatements = filterWithPreviousMigration(generateSchemaChanges(drizzleSchema, dbSchema, schemaModule), prevVersion,options.output);
+      const createStatements = filterWithPreviousMigration(
+        generateSchemaChanges(drizzleSchema, dbSchema, schemaModule),
+        prevVersion,
+        options.output,
+      );
 
       if (createStatements.length) {
         // Generate migration file content
@@ -590,12 +642,12 @@ export const updateMigration = async (options: any) => {
 
         // Save migration files only if there are actual changes
         if (saveMigrationFiles(migrationFile, version, options.output)) {
-      console.log(`✅ Migration successfully updated!`);
+          console.log(`✅ Migration successfully updated!`);
         }
-      process.exit(0);
-    } else {
-      console.log(`⚠️ No new migration changes detected.`);
-      process.exit(0);
+        process.exit(0);
+      } else {
+        console.log(`⚠️ No new migration changes detected.`);
+        process.exit(0);
       }
     } finally {
       await connection.end();

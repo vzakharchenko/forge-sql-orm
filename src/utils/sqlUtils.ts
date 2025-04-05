@@ -1,6 +1,6 @@
 import moment from "moment";
-import {AnyColumn, Column, isTable, SQL, sql, StringChunk} from "drizzle-orm";
-import {AnyMySqlTable, MySqlCustomColumn} from "drizzle-orm/mysql-core/index";
+import { AnyColumn, Column, isTable, SQL, sql, StringChunk } from "drizzle-orm";
+import { AnyMySqlTable, MySqlCustomColumn } from "drizzle-orm/mysql-core/index";
 import { PrimaryKeyBuilder } from "drizzle-orm/mysql-core/primary-keys";
 import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
 import { CheckBuilder } from "drizzle-orm/mysql-core/checks";
@@ -9,7 +9,7 @@ import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constrain
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import { getTableName } from "drizzle-orm/table";
-import {isSQLWrapper} from "drizzle-orm/sql/sql";
+import { isSQLWrapper } from "drizzle-orm/sql/sql";
 
 /**
  * Interface representing table metadata information
@@ -48,11 +48,11 @@ interface ConfigBuilderData {
  * @returns Date object
  */
 export const parseDateTime = (value: string, format: string): Date => {
-    const m = moment(value, format, true);
-    if (!m.isValid()) {
-        return moment(value).toDate();
-    }
-    return m.toDate();
+  const m = moment(value, format, true);
+  if (!m.isValid()) {
+    return moment(value).toDate();
+  }
+  return m.toDate();
 };
 
 /**
@@ -61,8 +61,8 @@ export const parseDateTime = (value: string, format: string): Date => {
  * @returns The extracted alias or the original query if no alias found
  */
 export function extractAlias(query: string): string {
-    const match = query.match(/\bas\s+(['"`]?)([\w*]+)\1$/i);
-    return match ? match[2] : query;
+  const match = query.match(/\bas\s+(['"`]?)([\w*]+)\1$/i);
+  return match ? match[2] : query;
 }
 
 /**
@@ -189,8 +189,8 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
   builders.foreignKeys = processForeignKeys(table, foreignKeysSymbol, extraSymbol);
 
   // Process extra configuration if available
-    if (extraSymbol) {
-        // @ts-ignore
+  if (extraSymbol) {
+    // @ts-ignore
     const extraConfigBuilder = table[extraSymbol];
     if (extraConfigBuilder && typeof extraConfigBuilder === "function") {
       const configBuilderData = extraConfigBuilder(table);
@@ -231,7 +231,7 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
     }
   }
 
-    return {
+  return {
     tableName: nameSymbol ? (table as any)[nameSymbol] : "",
     columns: columnsSymbol ? ((table as any)[columnsSymbol] as Record<string, AnyColumn>) : {},
     ...builders,
@@ -269,7 +269,7 @@ function mapSelectTableToAlias(table: MySqlTable, aliasMap: AliasColumnMap): any
     const uniqName = `a_${tableName}_${column.name}`;
     const fieldAlias = sql.raw(uniqName);
     selectionsTableFields[name] = sql`${column} as \`${fieldAlias}\``;
-    aliasMap[uniqName]= column;
+    aliasMap[uniqName] = column;
   });
   return selectionsTableFields;
 }
@@ -278,7 +278,12 @@ function isDrizzleColumn(column: any): boolean {
   return column && typeof column === "object" && "table" in column;
 }
 
-export function mapSelectAllFieldsToAlias(selections: any, name: string, fields: any, aliasMap: AliasColumnMap): any {
+export function mapSelectAllFieldsToAlias(
+  selections: any,
+  name: string,
+  fields: any,
+  aliasMap: AliasColumnMap,
+): any {
   if (isTable(fields)) {
     selections[name] = mapSelectTableToAlias(fields as MySqlTable, aliasMap);
   } else if (isDrizzleColumn(fields)) {
@@ -309,38 +314,39 @@ export function mapSelectFieldsWithAlias<TSelection extends SelectedFields>(
   Object.entries(fields).forEach(([name, fields]) => {
     mapSelectAllFieldsToAlias(selections, name, fields, aliasMap);
   });
-  return {selections, aliasMap};
+  return { selections, aliasMap };
 }
 
-
-
-function getAliasFromDrizzleAlias(value: unknown): string|undefined {
-  const isSQL = value !== null &&
-      typeof value === 'object' &&
-      isSQLWrapper(value) && 'queryChunks' in value;
-  if (isSQL){
-    const  sql = value as SQL;
+function getAliasFromDrizzleAlias(value: unknown): string | undefined {
+  const isSQL =
+    value !== null && typeof value === "object" && isSQLWrapper(value) && "queryChunks" in value;
+  if (isSQL) {
+    const sql = value as SQL;
     const queryChunks = sql.queryChunks;
-    if (queryChunks.length>3){
-      const aliasNameChunk = queryChunks[queryChunks.length-2];
-      if (isSQLWrapper(aliasNameChunk) && 'queryChunks' in aliasNameChunk){
-        const  aliasNameChunkSql = aliasNameChunk as SQL;
+    if (queryChunks.length > 3) {
+      const aliasNameChunk = queryChunks[queryChunks.length - 2];
+      if (isSQLWrapper(aliasNameChunk) && "queryChunks" in aliasNameChunk) {
+        const aliasNameChunkSql = aliasNameChunk as SQL;
         if (aliasNameChunkSql && aliasNameChunkSql.queryChunks.length === 1) {
           const queryChunksStringChunc = aliasNameChunkSql.queryChunks[0];
-          if (queryChunksStringChunc && 'value' in queryChunksStringChunc) {
+          if (queryChunksStringChunc && "value" in queryChunksStringChunc) {
             const values = (queryChunksStringChunc as StringChunk).value;
-            if (values && values.length===1){
-              return values[0]
+            if (values && values.length === 1) {
+              return values[0];
             }
           }
         }
       }
     }
   }
-  return undefined
+  return undefined;
 }
 
-function transformValue(value: unknown, alias: string, aliasMap: Record<string, AnyColumn>): unknown {
+function transformValue(
+  value: unknown,
+  alias: string,
+  aliasMap: Record<string, AnyColumn>,
+): unknown {
   const column = aliasMap[alias];
   if (!column) return value;
 
@@ -353,16 +359,24 @@ function transformValue(value: unknown, alias: string, aliasMap: Record<string, 
   return value;
 }
 
-function transformObject(obj: Record<string, unknown>, selections: Record<string, unknown>, aliasMap: Record<string, AnyColumn>): Record<string, unknown> {
+function transformObject(
+  obj: Record<string, unknown>,
+  selections: Record<string, unknown>,
+  aliasMap: Record<string, AnyColumn>,
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj)) {
     const selection = selections[key];
     const alias = getAliasFromDrizzleAlias(selection);
     if (alias && aliasMap[alias]) {
-        result[key] = transformValue(value, alias, aliasMap);
-    } else if (selection && typeof selection === 'object' && !isSQLWrapper(selection)) {
-      result[key] = transformObject(value as Record<string, unknown>, selection as Record<string, unknown>, aliasMap);
+      result[key] = transformValue(value, alias, aliasMap);
+    } else if (selection && typeof selection === "object" && !isSQLWrapper(selection)) {
+      result[key] = transformObject(
+        value as Record<string, unknown>,
+        selection as Record<string, unknown>,
+        aliasMap,
+      );
     } else {
       result[key] = value;
     }
@@ -374,9 +388,13 @@ function transformObject(obj: Record<string, unknown>, selections: Record<string
 export function applyFromDriverTransform<T, TSelection>(
   rows: T[],
   selections: TSelection,
-  aliasMap: Record<string, AnyColumn>
+  aliasMap: Record<string, AnyColumn>,
 ): T[] {
   return rows.map((row) => {
-    return transformObject(row as Record<string, unknown>, selections as Record<string, unknown>, aliasMap) as T;
+    return transformObject(
+      row as Record<string, unknown>,
+      selections as Record<string, unknown>,
+      aliasMap,
+    ) as T;
   });
 }

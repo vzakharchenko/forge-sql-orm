@@ -10,7 +10,7 @@ import { drizzle, MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizz
 import { forgeDriver } from "../utils/forgeDriver";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
-import {patchDbWithSelectAliased} from "../lib/drizzle/extensions/selectAliased";
+import { patchDbWithSelectAliased } from "../lib/drizzle/extensions/selectAliased";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -37,7 +37,9 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         console.debug("Initializing ForgeSQLORM...");
       }
       // Initialize Drizzle instance with our custom driver
-      this.drizzle =  patchDbWithSelectAliased(drizzle(forgeDriver, { logger: newOptions.logRawSqlQuery }));
+      this.drizzle = patchDbWithSelectAliased(
+        drizzle(forgeDriver, { logger: newOptions.logRawSqlQuery }),
+      );
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
     } catch (error) {
@@ -190,8 +192,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT> {
-    return this.ormInstance
-      .selectDistinct(fields);
+    return this.ormInstance.selectDistinct(fields);
   }
 
   /**

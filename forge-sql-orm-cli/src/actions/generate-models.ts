@@ -13,7 +13,7 @@ interface GenerateModelsOptions {
   password: string;
   dbName: string;
   output: string;
-  versionField: string,
+  versionField: string;
 }
 
 /**
@@ -92,32 +92,38 @@ function replaceMySQLTypes(schemaContent: string): string {
   // Replace types in the content
   let modifiedContent = schemaContent
     // Handle datetime with column name and mode option
-    .replace(/datetime\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeDateTimeString(\'$1\')')
+    .replace(
+      /datetime\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g,
+      "forgeDateTimeString('$1')",
+    )
     // Handle datetime with column name only
-    .replace(/datetime\(['"]([^'"]+)['"]\)/g, 'forgeDateTimeString(\'$1\')')
+    .replace(/datetime\(['"]([^'"]+)['"]\)/g, "forgeDateTimeString('$1')")
     // Handle datetime with mode option only
-    .replace(/datetime\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeDateTimeString()')
+    .replace(/datetime\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, "forgeDateTimeString()")
     // Handle time with column name and mode option
-    .replace(/time\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeTimeString(\'$1\')')
+    .replace(/time\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, "forgeTimeString('$1')")
     // Handle time with column name only
-    .replace(/time\(['"]([^'"]+)['"]\)/g, 'forgeTimeString(\'$1\')')
+    .replace(/time\(['"]([^'"]+)['"]\)/g, "forgeTimeString('$1')")
     // Handle time with mode option only
-    .replace(/time\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeTimeString()')
+    .replace(/time\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, "forgeTimeString()")
     // Handle date with column name and mode option
-    .replace(/date\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeDateString(\'$1\')')
+    .replace(/date\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, "forgeDateString('$1')")
     // Handle date with column name only
-    .replace(/date\(['"]([^'"]+)['"]\)/g, 'forgeDateString(\'$1\')')
+    .replace(/date\(['"]([^'"]+)['"]\)/g, "forgeDateString('$1')")
     // Handle date with mode option only
-    .replace(/date\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeDateString()')
+    .replace(/date\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, "forgeDateString()")
     // Handle timestamp with column name and mode option
-    .replace(/timestamp\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g, 'forgeTimestampString(\'$1\')')
+    .replace(
+      /timestamp\(['"]([^'"]+)['"],\s*{\s*mode:\s*['"]string['"]\s*}\)/g,
+      "forgeTimestampString('$1')",
+    )
     // Handle timestamp with column name only
-    .replace(/timestamp\(['"]([^'"]+)['"]\)/g, 'forgeTimestampString(\'$1\')')
+    .replace(/timestamp\(['"]([^'"]+)['"]\)/g, "forgeTimestampString('$1')")
     // Handle timestamp with mode option only
-    .replace(/timestamp\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, 'forgeTimestampString()');
+    .replace(/timestamp\(\s*{\s*mode:\s*['"]string['"]\s*}\s*\)/g, "forgeTimestampString()");
 
   // Add imports if they don't exist
-  if (!modifiedContent.includes('import { forgeDateTimeString')) {
+  if (!modifiedContent.includes("import { forgeDateTimeString")) {
     modifiedContent = imports + modifiedContent;
   }
 
@@ -131,46 +137,53 @@ function replaceMySQLTypes(schemaContent: string): string {
 export const generateModels = async (options: GenerateModelsOptions) => {
   try {
     // Generate models using drizzle-kit pull
-    const sql = await execSync(
+    await execSync(
       `npx drizzle-kit pull --dialect mysql --url mysql://${options.user}:${options.password}@${options.host}:${options.port}/${options.dbName} --out ${options.output}`,
-      { encoding: 'utf-8' }
+      { encoding: "utf-8" },
     );
 
     // Process metadata to create version map
-    const metaDir = path.join(options.output, 'meta');
+    const metaDir = path.join(options.output, "meta");
     const additionalMetadata: AdditionalMetadata = {};
 
     if (fs.existsSync(metaDir)) {
-      const snapshotFile = path.join(metaDir, '0000_snapshot.json');
+      const snapshotFile = path.join(metaDir, "0000_snapshot.json");
       if (fs.existsSync(snapshotFile)) {
-        const snapshotData = JSON.parse(fs.readFileSync(snapshotFile, 'utf-8'));
+        const snapshotData = JSON.parse(fs.readFileSync(snapshotFile, "utf-8"));
 
         // Process each table from the snapshot
         for (const [tableName, tableData] of Object.entries(snapshotData.tables)) {
           const table = tableData as TableMetadata;
 
           // Find version field in columns
-          const versionField = Object.entries(table.columns).find(([_, col]) =>
-            col.name.toLowerCase() === options.versionField
+          const versionField = Object.entries(table.columns).find(
+            ([_, col]) => col.name.toLowerCase() === options.versionField,
           );
 
           if (versionField) {
             const [_, col] = versionField;
             const fieldType = col.type;
-            const isSupportedType = fieldType === 'datetime' || fieldType === 'timestamp' || fieldType === 'int' || fieldType === 'number' || fieldType === 'decimal';
-            if (!col.notNull){
-              console.warn( `Version field "${col.name}" in table ${tableName} is nullable. Versioning may not work correctly.`)
+            const isSupportedType =
+              fieldType === "datetime" ||
+              fieldType === "timestamp" ||
+              fieldType === "int" ||
+              fieldType === "number" ||
+              fieldType === "decimal";
+            if (!col.notNull) {
+              console.warn(
+                `Version field "${col.name}" in table ${tableName} is nullable. Versioning may not work correctly.`,
+              );
             } else if (!isSupportedType) {
               console.warn(
-                  `Version field "${col.name}" in table ${tableName} has unsupported type "${fieldType}". ` +
-                  `Only datetime, timestamp, int, and decimal types are supported for versioning. Versioning will be skipped.`
+                `Version field "${col.name}" in table ${tableName} has unsupported type "${fieldType}". ` +
+                  `Only datetime, timestamp, int, and decimal types are supported for versioning. Versioning will be skipped.`,
               );
             } else {
               additionalMetadata[tableName] = {
                 tableName,
                 versionField: {
-                  fieldName: col.name
-                }
+                  fieldName: col.name,
+                },
               };
             }
           }
@@ -205,19 +218,19 @@ export type AdditionalMetadata = Record<string, TableMetadata>;
 export const additionalMetadata: AdditionalMetadata = ${JSON.stringify(additionalMetadata, null, 2)};
 `;
 
-    fs.writeFileSync(path.join(options.output, 'index.ts'), versionMetadataContent);
+    fs.writeFileSync(path.join(options.output, "index.ts"), versionMetadataContent);
 
     // Replace MySQL types in the generated schema file
-    const schemaPath = path.join(options.output, 'schema.ts');
+    const schemaPath = path.join(options.output, "schema.ts");
     if (fs.existsSync(schemaPath)) {
-      const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
+      const schemaContent = fs.readFileSync(schemaPath, "utf-8");
       const modifiedContent = replaceMySQLTypes(schemaContent);
       fs.writeFileSync(schemaPath, modifiedContent);
       console.log(`✅ Updated schema types in: ${schemaPath}`);
     }
 
     // Remove migration files and meta directory if they exist
-    const migrationDir = path.join(options.output, 'migrations');
+    const migrationDir = path.join(options.output, "migrations");
 
     if (fs.existsSync(migrationDir)) {
       fs.rmSync(migrationDir, { recursive: true, force: true });
@@ -226,9 +239,9 @@ export const additionalMetadata: AdditionalMetadata = ${JSON.stringify(additiona
 
     // Read journal and remove corresponding SQL file
     if (fs.existsSync(metaDir)) {
-      const journalFile = path.join(metaDir, '_journal.json');
+      const journalFile = path.join(metaDir, "_journal.json");
       if (fs.existsSync(journalFile)) {
-        const journalData = JSON.parse(fs.readFileSync(journalFile, 'utf-8')) as JournalData;
+        const journalData = JSON.parse(fs.readFileSync(journalFile, "utf-8")) as JournalData;
 
         // Remove SQL files for each entry
         for (const entry of journalData.entries) {

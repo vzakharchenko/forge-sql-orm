@@ -81,7 +81,7 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 
 ```sh
 npm install forge-sql-orm @forge/sql drizzle-orm momment -S
-npm install mysql2 drizzle-kit inquirer@8.0.0  -D
+npm install forge-sql-orm-cli  -D
 ```
 
 This will:
@@ -89,6 +89,7 @@ This will:
 - Install @forge/sql, the Forge database layer
 - Install Drizzle ORM and its MySQL driver
 - Install TypeScript types for MySQL
+- Install forge-sql-orm-cli A command-line interface tool for managing Atlassian Forge SQL migrations and model generation with Drizzle ORM integration.
 
 ## Direct Drizzle Usage with Custom Driver
 
@@ -127,7 +128,7 @@ This approach gives you direct access to all Drizzle ORM features while still us
 1. **Generate initial schema from an existing database**
 
    ```sh
-   npx forge-sql-orm generate:model --dbName testDb --output ./database/schema
+   npx forge-sql-orm-cli generate:model --dbName testDb --output ./database/schema
    ```
 
    _(This is done only once when setting up the project)_
@@ -135,7 +136,7 @@ This approach gives you direct access to all Drizzle ORM features while still us
 2. **Create the first migration**
 
    ```sh
-   npx forge-sql-orm migrations:create --dbName testDb --entitiesPath ./database/schema --output ./database/migration
+   npx forge-sql-orm-cli migrations:create --dbName testDb --entitiesPath ./database/schema --output ./database/migration
    ```
 
    _(This initializes the database migration structure, also done once)_
@@ -152,7 +153,7 @@ This approach gives you direct access to all Drizzle ORM features while still us
 5. **Update the migration**
 
    ```sh
-   npx forge-sql-orm migrations:update --dbName testDb --entitiesPath ./database/schema --output ./database/migration
+   npx forge-sql-orm-cli migrations:update --dbName testDb --entitiesPath ./database/schema --output ./database/migration
    ```
 
    - ⚠️ **Do NOT update schema before this step!**
@@ -165,7 +166,7 @@ This approach gives you direct access to all Drizzle ORM features while still us
 7. **Update the schema**
 
    ```sh
-   npx forge-sql-orm generate:model --dbName testDb --output ./database/schema
+   npx forge-sql-orm-cli generate:model --dbName testDb --output ./database/schema
    ```
 
 8. **Repeat steps 4-7 as needed**
@@ -194,12 +195,12 @@ Before using Drop Migrations, ensure that:
 
 1. First, ensure your local schema matches the deployed database:
    ```bash
-   npx forge-sql-orm generate:model --output ./database/schema
+   npx forge-sql-orm-cli generate:model --output ./database/schema
    ```
 
 2. Generate the drop migration:
    ```bash
-   npx forge-sql-orm migrations:drop --entitiesPath ./database/schema --output ./database/migration
+   npx forge-sql-orm-cli migrations:drop --entitiesPath ./database/schema --output ./database/migration
    ```
 
 3. Deploy and run the migration in your Forge app:
@@ -214,7 +215,7 @@ Before using Drop Migrations, ensure that:
 
 4. After dropping all tables, you can create a new migration to recreate the schema:
    ```bash
-   npx forge-sql-orm migrations:create --entitiesPath ./database/schema --output ./database/migration --force
+   npx forge-sql-orm-cli migrations:create --entitiesPath ./database/schema --output ./database/migration --force
    ```
    The `--force` parameter is required here because we're creating a new migration after dropping all tables.
 
@@ -535,22 +536,7 @@ The `ForgeSqlOrmOptions` object allows customization of ORM behavior:
 
 ## CLI Commands
 
-```sh
-$ npx forge-sql-orm --help
-
-Usage: forge-sql-orm [options] [command]
-
-Options:
-  -V, --version                Output the version number
-  -h, --help                   Display help for command
-
-Commands:
-  generate:model [options]     Generate Drizzle models from the database
-  migrations:create [options]  Generate an initial migration for the entire database
-  migrations:update [options]  Generate a migration to update the database schema
-  migrations:drop [options]    Generate a migration to drop all tables
-  help [command]               Display help for a specific command
-```
+Documentation [here](forge-sql-orm-cli/README.md)
 
 ## Web Triggers for Migrations
 

@@ -1,0 +1,65 @@
+{
+  "name": "forge-sql-orm-cli",
+  "version": "2.0.13",
+  "description": "CLI tool for Forge SQL ORM",
+  "main": "dist-cli/cli.js",
+  "types": "dist-cli/cli.d.ts",
+  "bin": {
+    "forge-sql-orm-cli": "./dist-cli/cli.mjs"
+  },
+  "scripts": {
+    "lint": "eslint src  --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write src",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && vite build && npm run build:types",
+    "build:types": "tsc --emitDeclarationOnly",
+    "prepublish:npm": "npm run build",
+    "publish:npm": "npm publish --access public",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "files": [
+    "dist-cli",
+    "tsconfig.json",
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "atlassian-forge",
+    "atlassian-forge-drizzle",
+    "forge-sql",
+    "forge",
+    "drizzle",
+    "drizzle-orm",
+    "drizzle-driver",
+    "drizzle-custom-driver",
+    "orm",
+    "database",
+    "sql",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^13.1.0",
+    "dotenv": "^16.4.7",
+    "drizzle-kit": "^0.30.6",
+    "inquirer": "^12.5.2",
+    "reflect-metadata": "^0.2.2",
+    "mysql2": "^3.14.0"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "^0.41.0",
+    "forge-sql-orm": "^2.0.13"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.14.0",
+    "@vitest/coverage-v8": "^3.1.1",
+    "reflect-metadata": "^0.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1"
+  }
+}

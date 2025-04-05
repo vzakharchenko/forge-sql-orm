@@ -29,9 +29,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    - run: npm run lint
     - run: npm run build
-    - run: npm run build:cli
     - run: npm test
+    - run: echo BUILD CLI
+    - run: cd forge-sql-orm-cli && npm ci
+    - run: cd forge-sql-orm-cli && npm run lint
+    - run: cd forge-sql-orm-cli && npm run build
     - run: echo BUILD EXAMPLES
     - run: cd examples/forge-sql-orm-example-dynamic && npm i
     - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm i

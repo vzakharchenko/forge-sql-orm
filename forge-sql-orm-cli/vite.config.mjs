@@ -1,24 +1,23 @@
 import { defineConfig } from "vite";
 import path from "node:path";
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+
   return {
     ssr: {
-      external: ["@forge/sql"],
       optimizeDeps: true,
       emitAssets: false,
     },
     build: {
-      outDir:  "dist",
+      outDir: "dist-cli",
       lib: {
-        entry: { ForgeSQLORM: path.resolve("src/index.ts") },
+        entry: { cli: path.resolve("src/cli.ts") },
         formats: ["cjs", "es"],
       },
       ssr: true,
       sourcemap: true,
       target: "node18",
       rollupOptions: {
-        external: ["@forge/sql"],
         output: {
           esModule: true,
           externalImportAttributes: true,

@@ -2,13 +2,13 @@ import "reflect-metadata";
 import fs from "fs";
 import path from "path";
 import { MySqlTable, TableConfig } from "drizzle-orm/mysql-core";
-import { getTableMetadata, generateDropTableStatements } from "../../src";
+import { getTableMetadata, generateDropTableStatements } from "forge-sql-orm";
 
 /**
  * Generates a migration ID using current date
  * @returns Migration ID string with current date
  */
-function generateMigrationUUID(version:number): string {
+function generateMigrationUUID(version: number): string {
   const now = new Date();
   const timestamp = now.getTime();
   return `MIGRATION_V${version}_${timestamp}`;
@@ -25,8 +25,7 @@ function generateMigrationFile(createStatements: string[], version: number): str
   // Clean each SQL statement and generate migration lines with .enqueue()
   const migrationLines = createStatements
     .map(
-      (stmt, index) =>
-        `        .enqueue("${uniqId}_${index}", \"${stmt}\")`, // eslint-disable-line no-useless-escape
+      (stmt, index) => `        .enqueue("${uniqId}_${index}", \"${stmt}\")`, // eslint-disable-line no-useless-escape
     )
     .join("\n");
 
@@ -97,7 +96,7 @@ export const dropMigration = async (options: any) => {
     const version = 1;
 
     // Import Drizzle schema using absolute path
-    const schemaPath = path.resolve(options.entitiesPath, 'schema.ts');
+    const schemaPath = path.resolve(options.entitiesPath, "schema.ts");
     if (!fs.existsSync(schemaPath)) {
       throw new Error(`Schema file not found at: ${schemaPath}`);
     }
@@ -115,12 +114,14 @@ export const dropMigration = async (options: any) => {
     }
 
     // Get table names for logging
-    const tableNames = tables.map(table => {
-      const metadata = getTableMetadata(table);
-      return metadata.tableName;
-    }).filter(Boolean);
+    const tableNames = tables
+      .map((table) => {
+        const metadata = getTableMetadata(table);
+        return metadata.tableName;
+      })
+      .filter(Boolean);
 
-    console.log('Found tables:', tableNames);
+    console.log("Found tables:", tableNames);
 
     // Generate drop statements
     const dropStatements = generateDropTableStatements(tables);

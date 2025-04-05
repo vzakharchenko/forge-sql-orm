@@ -4,9 +4,9 @@ export default defineConfig({
   test: {
     globals: true,
     mockReset: true,
+    include: ['__tests__/**/*.test.ts'],
     coverage: {
       include: ["src"],
     },
-    include: ['src/**/*.test.ts', '__tests__/**/*.test.ts'],
   },
 });

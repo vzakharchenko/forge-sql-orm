@@ -7,13 +7,16 @@
   "dependencies": {
     "@forge/resolver": "1.6.9",
     "@forge/sql": "^2.4.2",
-    "forge-sql-orm": "2.0.12"
+    "forge-sql-orm": "2.0.13"
   },
   "scripts": {
-    "models:create": "forge-sql-orm generate:model --output src/entities",
-    "migration:create": "forge-sql-orm migrations:create",
-    "migration:update": "forge-sql-orm migrations:update",
-    "migration:drop": "forge-sql-orm migrations:drop",
+    "models:create": "forge-sql-orm-cli generate:model --output src/entities",
+    "migration:create": "forge-sql-orm-cli migrations:create",
+    "migration:update": "forge-sql-orm-cli migrations:update",
+    "migration:drop": "forge-sql-orm-cli migrations:drop",
     "forge:debug": "forge tunnel -d -f index.handler"
+  },
+  "devDependencies": {
+    "forge-sql-orm-cli": "^2.0.13"
   }
 }

@@ -4,7 +4,7 @@ import {
   applySchemaMigrations,
   fetchSchemaWebTrigger,
   forgeDriver,
-    patchDbWithSelectAliased
+  patchDbWithSelectAliased,
 } from "forge-sql-orm";
 import migration from "./migration";
 import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
