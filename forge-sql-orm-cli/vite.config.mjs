@@ -11,7 +11,10 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist-cli",
       lib: {
-        entry: { cli: path.resolve("src/cli.ts") },
+        entry: {
+          cli: path.resolve("src/cli.ts"),
+          forgeSqlOrmCLI: path.resolve("src/forgeSqlOrmCLI.ts")
+        },
         formats: ["cjs", "es"],
       },
       ssr: true,
