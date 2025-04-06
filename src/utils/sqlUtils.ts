@@ -8,7 +8,6 @@ import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
 import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlTable } from "drizzle-orm/mysql-core";
-import { getTableName } from "drizzle-orm/table";
 import { isSQLWrapper } from "drizzle-orm/sql/sql";
 
 /**
@@ -261,12 +260,12 @@ export function generateDropTableStatements(tables: AnyMySqlTable[]): string[] {
 
 type AliasColumnMap = Record<string, AnyColumn>;
 
-function mapSelectTableToAlias(table: MySqlTable, aliasMap: AliasColumnMap): any {
+function mapSelectTableToAlias(table: MySqlTable,uniqPrefix:string, aliasMap: AliasColumnMap): any {
   const { columns, tableName } = getTableMetadata(table);
   const selectionsTableFields: Record<string, unknown> = {};
   Object.keys(columns).forEach((name) => {
     const column = columns[name] as AnyColumn;
-    const uniqName = `a_${tableName}_${column.name}`;
+    const uniqName = `a_${uniqPrefix}_${tableName}_${column.name}`.toLowerCase();
     const fieldAlias = sql.raw(uniqName);
     selectionsTableFields[name] = sql`${column} as \`${fieldAlias}\``;
     aliasMap[uniqName] = column;
@@ -281,15 +280,16 @@ function isDrizzleColumn(column: any): boolean {
 export function mapSelectAllFieldsToAlias(
   selections: any,
   name: string,
+  uniqName:string,
   fields: any,
   aliasMap: AliasColumnMap,
 ): any {
   if (isTable(fields)) {
-    selections[name] = mapSelectTableToAlias(fields as MySqlTable, aliasMap);
+    selections[name] = mapSelectTableToAlias(fields as MySqlTable, uniqName, aliasMap);
   } else if (isDrizzleColumn(fields)) {
     const column = fields as Column;
-    const uniqName = `a_${getTableName(column.table)}_${column.name}`;
-    let aliasName = sql.raw(uniqName);
+    const uniqAliasName = `a_${uniqName}_${column.name}`.toLowerCase();
+    let aliasName = sql.raw(uniqAliasName);
     selections[name] = sql`${column} as \`${aliasName}\``;
     aliasMap[uniqName] = column;
   } else if (isSQLWrapper(fields)) {
@@ -297,7 +297,7 @@ export function mapSelectAllFieldsToAlias(
   } else {
     const innerSelections: any = {};
     Object.entries(fields).forEach(([iname, ifields]) => {
-      mapSelectAllFieldsToAlias(innerSelections, iname, ifields, aliasMap);
+      mapSelectAllFieldsToAlias(innerSelections, iname, `${uniqName}_${iname}`, ifields, aliasMap);
     });
     selections[name] = innerSelections;
   }
@@ -312,7 +312,7 @@ export function mapSelectFieldsWithAlias<TSelection extends SelectedFields>(
   const aliasMap: AliasColumnMap = {};
   const selections: any = {};
   Object.entries(fields).forEach(([name, fields]) => {
-    mapSelectAllFieldsToAlias(selections, name, fields, aliasMap);
+    mapSelectAllFieldsToAlias(selections, name,name, fields, aliasMap);
   });
   return { selections, aliasMap };
 }
@@ -391,10 +391,41 @@ export function applyFromDriverTransform<T, TSelection>(
   aliasMap: Record<string, AnyColumn>,
 ): T[] {
   return rows.map((row) => {
-    return transformObject(
+    const transformed = transformObject(
       row as Record<string, unknown>,
       selections as Record<string, unknown>,
       aliasMap,
-    ) as T;
+    ) as Record<string, unknown>;
+
+    return processNullBranches(transformed) as unknown as T;
   });
+}
+
+function processNullBranches(obj: Record<string, unknown>): Record<string, unknown> | null {
+  if (obj === null || typeof obj !== 'object' || obj===undefined) {
+    return obj;
+  }
+
+  const result: Record<string, unknown> = {};
+  let allNull = true;
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === null || value===undefined) {
+      result[key] = null;
+      continue;
+    }
+
+    if (typeof value === 'object' && (value !== null || value !== undefined) ) {
+      const processed = processNullBranches(value as Record<string, unknown>);
+      result[key] = processed;
+      if (processed !== null) {
+        allNull = false;
+      }
+    } else {
+      result[key] = value;
+      allNull = false;
+    }
+  }
+
+  return allNull ? null : result;
 }

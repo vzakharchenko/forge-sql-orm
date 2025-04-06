@@ -428,7 +428,7 @@ function generateSchemaChanges(
         // Column exists in database but not in schema - create it
         const type = dbCol.COLUMN_TYPE;
         const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
-        changes.push(`ALTER TABLE \`${tableName}\` ADD COLUMN \`${colName}\` ${type} ${nullable};`);
+        changes.push(`ALTER TABLE \`${tableName}\` ADD COLUMN IF NOT EXISTS \`${colName}\` ${type} ${nullable};`);
         continue;
       }
 
@@ -440,7 +440,7 @@ function generateSchemaChanges(
         const type = dbCol.COLUMN_TYPE; // Use database type as source of truth
         const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
         changes.push(
-          `ALTER TABLE \`${tableName}\` MODIFY COLUMN \`${colName}\` ${type} ${nullable};`,
+          `ALTER TABLE \`${tableName}\` MODIFY COLUMN \`${colName}\` IF EXISTS ${type} ${nullable};`,
         );
       }
     }
@@ -538,7 +538,7 @@ function generateSchemaChanges(
           // Foreign key exists in schema but not in database - create it
           const fkName = getForeignKeyName(drizzleForeignKey);
           if (fkName) {
-            changes.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY \`${fkName}\`;`);
+            changes.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY  \`${fkName}\`;`);
           } else {
             // @ts-ignore
             const columns = drizzleForeignKey?.columns;
