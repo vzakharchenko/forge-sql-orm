@@ -291,7 +291,7 @@ export function mapSelectAllFieldsToAlias(
     const uniqAliasName = `a_${uniqName}_${column.name}`.toLowerCase();
     let aliasName = sql.raw(uniqAliasName);
     selections[name] = sql`${column} as \`${aliasName}\``;
-    aliasMap[uniqName] = column;
+    aliasMap[uniqAliasName] = column;
   } else if (isSQLWrapper(fields)) {
     selections[name] = fields;
   } else {

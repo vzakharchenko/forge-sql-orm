@@ -257,8 +257,16 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
     }
     const versionMetadata = this.options.additionalMetadata?.[tableName]?.versionField;
     if (!versionMetadata) return undefined;
+let fieldName = versionMetadata.fieldName;
 
-    const versionField = columns[versionMetadata.fieldName];
+    let versionField = columns[versionMetadata.fieldName];
+    if (!versionField){
+      const find = Object.entries(columns).find(([_,c])=>c.name === versionMetadata.fieldName);
+      if (find){
+        fieldName = find[0];
+        versionField = find[1];
+      }
+    }
     if (!versionField) {
       console.warn(
         `Version field "${versionMetadata.fieldName}" not found in table ${tableName}. Versioning will be skipped.`,
@@ -289,7 +297,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
       return undefined;
     }
 
-    return { fieldName: versionMetadata.fieldName, type: fieldType };
+    return { fieldName, type: fieldType };
   }
 
   /**

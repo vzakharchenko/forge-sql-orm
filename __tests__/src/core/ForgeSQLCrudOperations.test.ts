@@ -86,6 +86,7 @@ import {
 } from "../../entities/TestEntityDateVersion";
 import {eq} from "drizzle-orm";
 import {testEntityTimeStampVersion} from "../../entities/TestEntityTimeStampVersion";
+import {TestEntityVersionDifferentField} from "../../entities/TestEntityVersionDifferentField";
 
 describe("ForgeSQLCrudOperations", () => {
   let forgeSqlOperation: ForgeSqlOperation;
@@ -110,6 +111,12 @@ describe("ForgeSQLCrudOperations", () => {
           tableName: 'test_entity_timestamp_version',
           versionField: {
             fieldName: 'version'
+          }
+        },
+        "test_entity_diff_version": {
+          tableName: 'test_entity_diff_version',
+          versionField: {
+            fieldName: 'version_different_field'
           }
         }
       }
@@ -233,6 +240,17 @@ describe("ForgeSQLCrudOperations", () => {
       .updateById({ id: 1, name: "Updated", version: 2 }, testEntityVersion);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "update `test_entity_version` set `id` = ?, `name` = ?, `version` = ? where (`test_entity_version`.`id` = ? and `test_entity_version`.`version` = ?)",
+    );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Updated",3, 1,2);
+    expect(preparedStatement.execute).toHaveBeenCalled();
+  });
+  it("should call SQL prepare and execute on updateById With version column", async () => {
+    await forgeSqlOperation
+      .crud()
+      .updateById({ id: 1, name: "Updated", version: 2 }, TestEntityVersionDifferentField);
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "update `test_entity_diff_version` set `id` = ?, `name` = ?, `version_different_field` = ? where (`test_entity_diff_version`.`id` = ? and `test_entity_diff_version`.`version_different_field` = ?)",
     );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
     expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Updated",3, 1,2);
