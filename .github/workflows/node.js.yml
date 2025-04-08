@@ -28,6 +28,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - name: Upload to Qlty
+      uses: qlty-ai/github-action@v1
+      env:
+        QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
     - run: npm ci
     - run: npm run lint
     - run: npm run build
