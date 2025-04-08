@@ -43,7 +43,10 @@ jobs:
       uses: qltysh/qlty-action/coverage@main
       with:
         coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
-        files: ./coverage/lcov.info
+        files: |
+          ./coverage/lcov.info
+          src/
+          index.ts
     - run: echo BUILD CLI
     - run: cd forge-sql-orm-cli && npm ci
     - run: cd forge-sql-orm-cli && npm run lint
