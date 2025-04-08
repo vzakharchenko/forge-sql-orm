@@ -1,0 +1,25 @@
+version: '2'
+checks:
+  argument-count:
+    enabled: true
+  method-complexity:
+    enabled: false
+
+exclude_paths:
+  - "examples/"
+  - "forge-sql-orm-cli/"
+  - "node_modules/"
+  - "dist/"
+  - "coverage/"
+  - "**/*.test.ts"
+
+plugins:
+  eslint:
+    enabled: true
+    channel: "stable"
+  duplication:
+    enabled: false
+  fixme:
+    enabled: true
+  complexity:
+    enabled: false
