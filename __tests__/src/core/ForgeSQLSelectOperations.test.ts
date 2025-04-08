@@ -400,20 +400,20 @@ describe("ForgeSQLSelectOperations", () => {
                 "table1":  {
                 "id": 1,
                 "name": "Test1",
-                "versionField": moment('2025-04-07T15:06:21.000Z').toDate(),
+                "versionField": moment.utc('2025-04-07T15:06:21.000Z').toDate(),
     },
         "table2":  {
-            "column": moment('2025-04-07T15:06:21.000Z').toDate(),
+            "column": moment.utc('2025-04-07T15:06:21.000Z').toDate(),
         },
     },
          {
             "table1":  {
                 "id": 1,
                     "name": "Test2",
-                    "versionField": moment('2025-04-07T15:06:21.000Z').toDate(),
+                    "versionField": moment.utc('2025-04-07T15:06:21.000Z').toDate(),
             },
             "table2":  {
-                "column": moment('2025-04-07T15:06:21.000Z').toDate(),
+                "column": moment.utc('2025-04-07T15:06:21.000Z').toDate(),
             },
         },]);
     });
