@@ -35,7 +35,9 @@
     "@eslint/js": "^9.24.0",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
+    "@vitest/coverage-v8": "^3.1.1",
     "@vitest/ui": "^3.1.1",
+    "coveralls": "^3.1.1",
     "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-import": "^2.31.0",
@@ -61,7 +63,8 @@
     "build:types": "tsc --emitDeclarationOnly",
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
-    "generate:models": "ts-node scripts/generate-models.ts"
+    "generate:models": "ts-node scripts/generate-models.ts",
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "files": [
     "dist",
