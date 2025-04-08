@@ -22,4 +22,4 @@ plugins:
   fixme:
     enabled: true
   complexity:
-    enabled: false
+    enabled: fa
