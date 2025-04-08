@@ -374,8 +374,8 @@ describe("ForgeSQLSelectOperations", () => {
             bindParams: vi.fn(),
             execute: vi.fn().mockResolvedValue({
                 rows: [
-                    {id: 1, name: "Test1", date: "2025-04-07 18:06:21", date2:"2025-04-07 18:06:21"},
-                    {id: 1, name: "Test2", date: "2025-04-07 18:06:21", date2:"2025-04-07 18:06:21"},
+                    {id: 1, name: "Test1", date: moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss"), date2:moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss")},
+                    {id: 1, name: "Test2", date: moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss"), date2:moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss")},
 
                 ]
             }),
