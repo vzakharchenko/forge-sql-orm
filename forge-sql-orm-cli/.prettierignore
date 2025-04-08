@@ -1,5 +1,0 @@
-node_modules
-dist
-dist-cli
-scripts/postinstall.ts
-package-lock.json
