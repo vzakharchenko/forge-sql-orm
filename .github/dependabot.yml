@@ -29,6 +29,11 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
@@ -47,6 +52,11 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-simple/static/forge-orm-example"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
@@ -65,6 +75,11 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
@@ -83,6 +98,11 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-dynamic/static/forge-orm-example"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
