@@ -7,7 +7,7 @@ import {
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
 import { drizzle, MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy";
-import { forgeDriver } from "../utils/forgeDriver";
+import { createForgeDriverProxy } from "../utils/forgeDriverProxy";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
 import { patchDbWithSelectAliased } from "../lib/drizzle/extensions/selectAliased";
@@ -37,8 +37,9 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         console.debug("Initializing ForgeSQLORM...");
       }
       // Initialize Drizzle instance with our custom driver
+      const proxiedDriver = createForgeDriverProxy(newOptions.hints, newOptions.logRawSqlQuery);
       this.drizzle = patchDbWithSelectAliased(
-        drizzle(forgeDriver, { logger: newOptions.logRawSqlQuery }),
+        drizzle(proxiedDriver, { logger: newOptions.logRawSqlQuery }),
       );
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);

@@ -14,6 +14,7 @@ import { InferInsertModel, SQL } from "drizzle-orm";
 import moment from "moment/moment";
 import { parseDateTime } from "../utils/sqlUtils";
 import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy/index";
+import { SqlHints } from "../utils/sqlHints";
 
 // ============= Core Types =============
 
@@ -98,14 +99,14 @@ export interface CRUDForgeSQL {
    * Inserts multiple records into the database.
    * @template T - The type of the table schema
    * @param {T} schema - The entity schema
-   * @param {Partial<InferInsertModel<T>>[]} models - The list of entities to insert
+   * @param {<InferInsertModel<T>[]} models - The list of entities to insert
    * @param {boolean} [updateIfExists] - Whether to update the row if it already exists (default: false)
    * @returns {Promise<number>} The number of inserted rows
    * @throws {Error} If the insert operation fails
    */
   insert<T extends AnyMySqlTable>(
     schema: T,
-    models: Partial<InferInsertModel<T>>[],
+    models: InferInsertModel<T>[],
     updateIfExists?: boolean,
   ): Promise<number>;
 
@@ -228,22 +229,15 @@ export interface TableMetadata {
 export type AdditionalMetadata = Record<string, TableMetadata>;
 
 /**
- * Options for configuring ForgeSQL ORM behavior.
+ * Interface for ForgeSQL ORM options
  */
 export interface ForgeSqlOrmOptions {
-  /**
-   * Enables logging of raw SQL queries in the Atlassian Forge Developer Console.
-   * Useful for debugging and monitoring SQL operations.
-   * @default false
-   */
+  /** Whether to log raw SQL queries */
   logRawSqlQuery?: boolean;
-
-  /**
-   * Disables optimistic locking for all operations.
-   * When enabled, version checks are skipped during updates.
-   * @default false
-   */
+  /** Whether to disable optimistic locking */
   disableOptimisticLocking?: boolean;
+  /** SQL hints to be applied to queries */
+  hints?: SqlHints;
 
   /**
    * Additional metadata for table configuration.
@@ -301,7 +295,7 @@ export const forgeTimestampString = customType<{
     return "timestamp";
   },
   toDriver(value: Date) {
-    return moment(value as Date).format("YYYY-MM-DDTHH:mm:ss.SSS");
+    return moment(new Date(value)).format("YYYY-MM-DDTHH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
     const format = "YYYY-MM-DDTHH:mm:ss.SSS";

@@ -37,7 +37,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
    */
   async insert<T extends AnyMySqlTable>(
     schema: T,
-    models: Partial<InferInsertModel<T>>[],
+    models: InferInsertModel<T>[],
     updateIfExists: boolean = false,
   ): Promise<number> {
     if (!models?.length) return 0;
@@ -257,12 +257,12 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
     }
     const versionMetadata = this.options.additionalMetadata?.[tableName]?.versionField;
     if (!versionMetadata) return undefined;
-let fieldName = versionMetadata.fieldName;
+    let fieldName = versionMetadata.fieldName;
 
     let versionField = columns[versionMetadata.fieldName];
-    if (!versionField){
-      const find = Object.entries(columns).find(([_,c])=>c.name === versionMetadata.fieldName);
-      if (find){
+    if (!versionField) {
+      const find = Object.entries(columns).find(([, c]) => c.name === versionMetadata.fieldName);
+      if (find) {
         fieldName = find[0];
         versionField = find[1];
       }
@@ -349,15 +349,22 @@ let fieldName = versionMetadata.fieldName;
     columns: Record<string, AnyColumn>,
   ): InferInsertModel<T> {
     if (!versionMetadata || !columns) return model as InferInsertModel<T>;
+    let fieldName = versionMetadata.fieldName;
+    let versionField = columns[versionMetadata.fieldName];
+    if (!versionField) {
+      const find = Object.entries(columns).find(([, c]) => c.name === versionMetadata.fieldName);
+      if (find) {
+        fieldName = find[0];
+        versionField = find[1];
+      }
+    }
 
-    const versionField = columns[versionMetadata.fieldName];
     if (!versionField) return model as InferInsertModel<T>;
 
     const modelWithVersion = { ...model };
     const fieldType = versionField.getSQLType();
     const versionValue = fieldType === "datetime" || fieldType === "timestamp" ? new Date() : 1;
-    modelWithVersion[versionMetadata.fieldName as keyof typeof modelWithVersion] =
-      versionValue as any;
+    modelWithVersion[fieldName as keyof typeof modelWithVersion] = versionValue as any;
 
     return modelWithVersion as InferInsertModel<T>;
   }

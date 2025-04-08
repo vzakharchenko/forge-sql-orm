@@ -10,7 +10,10 @@ import {testDataEntity} from "../../entities/TestDataEntity";
 import {testEntityDateVersion} from "../../entities/TestEntityDateVersion";
 import {testEntityJoin1} from "../../entities/TestEntityJoin1";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
-
+import {testEntityVersionDifferentDateField} from "../../entities/TestEntityVersionDifferentFieldDate";
+const OriginalDate = global.Date;
+vi.useFakeTimers();
+vi.setSystemTime(new Date("2023-04-12 00:00:01"));
 vi.mock("@forge/sql", () => ({
     sql: {
         prepare: vi.fn((query: string) => {
@@ -361,6 +364,58 @@ describe("ForgeSQLSelectOperations", () => {
             {table1: {id: 2,
                     "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
         ]);
+    });
+
+    it("should execute inner join with the same diff fields", async () => {
+        // Mock result without aliases
+        vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+            query: "MOCK_QUERY",
+            params: [],
+            bindParams: vi.fn(),
+            execute: vi.fn().mockResolvedValue({
+                rows: [
+                    {id: 1, name: "Test1", date: "2025-04-07 18:06:21", date2:"2025-04-07 18:06:21"},
+                    {id: 1, name: "Test2", date: "2025-04-07 18:06:21", date2:"2025-04-07 18:06:21"},
+
+                ]
+            }),
+        } as any));
+
+        const query = forgeSqlOperation.select(
+            {
+                table1: testEntityVersionDifferentDateField,
+                table2: {
+                    column: testEntityVersionDifferentDateField.versionField
+                }
+            })
+            .from(testEntityJoin1)
+            .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityVersionDifferentDateField.id));
+
+        const result = await query
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "select `test_entity_diff_date_version`.`id` as `a_table1_test_entity_diff_date_version_id`, `test_entity_diff_date_version`.`name` as `a_table1_test_entity_diff_date_version_name`, `test_entity_diff_date_version`.`version_different_date_field` as `a_table1_test_entity_diff_date_version_version_different_date_field`, `test_entity_diff_date_version`.`version_different_date_field` as `a_table2_column_version_different_date_field` from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_diff_date_version`.`id`",
+        );
+        expect(result).toEqual([
+             {
+                "table1":  {
+                "id": 1,
+                "name": "Test1",
+                "versionField": moment('2025-04-07T15:06:21.000Z').toDate(),
+    },
+        "table2":  {
+            "column": moment('2025-04-07T15:06:21.000Z').toDate(),
+        },
+    },
+         {
+            "table1":  {
+                "id": 1,
+                    "name": "Test2",
+                    "versionField": moment('2025-04-07T15:06:21.000Z').toDate(),
+            },
+            "table2":  {
+                "column": moment('2025-04-07T15:06:21.000Z').toDate(),
+            },
+        },]);
     });
 
     it("should execute inner join with the same fields distinct", async () => {

@@ -47,22 +47,23 @@ interface ConfigBuilderData {
  * @returns Date object
  */
 export const parseDateTime = (value: string, format: string): Date => {
+  let result: Date;
   const m = moment(value, format, true);
   if (!m.isValid()) {
-    return moment(value).toDate();
+    const momentDate = moment(value);
+    if (momentDate.isValid()) {
+      result = momentDate.toDate();
+    } else {
+      result = new Date(value);
+    }
+  } else {
+    result = m.toDate();
   }
-  return m.toDate();
+  if (isNaN(result.getTime())) {
+    result = new Date(value);
+  }
+  return result;
 };
-
-/**
- * Extracts the alias from a SQL query
- * @param query - The SQL query to extract the alias from
- * @returns The extracted alias or the original query if no alias found
- */
-export function extractAlias(query: string): string {
-  const match = query.match(/\bas\s+(['"`]?)([\w*]+)\1$/i);
-  return match ? match[2] : query;
-}
 
 /**
  * Gets primary keys from the schema.
@@ -260,7 +261,11 @@ export function generateDropTableStatements(tables: AnyMySqlTable[]): string[] {
 
 type AliasColumnMap = Record<string, AnyColumn>;
 
-function mapSelectTableToAlias(table: MySqlTable,uniqPrefix:string, aliasMap: AliasColumnMap): any {
+function mapSelectTableToAlias(
+  table: MySqlTable,
+  uniqPrefix: string,
+  aliasMap: AliasColumnMap,
+): any {
   const { columns, tableName } = getTableMetadata(table);
   const selectionsTableFields: Record<string, unknown> = {};
   Object.keys(columns).forEach((name) => {
@@ -280,7 +285,7 @@ function isDrizzleColumn(column: any): boolean {
 export function mapSelectAllFieldsToAlias(
   selections: any,
   name: string,
-  uniqName:string,
+  uniqName: string,
   fields: any,
   aliasMap: AliasColumnMap,
 ): any {
@@ -312,7 +317,7 @@ export function mapSelectFieldsWithAlias<TSelection extends SelectedFields>(
   const aliasMap: AliasColumnMap = {};
   const selections: any = {};
   Object.entries(fields).forEach(([name, fields]) => {
-    mapSelectAllFieldsToAlias(selections, name,name, fields, aliasMap);
+    mapSelectAllFieldsToAlias(selections, name, name, fields, aliasMap);
   });
   return { selections, aliasMap };
 }
@@ -402,7 +407,12 @@ export function applyFromDriverTransform<T, TSelection>(
 }
 
 function processNullBranches(obj: Record<string, unknown>): Record<string, unknown> | null {
-  if (obj === null || typeof obj !== 'object' || obj===undefined) {
+  if (obj === null || typeof obj !== "object" || obj === undefined) {
+    return obj;
+  }
+
+  // Skip built-in objects like Date, Array, etc.
+  if (obj.constructor && obj.constructor.name !== "Object") {
     return obj;
   }
 
@@ -410,12 +420,12 @@ function processNullBranches(obj: Record<string, unknown>): Record<string, unkno
   let allNull = true;
 
   for (const [key, value] of Object.entries(obj)) {
-    if (value === null || value===undefined) {
+    if (value === null || value === undefined) {
       result[key] = null;
       continue;
     }
 
-    if (typeof value === 'object' && (value !== null || value !== undefined) ) {
+    if (typeof value === "object" && value !== null && value !== undefined) {
       const processed = processNullBranches(value as Record<string, unknown>);
       result[key] = processed;
       if (processed !== null) {
