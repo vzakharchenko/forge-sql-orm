@@ -12,7 +12,7 @@
     "mobx-react": "9.2.0",
     "moment": "^2.30.1",
     "prop-types": "^15.8.1",
-    "react": "^18.3.1",
+    "react": "^19.1.0",
     "react-countdown": "^2.3.6",
     "react-dom": "^18.3.1",
     "uuid": "^11.1.0"
@@ -21,7 +21,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@rollup/plugin-image": "^3.0.3",
     "@types/jest": "^29.5.14",
-    "@types/react": "^18.3.1",
+    "@types/react": "^19.1.0",
     "@types/react-csv": "^1.1.10",
     "@types/react-dom": "^18.3.1",
     "@types/react-router-dom": "^5.3.3",
