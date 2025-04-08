@@ -23,14 +23,6 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - name: Download Code Climate test reporter
-      run: |
-        curl -Ls https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 -o cc-test-reporter
-        chmod +x cc-test-reporter
-        mv cc-test-reporter /usr/local/bin/
-
-    - name: Code Climate before-build
-      run: cc-test-reporter before-build
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -47,12 +39,6 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: ./coverage/lcov.info
-    - name: Upload coverage to Code Climate
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      run: |
-        cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.json
-        cc-test-reporter upload-coverage -i coverage/codeclimate.json
     - name: Upload to Qlty
       uses: qltysh/qlty-action/coverage@main
       with:
