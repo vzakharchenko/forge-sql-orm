@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/" # Root project
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -12,7 +12,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/forge-sql-orm-cli"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -21,7 +21,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-drizzle-driver-simple"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -35,7 +35,7 @@ updates:
       - dependency-name: "@types/react"
       - dependency-name: "@types/react-dom"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -44,7 +44,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-simple"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -58,7 +58,7 @@ updates:
       - dependency-name: "@types/react"
       - dependency-name: "@types/react-dom"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -67,7 +67,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-optimistic-locking"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -81,7 +81,7 @@ updates:
       - dependency-name: "@types/react"
       - dependency-name: "@types/react-dom"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -90,7 +90,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/examples/forge-sql-orm-example-dynamic"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
@@ -104,7 +104,7 @@ updates:
       - dependency-name: "@types/react"
       - dependency-name: "@types/react-dom"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 5
     labels:
       - dependencies
