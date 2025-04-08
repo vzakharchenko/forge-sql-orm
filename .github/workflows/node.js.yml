@@ -41,7 +41,7 @@ jobs:
     - name: Upload to Qlty
       uses: qltysh/qlty-action/coverage@main
       with:
-        coverage-token: {{secrets.QLTY_COVERAGE_TOKEN}}
+        coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         files: ./coverage/lcov.info
     - run: echo BUILD CLI
     - run: cd forge-sql-orm-cli && npm ci
