@@ -240,17 +240,14 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
 
 /**
  * Generates SQL statements to drop tables
- * @param tables - Array of table schemas
+ * @param tables - Array of table names
  * @returns Array of SQL statements for dropping tables
  */
-export function generateDropTableStatements(tables: AnyMySqlTable[]): string[] {
+export function generateDropTableStatements(tables: string[]): string[] {
   const dropStatements: string[] = [];
 
-  tables.forEach((table) => {
-    const tableMetadata = getTableMetadata(table);
-    if (tableMetadata.tableName) {
-      dropStatements.push(`DROP TABLE IF EXISTS \`${tableMetadata.tableName}\`;`);
-    }
+  tables.forEach((tableName) => {
+    dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
   });
 
   // Add statement to clear migrations table

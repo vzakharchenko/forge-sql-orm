@@ -9,7 +9,6 @@ import {
   applySchemaMigrations,
   fetchSchemaWebTrigger,
 } from "forge-sql-orm";
-import * as schema from "./entities/schema";
 import {
   additionalMetadata,
   testData,
@@ -154,7 +153,7 @@ export const handlerMigration = async () => {
 };
 
 export const dropMigrations = () => {
-  return dropSchemaMigrations(Object.values(schema));
+  return dropSchemaMigrations();
 };
 
 export const fetchMigrations = () => {

@@ -598,15 +598,14 @@ This trigger allows you to completely reset your database schema. It's useful fo
 - Testing scenarios requiring a clean database
 - Resetting the database before applying new migrations
 
-**Important**: The trigger will only drop tables that are defined in your models. Any tables that exist in the database but are not defined in your models will remain untouched.
+**Important**: The trigger will  drop all tables including migration.
 
 ```typescript
 // Example usage in your Forge app
 import { dropSchemaMigrations } from "forge-sql-orm";
-import * as schema from "./entities/schema";
 
 export const dropMigrations = () => {
-  return dropSchemaMigrations(Object.values(schema));
+  return dropSchemaMigrations();
 };
 ```
 

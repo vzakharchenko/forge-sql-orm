@@ -1,6 +1,6 @@
 import { sql } from "@forge/sql";
 import { getHttpResponse, TriggerResponse } from "./index";
-import { forgeSystemTables } from "../core/SystemTables";
+import {forgeSystemTables, getTables} from "../core/SystemTables";
 import { getTableName } from "drizzle-orm/table";
 
 interface CreateTableRow {
@@ -45,14 +45,6 @@ export async function fetchSchemaWebTrigger(): Promise<TriggerResponse<string>> 
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return getHttpResponse<string>(500, errorMessage);
   }
-}
-
-/**
- * Retrieves all tables from the database
- */
-async function getTables(): Promise<string[]> {
-  const tables = await sql.executeDDL<string>("SHOW TABLES");
-  return tables.rows.flatMap((tableInfo) => Object.values(tableInfo));
 }
 
 /**
