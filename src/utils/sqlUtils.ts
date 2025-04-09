@@ -334,7 +334,7 @@ function getAliasFromDrizzleAlias(value: unknown): string | undefined {
         const aliasNameChunkSql = aliasNameChunk as SQL;
         if (aliasNameChunkSql.queryChunks?.length === 1 && aliasNameChunkSql.queryChunks[0]) {
           const queryChunksStringChunc = aliasNameChunkSql.queryChunks[0];
-          if (queryChunksStringChunc && "value" in queryChunksStringChunc) {
+          if ("value" in queryChunksStringChunc) {
             const values = (queryChunksStringChunc as StringChunk).value;
             if (values && values.length === 1) {
               return values[0];
