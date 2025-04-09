@@ -11,7 +11,7 @@ import {testEntityDateVersion} from "../../entities/TestEntityDateVersion";
 import {testEntityJoin1} from "../../entities/TestEntityJoin1";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
 import {testEntityVersionDifferentDateField} from "../../entities/TestEntityVersionDifferentFieldDate";
-const OriginalDate = global.Date;
+
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
 vi.mock("@forge/sql", () => ({

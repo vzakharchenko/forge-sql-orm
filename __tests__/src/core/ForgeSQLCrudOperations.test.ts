@@ -10,12 +10,13 @@ vi.mock("@forge/sql", () => ({
         query ===
         "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?"
       ) {
-        const testEntityVersion = new TestEntityVersion();
-        testEntityVersion.id = 1;
-        testEntityVersion.name = "test";
-        testEntityVersion.version = 5;
+        const testEntityVersion = {
+          id: 1,
+          name: "test",
+          version: 5
+        } as TestEntityVersion;
         const mockResult = {
-          query: query || "MOCK_QUERY",
+          query: "MOCK_QUERY",
           _params: [],
           remoteSqlApi: "",
           params: [],
@@ -24,18 +25,19 @@ vi.mock("@forge/sql", () => ({
             return mockResult;
           }),
           execute: () => ({ rows: [testEntityVersion] }),
-        };
+        } as any;
         return mockResult;
       } else if (
         query ===
         "select `t0`.`id`, `t0`.`version` from `test_entity_date_version` as `t0` where `t0`.`id` = 1"
       ) {
-        const testEntityVersion = new TestEntityDateVersion();
-        testEntityVersion.id = 1;
-        testEntityVersion.name = "test";
-        testEntityVersion.version = new Date("01.01.2000 00:00:00");
+        const testEntityVersion = {
+          id: 1,
+          name: "test",
+          version: new Date("01.01.2000 00:00:00")
+        } as TestEntityDateVersion;
         const mockResult = {
-          query: query || "MOCK_QUERY",
+          query: "MOCK_QUERY",
           _params: [],
           remoteSqlApi: "",
           params: [],
@@ -44,11 +46,11 @@ vi.mock("@forge/sql", () => ({
             return mockResult;
           }),
           execute: () => ({ rows: [testEntityVersion] }),
-        };
+        } as any;
         return mockResult;
       } else if (query.startsWith("update")) {
         const mockResult = {
-          query: query || "MOCK_QUERY",
+          query: "MOCK_QUERY",
           _params: [],
           remoteSqlApi: "",
           params: [],
@@ -57,11 +59,11 @@ vi.mock("@forge/sql", () => ({
             return mockResult;
           }),
           execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1 } }),
-        };
+        } as any;
         return mockResult;
       }
       const mockResult = {
-        query: query || "MOCK_QUERY",
+        query: "MOCK_QUERY",
         _params: [],
         remoteSqlApi: "",
         params: [],
@@ -70,7 +72,7 @@ vi.mock("@forge/sql", () => ({
           return mockResult;
         }),
         execute: vi.fn().mockResolvedValue({ rows: [] }),
-      };
+      } as any;
       return mockResult;
     }),
   },
@@ -172,7 +174,11 @@ describe("ForgeSQLCrudOperations", () => {
   it("should call SQL prepare and execute on insert with empty versioning date", async () => {
     await forgeSqlOperation
       .crud()
-      .insert(testEntityDateVersion, [{ id: 1, name: "Test" }]);
+      .insert(testEntityDateVersion, [{
+        id: 1,
+        name: "Test",
+        version: new Date()
+      } as { id: number; name: string; version: Date }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
@@ -185,9 +191,11 @@ describe("ForgeSQLCrudOperations", () => {
   it("should call SQL prepare and execute on insert notEmpty empty versioning date", async () => {
     await forgeSqlOperation
       .crud()
-      .insert(testEntityDateVersion, [
-        { id: 1, name: "Test", version: new OriginalDate() } as TestEntityDateVersion,
-      ]);
+      .insert(testEntityDateVersion, [{
+        id: 1,
+        name: "Test",
+        version: new OriginalDate()
+      } as { id: number; name: string; version: Date }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",

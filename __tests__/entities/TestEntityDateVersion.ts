@@ -3,7 +3,7 @@ import { mysqlTable, int, varchar } from 'drizzle-orm/mysql-core';
 
 export class TestEntityDateVersion {
   id!: number;
-  name?: string;
+  name!: string;
   version!: Date;
 }
 

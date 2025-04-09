@@ -1,6 +1,4 @@
 import { action, makeObservable, observable } from "mobx";
-import { FullContext } from "@forge/bridge/out/types";
-import DynamicTable from "@atlaskit/dynamic-table";
 import { Metadata } from "../utils/Constants";
 
 export class UsersStore {

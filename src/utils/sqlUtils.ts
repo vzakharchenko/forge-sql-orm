@@ -332,7 +332,7 @@ function getAliasFromDrizzleAlias(value: unknown): string | undefined {
       const aliasNameChunk = queryChunks[queryChunks.length - 2];
       if (isSQLWrapper(aliasNameChunk) && "queryChunks" in aliasNameChunk) {
         const aliasNameChunkSql = aliasNameChunk as SQL;
-        if (aliasNameChunkSql && aliasNameChunkSql.queryChunks.length === 1) {
+        if (aliasNameChunkSql?.queryChunks?.length === 1) {
           const queryChunksStringChunc = aliasNameChunkSql.queryChunks[0];
           if (queryChunksStringChunc && "value" in queryChunksStringChunc) {
             const values = (queryChunksStringChunc as StringChunk).value;
@@ -407,7 +407,7 @@ export function applyFromDriverTransform<T, TSelection>(
 }
 
 function processNullBranches(obj: Record<string, unknown>): Record<string, unknown> | null {
-  if (obj === null || typeof obj !== "object" || obj === undefined) {
+  if (obj === null || typeof obj !== "object") {
     return obj;
   }
 

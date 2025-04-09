@@ -1,4 +1,4 @@
-import { DynamicResponse, MetadataProperties } from "./Constants";
+import { MetadataProperties } from "./Constants";
 
 const getCommonCells = (
   withWidth: boolean,

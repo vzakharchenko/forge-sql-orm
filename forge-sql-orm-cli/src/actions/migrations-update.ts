@@ -536,18 +536,20 @@ function generateSchemaChanges(
 
         if (!isDbFk) {
           // Foreign key exists in schema but not in database - create it
-          const fkName = getForeignKeyName(drizzleForeignKey);
-          if (fkName) {
-            changes.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY  \`${fkName}\`;`);
-          } else {
-            // @ts-ignore
-            const columns = drizzleForeignKey?.columns;
-            const columnNames = columns?.length
-              ? columns.map((c: any) => c.name).join(", ")
-              : "unknown columns";
-            console.warn(
-              `⚠️ Drizzle model for table '${tableName}' does not provide a name for FOREIGN KEY constraint on columns: ${columnNames}`,
-            );
+          if (drizzleForeignKey) {
+            const fkName = getForeignKeyName(drizzleForeignKey);
+            if (fkName) {
+              changes.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY  \`${fkName}\`;`);
+            } else {
+              // @ts-ignore
+              const columns = drizzleForeignKey.columns;
+              const columnNames = columns?.length
+                ? columns.map((c: any) => c.name).join(", ")
+                : "unknown columns";
+              console.warn(
+                `⚠️ Drizzle model for table '${tableName}' does not provide a name for FOREIGN KEY constraint on columns: ${columnNames}`,
+              );
+            }
           }
         }
       }

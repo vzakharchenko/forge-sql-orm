@@ -18,7 +18,7 @@ export function createForgeDriverProxy(options?: SqlHints, logRawSqlQuery?: bool
     // Inject SQL hints into the query
     const modifiedQuery = injectSqlHints(query, options);
 
-    if (options && logRawSqlQuery) {
+    if (options && logRawSqlQuery && modifiedQuery !== query) {
       console.warn("modified query: " + modifiedQuery);
     }
     // Call the original forgeDriver with the modified query

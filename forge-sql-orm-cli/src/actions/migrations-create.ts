@@ -181,8 +181,6 @@ export const createMigration = async (options: CreateMigrationOptions) => {
       }
     }
 
-    // Start from version 1 if no previous migrations exist
-    version = 1;
     // Generate SQL using drizzle-kit
     await execSync(
       `npx drizzle-kit generate --name=init --dialect mysql --out ${options.output} --schema ${options.entitiesPath}`,

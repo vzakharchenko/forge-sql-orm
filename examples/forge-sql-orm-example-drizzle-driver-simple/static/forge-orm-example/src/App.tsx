@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { invoke } from "@forge/bridge";
 import UserTable from "./components/UserTable";
 import { observer } from "mobx-react";

@@ -1,15 +1,6 @@
 import { forgeDateTimeString, forgeTimestampString } from "forge-sql-orm";
 
-import {
-  mysqlTable,
-  mysqlSchema,
-  AnyMySqlColumn,
-  primaryKey,
-  int,
-  datetime,
-  varchar,
-  timestamp,
-} from "drizzle-orm/mysql-core";
+import { mysqlTable, primaryKey, int, varchar } from "drizzle-orm/mysql-core";
 
 export const testData = mysqlTable(
   "test_data",

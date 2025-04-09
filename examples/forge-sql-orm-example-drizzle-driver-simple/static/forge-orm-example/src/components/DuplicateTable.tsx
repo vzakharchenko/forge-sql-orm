@@ -1,4 +1,4 @@
-import { DuplicateResponse, UserResponse } from "../utils/Constants";
+import { DuplicateResponse } from "../utils/Constants";
 import DynamicTable from "@atlaskit/dynamic-table";
 import { createHead } from "../utils/TableUtils";
 import { observer } from "mobx-react";

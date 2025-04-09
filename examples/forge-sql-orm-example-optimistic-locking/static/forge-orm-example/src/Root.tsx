@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode } from "react";
 import { invoke } from "@forge/bridge";
 import { observer } from "mobx-react";
 import { useRootStore } from "./store";
@@ -47,7 +47,7 @@ function Root() {
         <h2>Reset All</h2>
         <p>
           Click the button below to revert all test entities to their initial state. This removes
-          any changes you’ve made during testing.
+          any changes you've made during testing.
         </p>
         <br />
         <Button
@@ -88,16 +88,16 @@ function Root() {
           {UPDATE_TYPES.map((e) => {
             switch (e) {
               case "WITHOUT_VERSIONING": {
-                return <Tab>Entity Without Version Column (No Locking)</Tab>;
+                return <Tab key={e}>Entity Without Version Column (No Locking)</Tab>;
               }
               case "OPTIMISTIC_NUMBER": {
-                return <Tab>Entity with Numeric Version Column</Tab>;
+                return <Tab key={e}>Entity with Numeric Version Column</Tab>;
               }
               case "OPTIMISTIC_DATE": {
-                return <Tab>Entity with Datetime-Based Version Column</Tab>;
+                return <Tab key={e}>Entity with Datetime-Based Version Column</Tab>;
               }
               case "OPTIMISTIC_TIMESTAMP": {
-                return <Tab>Entity with Timestamp-BasedVersion Column</Tab>;
+                return <Tab key={e}>Entity with Timestamp-BasedVersion Column</Tab>;
               }
             }
           })}
@@ -117,7 +117,7 @@ function Root() {
               </p>
               <h3>How to Test</h3>
               <ol>
-                <li>Open this entity’s update form in two separate browser tabs.</li>
+                <li>Open this entity's update form in two separate browser tabs.</li>
                 <li>
                   In the first tab, change any field and click <strong>Update</strong>.
                 </li>
@@ -144,7 +144,7 @@ function Root() {
               </p>
               <h3>How to Test</h3>
               <ol>
-                <li>Open this entity’s update form in two separate browser tabs.</li>
+                <li>Open this entity's update form in two separate browser tabs.</li>
                 <li>
                   In the first tab, change any field and click <strong>Update</strong>. This
                   succeeds and increments the version number.
@@ -171,7 +171,7 @@ function Root() {
               </p>
               <h3>How to Test</h3>
               <ol>
-                <li>Open this entity’s update form in two separate browser tabs.</li>
+                <li>Open this entity's update form in two separate browser tabs.</li>
                 <li>
                   In the first tab, change any field and click <strong>Update</strong>. This sets or
                   updates the date-based version.
@@ -198,7 +198,7 @@ function Root() {
               </p>
               <h3>How to Test</h3>
               <ol>
-                <li>Open this entity’s update form in two separate browser tabs.</li>
+                <li>Open this entity's update form in two separate browser tabs.</li>
                 <li>
                   In the first tab, modify any field and click <strong>Update</strong>. This
                   refreshes the timestamp.

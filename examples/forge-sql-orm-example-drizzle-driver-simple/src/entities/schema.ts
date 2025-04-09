@@ -1,13 +1,4 @@
-import {
-  mysqlTable,
-  mysqlSchema,
-  AnyMySqlColumn,
-  primaryKey,
-  int,
-  varchar,
-  decimal,
-} from "drizzle-orm/mysql-core";
-import { sql } from "drizzle-orm";
+import { mysqlTable, primaryKey, int, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable(
   "users",

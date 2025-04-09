@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { invoke } from "@forge/bridge";
 import { DynamicResponse, Metadata } from "./utils/Constants";
 import UserTable from "./components/UserTable";
