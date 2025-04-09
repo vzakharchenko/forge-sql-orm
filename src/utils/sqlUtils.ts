@@ -332,7 +332,7 @@ function getAliasFromDrizzleAlias(value: unknown): string | undefined {
       const aliasNameChunk = queryChunks[queryChunks.length - 2];
       if (isSQLWrapper(aliasNameChunk) && "queryChunks" in aliasNameChunk) {
         const aliasNameChunkSql = aliasNameChunk as SQL;
-        if (aliasNameChunkSql?.queryChunks?.length === 1) {
+        if (aliasNameChunkSql?.queryChunks?.length === 1 && aliasNameChunkSql.queryChunks[0]) {
           const queryChunksStringChunc = aliasNameChunkSql.queryChunks[0];
           if (queryChunksStringChunc && "value" in queryChunksStringChunc) {
             const values = (queryChunksStringChunc as StringChunk).value;
@@ -425,7 +425,7 @@ function processNullBranches(obj: Record<string, unknown>): Record<string, unkno
       continue;
     }
 
-    if (typeof value === "object" && value !== null && value !== undefined) {
+    if (typeof value === "object" && value !== null) {
       const processed = processNullBranches(value as Record<string, unknown>);
       result[key] = processed;
       if (processed !== null) {
