@@ -10,7 +10,6 @@ import migration from "./migration";
 import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
 import { asc, desc, eq, InferInsertModel, sql as rawSql } from "drizzle-orm";
 import { users } from "./entities";
-import * as schema from "./entities/schema";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
 import { drizzle } from "drizzle-orm/mysql-proxy";
 
@@ -80,7 +79,7 @@ export const handlerMigration = async () => {
 };
 
 export const dropMigrations = () => {
-  return dropSchemaMigrations(Object.values(schema));
+  return dropSchemaMigrations();
 };
 
 export const fetchMigrations = () => {

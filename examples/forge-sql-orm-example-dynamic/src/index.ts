@@ -20,7 +20,6 @@ import {
   fetchSchemaWebTrigger,
   applySchemaMigrations,
 } from "forge-sql-orm";
-import * as schema from "./entities/schema";
 
 // Initialize resolver and ForgeSQL
 const resolver = new Resolver();
@@ -191,7 +190,7 @@ export const handlerMigration = async () => {
 };
 
 export const dropMigrations = () => {
-  return dropSchemaMigrations(Object.values(schema));
+  return dropSchemaMigrations();
 };
 
 export const fetchMigrations = () => {

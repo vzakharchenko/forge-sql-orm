@@ -40,7 +40,7 @@ jobs:
     - name: Upload to Coveralls
       uses: coverallsapp/github-action@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
         path-to-lcov: ./coverage/lcov.info
     - name: Upload to Qlty
       uses: qltysh/qlty-action/coverage@main
@@ -64,3 +64,9 @@ jobs:
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
+    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-query-analyses && npm i
+    - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm run build

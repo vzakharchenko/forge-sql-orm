@@ -10,40 +10,61 @@ import {
   MySqlSelectDynamic,
   type SelectedFields,
 } from "drizzle-orm/mysql-core/query-builders/select.types";
-import { InferInsertModel, SQL } from "drizzle-orm";
+import { InferInsertModel, Query, SQL } from "drizzle-orm";
 import moment from "moment/moment";
 import { parseDateTime } from "../utils/sqlUtils";
 import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy/index";
 import { SqlHints } from "../utils/sqlHints";
-
-// ============= Core Types =============
+import {
+  ClusterStatementRowCamelCase,
+  ExplainAnalyzeRow,
+  SlowQueryNormalized,
+} from "./SystemTables";
 
 /**
- * Interface representing the main ForgeSQL operations.
- * Provides access to CRUD operations and schema-level SQL operations.
+ * Core interface for ForgeSQL operations.
+ * Provides access to CRUD operations, schema-level SQL operations, and query analysis capabilities.
+ *
+ * @interface ForgeSqlOperation
+ * @extends {QueryBuilderForgeSql}
  */
 export interface ForgeSqlOperation extends QueryBuilderForgeSql {
   /**
-   * Provides CRUD (Create, Read, Update, Delete) operations.
+   * Provides CRUD (Create, Update, Delete) operations.
+   * @deprecated Use modify() instead for better type safety and consistency
    * @returns {CRUDForgeSQL} Interface for performing CRUD operations
    */
   crud(): CRUDForgeSQL;
 
   /**
-   * Provides schema-level SQL fetch operations.
+   * Provides modify (Create, Update, Delete) operations with optimistic locking support.
+   * @returns {CRUDForgeSQL} Interface for performing CRUD operations
+   */
+  modify(): CRUDForgeSQL;
+
+  /**
+   * Provides schema-level SQL fetch operations with type safety.
    * @returns {SchemaSqlForgeSql} Interface for executing schema-bound SQL queries
    */
   fetch(): SchemaSqlForgeSql;
+
+  /**
+   * Provides query analysis capabilities including EXPLAIN ANALYZE and slow query analysis.
+   * @returns {SchemaAnalyzeForgeSql} Interface for analyzing query performance
+   */
+  analyze(): SchemaAnalyzeForgeSql;
 }
 
 /**
  * Interface for Query Builder operations.
- * Provides access to the underlying Drizzle ORM query builder.
+ * Provides access to the underlying Drizzle ORM query builder with enhanced functionality.
+ *
+ * @interface QueryBuilderForgeSql
  */
 export interface QueryBuilderForgeSql {
   /**
    * Creates a new query builder for the given entity.
-   * @returns {MySql2Database<Record<string, unknown>>} The Drizzle database instance for building queries
+   * @returns {MySqlRemoteDatabase<Record<string, unknown>>} The Drizzle database instance for building queries
    */
   getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>>;
 
@@ -88,18 +109,18 @@ export interface QueryBuilderForgeSql {
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 }
 
-// ============= CRUD Operations =============
-
 /**
- * Interface for CRUD (Create, Read, Update, Delete) operations.
+ * Interface for Modify (Create, Update, Delete) operations.
  * Provides methods for basic database operations with support for optimistic locking.
+ *
+ * @interface CRUDForgeSQL
  */
 export interface CRUDForgeSQL {
   /**
    * Inserts multiple records into the database.
    * @template T - The type of the table schema
    * @param {T} schema - The entity schema
-   * @param {<InferInsertModel<T>[]} models - The list of entities to insert
+   * @param {InferInsertModel<T>[]} models - The list of entities to insert
    * @param {boolean} [updateIfExists] - Whether to update the row if it already exists (default: false)
    * @returns {Promise<number>} The number of inserted rows
    * @throws {Error} If the insert operation fails
@@ -159,11 +180,81 @@ export interface CRUDForgeSQL {
   ): Promise<number>;
 }
 
-// ============= Schema SQL Operations =============
+/**
+ * Interface for schema analysis operations.
+ * Provides methods for analyzing query performance and execution plans.
+ *
+ * @interface SchemaAnalyzeForgeSql
+ */
+export interface SchemaAnalyzeForgeSql {
+  /**
+   * Executes EXPLAIN on a Drizzle query.
+   * @param {{ toSQL: () => Query }} query - The Drizzle query to analyze
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  explain(query: { toSQL: () => Query }): Promise<ExplainAnalyzeRow[]>;
+
+  /**
+   * Executes EXPLAIN on a raw SQL query.
+   * @param {string} query - The SQL query to analyze
+   * @param {unknown[]} bindParams - The query parameters
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  explainRaw(query: string, bindParams: unknown[]): Promise<ExplainAnalyzeRow[]>;
+
+  /**
+   * Executes EXPLAIN ANALYZE on a Drizzle query.
+   * @param {{ toSQL: () => Query }} query - The Drizzle query to analyze
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  explainAnalyze(query: { toSQL: () => Query }): Promise<ExplainAnalyzeRow[]>;
+
+  /**
+   * Executes EXPLAIN ANALYZE on a raw SQL query.
+   * @param {string} query - The SQL query to analyze
+   * @param {unknown[]} bindParams - The query parameters
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  explainAnalyzeRaw(query: string, bindParams: unknown[]): Promise<ExplainAnalyzeRow[]>;
+
+  /**
+   * Analyzes slow queries from the database.
+   * @returns {Promise<SlowQueryNormalized[]>} The normalized slow query data
+   */
+  analyzeSlowQueries(): Promise<SlowQueryNormalized[]>;
+
+  /**
+   * Analyzes query history for specific tables using Drizzle table objects.
+   * @param {AnyMySqlTable[]} tables - The Drizzle table objects to analyze
+   * @param {Date} [fromDate] - The start date for the analysis
+   * @param {Date} [toDate] - The end date for the analysis
+   * @returns {Promise<ClusterStatementRowCamelCase[]>} The analyzed query history
+   */
+  analyzeQueriesHistory(
+    tables: AnyMySqlTable[],
+    fromDate?: Date,
+    toDate?: Date,
+  ): Promise<ClusterStatementRowCamelCase[]>;
+
+  /**
+   * Analyzes query history for specific tables using raw table names.
+   * @param {string[]} tables - The table names to analyze
+   * @param {Date} [fromDate] - The start date for the analysis
+   * @param {Date} [toDate] - The end date for the analysis
+   * @returns {Promise<ClusterStatementRowCamelCase[]>} The analyzed query history
+   */
+  analyzeQueriesHistoryRaw(
+    tables: string[],
+    fromDate?: Date,
+    toDate?: Date,
+  ): Promise<ClusterStatementRowCamelCase[]>;
+}
 
 /**
  * Interface for schema-level SQL operations.
  * Provides methods for executing SQL queries with schema binding and type safety.
+ *
+ * @interface SchemaSqlForgeSql
  */
 export interface SchemaSqlForgeSql {
   /**
@@ -200,11 +291,11 @@ export interface SchemaSqlForgeSql {
   executeRawUpdateSQL(query: string, params?: unknown[]): Promise<UpdateQueryResponse>;
 }
 
-// ============= Configuration Types =============
-
 /**
  * Interface for version field metadata.
  * Defines the configuration for optimistic locking version fields.
+ *
+ * @interface VersionFieldMetadata
  */
 export interface VersionFieldMetadata {
   /** Name of the version field */
@@ -214,6 +305,8 @@ export interface VersionFieldMetadata {
 /**
  * Interface for table metadata.
  * Defines the configuration for a specific table.
+ *
+ * @interface TableMetadata
  */
 export interface TableMetadata {
   /** Name of the table */
@@ -225,11 +318,15 @@ export interface TableMetadata {
 /**
  * Type for additional metadata configuration.
  * Maps table names to their metadata configuration.
+ *
+ * @type {AdditionalMetadata}
  */
 export type AdditionalMetadata = Record<string, TableMetadata>;
 
 /**
  * Interface for ForgeSQL ORM options
+ *
+ * @interface ForgeSqlOrmOptions
  */
 export interface ForgeSqlOrmOptions {
   /** Whether to log raw SQL queries */
@@ -259,11 +356,11 @@ export interface ForgeSqlOrmOptions {
   additionalMetadata?: AdditionalMetadata;
 }
 
-// ============= Custom Types =============
-
 /**
  * Custom type for MySQL datetime fields.
  * Handles conversion between JavaScript Date objects and MySQL datetime strings.
+ *
+ * @type {CustomType}
  */
 export const forgeDateTimeString = customType<{
   data: Date;
@@ -285,6 +382,8 @@ export const forgeDateTimeString = customType<{
 /**
  * Custom type for MySQL timestamp fields.
  * Handles conversion between JavaScript Date objects and MySQL timestamp strings.
+ *
+ * @type {CustomType}
  */
 export const forgeTimestampString = customType<{
   data: Date;
@@ -306,6 +405,8 @@ export const forgeTimestampString = customType<{
 /**
  * Custom type for MySQL date fields.
  * Handles conversion between JavaScript Date objects and MySQL date strings.
+ *
+ * @type {CustomType}
  */
 export const forgeDateString = customType<{
   data: Date;
@@ -327,6 +428,8 @@ export const forgeDateString = customType<{
 /**
  * Custom type for MySQL time fields.
  * Handles conversion between JavaScript Date objects and MySQL time strings.
+ *
+ * @type {CustomType}
  */
 export const forgeTimeString = customType<{
   data: Date;

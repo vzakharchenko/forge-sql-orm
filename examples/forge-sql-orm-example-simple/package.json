@@ -14,7 +14,8 @@
     "migration:create": "forge-sql-orm-cli migrations:create",
     "migration:update": "forge-sql-orm-cli migrations:update",
     "migration:drop": "forge-sql-orm-cli migrations:drop",
-    "forge:debug": "forge tunnel -d -f index.handler"
+    "forge:debug": "forge tunnel -d -f index.handler",
+    "build:husky": "tsc --project tsconfig.json  --outDir ./dist && rm -rf ./dist"
   },
   "devDependencies": {
     "forge-sql-orm-cli": "^2.0.18"

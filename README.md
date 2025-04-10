@@ -17,6 +17,7 @@
 
 ## Key Features
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
+- ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Schema migration support**, allowing automatic schema evolution
 - ✅ **Automatic entity generation** from MySQL/tidb databases
@@ -25,7 +26,7 @@
 - ✅ **Schema Fetching** Development-only web trigger to retrieve current database schema and generate SQL statements for schema recreation
 - ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying migrations, dropping tables (development-only), and fetching schema (development-only) with proper error handling and security controls
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
-- ✅ **Type Safety** Full TypeScript support with proper type inference
+- ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights (Performance analysis and Troubleshooting only)
 
 ## Usage Approaches
 
@@ -598,15 +599,14 @@ This trigger allows you to completely reset your database schema. It's useful fo
 - Testing scenarios requiring a clean database
 - Resetting the database before applying new migrations
 
-**Important**: The trigger will only drop tables that are defined in your models. Any tables that exist in the database but are not defined in your models will remain untouched.
+**Important**: The trigger will  drop all tables including migration.
 
 ```typescript
 // Example usage in your Forge app
 import { dropSchemaMigrations } from "forge-sql-orm";
-import * as schema from "./entities/schema";
 
 export const dropMigrations = () => {
-  return dropSchemaMigrations(Object.values(schema));
+  return dropSchemaMigrations();
 };
 ```
 
@@ -681,6 +681,86 @@ SET foreign_key_checks = 1;
    - Test migrations in a development environment first
    - Use these triggers as part of your deployment pipeline
    - Monitor the execution logs in the Forge Developer Console
+
+## Query Analysis and Performance Optimization
+
+⚠️ **IMPORTANT NOTE**: The query analysis features described below are experimental and should be used only for troubleshooting purposes. These features rely on TiDB's `information_schema` and `performance_schema` which may change in future updates. As of April 2025, these features are available but their future availability is not guaranteed.
+
+### About Atlassian's Built-in Analysis Tools
+
+Atlassian already provides comprehensive query analysis tools in the development console, including:
+- Basic query performance metrics
+- Slow query tracking (queries over 500ms)
+- Basic execution statistics
+- Query history and patterns
+
+Our analysis tools are designed to complement these built-in features by providing additional insights directly from TiDB's system schemas. However, they should be used with caution and only for troubleshooting purposes.
+
+### Usage Guidelines
+
+1. **Development and Troubleshooting Only**
+   - These tools should not be used in production code
+   - Intended only for development and debugging
+   - Use for identifying and fixing performance issues
+
+2. **Schema Stability**
+   - Features rely on TiDB's `information_schema` and `performance_schema`
+   - Schema structure may change in future TiDB updates
+   - No guarantee of long-term availability
+
+3. **Current Availability (April 2025)**
+   - `information_schema` based analysis is currently functional
+   - Query plan analysis is available
+   - Performance metrics collection is working
+
+### Available Analysis Tools
+
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+const analyzeForgeSql = forgeSQL.analyze();
+```
+
+#### Query Plan Analysis
+
+⚠️ **For Troubleshooting Only**: This feature should only be used during development and debugging sessions.
+
+```typescript
+// Example usage for troubleshooting a specific query
+const forgeSQL = new ForgeSQL();
+const analyzeForgeSql = forgeSQL.analyze();
+
+// Analyze a Drizzle query
+const plan = await analyzeForgeSql.explain(
+  forgeSQL.select({
+    table1: testEntityJoin1,
+    table2: { name: testEntityJoin2.name, email: testEntityJoin2.email },
+    count: rawSql<number>`COUNT(*)`,
+    table3: {
+      table12: testEntityJoin1.name,
+      table22: testEntityJoin2.email,
+      table32: testEntity.id
+    },
+  })
+  .from(testEntityJoin1)
+  .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id))
+);
+
+// Analyze a raw SQL query
+const rawPlan = await analyzeForgeSql.explainRaw(
+  "SELECT * FROM users WHERE id = ?",
+  [1]
+);
+```
+
+This analysis helps you understand:
+- How the database executes your query
+- Which indexes are being used
+- Estimated vs actual row counts
+- Resource usage at each step
+- Potential performance bottlenecks
+
 
 ## License
 This project is licensed under the **MIT License**.  

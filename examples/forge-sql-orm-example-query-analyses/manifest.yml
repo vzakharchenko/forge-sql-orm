@@ -1,0 +1,54 @@
+modules:
+  jira:globalPage:
+    - key: forge-sql-orm-example-hello-world-page
+      resource: main
+      resolver:
+        function: resolver
+      title: Forge SQL Query Analyses
+  scheduledTrigger:
+    - key: scheduled-schema-migration
+      function: runSchemaMigration
+      interval: hour
+  trigger:
+    - key: post-install-schema-migration
+      function: runSchemaMigration
+      events:
+        - avi:forge:installed:app
+  webtrigger:
+    - key: invoke-schema-migration
+      function: runSchemaMigration
+      security:
+        egress:
+          allowDataEgress: false
+          allowedResponses:
+            - statusCode: 200
+              body: '{"body": "Migrations successfully executed"}'
+    - key: drop-schema-migration
+      function: dropMigrations
+    - key: fetch-schema
+      function: fetchSchema
+  sql:
+    - key: main
+      engine: mysql
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: runSchemaMigration
+      handler: index.handlerMigration
+    - key: dropMigrations
+      handler: index.dropMigrations
+    - key: fetchSchema
+      handler: index.fetchMigrations
+resources:
+  - key: main
+    path: static/forge-orm-example/build
+    tunnel:
+      port: 3099
+app:
+  runtime:
+    name: nodejs22.x
+  id: ari:cloud:ecosystem::app/35ab1c96-39e8-4d77-9974-493e46058b4c
+permissions:
+  content:
+    styles:
+      - "unsafe-inline"

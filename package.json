@@ -70,10 +70,8 @@
     "src",
     "README.md"
   ],
-  "dependencies": {
-    "drizzle-orm": "^0.41.0"
-  },
   "peerDependencies": {
+    "drizzle-orm": "^0.41.0",
     "@forge/sql": "^2.4.1",
     "moment": "^2.30.1"
   }

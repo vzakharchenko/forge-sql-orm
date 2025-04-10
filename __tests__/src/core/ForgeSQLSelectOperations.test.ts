@@ -41,6 +41,10 @@ describe("ForgeSQLSelectOperations", () => {
         forgeSqlOperation = new ForgeSQLORM({logRawSqlQuery: true});
     });
 
+    it("test analyses", async () => {
+        let schemaAnalyzeForgeSql = forgeSqlOperation.analyze();
+        expect(schemaAnalyzeForgeSql).toBeDefined()
+    })
     it("should call SQL prepare and execute on executeRawSQL", async () => {
         const result = await forgeSqlOperation.fetch().executeRawSQL("SELECT * FROM test_entity");
         const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;

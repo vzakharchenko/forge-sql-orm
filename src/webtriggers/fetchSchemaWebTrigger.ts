@@ -1,6 +1,6 @@
 import { sql } from "@forge/sql";
 import { getHttpResponse, TriggerResponse } from "./index";
-import { forgeSystemTables } from "../core/SystemTables";
+import { forgeSystemTables, getTables } from "../core/SystemTables";
 import { getTableName } from "drizzle-orm/table";
 
 interface CreateTableRow {
@@ -48,21 +48,13 @@ export async function fetchSchemaWebTrigger(): Promise<TriggerResponse<string>> 
 }
 
 /**
- * Retrieves all tables from the database
- */
-async function getTables(): Promise<string[]> {
-  const tables = await sql.executeDDL<string>("SHOW TABLES");
-  return tables.rows.flatMap((tableInfo) => Object.values(tableInfo));
-}
-
-/**
  * Generates CREATE TABLE statements for each table
  */
 async function generateCreateTableStatements(tables: string[]): Promise<string[]> {
   const statements: string[] = [];
 
   for (const table of tables) {
-    const createTableResult = await sql.executeDDL<CreateTableRow>(`SHOW CREATE TABLE ${table}`);
+    const createTableResult = await sql.executeDDL<CreateTableRow>(`SHOW CREATE TABLE "${table}"`);
 
     const createTableStatements = createTableResult.rows
       .filter((row) => !isSystemTable(row.Table))

@@ -3,6 +3,7 @@ import {
   CRUDForgeSQL,
   ForgeSqlOperation,
   ForgeSqlOrmOptions,
+  SchemaAnalyzeForgeSql,
   SchemaSqlForgeSql,
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
@@ -11,6 +12,7 @@ import { createForgeDriverProxy } from "../utils/forgeDriverProxy";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
 import { patchDbWithSelectAliased } from "../lib/drizzle/extensions/selectAliased";
+import { ForgeSQLAnalyseOperation } from "./ForgeSQLAnalyseOperations";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -19,9 +21,17 @@ import { patchDbWithSelectAliased } from "../lib/drizzle/extensions/selectAliase
  */
 class ForgeSQLORMImpl implements ForgeSqlOperation {
   private static instance: ForgeSQLORMImpl | null = null;
-  private readonly drizzle;
+  private readonly drizzle: MySqlRemoteDatabase<any> & {
+    selectAliased: <TSelection extends SelectedFields>(
+      fields: TSelection,
+    ) => MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+    selectAliasedDistinct: <TSelection extends SelectedFields>(
+      fields: TSelection,
+    ) => MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+  };
   private readonly crudOperations: CRUDForgeSQL;
   private readonly fetchOperations: SchemaSqlForgeSql;
+  private readonly analyzeOperations: SchemaAnalyzeForgeSql;
 
   /**
    * Private constructor to enforce singleton behavior.
@@ -43,10 +53,19 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       );
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
+      this.analyzeOperations = new ForgeSQLAnalyseOperation(this);
     } catch (error) {
       console.error("ForgeSQLORM initialization failed:", error);
       throw error;
     }
+  }
+
+  /**
+   * Create the modify operations instance.
+   * @returns modify operations.
+   */
+  modify(): CRUDForgeSQL {
+    return this.crudOperations;
   }
 
   /**
@@ -55,9 +74,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @returns The singleton instance of ForgeSQLORMImpl.
    */
   static getInstance(options?: ForgeSqlOrmOptions): ForgeSqlOperation {
-    if (!ForgeSQLORMImpl.instance) {
-      ForgeSQLORMImpl.instance = new ForgeSQLORMImpl(options);
-    }
+    ForgeSQLORMImpl.instance ??= new ForgeSQLORMImpl(options);
     return ForgeSQLORMImpl.instance;
   }
 
@@ -66,7 +83,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @returns CRUD operations.
    */
   crud(): CRUDForgeSQL {
-    return this.crudOperations;
+    return this.modify();
   }
 
   /**
@@ -75,6 +92,9 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    */
   fetch(): SchemaSqlForgeSql {
     return this.fetchOperations;
+  }
+  analyze(): SchemaAnalyzeForgeSql {
+    return this.analyzeOperations;
   }
 
   /**
@@ -180,7 +200,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    *
    * @template TSelection - The type of the selected fields
    * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
-   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A distinct select query builder with unique field aliases
+   * @returns {MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>} A distinct select query builder with unique field aliases
    * @throws {Error} If fields parameter is empty
    * @example
    * ```typescript
@@ -201,7 +221,15 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @returns CRUD operations.
    */
   crud(): CRUDForgeSQL {
-    return this.ormInstance.crud();
+    return this.ormInstance.modify();
+  }
+
+  /**
+   * Proxies the `modify` method from `ForgeSQLORMImpl`.
+   * @returns Modify operations.
+   */
+  modify(): CRUDForgeSQL {
+    return this.ormInstance.modify();
   }
 
   /**
@@ -210,6 +238,14 @@ class ForgeSQLORM implements ForgeSqlOperation {
    */
   fetch(): SchemaSqlForgeSql {
     return this.ormInstance.fetch();
+  }
+
+  /**
+   * Provides query analysis capabilities including EXPLAIN ANALYZE and slow query analysis.
+   * @returns {SchemaAnalyzeForgeSql} Interface for analyzing query performance
+   */
+  analyze(): SchemaAnalyzeForgeSql {
+    return this.ormInstance.analyze();
   }
 
   /**

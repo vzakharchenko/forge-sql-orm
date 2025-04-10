@@ -1,7 +1,7 @@
 import { sql } from "@forge/sql";
-import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { generateDropTableStatements as generateStatements } from "../utils/sqlUtils";
 import { getHttpResponse, TriggerResponse } from "./index";
+import { getTables } from "../core/SystemTables";
 
 /**
  * ⚠️ DEVELOPMENT ONLY WEB TRIGGER ⚠️
@@ -15,7 +15,6 @@ import { getHttpResponse, TriggerResponse } from "./index";
  * - It may affect application functionality
  * - It could lead to data loss and system instability
  *
- * @param tables - Array of table schemas to drop
  * @returns {Promise<TriggerResponse<string>>} A response containing:
  * - On success: 200 status with warning message about permanent deletion
  * - On failure: 500 status with error message
@@ -23,14 +22,13 @@ import { getHttpResponse, TriggerResponse } from "./index";
  * @example
  * ```typescript
  * // Example usage in development only
- * await dropSchemaMigrations([users, orders]);
+ * await dropSchemaMigrations();
  * // ⚠️ Warning: This will permanently delete all data in users and orders tables
  * ```
  */
-export async function dropSchemaMigrations(
-  tables: AnyMySqlTable[],
-): Promise<TriggerResponse<string>> {
+export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
   try {
+    const tables = await getTables();
     // Generate drop statements
     const dropStatements = generateStatements(tables);
 
@@ -45,6 +43,7 @@ export async function dropSchemaMigrations(
       "⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.",
     );
   } catch (error: unknown) {
+    console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return getHttpResponse<string>(500, errorMessage);
   }

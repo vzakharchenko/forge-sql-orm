@@ -6,7 +6,6 @@ import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
 import { asc, desc, InferInsertModel, sql as rawSql } from "drizzle-orm";
 import { users } from "./entities";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
-import * as schema from "./entities/schema";
 
 const resolver = new Resolver();
 const forgeSQL = new ForgeSQL({ logRawSqlQuery: true });
@@ -23,7 +22,6 @@ resolver.define("delete", async (req): Promise<number> => {
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   const duplicateResult = await forgeSQL
-    .getDrizzleQueryBuilder()
     .select({
       name: users.name,
       email: users.email,
@@ -72,7 +70,7 @@ export const handlerMigration = async () => {
 };
 
 export const dropMigrations = () => {
-  return dropSchemaMigrations(Object.values(schema));
+  return dropSchemaMigrations();
 };
 
 export const fetchMigrations = () => {
