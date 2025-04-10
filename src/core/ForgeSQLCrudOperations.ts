@@ -38,7 +38,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
   async insert<T extends AnyMySqlTable>(
     schema: T,
     models: InferInsertModel<T>[],
-    updateIfExists: boolean = false,
+      updateIfExists: boolean = false,
   ): Promise<number> {
     if (!models?.length) return 0;
 

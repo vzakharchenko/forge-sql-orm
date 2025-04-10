@@ -22,7 +22,6 @@ resolver.define("delete", async (req): Promise<number> => {
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   const duplicateResult = await forgeSQL
-    .getDrizzleQueryBuilder()
     .select({
       name: users.name,
       email: users.email,

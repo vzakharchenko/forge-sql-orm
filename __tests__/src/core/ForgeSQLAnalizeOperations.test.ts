@@ -252,8 +252,8 @@ describe('ForgeSQLAnalizeOperation', () => {
       const tables = ['t1', 't2'];
       const query = analyzeOperation.buildClusterStatementQuery(tables);
 
-      expect(query).toContain("TABLE_NAMES = CONCAT(SCHEMA_NAME, '.', 't1')");
-      expect(query).toContain("TABLE_NAMES = CONCAT(SCHEMA_NAME, '.', 't2')");
+      expect(query).toContain("TABLE_NAMES LIKE CONCAT(SCHEMA_NAME, '.', '%', 't1', '%')");
+      expect(query).toContain("TABLE_NAMES LIKE CONCAT(SCHEMA_NAME, '.', '%', 't2', '%')");
     });
 
     it('should include date range conditions when provided', () => {

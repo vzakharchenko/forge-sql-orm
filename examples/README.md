@@ -40,4 +40,16 @@ Shows how to work with dynamic queries and complex database operations.
 - Advanced filtering
 - Runtime query construction
 
+### [forge-sql-orm-example-query-analyses](forge-sql-orm-example-query-analyses)
+
+Demonstrates query analysis capabilities for performance optimization and debugging. This example shows how to analyze and optimize database queries using TiDB's system schemas.
+
+- Query plan analysis
+- Slow query analysis
+- Query history tracking
+- Performance optimization tools
+- Experimental features for development and troubleshooting
+
+⚠️ **Important Note**: The query analysis features shown in this example are experimental and should be used only for troubleshooting. They rely on TiDB's `information_schema` and `performance_schema` which may change in future updates. As of April 2025, these features are available but their future availability is not guaranteed.
+
 Each example includes its own README with detailed setup instructions and usage examples.

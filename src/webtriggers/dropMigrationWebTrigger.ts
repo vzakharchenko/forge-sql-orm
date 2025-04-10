@@ -43,6 +43,7 @@ export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
       "⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.",
     );
   } catch (error: unknown) {
+    console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return getHttpResponse<string>(500, errorMessage);
   }
