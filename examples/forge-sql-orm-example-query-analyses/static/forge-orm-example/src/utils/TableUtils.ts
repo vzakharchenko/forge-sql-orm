@@ -1,4 +1,3 @@
-import { ExplainAnalyzeRow } from "./Constants";
 
 const getCells = (withWidth: boolean, type: "SLOW_QUERY" | "PLAN" | "HISTORY") => {
   const columns: {
