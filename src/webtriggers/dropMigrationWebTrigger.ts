@@ -1,7 +1,7 @@
 import { sql } from "@forge/sql";
 import { generateDropTableStatements as generateStatements } from "../utils/sqlUtils";
 import { getHttpResponse, TriggerResponse } from "./index";
-import {getTables} from "../core/SystemTables";
+import { getTables } from "../core/SystemTables";
 
 /**
  * ⚠️ DEVELOPMENT ONLY WEB TRIGGER ⚠️

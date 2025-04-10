@@ -1,6 +1,6 @@
 import { sql } from "@forge/sql";
 import { getHttpResponse, TriggerResponse } from "./index";
-import {forgeSystemTables, getTables} from "../core/SystemTables";
+import { forgeSystemTables, getTables } from "../core/SystemTables";
 import { getTableName } from "drizzle-orm/table";
 
 interface CreateTableRow {
