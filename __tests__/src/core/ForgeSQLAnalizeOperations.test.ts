@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ForgeSQLAnalizeOperation } from '../../../src/core/ForgeSQLAnalizeOperations';
 import { ForgeSqlOperation } from '../../../src/core/ForgeSQLQueryBuilder';
-import { AnyMySqlTable } from 'drizzle-orm/mysql-core';
-import { getTableName } from 'drizzle-orm/table';
 import {testEntity} from "../../entities/TestEntity";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
 

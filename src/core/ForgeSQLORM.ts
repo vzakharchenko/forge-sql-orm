@@ -74,9 +74,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @returns The singleton instance of ForgeSQLORMImpl.
    */
   static getInstance(options?: ForgeSqlOrmOptions): ForgeSqlOperation {
-    if (!ForgeSQLORMImpl.instance) {
-      ForgeSQLORMImpl.instance = new ForgeSQLORMImpl(options);
-    }
+    ForgeSQLORMImpl.instance ??= new ForgeSQLORMImpl(options);
     return ForgeSQLORMImpl.instance;
   }
 

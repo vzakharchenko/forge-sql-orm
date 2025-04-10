@@ -1,7 +1,4 @@
-import {
-  ForgeSqlOperation,
-  SchemaAnalyzeForgeSql,
-} from "./ForgeSQLQueryBuilder";
+import { ForgeSqlOperation, SchemaAnalyzeForgeSql } from "./ForgeSQLQueryBuilder";
 import { Query } from "drizzle-orm";
 import {
   ClusterStatementRowCamelCase,
@@ -379,7 +376,7 @@ export class ForgeSQLAnalizeOperation implements SchemaAnalyzeForgeSql {
     }
 
     const result: any = {};
-    result.parsedPlan = this.decodedPlan(input["PLAN"] || "");
+    result.parsedPlan = this.decodedPlan(input["PLAN"] ?? "");
     for (const key in input) {
       const camelKey = key.toLowerCase().replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
       result[camelKey] = input[key];

@@ -147,7 +147,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on insert with empty versioning number", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .insert(testEntityVersion, [{ id: 1, name: "Test" }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on insert with not empty versioning number", async () => {
     await forgeSqlOperation
-        .crud()
+        .modify()
         .insert(testEntityVersion, [{ id: 1, name: "Test", version: 11111 }]);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
@@ -173,7 +173,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on insert with empty versioning date", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .insert(testEntityDateVersion, [{
         id: 1,
         name: "Test",
@@ -190,7 +190,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on insert notEmpty empty versioning date", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .insert(testEntityDateVersion, [{
         id: 1,
         name: "Test",
@@ -206,7 +206,7 @@ describe("ForgeSQLCrudOperations", () => {
   });
 
   it("should call SQL prepare and execute on deleteById", async () => {
-    await forgeSqlOperation.crud().deleteById(1, testEntity);
+    await forgeSqlOperation.modify().deleteById(1, testEntity);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "delete from `test_entity` where `test_entity`.`id` = ?",
@@ -218,7 +218,7 @@ describe("ForgeSQLCrudOperations", () => {
   });
 
   it("should call SQL prepare and execute on deleteById Versioning Field number", async () => {
-    await forgeSqlOperation.crud().deleteById(1, testEntityVersion);
+    await forgeSqlOperation.modify().deleteById(1, testEntityVersion);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?",
@@ -231,7 +231,7 @@ describe("ForgeSQLCrudOperations", () => {
   });
 
   it("should call SQL prepare and execute on updateById", async () => {
-    await forgeSqlOperation.crud().updateById({ id: 1, name: "Updated" }, testEntity);
+    await forgeSqlOperation.modify().updateById({ id: 1, name: "Updated" }, testEntity);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(expect.any(String));
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
@@ -244,7 +244,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on updateById With version", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .updateById({ id: 1, name: "Updated", version: 2 }, testEntityVersion);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "update `test_entity_version` set `id` = ?, `name` = ?, `version` = ? where (`test_entity_version`.`id` = ? and `test_entity_version`.`version` = ?)",
@@ -255,7 +255,7 @@ describe("ForgeSQLCrudOperations", () => {
   });
   it("should call SQL prepare and execute on updateById With version column", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .updateById({ id: 1, name: "Updated", version: 2 }, TestEntityVersionDifferentField);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
         "update `test_entity_diff_version` set `id` = ?, `name` = ?, `version_different_field` = ? where (`test_entity_diff_version`.`id` = ? and `test_entity_diff_version`.`version_different_field` = ?)",
@@ -267,7 +267,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on updateById With version Date", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .updateById(
         { id: 1, version: new Date("01.01.2010 00:00:00") },
         testEntityDateVersion,
@@ -281,7 +281,7 @@ describe("ForgeSQLCrudOperations", () => {
   });
   it("should call SQL prepare and execute on updateById With version TimeStamp", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .updateById(
         { id: 1, version: new Date("01.01.2010 00:00:00") },
           testEntityTimeStampVersion,
@@ -297,7 +297,7 @@ describe("ForgeSQLCrudOperations", () => {
 
   it("should call SQL prepare and execute on updateFields2 only update", async () => {
     await forgeSqlOperation
-      .crud()
+      .modify()
       .updateFields(
         { id: 1, name: "Updated" },
           testEntity,
@@ -315,7 +315,7 @@ describe("ForgeSQLCrudOperations", () => {
 
     await expect(
         forgeSqlOperation
-            .crud()
+            .modify()
             .updateFields(
                 { name: "Updated" } ,
                 testEntity,
