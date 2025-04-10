@@ -188,6 +188,21 @@ export interface CRUDForgeSQL {
  */
 export interface SchemaAnalyzeForgeSql {
   /**
+   * Executes EXPLAIN on a Drizzle query.
+   * @param {{ toSQL: () => Query }} query - The Drizzle query to analyze
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  explain(query: { toSQL: () => Query }): Promise<ExplainAnalyzeRow[]>;
+
+  /**
+   * Executes EXPLAIN on a raw SQL query.
+   * @param {string} query - The SQL query to analyze
+   * @param {unknown[]} bindParams - The query parameters
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  explainRaw(query: string, bindParams: unknown[]): Promise<ExplainAnalyzeRow[]>;
+
+  /**
    * Executes EXPLAIN ANALYZE on a Drizzle query.
    * @param {{ toSQL: () => Query }} query - The Drizzle query to analyze
    * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results

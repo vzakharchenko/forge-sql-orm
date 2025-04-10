@@ -26,8 +26,7 @@
 - ✅ **Schema Fetching** Development-only web trigger to retrieve current database schema and generate SQL statements for schema recreation
 - ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying migrations, dropping tables (development-only), and fetching schema (development-only) with proper error handling and security controls
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
-- ✅ **Query Analysis**: Comprehensive tools for analyzing slow queries and query performance
-- ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights
+- ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights (Performance analysis and Troubleshooting only)
 
 ## Usage Approaches
 
@@ -685,19 +684,34 @@ SET foreign_key_checks = 1;
 
 ## Query Analysis and Performance Optimization
 
-ForgeSQL ORM's provides powerful analysis complements Atlassian's built-in monitoring tools in the development console.
-While Atlassian provides basic metrics  query , my analysis tools provide deeper insights directly from the database.
-These features help you understand query performance, identify bottlenecks, and optimize your database operations.
+⚠️ **IMPORTANT NOTE**: The query analysis features described below are experimental and should be used only for troubleshooting purposes. These features rely on TiDB's `information_schema` and `performance_schema` which may change in future updates. As of April 2025, these features are available but their future availability is not guaranteed.
 
-### Why Use Query Analysis?
+### About Atlassian's Built-in Analysis Tools
 
-Query analysis is essential for:
-- Identifying slow or inefficient queries
-- Understanding query execution plans
-- Optimizing database performance
-- Debugging complex queries
-- Monitoring query patterns over time
-- Identifying potential indexing opportunities
+Atlassian already provides comprehensive query analysis tools in the development console, including:
+- Basic query performance metrics
+- Slow query tracking (queries over 500ms)
+- Basic execution statistics
+- Query history and patterns
+
+Our analysis tools are designed to complement these built-in features by providing additional insights directly from TiDB's system schemas. However, they should be used with caution and only for troubleshooting purposes.
+
+### Usage Guidelines
+
+1. **Development and Troubleshooting Only**
+   - These tools should not be used in production code
+   - Intended only for development and debugging
+   - Use for identifying and fixing performance issues
+
+2. **Schema Stability**
+   - Features rely on TiDB's `information_schema` and `performance_schema`
+   - Schema structure may change in future TiDB updates
+   - No guarantee of long-term availability
+
+3. **Current Availability (April 2025)**
+   - `information_schema` based analysis is currently functional
+   - Query plan analysis is available
+   - Performance metrics collection is working
 
 ### Available Analysis Tools
 
@@ -708,78 +722,17 @@ const forgeSQL = new ForgeSQL();
 const analyzeForgeSql = forgeSQL.analyze();
 ```
 
-#### 1. Slow Query Analysis
+#### Query Plan Analysis
 
-ForgeSQL ORM's slow query analysis complements Atlassian's built-in monitoring tools in the development console. While Atlassian provides basic metrics and slow query tracking (queries taking longer than 500ms), my analysis tools provide deeper insights directly from the database:
+⚠️ **For Troubleshooting Only**: This feature should only be used during development and debugging sessions.
 
 ```typescript
+// Example usage for troubleshooting a specific query
 const forgeSQL = new ForgeSQL();
 const analyzeForgeSql = forgeSQL.analyze();
-const slowQueries = await analyzeForgeSql.analyzeSlowQueries();
-```
 
-This returns comprehensive information including:
-- Query execution time and performance metrics
-- Detailed execution plans with parsed and formatted output
-- Resource usage (CPU, memory, disk)
-- Execution statistics and performance bottlenecks
-- Connection details and query patterns
-- Index usage and optimization opportunities
-
-Key differences from Atlassian's built-in monitoring:
-- Direct database-level analysis instead of aggregated metrics
-- Detailed query plan parsing and formatting
-- Ability to analyze specific queries on demand
-- Historical analysis beyond the standard retention period
-- Custom filtering and analysis options
-
-Example output structure:
-```typescript
-{
-  query: string;          // The actual SQL query
-  executionTime: number;  // Execution time in milliseconds
-  plan: {
-    // Parsed and formatted execution plan
-    operation: string;
-    estimatedRows: number;
-    actualRows: number;
-    cost: number;
-    // ... additional plan details
-  };
-  resources: {
-    cpu: number;
-    memory: number;
-    disk: number;
-  };
-  statistics: {
-    rowsExamined: number;
-    rowsReturned: number;
-    indexUsage: string[];
-  };
-  connection: {
-    host: string;
-    user: string;
-    database: string;
-  };
-}
-```
-
-This analysis is particularly useful for:
-- Detailed performance troubleshooting
-- Query optimization
-- Index tuning
-- Understanding complex query execution patterns
-- Identifying resource-intensive operations
-
-#### 2. Query Plan Analysis
-
-Analyze the execution plan of any query:
-
-```typescript
-const forgeSQL = new ForgeSQL();
-const analyzeForgeSql = forgeSQL.analyze();
 // Analyze a Drizzle query
-const plan = await analyzeForgeSql.explainAnalyze(
+const plan = await analyzeForgeSql.explain(
   forgeSQL.select({
     table1: testEntityJoin1,
     table2: { name: testEntityJoin2.name, email: testEntityJoin2.email },
@@ -795,43 +748,18 @@ const plan = await analyzeForgeSql.explainAnalyze(
 );
 
 // Analyze a raw SQL query
-const rawPlan = await analyzeForgeSql.explainAnalyzeRaw(
+const rawPlan = await analyzeForgeSql.explainRaw(
   "SELECT * FROM users WHERE id = ?",
   [1]
 );
 ```
 
-This helps you understand:
+This analysis helps you understand:
 - How the database executes your query
 - Which indexes are being used
 - Estimated vs actual row counts
 - Resource usage at each step
 - Potential performance bottlenecks
-
-#### 3. Query History Analysis
-
-Analyze historical query patterns:
-
-```typescript
-// Using Drizzle models
-const history = await analyzeForgeSql.analyzeQueriesHistory([testEntity, testEntityJoin2]);
-
-// Using raw table names
-const rawHistory = await analyzeForgeSql.analyzeQueriesHistoryRaw(
-  ['users', 'orders'],
-  new Date('2024-01-01'),
-  new Date('2024-01-31')
-);
-```
-
-This provides insights into:
-- Query frequency and patterns
-- Average execution times
-- Resource usage trends
-- Most common query types
-- Table access patterns
-
-> **Note:** Query history is stored for a limited time in the database.
 
 
 ## License

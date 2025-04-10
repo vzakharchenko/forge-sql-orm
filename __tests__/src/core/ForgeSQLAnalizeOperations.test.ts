@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ForgeSQLAnalizeOperation } from '../../../src/core/ForgeSQLAnalizeOperations';
+import { ForgeSQLAnalyseOperation } from '../../../src/core/ForgeSQLAnalyseOperations';
 import { ForgeSqlOperation } from '../../../src/core/ForgeSQLQueryBuilder';
 import {testEntity} from "../../entities/TestEntity";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
@@ -11,7 +11,7 @@ vi.mock('../../../src/core/ForgeSQLQueryBuilder', () => ({
 
 describe('ForgeSQLAnalizeOperation', () => {
   let forgeOperations: ForgeSqlOperation;
-  let analyzeOperation: ForgeSQLAnalizeOperation;
+  let analyzeOperation: ForgeSQLAnalyseOperation;
 
   beforeEach(() => {
     // Reset mocks before each test
@@ -24,7 +24,7 @@ describe('ForgeSQLAnalizeOperation', () => {
       }),
     } as unknown as ForgeSqlOperation;
 
-    analyzeOperation = new ForgeSQLAnalizeOperation(forgeOperations);
+    analyzeOperation = new ForgeSQLAnalyseOperation(forgeOperations);
   });
 
   describe('explainAnalyzeRaw', () => {

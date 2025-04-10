@@ -12,7 +12,7 @@ import { createForgeDriverProxy } from "../utils/forgeDriverProxy";
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
 import { patchDbWithSelectAliased } from "../lib/drizzle/extensions/selectAliased";
-import { ForgeSQLAnalizeOperation } from "./ForgeSQLAnalizeOperations";
+import { ForgeSQLAnalyseOperation } from "./ForgeSQLAnalyseOperations";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -53,7 +53,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       );
       this.crudOperations = new ForgeSQLCrudOperations(this, newOptions);
       this.fetchOperations = new ForgeSQLSelectOperations(newOptions);
-      this.analyzeOperations = new ForgeSQLAnalizeOperation(this);
+      this.analyzeOperations = new ForgeSQLAnalyseOperation(this);
     } catch (error) {
       console.error("ForgeSQLORM initialization failed:", error);
       throw error;

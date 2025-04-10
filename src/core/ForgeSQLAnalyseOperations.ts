@@ -187,7 +187,7 @@ export interface ClusterStatementRow {
  * Class implementing SQL analysis operations for ForgeSQL ORM.
  * Provides methods for analyzing query performance, execution plans, and slow queries.
  */
-export class ForgeSQLAnalizeOperation implements SchemaAnalyzeForgeSql {
+export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
   private readonly forgeOperations: ForgeSqlOperation;
 
   /**
@@ -197,6 +197,40 @@ export class ForgeSQLAnalizeOperation implements SchemaAnalyzeForgeSql {
   constructor(forgeOperations: ForgeSqlOperation) {
     this.forgeOperations = forgeOperations;
     this.mapToCamelCaseClusterStatement = this.mapToCamelCaseClusterStatement.bind(this);
+  }
+
+  /**
+   * Executes EXPLAIN on a raw SQL query.
+   * @param {string} query - The SQL query to analyze
+   * @param {unknown[]} bindParams - The query parameters
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  async explainRaw(query: string, bindParams: unknown[]): Promise<ExplainAnalyzeRow[]> {
+    const results = await this.forgeOperations
+      .fetch()
+      .executeRawSQL<DecodedPlanRow>(`EXPLAIN ${query}`, bindParams as SqlParameters);
+    console.error(results);
+    return results.map((row) => ({
+      id: row.id,
+      estRows: row.estRows,
+      actRows: row.actRows,
+      task: row.task,
+      accessObject: row["access object"],
+      executionInfo: row["execution info"],
+      operatorInfo: row["operator info"],
+      memory: row.memory,
+      disk: row.disk,
+    }));
+  }
+
+  /**
+   * Executes EXPLAIN on a Drizzle query.
+   * @param {{ toSQL: () => Query }} query - The Drizzle query to analyze
+   * @returns {Promise<ExplainAnalyzeRow[]>} The execution plan analysis results
+   */
+  async explain(query: { toSQL: () => Query }): Promise<ExplainAnalyzeRow[]> {
+    const { sql, params } = query.toSQL();
+    return this.explainRaw(sql, params);
   }
 
   /**
