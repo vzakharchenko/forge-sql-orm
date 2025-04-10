@@ -3,17 +3,15 @@ import DynamicTable from "@atlaskit/dynamic-table";
 import { createHead } from "../utils/TableUtils";
 import { observer } from "mobx-react";
 import { useRootStore } from "../store";
-import { invoke } from "@forge/bridge";
 import { RowCellType } from "@atlaskit/dynamic-table/types";
 import {ExplainAnalyzeRow, SlowQueryNormalized} from "../utils/Constants";
-import stateStore from "../store/StateStore";
 
 
 
 export default observer(() => {
   const { usersStore } = useRootStore();
 
-  const head = createHead(true, false, "PLAN");
+  const head = createHead(true, "PLAN");
   const plan: ExplainAnalyzeRow[] = usersStore.plan;
   if (!plan || plan.length === 0) {
     return <div>${usersStore.planString}</div>;

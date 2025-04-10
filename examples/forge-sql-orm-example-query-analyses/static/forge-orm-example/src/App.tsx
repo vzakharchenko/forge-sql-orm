@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { invoke } from "@forge/bridge";
 import { observer } from "mobx-react";
 import { useRootStore } from "./store";

@@ -1,6 +1,6 @@
 import { forgeDateTimeString, forgeTimeString, forgeDateString, forgeTimestampString } from "forge-sql-orm";
 
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, primaryKey, varbinary, varchar, foreignKey, int } from "drizzle-orm/mysql-core"
+import { mysqlTable, primaryKey, varbinary, varchar, int } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 
 export const category = mysqlTable("category", {

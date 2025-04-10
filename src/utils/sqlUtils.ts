@@ -249,9 +249,6 @@ export function generateDropTableStatements(tables: string[]): string[] {
   tables.forEach((tableName) => {
     dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
   });
-  //
-  // // Add statement to clear migrations table
-  // dropStatements.push(`DELETE FROM __migrations;`);
 
   return dropStatements;
 }

@@ -3,18 +3,17 @@ import DynamicTable from "@atlaskit/dynamic-table";
 import { createHead } from "../utils/TableUtils";
 import { observer } from "mobx-react";
 import { useRootStore } from "../store";
-import { invoke } from "@forge/bridge";
 import { RowCellType } from "@atlaskit/dynamic-table/types";
-import {ClusterStatementRowCamelCase, SlowQueryNormalized} from "../utils/Constants";
+import {ClusterStatementRowCamelCase} from "../utils/Constants";
 import stateStore from "../store/StateStore";
 
 export default observer(() => {
   const { usersStore } = useRootStore();
 
-  const head = createHead(true, false, "HISTORY");
+  const head = createHead(true, "HISTORY");
   const history: ClusterStatementRowCamelCase[] = usersStore.history;
   if (!history || history.length === 0) {
-    return <div>SlowQuery is EMPTY</div>;
+    return <div>Query history is EMPTY</div>;
   }
   return (
     <div>
