@@ -1,12 +1,9 @@
-
 import DynamicTable from "@atlaskit/dynamic-table";
 import { createHead } from "../utils/TableUtils";
 import { observer } from "mobx-react";
 import { useRootStore } from "../store";
 import { RowCellType } from "@atlaskit/dynamic-table/types";
-import {ExplainAnalyzeRow, SlowQueryNormalized} from "../utils/Constants";
-
-
+import { ExplainAnalyzeRow } from "../utils/Constants";
 
 export default observer(() => {
   const { usersStore } = useRootStore();

@@ -1,6 +1,6 @@
-import {ExplainAnalyzeRow} from "./Constants";
+import { ExplainAnalyzeRow } from "./Constants";
 
-const getCells = (withWidth: boolean, type: "SLOW_QUERY" | "PLAN" |"HISTORY") => {
+const getCells = (withWidth: boolean, type: "SLOW_QUERY" | "PLAN" | "HISTORY") => {
   const columns: {
     key: string;
     content: any;
@@ -152,7 +152,7 @@ const getCells = (withWidth: boolean, type: "SLOW_QUERY" | "PLAN" |"HISTORY") =>
   return columns;
 };
 
-export const createHead = (withWidth: boolean, type: "SLOW_QUERY" | "PLAN"| "HISTORY") => {
+export const createHead = (withWidth: boolean, type: "SLOW_QUERY" | "PLAN" | "HISTORY") => {
   return {
     cells: getCells(withWidth, type),
   };

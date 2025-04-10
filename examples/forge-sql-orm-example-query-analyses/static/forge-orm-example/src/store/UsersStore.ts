@@ -1,5 +1,9 @@
 import { action, makeObservable, observable } from "mobx";
-import {ExplainAnalyzeRow, SlowQueryNormalized, ClusterStatementRowCamelCase} from "../utils/Constants";
+import {
+  ExplainAnalyzeRow,
+  SlowQueryNormalized,
+  ClusterStatementRowCamelCase,
+} from "../utils/Constants";
 
 export class UsersStore {
   @observable isLoading: boolean = false;

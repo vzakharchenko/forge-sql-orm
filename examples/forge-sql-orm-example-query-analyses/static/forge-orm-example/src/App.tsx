@@ -2,12 +2,12 @@ import React from "react";
 import { invoke } from "@forge/bridge";
 import { observer } from "mobx-react";
 import { useRootStore } from "./store";
-import {SlowQueryNormalized} from "./utils/Constants";
+import { SlowQueryNormalized } from "./utils/Constants";
 import SlowQueryTable from "./components/SlowQueryTable";
 import PlanTable from "./components/PlanTable";
-import {ClusterStatementRowCamelCase, ExplainAnalyzeRow} from "forge-sql-orm";
+import { ClusterStatementRowCamelCase, ExplainAnalyzeRow } from "forge-sql-orm";
 import HistoryTable from "./components/HistoryTable";
-import "./App.css"
+import "./App.css";
 
 function App() {
   const { usersStore, stateStore } = useRootStore();
@@ -19,9 +19,9 @@ function App() {
   const handleExplainDrizzle = async () => {
     usersStore.loading();
     try {
-      const plan = await invoke<ExplainAnalyzeRow[]>('explain');
-      usersStore.showPlan(plan, 'Plan does not exists');
-      stateStore.saveState('PLAN');
+      const plan = await invoke<ExplainAnalyzeRow[]>("explain");
+      usersStore.showPlan(plan, "Plan does not exists");
+      stateStore.saveState("PLAN");
     } finally {
       usersStore.stopLoading();
     }
@@ -30,11 +30,11 @@ function App() {
   const handleExplainRaw = async () => {
     usersStore.loading();
     try {
-      const plan = await invoke<ExplainAnalyzeRow[]>('explainRaw', {
-        sql: "select `category`.`id` as `a_category_category_id`, `category`.`name` as `a_category_category_name`, `order_item`.`id` as `a_orderitem_order_item_id`, `order_item`.`product_id` as `a_orderitem_order_item_product_id`, `order_item`.`quantity` as `a_orderitem_order_item_quantity`, `product`.`id` as `a_product_product_id`, `product`.`name` as `a_product_product_name`, `product`.`category_id` as `a_product_product_category_id` from `category` left join `product` on `category`.`id` = `product`.`category_id` inner join `order_item` on `order_item`.`product_id` = `product`.`id`"
+      const plan = await invoke<ExplainAnalyzeRow[]>("explainRaw", {
+        sql: "select `category`.`id` as `a_category_category_id`, `category`.`name` as `a_category_category_name`, `order_item`.`id` as `a_orderitem_order_item_id`, `order_item`.`product_id` as `a_orderitem_order_item_product_id`, `order_item`.`quantity` as `a_orderitem_order_item_quantity`, `product`.`id` as `a_product_product_id`, `product`.`name` as `a_product_product_name`, `product`.`category_id` as `a_product_product_category_id` from `category` left join `product` on `category`.`id` = `product`.`category_id` inner join `order_item` on `order_item`.`product_id` = `product`.`id`",
       });
-      usersStore.showPlan(plan, 'Plan does not exists');
-      stateStore.saveState('PLAN');
+      usersStore.showPlan(plan, "Plan does not exists");
+      stateStore.saveState("PLAN");
     } finally {
       usersStore.stopLoading();
     }
@@ -43,9 +43,9 @@ function App() {
   const handleExplainAnalyzeDrizzle = async () => {
     usersStore.loading();
     try {
-      const plan = await invoke<ExplainAnalyzeRow[]>('explainAnalyze');
-      usersStore.showPlan(plan, 'Plan does not exists');
-      stateStore.saveState('PLAN');
+      const plan = await invoke<ExplainAnalyzeRow[]>("explainAnalyze");
+      usersStore.showPlan(plan, "Plan does not exists");
+      stateStore.saveState("PLAN");
     } finally {
       usersStore.stopLoading();
     }
@@ -54,11 +54,11 @@ function App() {
   const handleExplainAnalyzeRaw = async () => {
     usersStore.loading();
     try {
-      const plan = await invoke<ExplainAnalyzeRow[]>('explainAnalyseRaw', {
-        sql: "select `category`.`id` as `a_category_category_id`, `category`.`name` as `a_category_category_name`, `order_item`.`id` as `a_orderitem_order_item_id`, `order_item`.`product_id` as `a_orderitem_order_item_product_id`, `order_item`.`quantity` as `a_orderitem_order_item_quantity`, `product`.`id` as `a_product_product_id`, `product`.`name` as `a_product_product_name`, `product`.`category_id` as `a_product_product_category_id` from `category` left join `product` on `category`.`id` = `product`.`category_id` inner join `order_item` on `order_item`.`product_id` = `product`.`id`"
+      const plan = await invoke<ExplainAnalyzeRow[]>("explainAnalyseRaw", {
+        sql: "select `category`.`id` as `a_category_category_id`, `category`.`name` as `a_category_category_name`, `order_item`.`id` as `a_orderitem_order_item_id`, `order_item`.`product_id` as `a_orderitem_order_item_product_id`, `order_item`.`quantity` as `a_orderitem_order_item_quantity`, `product`.`id` as `a_product_product_id`, `product`.`name` as `a_product_product_name`, `product`.`category_id` as `a_product_product_category_id` from `category` left join `product` on `category`.`id` = `product`.`category_id` inner join `order_item` on `order_item`.`product_id` = `product`.`id`",
       });
-      usersStore.showPlan(plan, 'Plan does not exists');
-      stateStore.saveState('PLAN');
+      usersStore.showPlan(plan, "Plan does not exists");
+      stateStore.saveState("PLAN");
     } finally {
       usersStore.stopLoading();
     }
@@ -67,7 +67,7 @@ function App() {
   const handleExecuteDrizzle = async () => {
     usersStore.loading();
     try {
-      await invoke('drizzleQuery');
+      await invoke("drizzleQuery");
     } finally {
       usersStore.stopLoading();
     }
@@ -76,11 +76,11 @@ function App() {
   const handleShowHistory = async () => {
     usersStore.loading();
     try {
-      const history = await invoke<ClusterStatementRowCamelCase[]>('analyzeQueriesHistory', {
-        sql: "select `category`.`id` as `a_category_category_id`, `category`.`name` as `a_category_category_name`, `order_item`.`id` as `a_orderitem_order_item_id`, `order_item`.`product_id` as `a_orderitem_order_item_product_id`, `order_item`.`quantity` as `a_orderitem_order_item_quantity`, `product`.`id` as `a_product_product_id`, `product`.`name` as `a_product_product_name`, `product`.`category_id` as `a_product_product_category_id` from `category` left join `product` on `category`.`id` = `product`.`category_id` inner join `order_item` on `order_item`.`product_id` = `product`.`id`"
+      const history = await invoke<ClusterStatementRowCamelCase[]>("analyzeQueriesHistory", {
+        sql: "select `category`.`id` as `a_category_category_id`, `category`.`name` as `a_category_category_name`, `order_item`.`id` as `a_orderitem_order_item_id`, `order_item`.`product_id` as `a_orderitem_order_item_product_id`, `order_item`.`quantity` as `a_orderitem_order_item_quantity`, `product`.`id` as `a_product_product_id`, `product`.`name` as `a_product_product_name`, `product`.`category_id` as `a_product_product_category_id` from `category` left join `product` on `category`.`id` = `product`.`category_id` inner join `order_item` on `order_item`.`product_id` = `product`.`id`",
       });
       usersStore.saveHistory(history);
-      stateStore.saveState('HISTORY');
+      stateStore.saveState("HISTORY");
     } finally {
       usersStore.stopLoading();
     }
@@ -89,7 +89,7 @@ function App() {
   const handleGenerateSlowQuery = async () => {
     usersStore.loading();
     try {
-      await invoke('createSlowQuery');
+      await invoke("createSlowQuery");
     } finally {
       usersStore.stopLoading();
     }
@@ -175,7 +175,9 @@ inner join order_item on order_item.product_id = product.id`}
     case "SLOW_QUERY":
       return (
         <div className="analysis-results">
-          <button className="back-button" onClick={() => stateStore.saveState("ROOT")}>Back to Analysis</button>
+          <button className="back-button" onClick={() => stateStore.saveState("ROOT")}>
+            Back to Analysis
+          </button>
           <div className="results-spacer" />
           <SlowQueryTable />
         </div>
@@ -184,7 +186,9 @@ inner join order_item on order_item.product_id = product.id`}
     case "HISTORY":
       return (
         <div className="analysis-results">
-          <button className="back-button" onClick={() => stateStore.saveState("ROOT")}>Back to Analysis</button>
+          <button className="back-button" onClick={() => stateStore.saveState("ROOT")}>
+            Back to Analysis
+          </button>
           <div className="results-spacer" />
           <HistoryTable />
         </div>
@@ -193,7 +197,12 @@ inner join order_item on order_item.product_id = product.id`}
     case "PLAN":
       return (
         <div className="analysis-results">
-          <button className="back-button" onClick={() => stateStore.saveState(stateStore.lastState)}>Back to Analysis</button>
+          <button
+            className="back-button"
+            onClick={() => stateStore.saveState(stateStore.lastState)}
+          >
+            Back to Analysis
+          </button>
           <div className="results-spacer" />
           <PlanTable />
         </div>

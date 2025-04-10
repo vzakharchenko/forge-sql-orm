@@ -163,4 +163,3 @@ export interface ClusterStatementRowCamelCase {
   planCacheUnqualifiedLastReason: string;
   parsedPlan?: ExplainAnalyzeRow[];
 }
-

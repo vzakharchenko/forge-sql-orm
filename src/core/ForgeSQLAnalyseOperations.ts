@@ -361,10 +361,8 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
     const formatDateTime = (date: Date): string => moment(date).format("YYYY-MM-DDTHH:mm:ss.SSS");
 
     const tableConditions = tables
-        .map(
-            (table) => `TABLE_NAMES LIKE CONCAT(SCHEMA_NAME, '.', '%', '${table}', '%')`
-        )
-        .join(" OR ");
+      .map((table) => `TABLE_NAMES LIKE CONCAT(SCHEMA_NAME, '.', '%', '${table}', '%')`)
+      .join(" OR ");
 
     const timeConditions: string[] = [];
     if (from) {
@@ -375,8 +373,8 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
     }
 
     let whereClauses;
-    if (tableConditions?.length){
-      whereClauses  =  [tableConditions?`(${tableConditions})`:'', ...timeConditions]
+    if (tableConditions?.length) {
+      whereClauses = [tableConditions ? `(${tableConditions})` : "", ...timeConditions];
     } else {
       whereClauses = timeConditions;
     }
@@ -388,7 +386,7 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
         UNION ALL
         SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
       ) AS combined
-      ${whereClauses?.length > 0 ?`WHERE ${whereClauses.join(" AND ")}`:''}
+      ${whereClauses?.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : ""}
     `;
   }
 
@@ -458,10 +456,6 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
     toDate?: Date,
   ): Promise<ClusterStatementRowCamelCase[]> {
     const tableNames = tables?.map((table) => getTableName(table)) ?? [];
-    return this.analyzeQueriesHistoryRaw(
-        tableNames,
-      fromDate,
-      toDate,
-    );
+    return this.analyzeQueriesHistoryRaw(tableNames, fromDate, toDate);
   }
 }

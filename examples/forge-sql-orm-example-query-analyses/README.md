@@ -7,18 +7,21 @@ This application demonstrates the query analysis capabilities of Forge SQL ORM, 
 ## Features
 
 ### 1. Query Plan Analysis
+
 - Analyze query execution plans for both Drizzle and raw SQL queries
 - View detailed execution statistics
 - Understand how the database executes your queries
 - Identify potential performance bottlenecks
 
 ### 2. Query History Analysis
+
 - Track and analyze query execution history
 - View execution patterns and performance trends
 - Identify frequently executed queries
 - Analyze query performance over time
 
 ### 3. Slow Query Analysis
+
 - Generate and analyze slow queries
 - Identify performance bottlenecks
 - View detailed execution statistics
@@ -69,6 +72,7 @@ forge install -s <environment>.atlassian.net
 ## Using the Application
 
 ### Query Plan Analysis
+
 1. Select a query to analyze (either Drizzle or raw SQL)
 2. Click "Explain Query" to view the execution plan
 3. Analyze the plan to understand:
@@ -78,11 +82,13 @@ forge install -s <environment>.atlassian.net
    - Resource usage at each step
 
 ### Query History Analysis
+
 1. Execute a query to add it to the history
 2. Click "Show Query History" to view past executions
 3. Analyze execution patterns and performance
 
 ### Slow Query Analysis
+
 1. Generate a slow query using the "Generate Slow Query" button
 2. Click "Analyze Slow Queries" to view detailed analysis
 3. Review performance metrics and optimization suggestions
@@ -90,10 +96,12 @@ forge install -s <environment>.atlassian.net
 ## Best Practices
 
 1. **Use Sparingly**
+
    - Only use these tools when actively troubleshooting performance issues
    - Avoid incorporating them into regular application logic
 
 2. **Monitor Changes**
+
    - Keep track of TiDB's schema changes
    - Be prepared to update or remove analysis code if schemas change
 

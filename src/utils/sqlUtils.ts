@@ -48,8 +48,8 @@ interface ConfigBuilderData {
  */
 export const parseDateTime = (value: string, format: string): Date => {
   let result: Date;
-    const m = moment(value, format, true);
-    if (!m.isValid()) {
+  const m = moment(value, format, true);
+  if (!m.isValid()) {
     const momentDate = moment(value);
     if (momentDate.isValid()) {
       result = momentDate.toDate();
@@ -189,8 +189,8 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
   builders.foreignKeys = processForeignKeys(table, foreignKeysSymbol, extraSymbol);
 
   // Process extra configuration if available
-    if (extraSymbol) {
-        // @ts-ignore
+  if (extraSymbol) {
+    // @ts-ignore
     const extraConfigBuilder = table[extraSymbol];
     if (extraConfigBuilder && typeof extraConfigBuilder === "function") {
       const configBuilderData = extraConfigBuilder(table);
@@ -231,7 +231,7 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
     }
   }
 
-    return {
+  return {
     tableName: nameSymbol ? (table as any)[nameSymbol] : "",
     columns: columnsSymbol ? ((table as any)[columnsSymbol] as Record<string, AnyColumn>) : {},
     ...builders,
