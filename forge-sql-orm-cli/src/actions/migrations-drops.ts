@@ -124,7 +124,7 @@ export const dropMigration = async (options: any) => {
     console.log("Found tables:", tableNames);
 
     // Generate drop statements
-    const dropStatements = generateDropTableStatements(tables);
+    const dropStatements = generateDropTableStatements(tableNames);
 
     // Generate and save migration files
     const migrationFile = generateMigrationFile(dropStatements, version);
