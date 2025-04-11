@@ -27,23 +27,39 @@ import { MigrationRunner } from "@forge/sql/out/migration";
 export const applySchemaMigrations = async (
   migration: (migrationRunner: MigrationRunner) => Promise<MigrationRunner>,
 ) => {
-  console.log("Provisioning the database");
-  await sql._provision();
-  console.info("Running schema migrations");
-  const migrations = await migration(migrationRunner);
-  const successfulMigrations = await migrations.run();
-  console.info("Migrations applied:", successfulMigrations);
+  try {
+    if (typeof migration !== "function") {
+      throw new Error("migration is not a function");
+    }
 
-  const migrationHistory = (await migrationRunner.list())
-    .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-    .join("\n");
+    console.log("Provisioning the database");
+    await sql._provision();
+    console.info("Running schema migrations");
+    const migrations = await migration(migrationRunner);
+    const successfulMigrations = await migrations.run();
+    console.info("Migrations applied:", successfulMigrations);
 
-  console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
+    const migrationList = await migrationRunner.list();
+    const migrationHistory =
+      Array.isArray(migrationList) && migrationList.length > 0
+        ? migrationList.map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`).join("\n")
+        : "No migrations found";
 
-  return {
-    headers: { "Content-Type": ["application/json"] },
-    statusCode: 200,
-    statusText: "OK",
-    body: "Migrations successfully executed",
-  };
+    console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
+
+    return {
+      headers: { "Content-Type": ["application/json"] },
+      statusCode: 200,
+      statusText: "OK",
+      body: "Migrations successfully executed",
+    };
+  } catch (error) {
+    console.error("Error during migration:", error);
+    return {
+      headers: { "Content-Type": ["application/json"] },
+      statusCode: 500,
+      statusText: "Internal Server Error",
+      body: error instanceof Error ? error.message : "Unknown error during migration",
+    };
+  }
 };
