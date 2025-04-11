@@ -1,54 +1,72 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchSchemaWebTrigger, dropSchemaMigrations, applySchemaMigrations } from '../../../src/webtriggers';
 import {forgeSystemTables, getTables} from '../../../src/core/SystemTables';
 import { generateDropTableStatements } from '../../../src/utils/sqlUtils';
 import {sql} from "@forge/sql";
+import { MigrationRunner } from '@forge/sql/out/migration';
 
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
-vi.mock("@forge/sql", () => ({
-    sql: {
-        prepare: vi.fn((query: string) => {
-            let procedureMock = vi.fn().mockResolvedValue({rows: [{id: 1, data: 't', name: "Test"}]});
-            if (query === "select `test_data_entity`.`id` as `ID1`, `test_entity`.`id` as ID2, `test_data_entity`.`data`, `test_entity`.`name` from `test_data_entity` inner join `test_entity` on `test_data_entity`.`id` = `test_entity`.`id`") {
-                procedureMock = vi.fn().mockResolvedValue({rows: [{ID1: 1, ID2: 2, data: 't', name: "Test"}]});
-            }
-            const executeMock = procedureMock;
-            return {
-                query: query || "MOCK_QUERY",
-                _params: [],
-                remoteSqlApi: "",
-                params: [],
-                bindParams: vi.fn(),
-                execute: executeMock,
-            };
-        }),
-        executeRaw:vi.fn(),
-        _provision:vi.fn(),
-        executeDDL:vi.fn(),
-    },
-}));
 
+interface MockMigrationRunner extends MigrationRunner {
+    enqueue: ReturnType<typeof vi.fn>;
+    run: ReturnType<typeof vi.fn>;
+    list: ReturnType<typeof vi.fn>;
+}
 
+// Mock sql
+vi.mock("@forge/sql", () => {
+    const mockMigrationRunner = {
+        enqueue: vi.fn().mockReturnThis(),
+        run: vi.fn().mockResolvedValue(['migration1']),
+        list: vi.fn().mockResolvedValue([
+            { id: 1, name: 'test_migration', migratedAt: new Date() }
+        ])
+    } as MockMigrationRunner;
+
+    return {
+        sql: {
+            prepare: vi.fn((query: string) => {
+                let procedureMock = vi.fn().mockResolvedValue({rows: [{id: 1, data: 't', name: "Test"}]});
+                if (query === "select `test_data_entity`.`id` as `ID1`, `test_entity`.`id` as ID2, `test_data_entity`.`data`, `test_entity`.`name` from `test_data_entity` inner join `test_entity` on `test_data_entity`.`id` = `test_entity`.`id`") {
+                    procedureMock = vi.fn().mockResolvedValue({rows: [{ID1: 1, ID2: 2, data: 't', name: "Test"}]});
+                }
+                const executeMock = procedureMock;
+                return {
+                    query: query || "MOCK_QUERY",
+                    _params: [],
+                    remoteSqlApi: "",
+                    params: [],
+                    bindParams: vi.fn(),
+                    execute: executeMock,
+                };
+            }),
+            executeRaw: vi.fn(),
+            _provision: vi.fn().mockResolvedValue(undefined),
+            executeDDL: vi.fn().mockResolvedValue({ rows: [] }),
+        },
+        migrationRunner: mockMigrationRunner
+    };
+});
+
+// Mock SystemTables
 vi.mock('../../../src/core/SystemTables', () => ({
-    getTables: vi.fn(),
+    getTables: vi.fn().mockResolvedValue([]),
     forgeSystemTables: []
 }));
 
+// Mock sqlUtils
 vi.mock('../../../src/utils/sqlUtils', () => ({
-    generateDropTableStatements: vi.fn()
+    generateDropTableStatements: vi.fn().mockReturnValue([])
 }));
 
 describe('WebTriggers', () => {
-
-    beforeAll(() => {
-
-    });
+    let mockMigrationRunner: MockMigrationRunner;
 
     beforeEach(() => {
-
         // Reset mocks
         vi.clearAllMocks();
+        mockMigrationRunner = (vi.mocked(sql) as any).migrationRunner;
     });
 
     describe('fetchSchemaWebTrigger', () => {
@@ -57,12 +75,10 @@ describe('WebTriggers', () => {
             (getTables as any).mockResolvedValue(['table1', 'table2']);
 
             // Mock executeDDL to return create table statements
-            // (sql.executeDDL as any).mockResolvedValueOnce();
-
-            vi.mocked(sql.executeDDL).mockImplementation(() => ({rows: [
+            vi.mocked(sql.executeDDL).mockImplementation(() => Promise.resolve({rows: [
                 { 'Create Table': 'CREATE TABLE table1 (...)', Table:'table1' },
                 { 'Create Table': 'CREATE TABLE table2 (...)', Table:'table2' }
-            ]} as any));
+            ]}));
 
             const result = await fetchSchemaWebTrigger();
 
@@ -118,20 +134,20 @@ describe('WebTriggers', () => {
 
     describe('applySchemaMigrations', () => {
         it('should apply migrations successfully', async () => {
-            const mockMigration = async (runner: any) => {
-                await runner.execute('CREATE TABLE test (id INT)');
+            const mockMigration = async (runner: MigrationRunner) => {
+                runner.enqueue('test_migration', 'CREATE TABLE test (id INT)');
                 return runner;
             };
 
             const result = await applySchemaMigrations(mockMigration);
 
             expect(result.statusCode).toBe(200);
-            expect(result.body).toBe('Migrations applied successfully');
+            expect(result.body).toBe('Migrations successfully executed');
         });
 
         it('should handle errors during migration', async () => {
-            const mockMigration = async (runner: any) => {
-                await runner.execute('CREATE TABLE test (id INT)');
+            const mockMigration = async (runner: MigrationRunner) => {
+                runner.enqueue('test_migration', 'CREATE TABLE test (id INT)');
                 throw new Error('Failed to apply migration');
             };
 
@@ -142,10 +158,10 @@ describe('WebTriggers', () => {
         });
 
         it('should handle invalid migration object', async () => {
-            const result = await applySchemaMigrations({} as any);
+            const result = await applySchemaMigrations(null as any);
 
             expect(result.statusCode).toBe(500);
-            expect(result.body).toContain('Invalid migration object');
+            expect(result.body).toContain('migration is not a function');
         });
     });
 });
