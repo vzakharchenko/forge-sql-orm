@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchSchemaWebTrigger, dropSchemaMigrations, applySchemaMigrations } from '../../../src/webtriggers';
-import {forgeSystemTables, getTables} from '../../../src/core/SystemTables';
+import { getTables} from '../../../src/core/SystemTables';
 import { generateDropTableStatements } from '../../../src/utils/sqlUtils';
 import {sql} from "@forge/sql";
 import { MigrationRunner } from '@forge/sql/out/migration';

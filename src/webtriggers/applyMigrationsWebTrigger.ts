@@ -28,8 +28,8 @@ export const applySchemaMigrations = async (
   migration: (migrationRunner: MigrationRunner) => Promise<MigrationRunner>,
 ) => {
   try {
-    if (typeof migration !== 'function') {
-      throw new Error('migration is not a function');
+    if (typeof migration !== "function") {
+      throw new Error("migration is not a function");
     }
 
     console.log("Provisioning the database");
@@ -40,11 +40,10 @@ export const applySchemaMigrations = async (
     console.info("Migrations applied:", successfulMigrations);
 
     const migrationList = await migrationRunner.list();
-    const migrationHistory = Array.isArray(migrationList) && migrationList.length > 0
-      ? migrationList
-          .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-          .join("\n")
-      : "No migrations found";
+    const migrationHistory =
+      Array.isArray(migrationList) && migrationList.length > 0
+        ? migrationList.map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`).join("\n")
+        : "No migrations found";
 
     console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
 
