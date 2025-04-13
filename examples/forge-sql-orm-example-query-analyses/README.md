@@ -73,7 +73,7 @@ forge install -s <environment>.atlassian.net
 
 ### Query Plan Analysis
 
-1. Select a query to analyze (either Drizzle or raw SQL)
+1. Select a query to analyze 
 2. Click "Explain Query" to view the execution plan
 3. Analyze the plan to understand:
    - How the database executes your query
