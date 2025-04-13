@@ -275,7 +275,7 @@ LIMIT 10 OFFSET 50000;
                 <button onClick={handleOptimizeQuery}>4. Add optimization indexes</button>
                 <button onClick={handleExecuteQuery}>5. Execute SQL</button>
                 <button onClick={handleExplainDrizzle}>6. Explain (optional) </button>
-                <button onClick={handleExplainAnalyzeDrizzle}>7. Explain Analyze Not Optimized</button>
+                <button onClick={handleExplainAnalyzeDrizzle}>7. Explain Analyze</button>
               </div>
             </div>
           </section>
