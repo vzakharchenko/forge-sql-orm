@@ -1,37 +1,27 @@
-import { mysqlTable, primaryKey, varbinary, varchar, int } from "drizzle-orm/mysql-core";
-import { sql } from "drizzle-orm";
+import { forgeTimestampString } from "forge-sql-orm";
 
-export const category = mysqlTable(
-  "category",
-  {
-    id: varbinary({ length: 16 })
-      .default(sql`(uuid_to_bin(uuid()))`)
-      .notNull(),
-    name: varchar({ length: 255 }).notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.id], name: "category_id" })],
-);
+import { mysqlTable, varchar, int } from "drizzle-orm/mysql-core"
+import { sql } from "drizzle-orm"
+import {uuidBinary} from "./CustomTypes";
 
-export const orderItem = mysqlTable(
-  "order_item",
-  {
-    id: varbinary({ length: 16 })
-      .default(sql`(uuid_to_bin(uuid()))`)
-      .notNull(),
-    productId: varbinary("product_id", { length: 16 }).references(() => product.id),
-    quantity: int().notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.id], name: "order_item_id" })],
-);
+export const category = mysqlTable("category", {
+	id: uuidBinary('id').notNull(),
+	name: varchar({ length: 255 }).notNull(),
+	createdAt: forgeTimestampString('created_at').default(sql`(now())`).notNull(),
+});
 
-export const product = mysqlTable(
-  "product",
-  {
-    id: varbinary({ length: 16 })
-      .default(sql`(uuid_to_bin(uuid()))`)
-      .notNull(),
-    name: varchar({ length: 255 }).notNull(),
-    categoryId: varbinary("category_id", { length: 16 }).references(() => category.id),
-  },
-  (table) => [primaryKey({ columns: [table.id], name: "product_id" })],
-);
+export const orderItem = mysqlTable("order_item", {
+	id: uuidBinary('id').notNull(),
+	productId: varchar("product_id",{ length: 16 }).notNull(),
+	productName: varchar("product_name",{ length: 255 }).notNull(),
+	quantity: int().notNull(),
+	createdAt: forgeTimestampString('created_at').default(sql`(now())`).notNull(),
+});
+
+export const product = mysqlTable("product", {
+	id: uuidBinary('id').notNull(),
+	categoryId: varchar("category_id",{ length: 16 }).notNull(),
+	name: varchar({ length: 255 }).notNull(),
+	categoryName: varchar("category_name",{ length: 255 }).notNull(),
+	createdAt: forgeTimestampString('created_at').default(sql`(now())`).notNull(),
+});

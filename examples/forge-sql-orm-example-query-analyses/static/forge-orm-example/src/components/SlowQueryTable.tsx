@@ -50,7 +50,7 @@ export default observer(() => {
               cells: cells,
             };
           })}
-          rowsPerPage={5}
+          rowsPerPage={10}
           defaultPage={1}
           loadingSpinnerSize="large"
           emptyView={<div>Duplicate Table is EMPTY</div>}

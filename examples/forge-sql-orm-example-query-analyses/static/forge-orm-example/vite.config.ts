@@ -33,7 +33,7 @@ export default defineConfig(async (env: ConfigEnv): Promise<UserConfig> => {
     acc[`process.env.${key}`] = JSON.stringify(envVars[key]);
     return acc;
   }, {});
-  const buildPath = resolve(__dirname, envVars["BUILD_PATH"] || "./build");
+  const buildPath = resolve(__dirname, envVars["BUILD_PATH"] || "./build-analize");
   return {
     define: envKeys,
     base: "./",

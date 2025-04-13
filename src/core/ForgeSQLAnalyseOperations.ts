@@ -394,10 +394,11 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
    * Retrieves and analyzes slow queries from the database.
    * @returns {Promise<SlowQueryNormalized[]>} The normalized slow query data
    */
+  //  CLUSTER_SLOW_QUERY STATISTICS
   async analyzeSlowQueries(): Promise<SlowQueryNormalized[]> {
     const results = await this.forgeOperations.fetch().executeRawSQL<SlowQueryRaw>(`
       SELECT *
-      FROM information_schema.slow_query
+      FROM information_schema.slow_query 
       ORDER BY time DESC
     `);
     return results.map((row) => this.normalizeSlowQuery(row));
