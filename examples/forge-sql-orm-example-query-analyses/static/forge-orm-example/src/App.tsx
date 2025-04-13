@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React from "react";
 import { invoke } from "@forge/bridge";
 import { observer } from "mobx-react";
 import { useRootStore } from "./store";
@@ -46,19 +46,6 @@ function App() {
     }
   };
 
-  const handleExplainOptimized = async () => {
-    usersStore.loading();
-    try {
-      const plan = await invoke<ExplainAnalyzeRow[]>("explainOptimized");
-      usersStore.showPlan(plan, "Plan does not exists");
-      stateStore.saveState("PLAN");
-    } catch (e:any) {
-      console.error(e);
-      showError('explain optimized error', e.message)
-    } finally {
-      usersStore.stopLoading();
-    }
-  };
 
   const handleExplainAnalyzeDrizzle = async () => {
     usersStore.loading();
@@ -110,17 +97,6 @@ function App() {
     }
   };
 
-  const handleExecuteOptimizedQuery = async () => {
-    usersStore.loading();
-    try {
-       await invoke("executeOptimizedQuery");
-    } catch (e:any) {
-      console.error(e);
-      showError('execute optimized query error', e.message)
-    } finally {
-      usersStore.stopLoading();
-    }
-  };
 
   const handleOptimizeQuery = async () => {
     usersStore.loading();
@@ -168,20 +144,6 @@ function App() {
     }
   };
 
-  const handleExplainOptimizedAnalyze = async () => {
-    usersStore.loading();
-    try {
-      const plan = await invoke<ExplainAnalyzeRow[]>("explainOptimizedAnalyze");
-      usersStore.showPlan(plan, "Plan does not exists");
-      stateStore.saveState("PLAN");
-    } catch (e:any) {
-      console.error(e);
-      showError('explain optimized analyze error', e.message)
-    } finally {
-      usersStore.stopLoading();
-    }
-  };
-
   const handleShowHistory = async () => {
     usersStore.loading();
     try {
@@ -193,18 +155,6 @@ function App() {
     } catch (e:any) {
       console.error(e);
       showError('History error', e.message)
-    } finally {
-      usersStore.stopLoading();
-    }
-  };
-
-  const handleGenerateSlowQuery = async () => {
-    usersStore.loading();
-    try {
-      await invoke("createSlowQuery");
-    } catch (e:any) {
-      console.error(e);
-      showError('Slowquery error', e.message)
     } finally {
       usersStore.stopLoading();
     }
