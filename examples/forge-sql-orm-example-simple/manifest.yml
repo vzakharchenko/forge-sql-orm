@@ -41,7 +41,7 @@ modules:
       handler: index.fetchMigrations
 resources:
   - key: main
-    path: static/forge-orm-example/build
+    path: static/forge-orm-example/build-static
     tunnel:
       port: 3099
 app:
