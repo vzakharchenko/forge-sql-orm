@@ -5,10 +5,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/events": "^1.0.0",
-    "@forge/resolver": "1.6.9",
-    "@forge/sql": "^2.4.2",
-    "drizzle-orm": "^0.41.0",
+    "@forge/events": "^1.0.1",
+    "@forge/resolver": "1.6.10",
+    "@forge/sql": "^2.5.0",
+    "drizzle-orm": "^0.42.0",
     "forge-sql-orm": "2.0.19",
     "uuid": "^11.1.0"
   },

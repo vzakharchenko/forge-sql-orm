@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "@forge/resolver": "1.6.10",
-    "@forge/sql": "^2.4.2",
+    "@forge/sql": "^2.5.0",
     "forge-sql-orm": "2.0.19"
   },
   "scripts": {
