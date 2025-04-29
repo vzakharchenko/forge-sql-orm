@@ -168,7 +168,7 @@ program.version("1.0.0");
 // ✅ Command: Generate database models (Entities)
 program
   .command("generate:model")
-  .description("Generate MikroORM models from the database.")
+  .description("Generate Drizzle models from the database.")
   .option("--host <string>", "Database host")
   .option("--port <number>", "Database port")
   .option("--user <string>", "Database user")
