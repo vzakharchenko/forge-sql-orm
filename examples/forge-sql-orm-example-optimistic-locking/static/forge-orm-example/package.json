@@ -37,7 +37,7 @@
     "prettier-plugin-pkg": "^0.19.0",
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.3",
+    "vite": "^6.3.5",
     "vite-plugin-html": "^3.2.2"
   },
   "jest-junit": {

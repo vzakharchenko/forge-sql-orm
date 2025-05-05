@@ -42,7 +42,7 @@
   "dependencies": {
     "commander": "^13.1.0",
     "dotenv": "^16.5.0",
-    "drizzle-kit": "^0.31.0",
+    "drizzle-kit": "^0.31.1",
     "forge-sql-orm": "^2.0.20",
     "inquirer": "^12.6.0",
     "mysql2": "^3.14.1",
@@ -52,7 +52,7 @@
     "drizzle-orm": "^0.41.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.25.1",
+    "@eslint/js": "^9.26.0",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.15.3",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
@@ -61,6 +61,6 @@
     "eslint-plugin-import": "^2.31.0",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.8.3",
-    "vite": "^6.3.3"
+    "vite": "^6.3.5"
   }
 }
