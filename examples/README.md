@@ -52,4 +52,15 @@ Demonstrates query analysis capabilities for performance optimization and debugg
 
 ⚠️ **Important Note**: The query analysis features shown in this example are experimental and should be used only for troubleshooting. They rely on TiDB's `information_schema` and `performance_schema` which may change in future updates. As of April 2025, these features are available but their future availability is not guaranteed.
 
+### [forge-sql-orm-example-checklist](forge-sql-orm-example-checklist)
+
+A practical example demonstrating optimistic locking implementation in a real-world scenario. This example shows how to handle concurrent modifications in a checklist feature for Jira issues.
+
+- Optimistic locking in a real application
+- Concurrent modification handling
+- Automatic conflict resolution
+- User-friendly conflict notifications
+- Default checklist initialization
+- Two update modes comparison (with/without locking)
+
 Each example includes its own README with detailed setup instructions and usage examples.

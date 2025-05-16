@@ -433,3 +433,10 @@ function processNullBranches(obj: Record<string, unknown>): Record<string, unkno
 
   return allNull ? null : result;
 }
+
+export function formatLimitOffset(limitOrOffset: number): number {
+  if (typeof limitOrOffset !== "number" || isNaN(limitOrOffset)) {
+    throw new Error("limitOrOffset must be a valid number");
+  }
+  return sql.raw(`${limitOrOffset}`) as unknown as number;
+}

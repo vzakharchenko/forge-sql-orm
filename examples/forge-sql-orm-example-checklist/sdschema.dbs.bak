@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="MySql" database="MySql" id="00259513-2967-4483-8628-e52df056d592" >
+	<schema name="forgesqlarticle" >
+		<table name="issue_check_list" spec="" >
+			<column name="issue_id" type="VARCHAR" length="255" jt="12" mandatory="y" />
+			<column name="check_list" type="JSON" jt="2000" mandatory="y" />
+			<column name="updated_at" type="DATETIME" jt="93" mandatory="y" >
+				<defo><![CDATA[now()]]></defo>
+			</column>
+			<column name="update_id" type="VARCHAR" length="255" jt="12" mandatory="y" />
+			<column name="update_display_name" type="VARCHAR" length="255" jt="12" mandatory="y" />
+			<index name="pk_issue_check_list" unique="PRIMARY_KEY" >
+				<column name="issue_id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci]]></options>
+		</table>
+	</schema>
+	<layout name="Main Diagram" id="a900319c-77ba-4bab-ae0f-5369d9603068" show_relation="columns" >
+		<entity schema="forgesqlarticle" name="issue_check_list" color="3986C1" x="220" y="140" />
+		<callout x="60" y="60" pointer="Round" >
+			<comment><![CDATA[Create new tables by right-clicking the diagram.
+Double-click the table headers, columns, or foreign keys to edit.
+The schema structure will be saved to the design model file.]]></comment>
+		</callout>
+		<script name="issue_check_list" id="e1381b04-224e-48d5-838f-ad3349b4a448" language="SQL" >
+			<string><![CDATA[CREATE  TABLE forgesqlorm.issue_check_list ( 
+	issue_id             VARCHAR(255)    NOT NULL   PRIMARY KEY,
+	check_list           JSON    NOT NULL   ,
+	updated_at           DATETIME  DEFAULT (now())  NOT NULL   ,
+	update_id            INT    NOT NULL   ,
+	update_display_name  VARCHAR(255)    NOT NULL   
+ ) engine=InnoDB;
+]]></string>
+		</script>
+	</layout>
+</project>
