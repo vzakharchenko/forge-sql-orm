@@ -31,6 +31,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - name: Clear npm cache
+      run: npm cache clean --force
     - run: echo APPLICATION
     - run: npm ci
     - run: npm run lint
