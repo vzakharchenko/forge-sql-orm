@@ -37,12 +37,15 @@ jobs:
     - run: npm run build
     - run: npm test
     - run: npm run test:coverage
+      if: github.actor != 'dependabot[bot]'
     - name: Upload to Coveralls
+      if: github.actor != 'dependabot[bot]'
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
         path-to-lcov: ./coverage/lcov.info
     - name: Upload to Qlty
+      if: github.actor != 'dependabot[bot]'
       uses: qltysh/qlty-action/coverage@main
       with:
         coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
@@ -70,3 +73,6 @@ jobs:
     - run: cd examples/forge-sql-orm-example-query-analyses && npm i
     - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-checklist && npm i
+    - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm run build
