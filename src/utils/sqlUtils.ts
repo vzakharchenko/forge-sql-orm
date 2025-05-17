@@ -442,5 +442,5 @@ export function formatLimitOffset(limitOrOffset: number): number {
 }
 
 export function nextVal(sequenceName:string):number {
-  return sql`SELECT NEXT VALUE FOR ${sequenceName} AS id`as unknown as number
+  return sql.raw(`NEXTVAL(${sequenceName})`)as unknown as number
 }
