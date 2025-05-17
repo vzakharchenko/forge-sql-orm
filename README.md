@@ -465,6 +465,20 @@ await forgeSQL.crud().insert(Users, [
     ],
   true
   );
+
+// Insert with sequence (nextVal)
+import { nextVal } from "forge-sql-orm";
+
+const user = {
+  id: nextVal('user_id_seq'),
+  name: "user test",
+  organization_id: 1
+};
+const id = await forgeSQL.modify().insert(appUser, [user]);
+
+// The generated SQL will be:
+// INSERT INTO app_user (id, name, organization_id) 
+// VALUES (NEXTVAL(user_id_seq), ?, ?) -- params: ["user test", 1]
   ```
 
 ### Update Operations
@@ -493,6 +507,41 @@ await forgeSQL.crud().updateFields(
 // Delete by ID
 await forgeSQL.crud().deleteById(1, Users);
 ```
+
+## SQL Utilities
+
+### formatLimitOffset
+
+The `formatLimitOffset` utility function is used to safely insert numeric values directly into SQL queries for LIMIT and OFFSET clauses. This is necessary because Atlassian Forge SQL doesn't support parameterized queries for these clauses.
+
+```typescript
+import { formatLimitOffset } from "forge-sql-orm";
+
+// Example usage in a query
+const result = await forgeSQL
+  .select()
+  .from(orderItem)
+  .orderBy(asc(orderItem.createdAt))
+  .limit(formatLimitOffset(10))
+  .offset(formatLimitOffset(350000));
+
+// The generated SQL will be:
+// SELECT * FROM order_item 
+// ORDER BY created_at ASC 
+// LIMIT 10 
+// OFFSET 350000
+```
+
+**Important Notes:**
+- The function performs type checking to prevent SQL injection
+- It throws an error if the input is not a valid number
+- Use this function instead of direct parameter binding for LIMIT and OFFSET clauses
+- The function is specifically designed to work with Atlassian Forge SQL's limitations
+
+**Security Considerations:**
+- The function includes validation to ensure the input is a valid number
+- This prevents SQL injection by ensuring only numeric values are inserted
+- Always use this function instead of string concatenation for LIMIT and OFFSET values
 
 ## Optimistic Locking
 

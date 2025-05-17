@@ -45,11 +45,11 @@ const notOptimizedQuery = forgeSQL
         productName: product.name,
         orderItemQuantity: orderItem.quantity,
     })
-    .from(orderItem)
+  .from(orderItem)
     .leftJoin(product, eq(orderItem.productId, product.id))
     .leftJoin(category, eq(product.categoryId, category.id))
-    .orderBy(asc(orderItem.createdAt))
-    .limit(formatLimitOffset(10))
+        .orderBy(asc(orderItem.createdAt))
+        .limit(formatLimitOffset(10))
     .offset(formatLimitOffset(100000));
 
 const optimizedQuery = forgeSQL
@@ -74,14 +74,14 @@ const optimizedQuery = forgeSQL
     .offset(formatLimitOffset(100000));
 
 const drizzleSlowQuery = forgeSQL
-    .select({
-        category: category,
-        orderItem: orderItem,
-        product: product,
-    })
-    .from(category)
-    .leftJoin(product, eq(category.name, product.categoryName))
-    .innerJoin(orderItem, eq(orderItem.productName, product.name));
+  .select({
+    category: category,
+    orderItem: orderItem,
+    product: product,
+  })
+  .from(category)
+  .leftJoin(product, eq(category.name, product.categoryName))
+  .innerJoin(orderItem, eq(orderItem.productName, product.name));
 
 resolver.define("explain", async (): Promise<ExplainAnalyzeRow[]> => {
     try {
@@ -92,8 +92,8 @@ resolver.define("explain", async (): Promise<ExplainAnalyzeRow[]> => {
         if (e?.context?.debug) {
             throw new Error(e.context.debug.message);
         }
-        throw e;
-    }
+            throw e;
+        }
 });
 
 resolver.define("executeQuery", async (): Promise<void> => {
@@ -108,14 +108,14 @@ resolver.define("executeQuery", async (): Promise<void> => {
         if (e?.context?.debug) {
             throw new Error(e.context.debug.message);
         }
-        throw e;
+            throw e;
     }
 });
 
 resolver.define("explainAnalyze", async (): Promise<ExplainAnalyzeRow[]> => {
     const before = new Date().getTime();
     console.log(notOptimizedQuery.toSQL().sql);
-    const result = await forgeSQL.analyze().explainAnalyze(notOptimizedQuery);
+     const result = await forgeSQL.analyze().explainAnalyze(notOptimizedQuery);
     const after = new Date().getTime();
     console.warn(`TIMEOUT: ${after - before}`);
     console.log(notOptimizedQuery.toSQL().sql);
@@ -254,34 +254,34 @@ resolver.define("deOptimizeQuery", async (): Promise<void> => {
 });
 
 resolver.define("createSlowQuery", async (): Promise<void> => {
-    await drizzleSlowQuery;
+  await drizzleSlowQuery;
 });
 
 resolver.define("analyzeSlowQueries", async (): Promise<SlowQueryNormalized[]> => {
-    return await forgeSQL.analyze().analyzeSlowQueries();
+  return await forgeSQL.analyze().analyzeSlowQueries();
 });
 
 resolver.define("analyzeQueriesHistory", async (): Promise<ClusterStatementRowCamelCase[]> => {
-    return await forgeSQL.analyze().analyzeQueriesHistory([category, orderItem, product]);
+  return await forgeSQL.analyze().analyzeQueriesHistory([category, orderItem, product]);
 });
 
 export const handlerMigration = async () => {
-    try {
+  try {
         const applySchemaMigrations1 = await applySchemaMigrations(migration);
         await queue.push({ insert: true }, { delayInSeconds: 10 });
         return applySchemaMigrations1;
-    } catch (e) {
-        console.error(JSON.stringify(e));
-        throw e;
-    }
+  } catch (e) {
+    console.error(JSON.stringify(e));
+    throw e;
+  }
 };
 
 export const dropMigrations = () => {
-    return dropSchemaMigrations();
+  return dropSchemaMigrations();
 };
 
 export const fetchMigrations = () => {
-    return fetchSchemaWebTrigger();
+  return fetchSchemaWebTrigger();
 };
 
 export const handler = resolver.getDefinitions();
