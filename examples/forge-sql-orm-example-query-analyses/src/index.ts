@@ -1,7 +1,7 @@
 import Resolver from "@forge/resolver";
 import { Queue } from '@forge/events';
 import { v4 } from 'uuid';
-import ForgeSQL from "forge-sql-orm";
+import ForgeSQL, { formatLimitOffset } from "forge-sql-orm";
 import { dropSchemaMigrations, applySchemaMigrations, fetchSchemaWebTrigger, ExplainAnalyzeRow, ClusterStatementRowCamelCase, SlowQueryNormalized } from "forge-sql-orm";
 import { sql as forgeSQLClient } from "@forge/sql";
 import { asc, eq, InferInsertModel, sql } from "drizzle-orm";
@@ -12,12 +12,6 @@ const queue = new Queue({ key: 'insertQueue' });
 const resolver = new Resolver();
 const forgeSQL = new ForgeSQL({ logRawSqlQuery: false});
 
-export function formatLimitOffset(limitOrOffset: number): number {
-    if (typeof limitOrOffset !== "number" || isNaN(limitOrOffset)) {
-        throw new Error("limitOrOffset must be a valid number");
-    }
-    return sql.raw(`${limitOrOffset}`) as unknown as number;
-}
 
 const db = forgeSQL.getDrizzleQueryBuilder();
 const withQuery = db.$with('withQuery').as(

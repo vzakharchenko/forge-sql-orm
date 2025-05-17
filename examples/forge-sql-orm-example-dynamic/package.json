@@ -7,7 +7,7 @@
   "dependencies": {
     "@forge/resolver": "1.6.10",
     "@forge/sql": "^2.5.0",
-    "forge-sql-orm": "2.0.20"
+    "forge-sql-orm": "2.0.21"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
@@ -17,6 +17,6 @@
     "forge:debug": "forge tunnel -d -f index.handler"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.20"
+    "forge-sql-orm-cli": "^2.0.21"
   }
 }
