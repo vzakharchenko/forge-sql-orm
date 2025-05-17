@@ -322,4 +322,150 @@ describe("ForgeSQLCrudOperations", () => {
             )
     ).rejects.toThrow("WHERE conditions must be provided");
   });
+
+  describe('Error Handling', () => {
+    it('should throw error when insert fails', async () => {
+      vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+        query: "MOCK_QUERY",
+        params: [],
+        bindParams: vi.fn(),
+        execute: vi.fn().mockRejectedValue(new Error('Insert failed')),
+      } as any));
+
+      await expect(
+        forgeSqlOperation.crud().insert(testEntity, [{ id: 1, name: "Test" }])
+      ).rejects.toThrow('Insert failed');
+    });
+
+    it('should throw error when update fails', async () => {
+      vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+        query: "MOCK_QUERY",
+        params: [],
+        bindParams: vi.fn(),
+        execute: vi.fn().mockRejectedValue(new Error('Update failed')),
+      } as any));
+
+      await expect(
+        forgeSqlOperation.modify().updateById({ id: 1, name: "Updated" }, testEntity)
+      ).rejects.toThrow('Update failed');
+    });
+
+    it('should throw error when delete fails', async () => {
+      vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+        query: "MOCK_QUERY",
+        params: [],
+        bindParams: vi.fn(),
+        execute: vi.fn().mockRejectedValue(new Error('Delete failed')),
+      } as any));
+
+      await expect(
+        forgeSqlOperation.modify().deleteById(1, testEntity)
+      ).rejects.toThrow('Delete failed');
+    });
+  });
+
+  describe('Bulk Operations', () => {
+    it('should handle bulk insert with multiple records', async () => {
+      const records = [
+        { id: 1, name: "Test1" },
+        { id: 2, name: "Test2" },
+        { id: 3, name: "Test3" }
+      ];
+
+      await forgeSqlOperation.crud().insert(testEntity, records);
+
+      expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "insert into `test_entity` (`id`, `name`) values (?, ?), (?, ?), (?, ?)"
+      );
+      const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+      expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test1", 2, "Test2", 3, "Test3");
+    });
+
+    it('should handle bulk insert with versioning', async () => {
+      const records = [
+        { id: 1, name: "Test1", version: 1 },
+        { id: 2, name: "Test2", version: 1 },
+        { id: 3, name: "Test3", version: 1 }
+      ];
+
+      await forgeSqlOperation.modify().insert(testEntityVersion, records);
+
+      expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "insert into `test_entity_version` (`id`, `name`, `version`) values (?, ?, ?), (?, ?, ?), (?, ?, ?)"
+      );
+    });
+  });
+
+  describe('Versioning Edge Cases', () => {
+    it('should handle version conflict during update', async () => {
+      vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+        query: "MOCK_QUERY",
+        params: [],
+        bindParams: vi.fn(),
+        execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 0 } }),
+      } as any));
+
+      await expect(
+        forgeSqlOperation.modify().updateById(
+          { id: 1, name: "Updated", version: 2 },
+          testEntityVersion
+        )
+      ).rejects.toThrow('Optimistic locking failed: record with primary key 1 has been modified');
+    });
+
+    it('should handle version field with undefined value', async () => {
+       expect(
+           await forgeSqlOperation.modify().updateById(
+          { id: 1, name: "Updated", version: undefined },
+          testEntityVersion
+        )
+      ).toBe(1);
+    });
+
+    it('should handle version field with invalid type', async () => {
+      const invalidVersion = { id: 1, name: "Updated", version: NaN };
+      expect(
+          await forgeSqlOperation.modify().updateById(
+              { id: 1, name: "Updated", version: undefined },
+              testEntityVersion
+          )
+      ).toBe(1);
+    });
+
+    it('should handle version field with negative value', async () => {
+
+       expect(
+           await forgeSqlOperation.modify().updateById(
+               { id: 1, name: "Updated", version: -1 },
+               testEntityVersion
+           )
+      ).toBe(1);
+    });
+  });
+
+  describe('Query Building', () => {
+    it('should build correct query for update with multiple conditions', async () => {
+      await forgeSqlOperation.modify().updateFields(
+        { name: "Updated" },
+        testEntity,
+        eq(testEntity.id, 1)
+      );
+
+      expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "update `test_entity` set `name` = ? where `test_entity`.`id` = ?"
+      );
+    });
+
+    it('should build correct query for update with versioning and multiple conditions', async () => {
+      await forgeSqlOperation.modify().updateFields(
+        { name: "Updated", version: 2 },
+        testEntityVersion,
+        eq(testEntityVersion.id, 1)
+      );
+
+      expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+        "update `test_entity_version` set `name` = ?, `version` = ? where `test_entity_version`.`id` = ?"
+      );
+    });
+  });
 });
