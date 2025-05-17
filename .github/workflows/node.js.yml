@@ -78,3 +78,6 @@ jobs:
     - run: cd examples/forge-sql-orm-example-checklist && npm i
     - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm run build
+    - run: cd examples/forge-sql-orm-example-org-tracker && npm i
+    - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm i
+    - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm run build

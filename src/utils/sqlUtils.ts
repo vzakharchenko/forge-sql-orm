@@ -440,3 +440,7 @@ export function formatLimitOffset(limitOrOffset: number): number {
   }
   return sql.raw(`${limitOrOffset}`) as unknown as number;
 }
+
+export function nextVal(sequenceName:string):number {
+  return sql`SELECT NEXT VALUE FOR ${sequenceName} AS id`as unknown as number
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="MySql" database="MySql" id="72e19bbe-be04-4534-8ae6-93159efc8847" >
+	<schema name="innerjoin_sequence" >
+		<table name="app_user" prior="tbl" >
+			<column name="id" type="INT" jt="4" mandatory="y" />
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" />
+			<column name="organization_id" type="INT" jt="4" mandatory="y" />
+			<index name="pk_app_user" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_app_user_organization" to_schema="innerjoin_sequence" to_table="organization" >
+				<fk_column name="organization_id" pk="id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="organization" prior="user_id_seq" >
+			<column name="id" type="INT" jt="4" mandatory="y" />
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" />
+			<index name="pk_organization" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<sequence name="user_id_seq" />
+	</schema>
+	<layout name="Main Diagram" id="4df15519-24f4-42a6-9ad5-a89ecab30e3d" show_relation="columns" >
+		<entity schema="innerjoin_sequence" name="organization" color="C1D8EE" x="60" y="60" />
+		<entity schema="innerjoin_sequence" name="app_user" color="C1D8EE" x="280" y="100" />
+	</layout>
+</project>

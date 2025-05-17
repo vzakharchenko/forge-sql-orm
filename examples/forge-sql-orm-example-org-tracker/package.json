@@ -1,0 +1,23 @@
+{
+  "name": "jira-global-page-custom-ui",
+  "version": "1.1.4",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@forge/resolver": "1.6.10",
+    "@forge/sql": "^2.5.0",
+    "forge-sql-orm": "2.0.20"
+  },
+  "scripts": {
+    "models:create": "forge-sql-orm-cli generate:model --output src/entities",
+    "migration:create": "forge-sql-orm-cli migrations:create --force",
+    "migration:update": "forge-sql-orm-cli migrations:update",
+    "migration:drop": "forge-sql-orm-cli migrations:drop",
+    "forge:debug": "forge tunnel -d -f index.handler",
+    "build:husky": "tsc --project tsconfig.json  --outDir ./dist && rm -rf ./dist"
+  },
+  "devDependencies": {
+    "forge-sql-orm-cli": "^2.0.20"
+  }
+}

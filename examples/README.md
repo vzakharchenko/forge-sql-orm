@@ -52,6 +52,16 @@ Demonstrates query analysis capabilities for performance optimization and debugg
 
 ⚠️ **Important Note**: The query analysis features shown in this example are experimental and should be used only for troubleshooting. They rely on TiDB's `information_schema` and `performance_schema` which may change in future updates. As of April 2025, these features are available but their future availability is not guaranteed.
 
+### [forge-sql-orm-example-org-tracker](forge-sql-orm-example-org-tracker)
+
+A practical example demonstrating how to work with complex database relationships and sequences. This example shows how to build an organization tracking system with user management.
+
+- Joining tables with overlapping columns
+- Using sequences for ID generation
+- Complex queries with filtering
+- User and organization management
+- Search and filtering capabilities
+
 ### [forge-sql-orm-example-checklist](forge-sql-orm-example-checklist)
 
 A practical example demonstrating optimistic locking implementation in a real-world scenario. This example shows how to handle concurrent modifications in a checklist feature for Jira issues.

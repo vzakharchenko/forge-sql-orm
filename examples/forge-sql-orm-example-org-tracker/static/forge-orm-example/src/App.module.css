@@ -1,0 +1,182 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.header h1 {
+  color: #172B4D;
+  font-size: 28px;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.searchSection {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.searchInput,
+.orgSelect,
+.input,
+.select {
+  padding: 8px 12px;
+  border: 1px solid #DFE1E6;
+  border-radius: 3px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+}
+
+.orgSelect {
+  min-width: 200px;
+}
+
+.searchInput:focus,
+.orgSelect:focus,
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #4C9AFF;
+  box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.2);
+}
+
+.addButton {
+  background-color: #0052CC;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.addButton:hover {
+  background-color: #0747A6;
+}
+
+.addForm {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #F4F5F7;
+  border-radius: 3px;
+}
+
+.submitButton {
+  background-color: #36B37E;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+}
+
+.submitButton:hover {
+  background-color: #2E9D6F;
+}
+
+.submitButton .spinner {
+  width: 16px;
+  height: 16px;
+}
+
+.submitButton .spinnerInner {
+  border-width: 2px;
+}
+
+.tableContainer {
+  background: white;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(9, 30, 66, 0.25);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #DFE1E6;
+}
+
+.table th {
+  background-color: #F4F5F7;
+  font-weight: 500;
+  color: #172B4D;
+}
+
+.table tr:hover {
+  background-color: #F4F5F7;
+}
+
+.stats {
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #F4F5F7;
+  border-radius: 3px;
+  color: #172B4D;
+  font-size: 14px;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+.spinnerInner {
+  width: 100%;
+  height: 100%;
+  border: 3px solid #DFE1E6;
+  border-top-color: #0052CC;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 
