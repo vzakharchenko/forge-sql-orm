@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import ForgeSQL, { formatLimitOffset } from "forge-sql-orm";
 import { dropSchemaMigrations, applySchemaMigrations, fetchSchemaWebTrigger, ExplainAnalyzeRow, ClusterStatementRowCamelCase, SlowQueryNormalized } from "forge-sql-orm";
 import { sql as forgeSQLClient } from "@forge/sql";
-import { asc, eq, InferInsertModel, sql } from "drizzle-orm";
+import { asc, eq, InferInsertModel } from "drizzle-orm";
 import migration from "./migration";
 import { category, orderItem, product } from "./entities";
 

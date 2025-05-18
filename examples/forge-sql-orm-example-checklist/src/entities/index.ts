@@ -6,8 +6,6 @@
  * Any changes will be overwritten on next generation
  */
 
-
-export * from "./relations";
 export * from "./schema";
 
 export interface VersionFieldMetadata {
