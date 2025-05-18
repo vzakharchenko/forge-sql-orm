@@ -14,6 +14,7 @@
     "migration:create": "forge-sql-orm-cli migrations:create",
     "migration:update": "forge-sql-orm-cli migrations:update",
     "migration:drop": "forge-sql-orm-cli migrations:drop",
+    "build:ci": "tsc --target esnext --project tsconfig.json  --outDir dist && rm -rf dist",
     "forge:debug": "forge tunnel -d -f index.handler"
   },
   "devDependencies": {

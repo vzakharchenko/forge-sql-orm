@@ -64,20 +64,26 @@ jobs:
     - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-simple && npm i
+    - run: cd examples/forge-sql-orm-example-simple && npm run build:ci
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
+    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm run build:ci
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
+    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm run build:ci
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-query-analyses && npm i
+    - run: cd examples/forge-sql-orm-example-query-analyses && npm run build:ci
     - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-checklist && npm i
+    - run: cd examples/forge-sql-orm-example-checklist && npm run build:ci
     - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm run build
     - run: cd examples/forge-sql-orm-example-org-tracker && npm i
+    - run: cd examples/forge-sql-orm-example-org-tracker && npm run build:ci
     - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm i
     - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm run build
