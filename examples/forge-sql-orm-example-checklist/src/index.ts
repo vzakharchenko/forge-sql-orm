@@ -1,12 +1,11 @@
 import Resolver from "@forge/resolver";
-import {Queue} from '@forge/events';
+
 import ForgeSQL, {applySchemaMigrations, dropSchemaMigrations, fetchSchemaWebTrigger} from "forge-sql-orm";
 import {eq} from "drizzle-orm";
 import {additionalMetadata, issueCheckList} from "./entities";
 import api, {route} from "@forge/api";
 import migration from "./migration";
 
-const queue = new Queue({key: 'insertQueue'});
 const resolver = new Resolver();
 const forgeSQL = new ForgeSQL({logRawSqlQuery: true, additionalMetadata: additionalMetadata});
 
@@ -43,7 +42,7 @@ async function fetchCheckList(issueId: string): Promise<CheckListData | null> {
             .from(issueCheckList)
             .where(eq(issueCheckList.issueId, issueId))
     );
-    
+
     if (!result?.issueCheckList) {
         return null;
     }
@@ -115,7 +114,7 @@ resolver.define("updateWithOptimisticLocking", async (request): Promise<{data?: 
         payload.updateId = userInfo.accountId;
         payload.updateDisplayName = userInfo.displayName;
         await forgeSQL.crud().updateById(payload, issueCheckList);
-        
+
         const updatedCheckList = await fetchCheckList(payload.issueId);
         if (!updatedCheckList) {
             return {error: true, concurrent: false, message: 'Record does not exist'};
@@ -143,9 +142,9 @@ resolver.define("update", async (request): Promise<{data?: CheckListData, error?
         payload.updatedAt = new Date();
         payload.updateId = userInfo.accountId;
         payload.updateDisplayName = userInfo.displayName;
-        
+
         await db.update(issueCheckList).set(payload);
-        
+
         const updatedCheckList = await fetchCheckList(payload.issueId);
         if (!updatedCheckList) {
             return {error: true, concurrent: false, message: 'Record does not exist'};
