@@ -40,7 +40,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "commander": "^13.1.0",
+    "commander": "^14.0.0",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.1",
     "forge-sql-orm": "^2.0.21",
