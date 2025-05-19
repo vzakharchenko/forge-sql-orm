@@ -248,6 +248,7 @@ export function generateDropTableStatements(tables: string[]): string[] {
 
   tables.forEach((tableName) => {
     dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
+    dropStatements.push(`DROP SEQUENCE IF EXISTS \`${tableName}\`;`);
   });
 
   return dropStatements;
@@ -441,6 +442,6 @@ export function formatLimitOffset(limitOrOffset: number): number {
   return sql.raw(`${limitOrOffset}`) as unknown as number;
 }
 
-export function nextVal(sequenceName:string):number {
-  return sql.raw(`NEXTVAL(${sequenceName})`)as unknown as number
+export function nextVal(sequenceName: string): number {
+  return sql.raw(`NEXTVAL(${sequenceName})`) as unknown as number;
 }

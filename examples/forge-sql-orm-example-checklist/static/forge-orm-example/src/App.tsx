@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { invoke, showFlag } from "@forge/bridge";
 import { observer } from "mobx-react";
 import "./App.css";
-import {FlagType} from "@forge/bridge/out/flag/flag";
+import { FlagType } from "@forge/bridge/out/flag/flag";
 
 interface CheckListData {
   checkList: string;
@@ -23,13 +23,13 @@ async function showNotification(title: string, message: string, messageType: Fla
 }
 
 function formatDate(date: Date): string {
-  return new Date(date).toLocaleString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
+  return new Date(date).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   });
 }
 
@@ -43,11 +43,11 @@ function LoadingOverlay() {
 
 function App() {
   const [checklist, setChecklist] = useState<CheckListData>({
-    checkList: '[]',
-    issueId: '',
+    checkList: "[]",
+    issueId: "",
     updatedAt: new Date(),
-    updateDisplayName: '',
-    updateId: ''
+    updateDisplayName: "",
+    updateId: "",
   });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -64,7 +64,7 @@ function App() {
       await showNotification(
         "Checklist Loading Error",
         "Unable to load the checklist. Please try again later.",
-        "error"
+        "error",
       );
     } finally {
       setLoading(false);
@@ -86,14 +86,14 @@ function App() {
           await showNotification(
             "Concurrent Modification Detected",
             `User ${response.data?.updateDisplayName} has modified the checklist before you. Your changes could not be saved.`,
-            "error"
+            "error",
           );
           await loadChecklist();
         } else {
           await showNotification(
             "Update Failed",
             response.message || "Unable to update the checklist. Please try again later.",
-            "error"
+            "error",
           );
         }
       } else {
@@ -102,7 +102,7 @@ function App() {
           await showNotification(
             "Update Successful",
             "The checklist has been successfully updated",
-            "success"
+            "success",
           );
         }
       }
@@ -110,7 +110,7 @@ function App() {
       await showNotification(
         "Update Error",
         "An error occurred while updating the checklist. Please try again later.",
-        "error"
+        "error",
       );
     } finally {
       setUpdating(false);
@@ -123,7 +123,7 @@ function App() {
       ...newChecklist[index],
       done: !newChecklist[index].done,
     };
-    setChecklist({...checklist, checkList: JSON.stringify(newChecklist)});
+    setChecklist({ ...checklist, checkList: JSON.stringify(newChecklist) });
   };
 
   if (loading) {
@@ -146,11 +146,7 @@ function App() {
       <div className="checklist">
         {JSON.parse(checklist.checkList).map((item: any, index: any) => (
           <div key={index} className="checklist-item">
-            <input
-              type="checkbox"
-              checked={item.done}
-              onChange={() => toggleItem(index)}
-            />
+            <input type="checkbox" checked={item.done} onChange={() => toggleItem(index)} />
             <span>{item.label}</span>
           </div>
         ))}

@@ -26,11 +26,11 @@ The application initializes new issues with the following default checklist:
 
 ```json
 [
-    { "label": "Feature flags verified", "done": false },
-    { "label": "Support team notified", "done": false },
-    { "label": "Release notes added", "done": false },
-    { "label": "Linked issues closed", "done": false },
-    { "label": "Changelog updated", "done": false }
+  { "label": "Feature flags verified", "done": false },
+  { "label": "Support team notified", "done": false },
+  { "label": "Release notes added", "done": false },
+  { "label": "Linked issues closed", "done": false },
+  { "label": "Changelog updated", "done": false }
 ]
 ```
 
@@ -93,6 +93,7 @@ forge install -s <environment>.atlassian.net
 The application demonstrates two approaches to handling concurrent modifications:
 
 1. **With Optimistic Locking**
+
    - Detects concurrent modifications
    - Prevents lost updates
    - Shows who made the conflicting change
@@ -106,6 +107,7 @@ The application demonstrates two approaches to handling concurrent modifications
 ## Best Practices
 
 1. **Use Optimistic Locking When**
+
    - Multiple users might edit the same data
    - Data consistency is important
    - You want to prevent lost updates

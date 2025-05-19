@@ -8,7 +8,7 @@ import PlanTable from "./components/PlanTable";
 import { ClusterStatementRowCamelCase, ExplainAnalyzeRow } from "forge-sql-orm";
 import HistoryTable from "./components/HistoryTable";
 import "./App.css";
-import {showError} from "./utils/ErrorUtils";
+import { showError } from "./utils/ErrorUtils";
 
 function App() {
   const { usersStore, stateStore } = useRootStore();
@@ -22,11 +22,10 @@ function App() {
       const plan = await invoke<ExplainAnalyzeRow[]>("explain");
       usersStore.showPlan(plan, "Plan does not exists");
       stateStore.saveState("PLAN");
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e);
-      showError('explain error', e.message)
-    }
-    finally {
+      showError("explain error", e.message);
+    } finally {
       usersStore.stopLoading();
     }
   };
@@ -37,15 +36,13 @@ function App() {
       const plan = await invoke<ExplainAnalyzeRow[]>("explainWith");
       usersStore.showPlan(plan, "Plan does not exists");
       stateStore.saveState("PLAN");
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e);
-      showError('explain error', e.message)
-    }
-    finally {
+      showError("explain error", e.message);
+    } finally {
       usersStore.stopLoading();
     }
   };
-
 
   const handleExplainAnalyzeDrizzle = async () => {
     usersStore.loading();
@@ -53,9 +50,9 @@ function App() {
       const plan = await invoke<ExplainAnalyzeRow[]>("explainAnalyze");
       usersStore.showPlan(plan, "Plan does not exists");
       stateStore.saveState("PLAN");
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e);
-      showError('explain analyze error', e.message)
+      showError("explain analyze error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -66,9 +63,9 @@ function App() {
       const plan = await invoke<ExplainAnalyzeRow[]>("explainAnalyzeWith");
       usersStore.showPlan(plan, "Plan does not exists");
       stateStore.saveState("PLAN");
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e);
-      showError('explain analyze error', e.message)
+      showError("explain analyze error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -77,10 +74,10 @@ function App() {
   const handleExecuteQuery = async () => {
     usersStore.loading();
     try {
-       await invoke("executeQuery");
-    } catch (e:any) {
+      await invoke("executeQuery");
+    } catch (e: any) {
       console.error(e);
-      showError('execute query error', e.message)
+      showError("execute query error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -88,23 +85,22 @@ function App() {
   const handleExecuteQueryNoIndex = async () => {
     usersStore.loading();
     try {
-       await invoke("executeQueryWith");
-    } catch (e:any) {
+      await invoke("executeQueryWith");
+    } catch (e: any) {
       console.error(e);
-      showError('execute query error', e.message)
+      showError("execute query error", e.message);
     } finally {
       usersStore.stopLoading();
     }
   };
 
-
   const handleOptimizeQuery = async () => {
     usersStore.loading();
     try {
-       await invoke<number>("optimizeQuery");
-    } catch (e:any) {
+      await invoke<number>("optimizeQuery");
+    } catch (e: any) {
       console.error(e);
-      showError('Optimize error', e.message)
+      showError("Optimize error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -112,10 +108,10 @@ function App() {
   const handleOptimizeQueryNoIndex = async () => {
     usersStore.loading();
     try {
-       await invoke<number>("optimizeQueryCTE");
-    } catch (e:any) {
+      await invoke<number>("optimizeQueryCTE");
+    } catch (e: any) {
       console.error(e);
-      showError('Optimize error', e.message)
+      showError("Optimize error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -124,10 +120,10 @@ function App() {
   const handledDropStats = async () => {
     usersStore.loading();
     try {
-       await invoke<number>("dropStats");
-    } catch (e:any) {
+      await invoke<number>("dropStats");
+    } catch (e: any) {
       console.error(e);
-      showError('dropStats error', e.message)
+      showError("dropStats error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -135,10 +131,10 @@ function App() {
   const handleDeOptimizeQuery = async () => {
     usersStore.loading();
     try {
-       await invoke<number>("deOptimizeQuery");
-    } catch (e:any) {
+      await invoke<number>("deOptimizeQuery");
+    } catch (e: any) {
       console.error(e);
-      showError('deoptimize error', e.message)
+      showError("deoptimize error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -152,9 +148,9 @@ function App() {
       });
       usersStore.saveHistory(history);
       stateStore.saveState("HISTORY");
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e);
-      showError('History error', e.message)
+      showError("History error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -166,9 +162,9 @@ function App() {
       const slowQueryNormalizeds = await invoke<SlowQueryNormalized[]>("analyzeSlowQueries");
       usersStore.saveSlowQuery(slowQueryNormalizeds);
       stateStore.saveState("SLOW_QUERY");
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e);
-      showError('Slowquery error', e.message)
+      showError("Slowquery error", e.message);
     } finally {
       usersStore.stopLoading();
     }
@@ -178,22 +174,17 @@ function App() {
     case "ROOT":
       return (
         <div className="query-analysis-container">
-
           <div className="section-spacer" />
 
           <section className="analysis-section">
             <h2>Stage 1: Initial Query Analysis</h2>
             <div className="query-example">
               <pre>
-                SELECT
-  `category`.`name` AS `a_categoryname_name`,
-  `product`.`name` AS `a_productname_name`,
-  `order_item`.`quantity` AS `a_orderitemquantity_quantity`
-FROM `order_item`
-LEFT JOIN `product` ON `order_item`.`product_id` = `product`.`id`
-LEFT JOIN `category` ON `product`.`category_id` = `category`.`id`
-ORDER BY `order_item`.`created_at` ASC
-LIMIT 10 OFFSET 50000;
+                SELECT `category`.`name` AS `a_categoryname_name`, `product`.`name` AS
+                `a_productname_name`, `order_item`.`quantity` AS `a_orderitemquantity_quantity` FROM
+                `order_item` LEFT JOIN `product` ON `order_item`.`product_id` = `product`.`id` LEFT
+                JOIN `category` ON `product`.`category_id` = `category`.`id` ORDER BY
+                `order_item`.`created_at` ASC LIMIT 10 OFFSET 50000;
               </pre>
             </div>
             <div className="button-group">
@@ -209,15 +200,11 @@ LIMIT 10 OFFSET 50000;
             <h2>Stage 2: Adding Indexes — Better but Not Yet Great</h2>
             <div className="query-example">
               <pre>
-                SELECT
-  `category`.`name` AS `a_categoryname_name`,
-  `product`.`name` AS `a_productname_name`,
-  `order_item`.`quantity` AS `a_orderitemquantity_quantity`
-FROM `order_item`
-LEFT JOIN `product` ON `order_item`.`product_id` = `product`.`id`
-LEFT JOIN `category` ON `product`.`category_id` = `category`.`id`
-ORDER BY `order_item`.`created_at` ASC
-LIMIT 10 OFFSET 50000;
+                SELECT `category`.`name` AS `a_categoryname_name`, `product`.`name` AS
+                `a_productname_name`, `order_item`.`quantity` AS `a_orderitemquantity_quantity` FROM
+                `order_item` LEFT JOIN `product` ON `order_item`.`product_id` = `product`.`id` LEFT
+                JOIN `category` ON `product`.`category_id` = `category`.`id` ORDER BY
+                `order_item`.`created_at` ASC LIMIT 10 OFFSET 50000;
               </pre>
             </div>
             <div className="button-group">
@@ -234,50 +221,45 @@ LIMIT 10 OFFSET 50000;
             <h2>Stage 3: Optimizing with WITH Clause — Smarter Pagination</h2>
             <div className="query-example">
               <pre>
-WITH withQuery AS (
-  SELECT id, product_id, product_name, quantity, created_at
-  FROM order_item
-  ORDER BY created_at ASC
-  LIMIT 10 OFFSET 350000
-)
-SELECT category.name, withQuery.quantity, product.name
-FROM withQuery
-LEFT JOIN product ON withQuery.product_id = product.id
-LEFT JOIN category ON category.id = product.category_id;
+                WITH withQuery AS ( SELECT id, product_id, product_name, quantity, created_at FROM
+                order_item ORDER BY created_at ASC LIMIT 10 OFFSET 350000 ) SELECT category.name,
+                withQuery.quantity, product.name FROM withQuery LEFT JOIN product ON
+                withQuery.product_id = product.id LEFT JOIN category ON category.id =
+                product.category_id;
               </pre>
             </div>
             <div className="button-group">
               <div className="button-row">
                 <button onClick={handleExecuteQueryNoIndex}>8. Execute CTE</button>
-                <button onClick={handleExplainDrizzleNoIndex}>9. Explain CTE  (optional)</button>
-                <button onClick={handleExplainAnalyzeDrizzleNoIndex}>10. Explain Analyze CTE</button>
+                <button onClick={handleExplainDrizzleNoIndex}>9. Explain CTE (optional)</button>
+                <button onClick={handleExplainAnalyzeDrizzleNoIndex}>
+                  10. Explain Analyze CTE
+                </button>
               </div>
             </div>
           </section>
-
 
           <section className="analysis-section">
             <h2>Stage 4: Final Optimization — Goodbye Full Table Scans</h2>
             <div className="query-example">
               <pre>
-WITH withQuery AS (
-  SELECT id, product_id, product_name, quantity, created_at
-  FROM order_item
-  ORDER BY created_at ASC
-  LIMIT 10 OFFSET 350000
-)
-SELECT category.name, withQuery.quantity, product.name
-FROM withQuery
-LEFT JOIN product ON withQuery.product_id = product.id
-LEFT JOIN category ON category.id = product.category_id;
+                WITH withQuery AS ( SELECT id, product_id, product_name, quantity, created_at FROM
+                order_item ORDER BY created_at ASC LIMIT 10 OFFSET 350000 ) SELECT category.name,
+                withQuery.quantity, product.name FROM withQuery LEFT JOIN product ON
+                withQuery.product_id = product.id LEFT JOIN category ON category.id =
+                product.category_id;
               </pre>
             </div>
             <div className="button-group">
               <div className="button-row">
-                <button onClick={handleOptimizeQueryNoIndex}>9. Add optimization indexes for CTE</button>
+                <button onClick={handleOptimizeQueryNoIndex}>
+                  9. Add optimization indexes for CTE
+                </button>
                 <button onClick={handleExecuteQueryNoIndex}>10. Execute CTE</button>
                 <button onClick={handleExplainDrizzleNoIndex}>11. Explain CTE (optional)</button>
-                <button onClick={handleExplainAnalyzeDrizzleNoIndex}>12. Explain Analyze CTE</button>
+                <button onClick={handleExplainAnalyzeDrizzleNoIndex}>
+                  12. Explain Analyze CTE
+                </button>
               </div>
             </div>
           </section>
@@ -285,10 +267,10 @@ LEFT JOIN category ON category.id = product.category_id;
           <section className="analysis-section">
             <h2>Additional action</h2>
             <div className="button-group">
-          <div className="button-row">
-            <button onClick={handleDeOptimizeQuery}>Drop indexes(back to Stage 1)</button>
-            <button onClick={handledDropStats}>DROP STATS from all tables</button>
-          </div>
+              <div className="button-row">
+                <button onClick={handleDeOptimizeQuery}>Drop indexes(back to Stage 1)</button>
+                <button onClick={handledDropStats}>DROP STATS from all tables</button>
+              </div>
             </div>
           </section>
 

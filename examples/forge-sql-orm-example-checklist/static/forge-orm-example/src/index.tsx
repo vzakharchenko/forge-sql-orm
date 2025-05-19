@@ -8,9 +8,7 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 
 const renderApp = () => {
-  root.render(
-      <App />
-  );
+  root.render(<App />);
 };
 view.theme
   .enable()

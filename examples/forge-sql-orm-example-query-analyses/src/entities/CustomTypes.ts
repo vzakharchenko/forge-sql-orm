@@ -20,11 +20,11 @@ export const uuidBinary = customType<{
     }>`UUID_TO_BIN(${value})`;
   },
   fromDriver(value) {
-      const arrayBufferBuffer = Buffer.from(value.data);
-      const bytesArray = new Uint8Array(arrayBufferBuffer);
-      if (bytesArray.length !== 16) {
-        throw new Error(`Invalid UUID buffer length: ${bytesArray.length}`);
-      }
-      return uuidStringify(bytesArray);
+    const arrayBufferBuffer = Buffer.from(value.data);
+    const bytesArray = new Uint8Array(arrayBufferBuffer);
+    if (bytesArray.length !== 16) {
+      throw new Error(`Invalid UUID buffer length: ${bytesArray.length}`);
+    }
+    return uuidStringify(bytesArray);
   },
 });

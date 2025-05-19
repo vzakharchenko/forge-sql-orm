@@ -29,8 +29,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .checklist-header {
@@ -39,12 +43,12 @@
 
 .checklist-header h2 {
   margin: 0 0 8px 0;
-  color: #172B4D;
+  color: #172b4d;
   font-size: 20px;
 }
 
 .last-update {
-  color: #6B778C;
+  color: #6b778c;
   font-size: 14px;
   font-style: italic;
 }
@@ -59,7 +63,7 @@
 
 .checklist {
   margin-bottom: 20px;
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -81,7 +85,7 @@
 
 .checklist-item span {
   font-size: 14px;
-  color: #172B4D;
+  color: #172b4d;
 }
 
 .buttons {

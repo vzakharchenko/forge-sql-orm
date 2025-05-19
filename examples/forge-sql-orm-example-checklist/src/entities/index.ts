@@ -20,10 +20,10 @@ export interface TableMetadata {
 export type AdditionalMetadata = Record<string, TableMetadata>;
 
 export const additionalMetadata: AdditionalMetadata = {
-  "issue_check_list": {
-    "tableName": "issue_check_list",
-    "versionField": {
-      "fieldName": "updatedAt"
-    }
-  }
+  issue_check_list: {
+    tableName: "issue_check_list",
+    versionField: {
+      fieldName: "updatedAt",
+    },
+  },
 };

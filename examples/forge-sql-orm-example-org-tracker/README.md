@@ -5,6 +5,7 @@ This application demonstrates how to use Forge SQL ORM to build a practical orga
 ## Features
 
 ### User Management
+
 - View all users with their organization assignments
 - Search users by name
 - Filter users by organization
@@ -12,6 +13,7 @@ This application demonstrates how to use Forge SQL ORM to build a practical orga
 - Real-time updates when adding new users
 
 ### Organization Features
+
 - View all organizations
 - See user count per organization
 - Filter users by organization
@@ -71,11 +73,13 @@ forge install -s <environment>.atlassian.net
 ## Using the Application
 
 1. **Viewing Users**
+
    - The main table shows all users with their organization assignments
    - Use the search box to find users by name
    - Use the organization dropdown to filter users by organization
 
 2. **Adding Users**
+
    - Click the "+ Add User" button to show the add form
    - Enter the user's name
    - Select their organization

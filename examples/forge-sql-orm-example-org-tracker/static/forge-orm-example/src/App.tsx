@@ -46,10 +46,10 @@ function App() {
 
   const fetchUsers = async () => {
     try {
-      const result = await invoke("getUsers", {
+      const result = (await invoke("getUsers", {
         searchTerm: searchTerm || undefined,
         organizationId: selectedOrg || undefined,
-      }) as User[];
+      })) as User[];
       setUsers(result);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -58,7 +58,7 @@ function App() {
 
   const fetchOrganizations = async () => {
     try {
-      const result = await invoke("getOrganizations") as Organization[];
+      const result = (await invoke("getOrganizations")) as Organization[];
       setOrganizations(result);
     } catch (error) {
       console.error("Error fetching organizations:", error);
@@ -67,7 +67,7 @@ function App() {
 
   const fetchStats = async () => {
     try {
-      const result = await invoke("getUserStats") as UserStats;
+      const result = (await invoke("getUserStats")) as UserStats;
       setStats(result);
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -143,10 +143,7 @@ function App() {
             ))}
           </select>
         </div>
-        <button
-          className={styles.addButton}
-          onClick={() => setShowAddForm(!showAddForm)}
-        >
+        <button className={styles.addButton} onClick={() => setShowAddForm(!showAddForm)}>
           {showAddForm ? "Cancel" : "+ Add User"}
         </button>
       </div>
@@ -174,22 +171,22 @@ function App() {
               </option>
             ))}
           </select>
-          <button 
-            onClick={handleAddUser} 
+          <button
+            onClick={handleAddUser}
             className={styles.submitButton}
             disabled={!newUserName || !newUserOrg || isAddingUser}
-            style={{ 
-              opacity: (!newUserName || !newUserOrg || isAddingUser) ? 0.5 : 1,
-              cursor: (!newUserName || !newUserOrg || isAddingUser) ? 'not-allowed' : 'pointer'
+            style={{
+              opacity: !newUserName || !newUserOrg || isAddingUser ? 0.5 : 1,
+              cursor: !newUserName || !newUserOrg || isAddingUser ? "not-allowed" : "pointer",
             }}
           >
             {isAddingUser ? (
               <>
                 <Spinner />
-                <span style={{ marginLeft: '8px' }}>Adding...</span>
+                <span style={{ marginLeft: "8px" }}>Adding...</span>
               </>
             ) : (
-              'Add User'
+              "Add User"
             )}
           </button>
         </div>
