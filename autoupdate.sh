@@ -114,3 +114,18 @@ sleep 2s
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
+
+cd forge-sql-orm-example-sql-executor
+rm -rf node_modules
+ncu -u
+npm i
+cd static/forge-orm-example
+rm -rf node_modules
+ncu -u
+rm -rf package-lock.json
+npm i
+npm run build
+sleep 2s
+git add -f package-lock.json
+git add -f build-static/*
+cd ../../..
