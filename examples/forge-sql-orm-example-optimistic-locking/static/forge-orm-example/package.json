@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@atlaskit/css-reset": "^7.2.0",
+    "@atlaskit/css-reset": "^7.3.0",
     "@atlaskit/dynamic-table": "^18.1.1",
     "@atlaskit/tabs": "^18.1.0",
     "@forge/bridge": "^4.5.2",
