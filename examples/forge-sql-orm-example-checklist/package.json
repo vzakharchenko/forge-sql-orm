@@ -5,9 +5,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/events": "^1.0.1",
-    "@forge/resolver": "1.6.10",
-    "@forge/sql": "^2.5.0",
+    "@forge/events": "^1.0.2",
+    "@forge/resolver": "1.6.11",
+    "@forge/sql": "^2.5.1",
     "forge-sql-orm": "2.0.21",
     "uuid": "^11.1.0"
   },
