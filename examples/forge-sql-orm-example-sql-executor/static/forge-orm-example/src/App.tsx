@@ -6,7 +6,7 @@ interface QueryHistory {
   query: string;
   result: string;
   timestamp: Date;
-  type: 'SQL' | 'DDL';
+  type: 'SQL' | 'DDL' | 'COMMAND';
 }
 
 function App() {
@@ -15,9 +15,10 @@ function App() {
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingDDL, setIsLoadingDDL] = useState(false);
+  const [isLoadingCommand, setIsLoadingCommand] = useState(false);
   const [history, setHistory] = useState<QueryHistory[]>([]);
 
-  const addToHistory = (query: string, result: string, type: 'SQL' | 'DDL') => {
+  const addToHistory = (query: string, result: string, type: 'SQL' | 'DDL' | 'COMMAND') => {
     setHistory(prev => [{
       id: Date.now(),
       query,
@@ -57,6 +58,21 @@ function App() {
     }
   };
 
+  const handleExecuteCommand = async () => {
+    try {
+      setError('');
+      setIsLoadingCommand(true);
+      const response = await invoke<string>('executeCommand', { command:query });
+      setResult(response);
+      addToHistory(query, response, 'COMMAND');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setResult('');
+    } finally {
+      setIsLoadingCommand(false);
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
@@ -66,10 +82,23 @@ function App() {
     }).format(date);
   };
 
+  const getButtonColor = (type: 'SQL' | 'DDL' | 'COMMAND') => {
+    switch (type) {
+      case 'SQL':
+        return '#0052CC';
+      case 'DDL':
+        return '#36B37E';
+      case 'COMMAND':
+        return '#FF5630';
+      default:
+        return '#0052CC';
+    }
+  };
+
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <h1>SQL Query Executor</h1>
-      
+
       <div style={{ marginBottom: '20px' }}>
         <textarea
           value={query}
@@ -87,7 +116,7 @@ function App() {
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
             onClick={handleExecute}
-            disabled={isLoading || isLoadingDDL}
+            disabled={isLoading || isLoadingDDL || isLoadingCommand}
             style={{
               padding: '10px 20px',
               backgroundColor: isLoading ? '#0052CC80' : '#0052CC',
@@ -116,7 +145,7 @@ function App() {
           </button>
           <button
             onClick={handleExecuteDDL}
-            disabled={isLoading || isLoadingDDL}
+            disabled={isLoading || isLoadingDDL || isLoadingCommand}
             style={{
               padding: '10px 20px',
               backgroundColor: isLoadingDDL ? '#36B37E80' : '#36B37E',
@@ -143,13 +172,42 @@ function App() {
               </>
             ) : 'Execute DDL'}
           </button>
+          <button
+            onClick={handleExecuteCommand}
+            disabled={isLoading || isLoadingDDL || isLoadingCommand}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: isLoadingCommand ? '#FF563080' : '#FF5630',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: isLoadingCommand ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {isLoadingCommand ? (
+              <>
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid #ffffff',
+                  borderTop: '2px solid transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                Executing...
+              </>
+            ) : 'Execute Command'}
+          </button>
         </div>
       </div>
 
       {error && (
-        <div style={{ 
-          padding: '10px', 
-          backgroundColor: '#FFEBE6', 
+        <div style={{
+          padding: '10px',
+          backgroundColor: '#FFEBE6',
           border: '1px solid #DE350B',
           borderRadius: '3px',
           marginBottom: '20px',
@@ -179,7 +237,7 @@ function App() {
           <h2>Query History</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {history.map((item) => (
-              <div 
+              <div
                 key={item.id}
                 style={{
                   border: '1px solid #DFE1E6',
@@ -189,7 +247,7 @@ function App() {
               >
                 <div style={{
                   padding: '10px',
-                  backgroundColor: item.type === 'SQL' ? '#0052CC' : '#36B37E',
+                  backgroundColor: getButtonColor(item.type),
                   color: 'white',
                   display: 'flex',
                   justifyContent: 'space-between',
