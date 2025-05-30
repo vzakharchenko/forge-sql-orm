@@ -7,7 +7,7 @@
   "dependencies": {
     "@forge/resolver": "1.6.11",
     "@forge/sql": "^2.5.1",
-    "forge-sql-orm": "2.0.21"
+    "forge-sql-orm": "2.0.22"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
