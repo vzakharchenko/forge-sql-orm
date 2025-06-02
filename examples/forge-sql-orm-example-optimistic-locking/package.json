@@ -18,6 +18,6 @@
     "forge:debug": "forge tunnel -d -f index.handler"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.21"
+    "forge-sql-orm-cli": "^2.0.22"
   }
 }

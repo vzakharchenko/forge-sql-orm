@@ -19,6 +19,6 @@
     "build:husky": "tsc --project tsconfig.json  --outDir ./dist && rm -rf ./dist"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.21"
+    "forge-sql-orm-cli": "^2.0.22"
   }
 }
