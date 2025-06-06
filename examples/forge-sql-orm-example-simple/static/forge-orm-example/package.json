@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@atlaskit/css-reset": "^7.3.2",
-    "@atlaskit/dynamic-table": "^18.1.4",
+    "@atlaskit/dynamic-table": "^18.2.0",
     "@forge/bridge": "^4.5.3",
     "lodash": "^4.17.21",
     "mobx": "6.13.7",
