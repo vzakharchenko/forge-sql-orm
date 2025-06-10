@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/resolver": "1.6.11",
+    "@forge/resolver": "1.6.12",
     "@forge/sql": "^2.5.1",
     "forge-sql-orm": "2.0.22"
   },
