@@ -8,7 +8,7 @@
     "@forge/events": "^1.0.3",
     "@forge/resolver": "1.6.12",
     "@forge/sql": "^2.5.2",
-    "forge-sql-orm": "2.0.22",
+    "forge-sql-orm": "2.0.23",
     "uuid": "^11.1.0"
   },
   "scripts": {
@@ -20,6 +20,6 @@
     "forge:debug": "forge tunnel -d -f index.handler"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.22"
+    "forge-sql-orm-cli": "^2.0.23"
   }
 }
