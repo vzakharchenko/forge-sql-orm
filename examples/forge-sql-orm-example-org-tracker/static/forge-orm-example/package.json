@@ -20,7 +20,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@rollup/plugin-image": "^3.0.3",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/react": "^18.3.1",
     "@types/react-csv": "^1.1.10",
     "@types/react-dom": "^18.3.1",
