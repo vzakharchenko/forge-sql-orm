@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { sql } from "@forge/sql";
 import { getTables, forgeSystemTables, migrations } from "../../../src/core/SystemTables";
-import { Table } from "drizzle-orm";
+import {getTableColumns, Table} from "drizzle-orm";
+import {dynamicTableBuilder} from "../../../src/core/DynamicTable";
 
 vi.mock("@forge/sql", () => ({
   sql: {
@@ -56,6 +57,23 @@ describe("SystemTables", () => {
       expect(sql.executeDDL).toHaveBeenCalledWith("SHOW TABLES");
     });
 
+    it(" dynamicTableBuilder", async () => {
+      const mySqlTable = await dynamicTableBuilder.createModel({
+        tableName: 'test',
+        columns: {
+          'id': {
+            type: "int",
+            nullable: false,
+            isPrimary: true,
+          },
+          'testField': {
+          type: 'boolean',
+            nullable: false,
+          default: 'false'
+          }}
+      });
+
+    })
     it("should handle error from executeDDL", async () => {
       const error = new Error("Database error");
       vi.mocked(sql.executeDDL).mockRejectedValueOnce(error);
@@ -80,4 +98,4 @@ describe("SystemTables", () => {
       expect(sql.executeDDL).toHaveBeenCalledWith("SHOW TABLES");
     });
   });
-}); 
+});
