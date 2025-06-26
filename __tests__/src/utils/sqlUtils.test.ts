@@ -26,11 +26,7 @@ describe("transformValue", () => {
         it('should return a valid SQL raw number for valid input', () => {
             const result = formatLimitOffset(10);
             expect(result).toBeDefined();
-            expect(JSON.stringify(result)).toBe(JSON.stringify({
-                "decoder": {},
-                "shouldInlineParams": false,
-                "queryChunks": [{"value": ["10"]}]
-            }));
+            expect(JSON.stringify(result)).toBe(JSON.stringify({"decoder":{},"shouldInlineParams":false,"usedTables":[],"queryChunks":[{"value":["10"]}]}));
         });
 
         it('should throw error for NaN input', () => {
@@ -45,21 +41,13 @@ describe("transformValue", () => {
         it('should handle zero value', () => {
             const result = formatLimitOffset(0);
             expect(result).toBeDefined();
-            expect(JSON.stringify(result)).toBe(JSON.stringify({
-                "decoder": {},
-                "shouldInlineParams": false,
-                "queryChunks": [{"value": ["0"]}]
-            }));
+            expect(JSON.stringify(result)).toBe(JSON.stringify({"decoder":{},"shouldInlineParams":false,"usedTables":[],"queryChunks":[{"value":["0"]}]}));
         });
 
         it('should handle negative values', () => {
             const result = formatLimitOffset(-5);
             expect(result).toBeDefined();
-            expect(JSON.stringify(result)).toBe(JSON.stringify({
-                "decoder": {},
-                "shouldInlineParams": false,
-                "queryChunks": [{"value": ["-5"]}]
-            }));
+            expect(JSON.stringify(result)).toBe(JSON.stringify({"decoder":{},"shouldInlineParams":false,"usedTables":[],"queryChunks":[{"value":["-5"]}]}));
         });
     });
 
@@ -67,31 +55,19 @@ describe("transformValue", () => {
         it('should return a valid SQL template literal for sequence', () => {
             const result = nextVal('test_sequence');
             expect(result).toBeDefined();
-            expect(JSON.stringify(result)).toBe(JSON.stringify({
-                "decoder": {},
-                "shouldInlineParams": false,
-                "queryChunks": [{"value": ["NEXTVAL(test_sequence)"]}]
-            }));
+            expect(JSON.stringify(result)).toBe(JSON.stringify({"decoder":{},"shouldInlineParams":false,"usedTables":[],"queryChunks":[{"value":["NEXTVAL(test_sequence)"]}]}));
         });
 
         it('should handle sequence names with special characters', () => {
             const result = nextVal('test-sequence_123');
             expect(result).toBeDefined();
-            expect(JSON.stringify(result)).toBe(JSON.stringify({
-                "decoder": {},
-                "shouldInlineParams": false,
-                "queryChunks": [{"value": ["NEXTVAL(test-sequence_123)"]}]
-            }));
+            expect(JSON.stringify(result)).toBe(JSON.stringify({"decoder":{},"shouldInlineParams":false,"usedTables":[],"queryChunks":[{"value":["NEXTVAL(test-sequence_123)"]}]}));
         });
 
         it('should handle empty sequence name', () => {
             const result = nextVal('');
             expect(result).toBeDefined();
-            expect(JSON.stringify(result)).toBe(JSON.stringify({
-                "decoder": {},
-                "shouldInlineParams": false,
-                "queryChunks": [{"value": ["NEXTVAL()"]}]
-            }));
+            expect(JSON.stringify(result)).toBe(JSON.stringify({"decoder":{},"shouldInlineParams":false,"usedTables":[],"queryChunks":[{"value":["NEXTVAL()"]}]}));
         });
     });
 

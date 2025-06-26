@@ -334,7 +334,8 @@ describe("ForgeSQLCrudOperations", () => {
 
       await expect(
         forgeSqlOperation.crud().insert(testEntity, [{ id: 1, name: "Test" }])
-      ).rejects.toThrow('Insert failed');
+      ).rejects.toThrow("Failed query: insert into `test_entity` (`id`, `name`) values (?, ?)\n" +
+        "params: 1,Test");
     });
 
     it('should throw error when update fails', async () => {
@@ -347,7 +348,8 @@ describe("ForgeSQLCrudOperations", () => {
 
       await expect(
         forgeSqlOperation.modify().updateById({ id: 1, name: "Updated" }, testEntity)
-      ).rejects.toThrow('Update failed');
+      ).rejects.toThrow('Failed query: update `test_entity` set `id` = ?, `name` = ? where `test_entity`.`id` = ?\n' +
+        'params: 1,Updated,1');
     });
 
     it('should throw error when delete fails', async () => {
@@ -360,7 +362,8 @@ describe("ForgeSQLCrudOperations", () => {
 
       await expect(
         forgeSqlOperation.modify().deleteById(1, testEntity)
-      ).rejects.toThrow('Delete failed');
+      ).rejects.toThrow('Failed query: delete from `test_entity` where `test_entity`.`id` = ?\n' +
+        'params: 1');
     });
   });
 
