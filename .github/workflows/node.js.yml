@@ -73,7 +73,7 @@ jobs:
       run: cd examples/forge-sql-orm-example-drizzle-driver-simple && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }}  && forge deploy --non-interactive -e development
     - name: Forge Install (Production)
       if: github.event_name == 'push'
-      run: cd examples/forge-sql-orm-example-drizzle-driver-simplee && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e production  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
+      run: cd examples/forge-sql-orm-example-drizzle-driver-simple && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e production  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
     - name: Forge Install (Development)
       if: github.event_name == 'pull_request'
       run: cd examples/forge-sql-orm-example-drizzle-driver-simple && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
