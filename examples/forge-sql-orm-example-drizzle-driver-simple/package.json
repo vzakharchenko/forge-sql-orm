@@ -5,12 +5,12 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/resolver": "1.6.12",
-    "@forge/sql": "^2.5.2",
-    "forge-sql-orm": "2.0.23"
+    "@forge/resolver": "1.6.13",
+    "@forge/sql": "^3.0.0",
+    "forge-sql-orm": "2.0.24"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.23"
+    "forge-sql-orm-cli": "^2.0.24"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",

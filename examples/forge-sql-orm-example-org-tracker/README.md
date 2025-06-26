@@ -73,13 +73,11 @@ forge install -s <environment>.atlassian.net
 ## Using the Application
 
 1. **Viewing Users**
-
    - The main table shows all users with their organization assignments
    - Use the search box to find users by name
    - Use the organization dropdown to filter users by organization
 
 2. **Adding Users**
-
    - Click the "+ Add User" button to show the add form
    - Enter the user's name
    - Select their organization

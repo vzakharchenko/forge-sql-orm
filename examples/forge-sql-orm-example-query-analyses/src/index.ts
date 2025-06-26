@@ -271,7 +271,7 @@ resolver.define("analyzeQueriesHistory", async (): Promise<ClusterStatementRowCa
 export const handlerMigration = async () => {
   try {
     const applySchemaMigrations1 = await applySchemaMigrations(migration);
-    await queue.push({ insert: true }, { delayInSeconds: 10 });
+    await queue.push({body:{ insert: true },delayInSeconds: 10});
     return applySchemaMigrations1;
   } catch (e) {
     console.error(JSON.stringify(e));

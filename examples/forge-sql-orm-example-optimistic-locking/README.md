@@ -70,7 +70,6 @@ The application is available as a global Jira page titled **Forge SQL ORM Optimi
 
 - **Tabs:**  
   Use the tabs to select the desired entity:
-
   - **Entity Without Version Column (No Locking)**
   - **Entity with Numeric Version Column**
   - **Entity with Date-Based Version Column**
@@ -79,7 +78,6 @@ The application is available as a global Jira page titled **Forge SQL ORM Optimi
 - **Update Records:**  
   Each entity displays records with an **Update** button next to them. Click the button to open a form that lets you modify the record.  
   If you open the same record in two different browser tabs, you'll see how optimistic locking prevents outdated updates:
-
   1. In one tab, modify the record and click **Update**.
   2. In the other tab, attempt to update the same record.
   3. The second update will fail if the record was modified already, indicating that the version is out of date.

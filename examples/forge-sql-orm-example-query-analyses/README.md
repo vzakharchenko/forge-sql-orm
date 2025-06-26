@@ -96,12 +96,10 @@ forge install -s <environment>.atlassian.net
 ## Best Practices
 
 1. **Use Sparingly**
-
    - Only use these tools when actively troubleshooting performance issues
    - Avoid incorporating them into regular application logic
 
 2. **Monitor Changes**
-
    - Keep track of TiDB's schema changes
    - Be prepared to update or remove analysis code if schemas change
 

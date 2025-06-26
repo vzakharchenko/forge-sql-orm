@@ -93,7 +93,6 @@ forge install -s <environment>.atlassian.net
 The application demonstrates two approaches to handling concurrent modifications:
 
 1. **With Optimistic Locking**
-
    - Detects concurrent modifications
    - Prevents lost updates
    - Shows who made the conflicting change
@@ -107,7 +106,6 @@ The application demonstrates two approaches to handling concurrent modifications
 ## Best Practices
 
 1. **Use Optimistic Locking When**
-
    - Multiple users might edit the same data
    - Data consistency is important
    - You want to prevent lost updates

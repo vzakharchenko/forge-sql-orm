@@ -1,6 +1,6 @@
 {
   "name": "forge-sql-orm-cli",
-  "version": "2.0.23",
+  "version": "2.0.24",
   "description": "CLI tool for Forge SQL ORM",
   "main": "dist-cli/cli.js",
   "types": "dist-cli/cli.d.ts",
@@ -42,25 +42,25 @@
   "dependencies": {
     "commander": "^14.0.0",
     "dotenv": "^16.5.0",
-    "drizzle-kit": "^0.31.1",
-    "forge-sql-orm": "^2.0.23",
+    "drizzle-kit": "^0.31.2",
+    "forge-sql-orm": "^2.0.24",
     "inquirer": "^12.6.3",
     "mysql2": "^3.14.1",
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {
-    "drizzle-orm": "^0.41.0"
+    "drizzle-orm": "^0.44.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
     "@types/inquirer": "^9.0.8",
-    "@types/node": "^24.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.34.0",
-    "@typescript-eslint/parser": "^8.34.0",
+    "@types/node": "^24.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-import": "^2.32.0",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^7.0.0"
   }
 }
