@@ -41,7 +41,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^14.0.0",
-    "dotenv": "^17.0.0",
+    "dotenv": "^17.0.1",
     "drizzle-kit": "^0.31.4",
     "forge-sql-orm": "^2.0.25",
     "inquirer": "^12.6.3",
@@ -54,9 +54,9 @@
   "devDependencies": {
     "@eslint/js": "^9.30.0",
     "@types/inquirer": "^9.0.8",
-    "@types/node": "^24.0.7",
-    "@typescript-eslint/eslint-plugin": "^8.35.0",
-    "@typescript-eslint/parser": "^8.35.0",
+    "@types/node": "^24.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.32.0",
     "reflect-metadata": "^0.2.2",
