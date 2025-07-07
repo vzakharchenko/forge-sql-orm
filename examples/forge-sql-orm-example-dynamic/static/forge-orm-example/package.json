@@ -6,7 +6,7 @@
   "dependencies": {
     "@atlaskit/css-reset": "^7.3.2",
     "@atlaskit/dynamic-table": "^18.2.4",
-    "@forge/bridge": "^5.1.0",
+    "@forge/bridge": "^5.2.0",
     "lodash": "^4.17.21",
     "mobx": "6.13.7",
     "mobx-react": "9.2.0",
