@@ -49,14 +49,14 @@
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {
-    "drizzle-orm": "^0.44.2"
+    "drizzle-orm": "^0.44.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
     "@types/inquirer": "^9.0.8",
     "@types/node": "^24.0.13",
-    "@typescript-eslint/eslint-plugin": "^8.36.0",
-    "@typescript-eslint/parser": "^8.36.0",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.32.0",
     "reflect-metadata": "^0.2.2",
