@@ -41,10 +41,10 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^14.0.0",
-    "dotenv": "^17.2.0",
+    "dotenv": "^17.2.1",
     "drizzle-kit": "^0.31.4",
     "forge-sql-orm": "^2.0.25",
-    "inquirer": "^12.7.0",
+    "inquirer": "^12.9.0",
     "mysql2": "^3.14.2",
     "reflect-metadata": "^0.2.2"
   },
@@ -52,15 +52,15 @@
     "drizzle-orm": "^0.44.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.31.0",
+    "@eslint/js": "^9.32.0",
     "@types/inquirer": "^9.0.8",
-    "@types/node": "^24.0.13",
-    "@typescript-eslint/eslint-plugin": "^8.37.0",
-    "@typescript-eslint/parser": "^8.37.0",
-    "eslint-config-prettier": "^10.1.5",
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.6"
   }
 }
