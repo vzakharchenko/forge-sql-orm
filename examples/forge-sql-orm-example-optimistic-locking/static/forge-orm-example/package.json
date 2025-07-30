@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@atlaskit/css-reset": "^7.3.3",
-    "@atlaskit/dynamic-table": "^18.2.5",
+    "@atlaskit/dynamic-table": "^18.2.6",
     "@atlaskit/tabs": "^18.1.4",
     "@forge/bridge": "^5.2.0",
     "lodash": "^4.17.21",
@@ -31,13 +31,13 @@
     "@vitejs/plugin-react": "^4.7.0",
     "@vitest/coverage-v8": "^3.2.4",
     "body-parser": "^2.2.0",
-    "dotenv": "17.2.0",
+    "dotenv": "17.2.1",
     "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
     "prettier-plugin-pkg": "^0.21.2",
     "rollup-plugin-visualizer": "^6.0.3",
     "typescript": "^5.8.3",
-    "vite": "^7.0.5",
+    "vite": "^7.0.6",
     "vite-plugin-html": "^3.2.2"
   },
   "jest-junit": {
