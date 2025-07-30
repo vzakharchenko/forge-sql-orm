@@ -20,7 +20,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
@@ -35,7 +35,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
@@ -50,7 +50,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
@@ -65,7 +65,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-analize/*
 cd ../../..
@@ -80,7 +80,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
@@ -95,7 +95,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-article/*
 cd ../../..
@@ -110,7 +110,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
@@ -125,7 +125,7 @@ ncu -u --dep prod,dev,peer
 rm -rf package-lock.json
 npm i
 npm run build
-sleep 2s
+sleep 2
 git add -f package-lock.json
 git add -f build-static/*
 cd ../../..
