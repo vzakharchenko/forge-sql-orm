@@ -72,7 +72,7 @@
   ],
   "peerDependencies": {
     "@forge/sql": "^3.0.2",
-    "drizzle-orm": "^0.44.3",
+    "drizzle-orm": "^0.44.4",
     "moment": "^2.30.1"
   }
 }
