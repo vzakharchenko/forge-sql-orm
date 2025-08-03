@@ -54,7 +54,12 @@ export const applySchemaMigrations = async (
       body: "Migrations successfully executed",
     };
   } catch (error) {
-    console.error("Error during migration:", error);
+    try {
+      console.error("Error during migration:", JSON.stringify(error));
+    } catch (e) {
+      console.trace("Error stringify:", e);
+      console.error("Error during migration:", error);
+    }
     return {
       headers: { "Content-Type": ["application/json"] },
       statusCode: 500,
