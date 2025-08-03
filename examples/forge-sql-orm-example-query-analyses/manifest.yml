@@ -21,9 +21,7 @@ modules:
   consumer:
     - key: initialize-database
       queue: insertQueue
-      resolver:
-        function: insertFunction
-        method: event-listener
+      function: insertFunction
   sql:
     - key: main
       engine: mysql

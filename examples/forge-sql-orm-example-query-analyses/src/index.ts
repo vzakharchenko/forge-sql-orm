@@ -287,10 +287,7 @@ export const fetchMigrations = () => {
   return fetchSchemaWebTrigger();
 };
 
-export const handler = resolver.getDefinitions();
-export const insertFunction = resolver.getDefinitions();
-
-resolver.define("event-listener", async (request) => {
+export const insertFunction = async () => {
   const categories: InferInsertModel<typeof category>[] = [];
   const orderItems: InferInsertModel<typeof orderItem>[] = [];
   const products: InferInsertModel<typeof product>[] = [];
@@ -372,7 +369,9 @@ resolver.define("event-listener", async (request) => {
   console.log(
     `DATABASE INITIALIZED with orderItems=${orderItems.length}, products=${products.length}, catalogs=${categories.length}`,
   );
-});
+};
+
+export const handler = resolver.getDefinitions();
 
 function getRandomDate(from: Date, to: Date): Date {
   const fromTime = from.getTime();
