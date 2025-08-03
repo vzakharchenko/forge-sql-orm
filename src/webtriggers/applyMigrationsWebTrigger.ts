@@ -57,6 +57,7 @@ export const applySchemaMigrations = async (
     try {
       console.error("Error during migration:", JSON.stringify(error));
     } catch (e) {
+      console.trace("Error stringify:", e);
       console.error("Error during migration:", error);
     }
     return {
