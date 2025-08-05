@@ -54,9 +54,9 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@types/inquirer": "^9.0.8",
-    "@types/node": "^24.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.38.0",
-    "@typescript-eslint/parser": "^8.38.0",
+    "@types/node": "^24.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "reflect-metadata": "^0.2.2",

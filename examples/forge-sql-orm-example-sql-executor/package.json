@@ -5,9 +5,11 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/resolver": "1.6.15",
-    "@forge/sql": "^3.0.2",
-    "forge-sql-orm": "2.0.26"
+    "@forge/resolver": "1.6.16",
+    "@forge/sql": "^3.0.3",
+    "forge-sql-orm": "2.0.26",
+    "package-lock.json": "^1.0.0",
+    "package.json": "^2.0.1"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
