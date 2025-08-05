@@ -46,9 +46,7 @@
     "forge-sql-orm": "^2.0.26",
     "inquirer": "^12.9.0",
     "mysql2": "^3.14.3",
-    "reflect-metadata": "^0.2.2"
-  },
-  "peerDependencies": {
+    "reflect-metadata": "^0.2.2",
     "drizzle-orm": "^0.44.4"
   },
   "devDependencies": {
