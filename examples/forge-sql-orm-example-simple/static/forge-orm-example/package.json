@@ -11,8 +11,6 @@
     "mobx": "6.13.7",
     "mobx-react": "9.2.0",
     "moment": "^2.30.1",
-    "package-lock.json": "^1.0.0",
-    "package.json": "^2.0.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-countdown": "^2.3.6",
@@ -73,7 +71,6 @@
     ]
   },
   "overrides": {
-    "package-json": "npm:package-json@latest",
     "esbuild": "npm:esbuild@latest",
     "parse-url": "npm:parsed-url@latest",
     "gry": "npm:gry@latest"

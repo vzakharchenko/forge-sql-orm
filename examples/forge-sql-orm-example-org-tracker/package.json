@@ -7,9 +7,7 @@
   "dependencies": {
     "@forge/resolver": "1.6.16",
     "@forge/sql": "^3.0.3",
-    "forge-sql-orm": "2.0.26",
-    "package-lock.json": "^1.0.0",
-    "package.json": "^2.0.1"
+    "forge-sql-orm": "2.0.26"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
@@ -24,7 +22,6 @@
     "forge-sql-orm-cli": "^2.0.26"
   },
   "overrides": {
-    "package-json": "npm:package-json@latest",
     "esbuild": "npm:esbuild@latest",
     "parse-url": "npm:parsed-url@latest",
     "gry": "npm:gry@latest"
