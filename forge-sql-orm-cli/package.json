@@ -62,5 +62,8 @@
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.8.3",
     "vite": "^7.0.6"
+  },
+  "overrides": {
+    "esbuild": "npm:esbuild@0.25.0"
   }
 }
