@@ -22,5 +22,9 @@
   },
   "devDependencies": {
     "forge-sql-orm-cli": "^2.0.26"
+  },
+  "overrides": {
+    "parse-url": "npm:parse-url@latest",
+    "got": "npm:got@latest"
   }
 }

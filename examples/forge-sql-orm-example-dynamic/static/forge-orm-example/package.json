@@ -20,7 +20,6 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@rollup/plugin-image": "^3.0.3",
     "@types/jest": "^30.0.0",
     "@types/react": "^18.3.1",
@@ -72,5 +71,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "parse-url": "npm:parse-url@latest",
+    "gry": "npm:gry@latest",
+    "got": "npm:got@latest"
   }
 }

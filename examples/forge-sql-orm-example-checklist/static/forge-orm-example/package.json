@@ -72,5 +72,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "parse-url": "npm:parse-url@latest",
+    "gry": "npm:gry@latest",
+    "got": "npm:got@latest"
   }
 }
