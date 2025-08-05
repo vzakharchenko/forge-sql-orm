@@ -78,5 +78,12 @@
   "dependencies": {
     "package-lock.json": "^1.0.0",
     "package.json": "^2.0.1"
+  },
+  "overrides": {
+    "parse-url": "npm:parse-url@latest",
+    "got": "npm:got@latest",
+    "gry": "npm:gry@latest",
+    "esbuild": "npm:esbuild@latest",
+    "@eslint/plugin-kit": "npm:@eslint/plugin-kit@latest"
   }
 }
