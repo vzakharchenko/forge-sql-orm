@@ -42,7 +42,10 @@ export const applySchemaMigrations = async (
     const migrationList = await migrationRunner.list();
     const migrationHistory =
       Array.isArray(migrationList) && migrationList.length > 0
-        ? migrationList.map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`).join("\n")
+        ? migrationList
+            .sort((a, b) => a.migratedAt.getTime() - b.migratedAt.getTime())
+            .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
+            .join("\n")
         : "No migrations found";
 
     console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);

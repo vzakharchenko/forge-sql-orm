@@ -4,6 +4,7 @@ set -e
 ncu -u --dep prod,dev,peer
 rm -rf node_modules package-lock.json
 npm i
+npm run lint:fix
 npm run build
 git add package.json
 git add package-lock.json
@@ -157,3 +158,6 @@ git add package.json
 git add package-lock.json
 git add -f build-static/*
 cd ../../..
+
+cd ..
+npm run format
