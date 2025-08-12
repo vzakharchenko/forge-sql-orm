@@ -44,22 +44,22 @@
     "dotenv": "^17.2.1",
     "drizzle-kit": "^0.31.4",
     "forge-sql-orm": "^2.0.26",
-    "inquirer": "^12.9.0",
+    "inquirer": "^12.9.1",
     "mysql2": "^3.14.3",
     "reflect-metadata": "^0.2.2",
     "drizzle-orm": "^0.44.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
+    "@eslint/js": "^9.33.0",
     "@types/inquirer": "^9.0.9",
-    "@types/node": "^24.2.0",
-    "@typescript-eslint/eslint-plugin": "^8.39.0",
-    "@typescript-eslint/parser": "^8.39.0",
+    "@types/node": "^24.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "reflect-metadata": "^0.2.2",
-    "typescript": "^5.8.3",
-    "vite": "^7.1.1"
+    "typescript": "^5.9.2",
+    "vite": "^7.1.2"
   },
   "overrides": {
     "esbuild": "npm:esbuild@0.25.0",
