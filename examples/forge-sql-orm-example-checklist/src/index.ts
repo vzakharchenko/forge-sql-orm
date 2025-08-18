@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 
 import ForgeSQL, {
   applySchemaMigrations,
@@ -113,9 +113,9 @@ resolver.define("getCheckList", async (request): Promise<CheckListData> => {
 resolver.define(
   "updateWithOptimisticLocking",
   async (
-    request,
+    request: Request<CheckListData>,
   ): Promise<{ data?: CheckListData; error?: boolean; concurrent?: boolean; message?: string }> => {
-    const payload: CheckListData = request.payload as CheckListData;
+    const payload: CheckListData = request.payload;
     if (!payload) {
       return { error: true, concurrent: false, message: "Payload is empty" };
     }
@@ -146,9 +146,9 @@ resolver.define(
 resolver.define(
   "update",
   async (
-    request,
+    request: Request<CheckListData>,
   ): Promise<{ data?: CheckListData; error?: boolean; concurrent?: boolean; message?: string }> => {
-    const payload: CheckListData = request.payload as CheckListData;
+    const payload: CheckListData = request.payload;
     if (!payload) {
       return { error: true, concurrent: false, message: "Payload is empty" };
     }

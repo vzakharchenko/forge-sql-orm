@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 import {
   dropSchemaMigrations,
   applySchemaMigrations,
@@ -17,13 +17,16 @@ const resolver = new Resolver();
 
 const db = patchDbWithSelectAliased(drizzle(forgeDriver, { logger: true }));
 
-resolver.define("create", async (req): Promise<number> => {
-  const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
-  let result = await db.insert(users).values(payload);
-  return result[0].insertId;
-});
+resolver.define(
+  "create",
+  async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
+    const payload = req.payload.data;
+    let result = await db.insert(users).values(payload);
+    return result[0].insertId;
+  },
+);
 
-resolver.define("delete", async (req): Promise<number> => {
+resolver.define("delete", async (req: Request<{ id: number }>): Promise<number> => {
   const id = req.payload.id as number;
   const result = await db.delete(users).where(eq(users.id, id));
   return result[0].affectedRows;
@@ -49,8 +52,8 @@ resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   );
 });
 
-resolver.define("fetch", async (req): Promise<UserResponse[]> => {
-  const sortType = req.payload.sortType as SortType | undefined;
+resolver.define("fetch", async (req: Request<{ sortType?: SortType }>): Promise<UserResponse[]> => {
+  const sortType = req.payload.sortType;
   const baseQuery = db.select().from(users);
 
   // Apply sorting if specified

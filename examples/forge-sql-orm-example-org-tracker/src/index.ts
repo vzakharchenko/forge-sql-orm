@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 import ForgeSQL, {
   applySchemaMigrations,
   dropSchemaMigrations,
@@ -14,17 +14,17 @@ const forgeSQL = new ForgeSQL({ logRawSqlQuery: true });
 resolver.define(
   "getUsers",
   async (
-    req,
+    req: Request<{
+      searchTerm?: string;
+      organizationId?: number;
+    }>,
   ): Promise<
     {
       users: InferSelectModel<typeof appUser>;
       organization: InferSelectModel<typeof organization>;
     }[]
   > => {
-    const { searchTerm, organizationId } = req.payload as {
-      searchTerm?: string;
-      organizationId?: number;
-    };
+    const { searchTerm, organizationId } = req.payload;
 
     let joinQuery = forgeSQL
       .select({ users: appUser, organization: organization })
@@ -60,13 +60,13 @@ resolver.define(
 resolver.define(
   "createUser",
   async (
-    req,
+    req: Request<InferInsertModel<typeof appUser>>,
   ): Promise<{
     id: number;
     name: string;
     organizationId: number;
   }> => {
-    const user = req.payload as InferInsertModel<typeof appUser>;
+    const user = req.payload;
     const id = await forgeSQL.modify().insert(appUser, [user]);
     return {
       id,
@@ -103,7 +103,7 @@ resolver.define(
   },
 );
 
-resolver.define("deleteUser", async (req): Promise<void> => {
+resolver.define("deleteUser", async (req: Request<{ id: number }>): Promise<void> => {
   const id = req.payload.id;
   if (id) {
     await forgeSQL.modify().deleteById(id, appUser);

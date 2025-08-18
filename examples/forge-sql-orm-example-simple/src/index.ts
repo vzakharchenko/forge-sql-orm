@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
 import { dropSchemaMigrations, applySchemaMigrations, fetchSchemaWebTrigger } from "forge-sql-orm";
 import migration from "./migration";
@@ -10,13 +10,16 @@ import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
 const resolver = new Resolver();
 const forgeSQL = new ForgeSQL({ logRawSqlQuery: true });
 
-resolver.define("create", async (req): Promise<number> => {
-  const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
-  return await forgeSQL.crud().insert(users, [payload]);
-});
+resolver.define(
+  "create",
+  async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
+    const payload = req.payload.data;
+    return await forgeSQL.crud().insert(users, [payload]);
+  },
+);
 
-resolver.define("delete", async (req): Promise<number> => {
-  const id = req.payload.id as number;
+resolver.define("delete", async (req: Request<{ id: number }>): Promise<number> => {
+  const id = req.payload.id;
   return await forgeSQL.crud().deleteById(id, users);
 });
 
@@ -40,8 +43,8 @@ resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
   );
 });
 
-resolver.define("fetch", async (req): Promise<UserResponse[]> => {
-  const sortType = req.payload.sortType as SortType | undefined;
+resolver.define("fetch", async (req: Request<{ sortType?: SortType }>): Promise<UserResponse[]> => {
+  const sortType = req.payload.sortType;
   const baseQuery = forgeSQL.getDrizzleQueryBuilder().select().from(users);
 
   // Apply sorting if specified

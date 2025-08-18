@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
 import migration from "./migration";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
@@ -75,76 +75,93 @@ resolver.define("fetchOrCreateIfNotExists", async (): Promise<CreatedResponse> =
   return newVar;
 });
 
-resolver.define("clearAll", async (req): Promise<void> => {
-  const {
-    testDataId,
-    testDataOptimisticNumberId,
-    testDataOptimisticDateId,
-    testDataOptimisticTimeStampId,
-  } = req.payload as {
-    testDataId: number;
-    testDataOptimisticNumberId: number;
-    testDataOptimisticDateId: number;
-    testDataOptimisticTimeStampId: number;
-  };
-  if (testDataId) {
-    await forgeSQL.crud().deleteById(testDataId, testData);
-  }
-  if (testDataOptimisticNumberId) {
-    await forgeSQL.crud().deleteById(testDataOptimisticNumberId, testDataOptimisticNumber);
-  }
-  if (testDataOptimisticTimeStampId) {
-    await forgeSQL.crud().deleteById(testDataOptimisticTimeStampId, testDataOptimisticTimestamp);
-  }
-  if (testDataOptimisticDateId) {
-    await forgeSQL.crud().deleteById(testDataOptimisticDateId, testDataOptimisticDate);
-  }
-});
-
-resolver.define("update", async (req): Promise<string> => {
-  try {
-    const { objectName, data } = req.payload;
-    switch (objectName) {
-      case "WITHOUT_VERSIONING": {
-        await forgeSQL.crud().updateById(data as InferInsertModel<typeof testData>, testData);
-        return "SUCCESS";
-      }
-      case "OPTIMISTIC_NUMBER": {
-        await forgeSQL
-          .crud()
-          .updateById(
-            data as InferInsertModel<typeof testDataOptimisticNumber>,
-            testDataOptimisticNumber,
-          );
-        return "SUCCESS";
-      }
-      case "OPTIMISTIC_DATE": {
-        await forgeSQL
-          .crud()
-          .updateById(
-            data as InferInsertModel<typeof testDataOptimisticDate>,
-            testDataOptimisticDate,
-          );
-        return "SUCCESS";
-      }
-      case "OPTIMISTIC_TIMESTAMP": {
-        await forgeSQL
-          .crud()
-          .updateById(
-            data as InferInsertModel<typeof testDataOptimisticTimestamp>,
-            testDataOptimisticTimestamp,
-          );
-        return "SUCCESS";
-      }
-      default: {
-        throw new Error("unsupported " + objectName);
-      }
+resolver.define(
+  "clearAll",
+  async (
+    req: Request<{
+      testDataId: number;
+      testDataOptimisticNumberId: number;
+      testDataOptimisticDateId: number;
+      testDataOptimisticTimeStampId: number;
+    }>,
+  ): Promise<void> => {
+    const {
+      testDataId,
+      testDataOptimisticNumberId,
+      testDataOptimisticDateId,
+      testDataOptimisticTimeStampId,
+    } = req.payload;
+    if (testDataId) {
+      await forgeSQL.crud().deleteById(testDataId, testData);
     }
-  } catch (e) {
-    console.error(e.message, e);
-    return e.message;
-  }
-});
+    if (testDataOptimisticNumberId) {
+      await forgeSQL.crud().deleteById(testDataOptimisticNumberId, testDataOptimisticNumber);
+    }
+    if (testDataOptimisticTimeStampId) {
+      await forgeSQL.crud().deleteById(testDataOptimisticTimeStampId, testDataOptimisticTimestamp);
+    }
+    if (testDataOptimisticDateId) {
+      await forgeSQL.crud().deleteById(testDataOptimisticDateId, testDataOptimisticDate);
+    }
+  },
+);
+
+resolver.define(
+  "update",
+  async (
+    req: Request<{
+      objectName: string;
+      data:
+        | InferInsertModel<typeof testData>
+        | InferInsertModel<typeof testDataOptimisticNumber>
+        | InferInsertModel<typeof testDataOptimisticDate>
+        | InferInsertModel<typeof testDataOptimisticTimestamp>;
+    }>,
+  ): Promise<string> => {
+    try {
+      const { objectName, data } = req.payload;
+      switch (objectName) {
+        case "WITHOUT_VERSIONING": {
+          await forgeSQL.crud().updateById(data as InferInsertModel<typeof testData>, testData);
+          return "SUCCESS";
+        }
+        case "OPTIMISTIC_NUMBER": {
+          await forgeSQL
+            .crud()
+            .updateById(
+              data as InferInsertModel<typeof testDataOptimisticNumber>,
+              testDataOptimisticNumber,
+            );
+          return "SUCCESS";
+        }
+        case "OPTIMISTIC_DATE": {
+          await forgeSQL
+            .crud()
+            .updateById(
+              data as InferInsertModel<typeof testDataOptimisticDate>,
+              testDataOptimisticDate,
+            );
+          return "SUCCESS";
+        }
+        case "OPTIMISTIC_TIMESTAMP": {
+          await forgeSQL
+            .crud()
+            .updateById(
+              data as InferInsertModel<typeof testDataOptimisticTimestamp>,
+              testDataOptimisticTimestamp,
+            );
+          return "SUCCESS";
+        }
+        default: {
+          throw new Error("unsupported " + objectName);
+        }
+      }
+    } catch (e) {
+      console.error(e.message, e);
+      return e.message;
+    }
+  },
+);
 
 export const handler = resolver.getDefinitions();
 

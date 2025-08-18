@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 import { spawn } from "child_process";
 import { sql } from "@forge/sql";
 import { dropSchemaMigrations, applySchemaMigrations, fetchSchemaWebTrigger } from "forge-sql-orm";
@@ -6,7 +6,7 @@ import migration from "./migration";
 
 const resolver = new Resolver();
 
-resolver.define("execute", async (req): Promise<string> => {
+resolver.define("execute", async (req: Request<{ query: string }>): Promise<string> => {
   try {
     const query = req.payload.query;
     let result = await sql.executeRaw(query);
@@ -17,7 +17,7 @@ resolver.define("execute", async (req): Promise<string> => {
   }
 });
 
-resolver.define("executeDDL", async (req): Promise<string> => {
+resolver.define("executeDDL", async (req: Request<{ query: string }>): Promise<string> => {
   try {
     const query = req.payload.query;
     let result = await sql.executeDDL(query);
@@ -28,7 +28,7 @@ resolver.define("executeDDL", async (req): Promise<string> => {
   }
 });
 
-resolver.define("executeCommand", async (request) => {
+resolver.define("executeCommand", async (request: Request<{ command: string }>) => {
   const { command } = request.payload;
   return new Promise((resolve, reject) => {
     // @ts-ignore

@@ -1,4 +1,4 @@
-import Resolver from "@forge/resolver";
+import Resolver, { Request } from "@forge/resolver";
 import ForgeSQL from "forge-sql-orm";
 import migration from "./migration";
 import {
@@ -36,18 +36,21 @@ const forgeSQL = new ForgeSQL({
  * @param req - Request containing user data
  * @returns Promise with the ID of the created user
  */
-resolver.define("create", async (req): Promise<number> => {
-  const payload = req.payload.data as Partial<InferInsertModel<typeof users>>;
-  return await forgeSQL.crud().insert(users, [payload]);
-});
+resolver.define(
+  "create",
+  async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
+    const payload = req.payload.data;
+    return await forgeSQL.crud().insert(users, [payload]);
+  },
+);
 
 /**
  * Deletes a user record by ID
  * @param req - Request containing user ID
  * @returns Promise with the number of affected rows
  */
-resolver.define("delete", async (req): Promise<number> => {
-  const id = req.payload.id as number;
+resolver.define("delete", async (req: Request<{ id: number }>): Promise<number> => {
+  const id = req.payload.id;
   return await forgeSQL.crud().deleteById(id, users);
 });
 
@@ -150,38 +153,43 @@ resolver.define("duplicate", async (): Promise<DuplicateResponse[]> => {
  * @param req - Request containing sort configuration
  * @returns Promise with array of user records
  */
-resolver.define("fetch", async (req): Promise<DynamicResponse[]> => {
-  const sortType = req.payload.sortType as SortType | undefined;
-  const { columns } = getTableMetadata(users);
-  const primaryKeys = getPrimaryKeys(users);
-  if (!primaryKeys) {
-    throw new Error("Primary key does not found");
-  }
-  const baseQuery = forgeSQL.getDrizzleQueryBuilder().select().from(users);
+resolver.define(
+  "fetch",
+  async (req: Request<{ sortType?: SortType }>): Promise<DynamicResponse[]> => {
+    const sortType = req.payload.sortType;
+    const { columns } = getTableMetadata(users);
+    const primaryKeys = getPrimaryKeys(users);
+    if (!primaryKeys) {
+      throw new Error("Primary key does not found");
+    }
+    const baseQuery = forgeSQL.getDrizzleQueryBuilder().select().from(users);
 
-  // Apply sorting if specified
-  const query =
-    sortType?.name && columns[sortType.name]
-      ? baseQuery.orderBy(
-          sortType.sortType === "ASC" ? asc(columns[sortType.name]) : desc(columns[sortType.name]),
-        )
-      : baseQuery;
+    // Apply sorting if specified
+    const query =
+      sortType?.name && columns[sortType.name]
+        ? baseQuery.orderBy(
+            sortType.sortType === "ASC"
+              ? asc(columns[sortType.name])
+              : desc(columns[sortType.name]),
+          )
+        : baseQuery;
 
-  const result = await query;
+    const result = await query;
 
-  // Transform results
-  return result.map((record): DynamicResponse => {
-    const id = record.id;
-    const fields = Object.entries(columns)
-      .filter(([_, column]) => !primaryKeys.map(([name, pc]) => pc).includes(column))
-      .reduce<Record<string, string>>((acc, [name]) => {
-        acc[name] = String(record[name as keyof typeof record] ?? "");
-        return acc;
-      }, {});
+    // Transform results
+    return result.map((record): DynamicResponse => {
+      const id = record.id;
+      const fields = Object.entries(columns)
+        .filter(([_, column]) => !primaryKeys.map(([name, pc]) => pc).includes(column))
+        .reduce<Record<string, string>>((acc, [name]) => {
+          acc[name] = String(record[name as keyof typeof record] ?? "");
+          return acc;
+        }, {});
 
-    return { id, fields };
-  });
-});
+      return { id, fields };
+    });
+  },
+);
 
 // ============= Migration Handler =============
 
