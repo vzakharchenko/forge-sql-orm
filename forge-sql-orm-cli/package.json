@@ -44,7 +44,7 @@
     "dotenv": "^17.2.1",
     "drizzle-kit": "^0.31.4",
     "forge-sql-orm": "^2.0.27",
-    "inquirer": "^12.9.1",
+    "inquirer": "^12.9.3",
     "mysql2": "^3.14.3",
     "reflect-metadata": "^0.2.2",
     "drizzle-orm": "^0.44.4"
@@ -52,7 +52,7 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@types/inquirer": "^9.0.9",
-    "@types/node": "^24.2.1",
+    "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
     "eslint-config-prettier": "^10.1.8",
