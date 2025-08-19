@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-_MToWOkX.js",
+      "./body-DymbRY_K.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-C8wDqbS4.js",
       "./lodash-vendor-DMLdzvRJ.js",
@@ -4375,7 +4375,7 @@ var Ta = function (t) {
       ],
     );
   })(),
-  Fr = "5.5.3";
+  Fr = "5.5.4";
 function qg(e) {
   try {
     return Function.toString.call(e).indexOf("[native code]") !== -1;
@@ -14359,7 +14359,7 @@ function Mr(e) {
   return e;
 }
 var B1 = j_.tooltip(),
-  Od = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.0" },
+  Od = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.1" },
   z1 = { top: "bottom", bottom: "top", left: "right", right: "left" },
   q1 = function (t) {
     return t.split("-")[0];
@@ -15248,7 +15248,7 @@ var oO = function (t) {
   },
   sO = y.lazy(function () {
     return lg(
-      () => import("./body-_MToWOkX.js"),
+      () => import("./body-DymbRY_K.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
