@@ -239,16 +239,28 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
 }
 
 /**
- * Generates SQL statements to drop tables
- * @param tables - Array of table names
- * @returns Array of SQL statements for dropping tables
+ * Generates SQL statements for dropping tables and/or their sequences.
+ *
+ * @param tables - List of table names to generate DROP statements for.
+ * @param options - Configuration object:
+ *   - sequence: whether to drop associated sequences (default: true)
+ *   - table: whether to drop tables themselves (default: true)
+ * @returns Array of SQL statements for dropping the specified objects
  */
-export function generateDropTableStatements(tables: string[]): string[] {
+export function generateDropTableStatements(tables: string[], options?: {sequence: boolean, table: boolean}): string[] {
   const dropStatements: string[] = [];
-
+  const validOptions = options ?? {sequence: true, table: true};
+  if (!validOptions.sequence && !validOptions.table) {
+      console.warn('No drop operations requested: both "table" and "sequence" options are false');
+      return [];
+  }
   tables.forEach((tableName) => {
-    dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
-    dropStatements.push(`DROP SEQUENCE IF EXISTS \`${tableName}\`;`);
+      if (validOptions.table) {
+          dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
+      }
+      if (validOptions.sequence) {
+          dropStatements.push(`DROP SEQUENCE IF EXISTS \`${tableName}\`;`);
+      }
   });
 
   return dropStatements;

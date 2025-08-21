@@ -16,23 +16,23 @@ function Cn(e) {
   var y = e.default;
   if (typeof y == "function") {
     var u = function h() {
-      var f = !1;
+      var g = !1;
       try {
-        f = this instanceof h;
+        g = this instanceof h;
       } catch {}
-      return f ? Reflect.construct(y, arguments, this.constructor) : y.apply(this, arguments);
+      return g ? Reflect.construct(y, arguments, this.constructor) : y.apply(this, arguments);
     };
     u.prototype = y.prototype;
   } else u = {};
   return (
     Object.defineProperty(u, "__esModule", { value: !0 }),
     Object.keys(e).forEach(function (h) {
-      var f = Object.getOwnPropertyDescriptor(e, h);
+      var g = Object.getOwnPropertyDescriptor(e, h);
       Object.defineProperty(
         u,
         h,
-        f.get
-          ? f
+        g.get
+          ? g
           : {
               enumerable: !0,
               get: function () {
@@ -57,7 +57,7 @@ function j() {
         const y = " DEBUG ",
           u = "  INFO ",
           h = "  WARN ",
-          f = " ERROR ";
+          g = " ERROR ";
         function _(b) {
           return (b.unshift("[Statsig]"), b);
         }
@@ -73,7 +73,7 @@ function j() {
             m.level >= e.LogLevel.Warn && console.warn(h, ..._(v));
           }
           static error(...v) {
-            m.level >= e.LogLevel.Error && console.error(f, ..._(v));
+            m.level >= e.LogLevel.Error && console.error(g, ..._(v));
           }
         }
         ((e.Log = m), (m.level = e.LogLevel.Warn));
@@ -90,7 +90,7 @@ function H() {
         var y, u, h;
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._getInstance = e._getStatsigGlobalFlag = e._getStatsigGlobal = void 0));
-        const f = j(),
+        const g = j(),
           _ = () => {
             try {
               return typeof __STATSIG__ < "u" ? __STATSIG__ : i;
@@ -107,7 +107,7 @@ function H() {
             ? n.instances && n.instances[o]
             : (n.instances &&
                 Object.keys(n.instances).length > 1 &&
-                f.Log.warn(
+                g.Log.warn(
                   "Call made to Statsig global instance without an SDK key but there is more than one client instance. If you are using mulitple clients, please specify the SDK key.",
                 ),
               n.firstInstance);
@@ -140,7 +140,7 @@ function Ye() {
         const y = new Map(),
           u = "start",
           h = "end",
-          f = "statsig::diagnostics";
+          g = "statsig::diagnostics";
         e.Diagnostics = {
           _getMarkers: (l) => y.get(l),
           _markInitOverallStart: (l) => {
@@ -204,7 +204,7 @@ function Ye() {
           return Object.assign({ key: r, action: a, step: i, timestamp: Date.now() }, l);
         }
         function m(l, a) {
-          return { eventName: f, user: l, value: null, metadata: a, time: Date.now() };
+          return { eventName: g, user: l, value: null, metadata: a, time: Date.now() };
         }
         function b(l, a) {
           var r;
@@ -233,8 +233,8 @@ function Ze() {
   }
   ee._typeOf = e;
   function y(u, h) {
-    const f = (_) => (Array.isArray(_) ? "array" : _ === null ? "null" : typeof _);
-    return f(u) === f(h);
+    const g = (_) => (Array.isArray(_) ? "array" : _ === null ? "null" : typeof _);
+    return g(u) === g(h);
   }
   return ((ee._isTypeMatch = y), ee);
 }
@@ -258,7 +258,7 @@ function fe() {
         e._DJB2 = u;
         const h = (_, m) => (0, e._DJB2)(JSON.stringify((0, e._getSortedObject)(_, m)));
         e._DJB2Object = h;
-        const f = (_, m) => {
+        const g = (_, m) => {
           if (_ == null) return null;
           const b = Object.keys(_).sort(),
             v = {};
@@ -274,7 +274,7 @@ function fe() {
             v
           );
         };
-        e._getSortedObject = f;
+        e._getSortedObject = g;
       })(Ae)),
     Ae
   );
@@ -286,12 +286,12 @@ function Ie() {
     Object.defineProperty(Z, "__esModule", { value: !0 }),
     (Z._getStorageKey = Z._getUserStorageKey = void 0));
   const e = fe();
-  function y(h, f, _) {
+  function y(h, g, _) {
     var m;
-    if (_) return _(h, f);
-    const b = f && f.customIDs ? f.customIDs : {},
+    if (_) return _(h, g);
+    const b = g && g.customIDs ? g.customIDs : {},
       v = [
-        `uid:${(m = f?.userID) !== null && m !== void 0 ? m : ""}`,
+        `uid:${(m = g?.userID) !== null && m !== void 0 ? m : ""}`,
         `cids:${Object.keys(b)
           .sort((l, a) => l.localeCompare(a))
           .map((l) => `${l}-${b[l]}`)
@@ -301,8 +301,8 @@ function Ie() {
     return (0, e._DJB2)(v.join("|"));
   }
   Z._getUserStorageKey = y;
-  function u(h, f, _) {
-    return f ? y(h, f, _) : (0, e._DJB2)(`k:${h}`);
+  function u(h, g, _) {
+    return g ? y(h, g, _) : (0, e._DJB2)(`k:${h}`);
   }
   return ((Z._getStorageKey = u), Z);
 }
@@ -370,11 +370,11 @@ function le() {
           return typeof EdgeRuntime == "string" || v;
         };
         e._isServerEnv = h;
-        const f = (v, l) => {
+        const g = (v, l) => {
           const a = (0, e._getWindowSafe)();
           typeof a?.addEventListener == "function" && a.addEventListener(v, l);
         };
-        e._addWindowEventListenerSafe = f;
+        e._addWindowEventListenerSafe = g;
         const _ = (v, l) => {
           const a = (0, e._getDocumentSafe)();
           typeof a?.addEventListener == "function" && a.addEventListener(v, l);
@@ -426,8 +426,8 @@ function Xt() {
         time: Date.now(),
       }
     ),
-    f = ({ eventName: a }) => a === y || a === e || a === u;
-  q._isExposureEvent = f;
+    g = ({ eventName: a }) => a === y || a === e || a === u;
+  q._isExposureEvent = g;
   const _ = (a, r, i) => {
     var o, n, t;
     const c = { gate: r.name, gateValue: String(r.value), ruleID: r.ruleID };
@@ -456,17 +456,17 @@ function Xt() {
   q._mapExposures = m;
   const b = (a, r, i) => {
     var o, n, t, c;
-    const g = { config: r.name, ruleID: r.ruleID };
+    const f = { config: r.name, ruleID: r.ruleID };
     return (
       ((o = r.__evaluation) === null || o === void 0 ? void 0 : o.version) != null &&
-        (g.configVersion = r.__evaluation.version),
+        (f.configVersion = r.__evaluation.version),
       ((n = r.__evaluation) === null || n === void 0 ? void 0 : n.passed) != null &&
-        (g.rulePassed = String(r.__evaluation.passed)),
+        (f.rulePassed = String(r.__evaluation.passed)),
       h(
         e,
         a,
         r.details,
-        g,
+        f,
         m(
           (c = (t = r.__evaluation) === null || t === void 0 ? void 0 : t.secondary_exposures) !==
             null && c !== void 0
@@ -479,14 +479,14 @@ function Xt() {
   };
   q._createConfigExposure = b;
   const v = (a, r, i, o) => {
-    var n, t, c, g, s, E, w;
+    var n, t, c, f, s, E, w;
     const d = r.__evaluation,
       S = ((n = d?.explicit_parameters) === null || n === void 0 ? void 0 : n.includes(i)) === !0;
     let D = "",
       k = (t = d?.undelegated_secondary_exposures) !== null && t !== void 0 ? t : [];
     S &&
       ((D = (c = d.allocated_experiment_name) !== null && c !== void 0 ? c : ""),
-      (k = (g = d.secondary_exposures) !== null && g !== void 0 ? g : []));
+      (k = (f = d.secondary_exposures) !== null && f !== void 0 ? f : []));
     const C = (s = r.__evaluation) === null || s === void 0 ? void 0 : s.parameter_rule_ids,
       U = {
         config: r.name,
@@ -539,7 +539,7 @@ function Q() {
         const y = j(),
           u = le(),
           h = {},
-          f = {
+          g = {
             isReady: () => !0,
             isReadyResolver: () => null,
             getProviderName: () => "InMemory",
@@ -570,14 +570,14 @@ function Q() {
         } catch {
           y.Log.warn("Failed to setup localStorageProvider.");
         }
-        let m = _ ?? f,
+        let m = _ ?? g,
           b = m;
         function v(r) {
           try {
             return r();
           } catch (i) {
             if (i instanceof Error && i.name === "SecurityError")
-              return (e.Storage._setProvider(f), null);
+              return (e.Storage._setProvider(g), null);
             if (i instanceof Error && i.name === "QuotaExceededError") {
               const n = e.Storage.getAllKeys().filter((t) => t.startsWith("statsig."));
               i.message = `${i.message}. Statsig Keys: ${n.length}`;
@@ -597,7 +597,7 @@ function Q() {
             ((m = r), (b = r));
           },
           _setDisabled: (r) => {
-            r ? (b = f) : (b = m);
+            r ? (b = g) : (b = m);
           },
         };
         function l(r) {
@@ -667,7 +667,7 @@ function et() {
         const y = le(),
           u = "foreground",
           h = "background",
-          f = [];
+          g = [];
         let _ = u,
           m = !1;
         const b = () => _ === u;
@@ -675,11 +675,11 @@ function et() {
         const v = () => m;
         e._isUnloading = v;
         const l = (r) => {
-          f.unshift(r);
+          g.unshift(r);
         };
         e._subscribeToVisiblityChanged = l;
         const a = (r) => {
-          r !== _ && ((_ = r), f.forEach((i) => i(r)));
+          r !== _ && ((_ = r), g.forEach((i) => i(r)));
         };
         ((e._notifyVisibilityChanged = a),
           (0, y._addWindowEventListenerSafe)("focus", () => {
@@ -735,7 +735,7 @@ function Zt() {
   const y = Ie(),
     u = fe(),
     h = j(),
-    f = Ce(),
+    g = Ce(),
     _ = le(),
     m = Xt(),
     b = Te(),
@@ -748,16 +748,16 @@ function Zt() {
     n = 6e5,
     t = 500,
     c = 200,
-    g = {},
+    f = {},
     s = { Startup: "startup", GainedFocus: "gained_focus" };
   let E = class _e {
     static _safeFlushAndForget(d) {
       var S;
-      (S = g[d]) === null || S === void 0 || S.flush().catch(() => {});
+      (S = f[d]) === null || S === void 0 || S.flush().catch(() => {});
     }
     static _safeRetryFailedLogs(d) {
       var S;
-      (S = g[d]) === null || S === void 0 || S._retryFailedLogs(s.GainedFocus);
+      (S = f[d]) === null || S === void 0 || S._retryFailedLogs(s.GainedFocus);
     }
     constructor(d, S, D, k) {
       var C, U;
@@ -784,7 +784,7 @@ function Zt() {
         (this._maxQueueSize = (U = k?.loggingBufferMaxSize) !== null && U !== void 0 ? U : r));
       const L = k?.networkConfig;
       this._logEventUrlConfig = new l.UrlConfiguration(
-        f.Endpoint._rgstr,
+        g.Endpoint._rgstr,
         L?.logEventUrl,
         L?.api,
         L?.logEventFallbackUrls,
@@ -815,7 +815,7 @@ function Zt() {
       const S = (0, _._isServerEnv)();
       (S &&
         ((d = this._options) === null || d === void 0 ? void 0 : d.loggingEnabled) !== "always") ||
-        ((g[this._sdkKey] = this),
+        ((f[this._sdkKey] = this),
         S ||
           (0, a._subscribeToVisiblityChanged)((D) => {
             D === "background"
@@ -829,7 +829,7 @@ function Zt() {
       return e(this, void 0, void 0, function* () {
         (this._flushIntervalId &&
           (clearInterval(this._flushIntervalId), (this._flushIntervalId = null)),
-          delete g[this._sdkKey],
+          delete f[this._sdkKey],
           yield this.flush());
       });
     }
@@ -917,7 +917,7 @@ function Zt() {
         urlConfig: this._logEventUrlConfig,
         retries: 3,
         isCompressable: !0,
-        params: { [f.NetworkParam.EventCount]: String(d.length) },
+        params: { [g.NetworkParam.EventCount]: String(d.length) },
         credentials: "same-origin",
       };
     }
@@ -980,7 +980,7 @@ function Zt() {
             ? S
             : i,
         k = setInterval(() => {
-          const C = g[this._sdkKey];
+          const C = f[this._sdkKey];
           !C || C._flushIntervalId !== k ? clearInterval(k) : _e._safeFlushAndForget(this._sdkKey);
         }, D);
       this._flushIntervalId = k;
@@ -997,7 +997,7 @@ function Oe() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigMetadataProvider = e.SDK_VERSION = void 0),
-          (e.SDK_VERSION = "3.23.0"));
+          (e.SDK_VERSION = "3.24.1"));
         let y = { sdkVersion: e.SDK_VERSION, sdkType: "js-mono" };
         e.StatsigMetadataProvider = {
           get: () => y,
@@ -1027,13 +1027,13 @@ function tt() {
       u = (typeof performance < "u" && performance.now && performance.now() * 1e3) || 0;
     return `xxxxxxxx-xxxx-4xxx-${"89ab"[Math.floor(Math.random() * 4)]}xxx-xxxxxxxxxxxx`.replace(
       /[xy]/g,
-      (f) => {
+      (g) => {
         let _ = Math.random() * 16;
         return (
           y > 0
             ? ((_ = (y + _) % 16 | 0), (y = Math.floor(y / 16)))
             : ((_ = (u + _) % 16 | 0), (u = Math.floor(u / 16))),
-          (f === "x" ? _ : (_ & 7) | 8).toString(16)
+          (g === "x" ? _ : (_ & 7) | 8).toString(16)
         );
       },
     );
@@ -1048,7 +1048,7 @@ function Re() {
     y = j(),
     u = le(),
     h = Q(),
-    f = tt(),
+    g = tt(),
     _ = {},
     m = {},
     b = {};
@@ -1063,7 +1063,7 @@ function Re() {
         (t = r(n)),
         t != null
           ? ((_[n] = t), l(t, n), t)
-          : ((t = a(n)), t == null && (t = (0, f.getUUID)()), l(t, n), i(t, n), (_[n] = t), t)
+          : ((t = a(n)), t == null && (t = (0, g.getUUID)()), l(t, n), i(t, n), (_[n] = t), t)
       );
     },
     setOverride: (n, t) => {
@@ -1095,8 +1095,8 @@ function Re() {
     if (!m[n] || (0, u._getDocumentSafe)() == null) return null;
     const t = document.cookie.split(";");
     for (const c of t) {
-      const [g, s] = c.trim().split("=");
-      if (g === o(n)) return decodeURIComponent(s);
+      const [f, s] = c.trim().split("=");
+      if (f === o(n)) return decodeURIComponent(s);
     }
     return null;
   }
@@ -1120,9 +1120,9 @@ function en() {
     (ne._getFullUserHash = ne._normalizeUser = void 0));
   const e = fe(),
     y = j();
-  function u(f, _, m) {
+  function u(g, _, m) {
     try {
-      const b = JSON.parse(JSON.stringify(f));
+      const b = JSON.parse(JSON.stringify(g));
       return (
         _ != null && _.environment != null
           ? (b.statsigEnvironment = _.environment)
@@ -1134,8 +1134,8 @@ function en() {
     }
   }
   ne._normalizeUser = u;
-  function h(f) {
-    return f ? (0, e._DJB2Object)(f) : null;
+  function h(g) {
+    return g ? (0, e._DJB2Object)(g) : null;
   }
   return ((ne._getFullUserHash = h), ne);
 }
@@ -1145,12 +1145,12 @@ function tn() {
   if (Ot) return Se;
   ((Ot = 1), Object.defineProperty(Se, "__esModule", { value: !0 }), (Se._typedJsonParse = void 0));
   const e = j();
-  function y(u, h, f) {
+  function y(u, h, g) {
     try {
       const _ = JSON.parse(u);
       if (_ && typeof _ == "object" && h in _) return _;
     } catch {}
-    return (e.Log.error(`Failed to parse ${f}`), null);
+    return (e.Log.error(`Failed to parse ${g}`), null);
   }
   return ((Se._typedJsonParse = y), Se);
 }
@@ -1164,23 +1164,23 @@ function un() {
       function t(c) {
         return c instanceof o
           ? c
-          : new o(function (g) {
-              g(c);
+          : new o(function (f) {
+              f(c);
             });
       }
-      return new (o || (o = Promise))(function (c, g) {
+      return new (o || (o = Promise))(function (c, f) {
         function s(d) {
           try {
             w(n.next(d));
           } catch (S) {
-            g(S);
+            f(S);
           }
         }
         function E(d) {
           try {
             w(n.throw(d));
           } catch (S) {
-            g(S);
+            f(S);
           }
         }
         function w(d) {
@@ -1194,7 +1194,7 @@ function un() {
   const y = j(),
     u = Re(),
     h = en(),
-    f = Q(),
+    g = Q(),
     _ = tn(),
     m = 10;
   let b = class {
@@ -1229,13 +1229,13 @@ function un() {
     }
     _getDataAsyncImpl(i, o, n) {
       return e(this, void 0, void 0, function* () {
-        f.Storage.isReady() || (yield f.Storage.isReadyResolver());
+        g.Storage.isReady() || (yield g.Storage.isReadyResolver());
         const t = i ?? this.getDataSync(o),
           c = [this._fetchAndPrepFromNetwork(t, o, n)];
         return (
           n?.timeoutMs &&
             c.push(
-              new Promise((g) => setTimeout(g, n.timeoutMs)).then(
+              new Promise((f) => setTimeout(f, n.timeoutMs)).then(
                 () => (y.Log.debug("Fetching latest value timed out"), null),
               ),
             ),
@@ -1256,8 +1256,8 @@ function un() {
       return e(this, void 0, void 0, function* () {
         var t;
         const c = (t = i?.data) !== null && t !== void 0 ? t : null,
-          g = i != null && this._isCachedResultValidFor204(i, o),
-          s = yield this._fetchFromNetwork(c, o, n, g);
+          f = i != null && this._isCachedResultValidFor204(i, o),
+          s = yield this._fetchFromNetwork(c, o, n, f);
         if (!s) return (y.Log.debug("No response returned for latest value"), null);
         const E = (0, _._typedJsonParse)(s, "has_updates", "Response"),
           w = this._getSdkKey(),
@@ -1277,24 +1277,24 @@ function un() {
     }
     _loadFromCache(i) {
       var o;
-      const n = (o = f.Storage.getItem) === null || o === void 0 ? void 0 : o.call(f.Storage, i);
+      const n = (o = g.Storage.getItem) === null || o === void 0 ? void 0 : o.call(g.Storage, i);
       if (n == null) return null;
       const t = (0, _._typedJsonParse)(n, "source", "Cached Result");
       return t ? Object.assign(Object.assign({}, t), { source: "Cache" }) : null;
     }
     _writeToCache(i, o) {
-      (f.Storage.setItem(i, JSON.stringify(o)), this._runLocalStorageCacheEviction(i));
+      (g.Storage.setItem(i, JSON.stringify(o)), this._runLocalStorageCacheEviction(i));
     }
     _runLocalStorageCacheEviction(i) {
       var o;
       const n =
-        (o = (0, f._getObjectFromStorage)(this._lastModifiedStoreKey)) !== null && o !== void 0
+        (o = (0, g._getObjectFromStorage)(this._lastModifiedStoreKey)) !== null && o !== void 0
           ? o
           : {};
       n[i] = Date.now();
       const t = a(n, m);
-      (t && (delete n[t], f.Storage.removeItem(t)),
-        (0, f._setObjectInStorage)(this._lastModifiedStoreKey, n));
+      (t && (delete n[t], g.Storage.removeItem(t)),
+        (0, g._setObjectInStorage)(this._lastModifiedStoreKey, n));
     }
   };
   z.DataAdapterCore = b;
@@ -1316,8 +1316,8 @@ function un() {
       var n;
       const t = this._data[i],
         c = t?.stableID,
-        g = (n = o?.customIDs) === null || n === void 0 ? void 0 : n.stableID;
-      return g && c && g !== c
+        f = (n = o?.customIDs) === null || n === void 0 ? void 0 : n.stableID;
+      return f && c && f !== c
         ? (y.Log.warn("'StatsigUser.customIDs.stableID' mismatch"), null)
         : t;
     }
@@ -1335,12 +1335,12 @@ function un() {
       ? null
       : o.reduce((n, t) => {
           const c = r[n],
-            g = r[t];
-          return typeof c == "object" && typeof g == "object"
-            ? g.receivedAt < c.receivedAt
+            f = r[t];
+          return typeof c == "object" && typeof f == "object"
+            ? f.receivedAt < c.receivedAt
               ? t
               : n
-            : g < c
+            : f < c
               ? t
               : n;
         });
@@ -1388,23 +1388,23 @@ function nn() {
             function t(c) {
               return c instanceof o
                 ? c
-                : new o(function (g) {
-                    g(c);
+                : new o(function (f) {
+                    f(c);
                   });
             }
-            return new (o || (o = Promise))(function (c, g) {
+            return new (o || (o = Promise))(function (c, f) {
               function s(d) {
                 try {
                   w(n.next(d));
                 } catch (S) {
-                  g(S);
+                  f(S);
                 }
               }
               function E(d) {
                 try {
                   w(n.throw(d));
                 } catch (S) {
-                  g(S);
+                  f(S);
                 }
               }
               function w(d) {
@@ -1417,7 +1417,7 @@ function nn() {
           (e.ErrorBoundary = e.EXCEPTION_ENDPOINT = void 0));
         const u = j(),
           h = nt(),
-          f = Oe();
+          g = Oe();
         e.EXCEPTION_ENDPOINT = "https://statsigapi.net/v1/sdk_exception";
         const _ = "[Statsig] UnknownError";
         let m = class {
@@ -1428,16 +1428,17 @@ function nn() {
               (this._lastSeenError = t),
               (this._seen = new Set()));
           }
-          wrap(i) {
+          wrap(i, o) {
             try {
-              const o = i;
-              l(o).forEach((n) => {
-                const t = o[n];
-                "$EB" in t ||
-                  ((o[n] = (...c) => this._capture(n, () => t.apply(i, c))), (o[n].$EB = !0));
+              const n = i;
+              l(n).forEach((t) => {
+                const c = n[t];
+                "$EB" in c ||
+                  ((n[t] = (...f) => this._capture(o ? `${o}:${t}` : t, () => c.apply(i, f))),
+                  (n[t].$EB = !0));
               });
-            } catch (o) {
-              this._onError("eb:wrap", o);
+            } catch (n) {
+              this._onError("eb:wrap", n);
             }
           }
           logError(i, o) {
@@ -1462,7 +1463,7 @@ function nn() {
             try {
               (u.Log.warn(`Caught error in ${i}`, { error: o }),
                 y(this, void 0, void 0, function* () {
-                  var t, c, g, s, E, w, d;
+                  var t, c, f, s, E, w, d;
                   const S = o || Error(_),
                     D = S instanceof Error,
                     k = D ? S.name : "No Name",
@@ -1476,13 +1477,13 @@ function nn() {
                         null || c === void 0
                     ) && c.preventAllNetworkTraffic)
                   ) {
-                    (g = this._emitter) === null ||
-                      g === void 0 ||
-                      g.call(this, { name: "error", error: o, tag: i });
+                    (f = this._emitter) === null ||
+                      f === void 0 ||
+                      f.call(this, { name: "error", error: o, tag: i });
                     return;
                   }
                   const U = h.SDKType._get(this._sdkKey),
-                    L = f.StatsigMetadataProvider.get(),
+                    L = g.StatsigMetadataProvider.get(),
                     W = D ? S.stack : v(S),
                     x = Object.assign(
                       { tag: i, exception: k, info: W, statsigOptions: a(this._options) },
@@ -1603,8 +1604,8 @@ function rn() {
     }));
   const e = new Set([]),
     y = new Set(["userPersistedValues"]);
-  function u(h, f, _) {
-    let m = `${h}|${f}`;
+  function u(h, g, _) {
+    let m = `${h}|${g}`;
     if (!_) return m;
     for (const b of Object.keys(_)) {
       if (y.has(b)) return;
@@ -1632,22 +1633,22 @@ function gn() {
             });
       }
       return new (l || (l = Promise))(function (i, o) {
-        function n(g) {
+        function n(f) {
           try {
-            c(a.next(g));
+            c(a.next(f));
           } catch (s) {
             o(s);
           }
         }
-        function t(g) {
+        function t(f) {
           try {
-            c(a.throw(g));
+            c(a.throw(f));
           } catch (s) {
             o(s);
           }
         }
-        function c(g) {
-          g.done ? i(g.value) : r(g.value).then(n, t);
+        function c(f) {
+          f.done ? i(f.value) : r(f.value).then(n, t);
         }
         c((a = a.apply(b, v || [])).next());
       });
@@ -1659,7 +1660,7 @@ function gn() {
     ]),
     u = "https://cloudflare-dns.com/dns-query",
     h = ["i", "e", "d"],
-    f = 200;
+    g = 200;
   function _(b) {
     return e(this, void 0, void 0, function* () {
       const v = yield b(u, {
@@ -1680,7 +1681,7 @@ function gn() {
   function m(b) {
     const v = b.findIndex(
       (a, r) =>
-        r < f && String.fromCharCode(a) === "=" && h.includes(String.fromCharCode(b[r - 1])),
+        r < g && String.fromCharCode(a) === "=" && h.includes(String.fromCharCode(b[r - 1])),
     );
     if (v === -1) {
       const a = new Error("Failed to parse TXT records from DNS");
@@ -1699,7 +1700,7 @@ function vn() {
   var e =
     (J && J.__awaiter) ||
     function (o, n, t, c) {
-      function g(s) {
+      function f(s) {
         return s instanceof t
           ? s
           : new t(function (E) {
@@ -1722,7 +1723,7 @@ function vn() {
           }
         }
         function S(D) {
-          D.done ? s(D.value) : g(D.value).then(w, d);
+          D.done ? s(D.value) : f(D.value).then(w, d);
         }
         S((c = c.apply(o, n || [])).next());
       });
@@ -1732,7 +1733,7 @@ function vn() {
   const y = gn(),
     u = fe(),
     h = j(),
-    f = Q(),
+    g = Q(),
     _ = 10080 * 60 * 1e3,
     m = 14400 * 1e3;
   let b = class {
@@ -1749,30 +1750,30 @@ function vn() {
     }
     tryBumpExpiryTime(n, t) {
       var c;
-      const g = (c = this._fallbackInfo) === null || c === void 0 ? void 0 : c[t.endpoint];
-      g &&
-        ((g.expiryTime = Date.now() + _),
-        a(n, Object.assign(Object.assign({}, this._fallbackInfo), { [t.endpoint]: g })));
+      const f = (c = this._fallbackInfo) === null || c === void 0 ? void 0 : c[t.endpoint];
+      f &&
+        ((f.expiryTime = Date.now() + _),
+        a(n, Object.assign(Object.assign({}, this._fallbackInfo), { [t.endpoint]: f })));
     }
     getActiveFallbackUrl(n, t) {
-      var c, g;
+      var c, f;
       if (t.customUrl != null && t.fallbackUrls != null) return null;
       let s = this._fallbackInfo;
       s == null && ((s = (c = r(n)) !== null && c !== void 0 ? c : {}), (this._fallbackInfo = s));
       const E = s[t.endpoint];
       return !E ||
-        Date.now() > ((g = E.expiryTime) !== null && g !== void 0 ? g : 0) ||
+        Date.now() > ((f = E.expiryTime) !== null && f !== void 0 ? f : 0) ||
         t.getChecksum() !== E.urlConfigChecksum
         ? (delete s[t.endpoint], (this._fallbackInfo = s), a(n, this._fallbackInfo), null)
         : E.url
           ? E.url
           : null;
     }
-    tryFetchUpdatedFallbackInfo(n, t, c, g) {
+    tryFetchUpdatedFallbackInfo(n, t, c, f) {
       return e(this, void 0, void 0, function* () {
         var s, E;
         try {
-          if (!v(c, g)) return !1;
+          if (!v(c, f)) return !1;
           const d =
               t.customUrl == null && t.fallbackUrls == null
                 ? yield this._tryFetchFallbackUrlsFromNetwork(t)
@@ -1793,7 +1794,7 @@ function vn() {
       });
     }
     _updateFallbackInfoWithNewUrl(n, t, c) {
-      var g, s, E;
+      var f, s, E;
       const w = {
           urlConfigChecksum: t.getChecksum(),
           url: c,
@@ -1801,7 +1802,7 @@ function vn() {
           previous: [],
         },
         d = t.endpoint,
-        S = (g = this._fallbackInfo) === null || g === void 0 ? void 0 : g[d];
+        S = (f = this._fallbackInfo) === null || f === void 0 ? void 0 : f[d];
       (S && w.previous.push(...S.previous), w.previous.length > 10 && (w.previous = []));
       const D =
         (E = (s = this._fallbackInfo) === null || s === void 0 ? void 0 : s[d]) === null ||
@@ -1818,7 +1819,7 @@ function vn() {
         const c = this._dnsQueryCooldowns[n.endpoint];
         if (c && Date.now() < c) return null;
         this._dnsQueryCooldowns[n.endpoint] = Date.now() + m;
-        const g = [],
+        const f = [],
           s = yield (0, y._fetchTxtRecords)(
             (t = this._networkOverrideFunc) !== null && t !== void 0 ? t : fetch,
           ),
@@ -1828,21 +1829,21 @@ function vn() {
           const d = w.split("=");
           if (d.length > 1) {
             let S = d[1];
-            (S.endsWith("/") && (S = S.slice(0, -1)), g.push(`https://${S}${E}`));
+            (S.endsWith("/") && (S = S.slice(0, -1)), f.push(`https://${S}${E}`));
           }
         }
-        return g;
+        return f;
       });
     }
     _pickNewFallbackUrl(n, t) {
       var c;
       if (t == null) return null;
-      const g = new Set((c = n?.previous) !== null && c !== void 0 ? c : []),
+      const f = new Set((c = n?.previous) !== null && c !== void 0 ? c : []),
         s = n?.url;
       let E = null;
       for (const w of t) {
         const d = w.endsWith("/") ? w.slice(0, -1) : w;
-        if (!g.has(w) && d !== s) {
+        if (!f.has(w) && d !== s) {
           E = d;
           break;
         }
@@ -1868,14 +1869,14 @@ function vn() {
   function a(o, n) {
     const t = l(o);
     if (!n || Object.keys(n).length === 0) {
-      f.Storage.removeItem(t);
+      g.Storage.removeItem(t);
       return;
     }
-    f.Storage.setItem(t, JSON.stringify(n));
+    g.Storage.setItem(t, JSON.stringify(n));
   }
   function r(o) {
     const n = l(o),
-      t = f.Storage.getItem(n);
+      t = g.Storage.getItem(n);
     if (!t) return null;
     try {
       return JSON.parse(t);
@@ -1904,9 +1905,9 @@ function on() {
         e[y] = u;
       },
       get: (y, u) => {
-        var h, f;
-        return (f = (h = e[y]) === null || h === void 0 ? void 0 : h[u]) !== null && f !== void 0
-          ? f
+        var h, g;
+        return (g = (h = e[y]) === null || h === void 0 ? void 0 : h[u]) !== null && g !== void 0
+          ? g
           : !1;
       },
     }),
@@ -1925,7 +1926,7 @@ function rt() {
         const y = H(),
           u = Ie(),
           h = j(),
-          f = Q(),
+          g = Q(),
           _ = tt(),
           m = 1800 * 1e3,
           b = 14400 * 1e3,
@@ -1942,7 +1943,7 @@ function rt() {
             },
           }));
         function l(s) {
-          let E = g(s);
+          let E = f(s);
           const w = Date.now();
           return (
             E || (E = { sessionID: (0, _.getUUID)(), startTime: w, lastUpdate: w }),
@@ -1989,14 +1990,14 @@ function rt() {
         function c(s, E) {
           const w = t(E);
           try {
-            (0, f._setObjectInStorage)(w, s);
+            (0, g._setObjectInStorage)(w, s);
           } catch {
             h.Log.warn("Failed to save SessionID");
           }
         }
-        function g(s) {
+        function f(s) {
           const E = t(s);
-          return (0, f._getObjectFromStorage)(E);
+          return (0, g._getObjectFromStorage)(E);
         }
       })(Je)),
     Je
@@ -2053,7 +2054,7 @@ function hn() {
   const y = H(),
     u = Ye(),
     h = j(),
-    f = Ce(),
+    g = Ce(),
     _ = vn(),
     m = on(),
     b = nt(),
@@ -2066,7 +2067,7 @@ function hn() {
     n = et(),
     t = 1e4,
     c = 500,
-    g = 3e4,
+    f = 3e4,
     s = 1e3,
     E = 50,
     w = E / s,
@@ -2232,16 +2233,16 @@ function hn() {
     _getPopulatedURL(p) {
       var O;
       const T = (O = p.fallbackUrl) !== null && O !== void 0 ? O : p.urlConfig.getUrl();
-      (p.urlConfig.endpoint === f.Endpoint._initialize ||
-        p.urlConfig.endpoint === f.Endpoint._download_config_specs) &&
+      (p.urlConfig.endpoint === g.Endpoint._initialize ||
+        p.urlConfig.endpoint === g.Endpoint._download_config_specs) &&
         (this._lastUsedInitUrl = T);
       const R = Object.assign(
           {
-            [f.NetworkParam.SdkKey]: p.sdkKey,
-            [f.NetworkParam.SdkType]: b.SDKType._get(p.sdkKey),
-            [f.NetworkParam.SdkVersion]: i.SDK_VERSION,
-            [f.NetworkParam.Time]: String(Date.now()),
-            [f.NetworkParam.SessionID]: l.SessionID.get(p.sdkKey),
+            [g.NetworkParam.SdkKey]: p.sdkKey,
+            [g.NetworkParam.SdkType]: b.SDKType._get(p.sdkKey),
+            [g.NetworkParam.SdkVersion]: i.SDK_VERSION,
+            [g.NetworkParam.Time]: String(Date.now()),
+            [g.NetworkParam.SessionID]: l.SessionID.get(p.sdkKey),
           },
           p.params,
         ),
@@ -2267,7 +2268,7 @@ function hn() {
           ((p.body = T.btoa(R).split("").reverse().join("")),
             (p.params = Object.assign(
               Object.assign({}, (O = p.params) !== null && O !== void 0 ? O : {}),
-              { [f.NetworkParam.StatsigEncoded]: "1" },
+              { [g.NetworkParam.StatsigEncoded]: "1" },
             )));
         } catch (M) {
           h.Log.warn(`Request encoding failed for ${p.urlConfig.getUrl()}`, M);
@@ -2294,7 +2295,7 @@ function hn() {
             ((p.body = F),
               (p.params = Object.assign(
                 Object.assign({}, (O = p.params) !== null && O !== void 0 ? O : {}),
-                { [f.NetworkParam.IsGzipped]: "1" },
+                { [g.NetworkParam.IsGzipped]: "1" },
               )));
           } catch (R) {
             h.Log.warn(`Request compression failed for ${p.urlConfig.getUrl()}`, R);
@@ -2364,16 +2365,16 @@ function hn() {
     );
   }
   function W(I, p) {
-    I.urlConfig.endpoint === f.Endpoint._initialize &&
+    I.urlConfig.endpoint === g.Endpoint._initialize &&
       u.Diagnostics._markInitNetworkReqStart(I.sdkKey, { attempt: p });
   }
   function x(I, p, O, T, R) {
-    I.urlConfig.endpoint === f.Endpoint._initialize &&
+    I.urlConfig.endpoint === g.Endpoint._initialize &&
       u.Diagnostics._markInitNetworkReqEnd(I.sdkKey, u.Diagnostics._getDiagnosticsData(p, O, T, R));
   }
   function B(I) {
     return e(this, void 0, void 0, function* () {
-      yield new Promise((p) => setTimeout(p, Math.min(c * (I * I), g)));
+      yield new Promise((p) => setTimeout(p, Math.min(c * (I * I), f)));
     });
   }
   return ie;
@@ -2398,12 +2399,12 @@ function Sn() {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e._fastApproxSizeOf = void 0));
         const y = 2,
           u = 1,
-          h = (f, _) => {
+          h = (g, _) => {
             let m = 0;
-            const b = Object.keys(f);
+            const b = Object.keys(g);
             for (let v = 0; v < b.length; v++) {
               const l = b[v],
-                a = f[l];
+                a = g[l];
               if (
                 ((m += l.length),
                 typeof a == "object" && a !== null
@@ -2427,7 +2428,7 @@ function bn() {
   Vt = 1;
   var e =
     (se && se.__awaiter) ||
-    function (n, t, c, g) {
+    function (n, t, c, f) {
       function s(E) {
         return E instanceof c
           ? E
@@ -2438,14 +2439,14 @@ function bn() {
       return new (c || (c = Promise))(function (E, w) {
         function d(k) {
           try {
-            D(g.next(k));
+            D(f.next(k));
           } catch (C) {
             w(C);
           }
         }
         function S(k) {
           try {
-            D(g.throw(k));
+            D(f.throw(k));
           } catch (C) {
             w(C);
           }
@@ -2453,14 +2454,14 @@ function bn() {
         function D(k) {
           k.done ? E(k.value) : s(k.value).then(d, S);
         }
-        D((g = g.apply(n, t || [])).next());
+        D((f = f.apply(n, t || [])).next());
       });
     };
   (Object.defineProperty(se, "__esModule", { value: !0 }), (se.StatsigClientBase = void 0), H());
   const y = H(),
     u = nn(),
     h = Zt(),
-    f = j(),
+    g = j(),
     _ = rn(),
     m = le(),
     b = rt(),
@@ -2469,13 +2470,13 @@ function bn() {
     a = Q(),
     r = 3e3;
   let i = class {
-    constructor(t, c, g, s) {
+    constructor(t, c, f, s) {
       var E, w, d, S;
       ((this.loadingStatus = "Uninitialized"),
         (this._initializePromise = null),
         (this._listeners = {}));
       const D = this.$emt.bind(this);
-      (s?.logLevel != null && (f.Log.level = s.logLevel),
+      (s?.logLevel != null && (g.Log.level = s.logLevel),
         s?.disableStorage && a.Storage._setDisabled(!0),
         s?.initialSessionID && b.StatsigSession.overrideInitialSessionID(s.initialSessionID, t),
         s?.storageProvider && a.Storage._setProvider(s.storageProvider),
@@ -2485,14 +2486,14 @@ function bn() {
         (this._options = s ?? {}),
         (this._memoCache = {}),
         (this.overrideAdapter = (E = s?.overrideAdapter) !== null && E !== void 0 ? E : null),
-        (this._logger = new h.EventLogger(t, D, g, s)),
+        (this._logger = new h.EventLogger(t, D, f, s)),
         (this._errorBoundary = new u.ErrorBoundary(t, s, D)),
         this._errorBoundary.wrap(this),
         this._errorBoundary.wrap(c),
         this._errorBoundary.wrap(this._logger),
-        g.setErrorBoundary(this._errorBoundary),
+        f.setErrorBoundary(this._errorBoundary),
         (this.dataAdapter = c),
-        this.dataAdapter.attach(t, s, g),
+        this.dataAdapter.attach(t, s, f),
         (this.storageProvider = a.Storage),
         (S =
           (d = (w = this.overrideAdapter) === null || w === void 0 ? void 0 : w.loadFromStorage) ===
@@ -2538,8 +2539,8 @@ function bn() {
     }
     off(t, c) {
       if (this._listeners[t]) {
-        const g = this._listeners[t].indexOf(c);
-        g !== -1 && this._listeners[t].splice(g, 1);
+        const f = this._listeners[t].indexOf(c);
+        f !== -1 && this._listeners[t].splice(f, 1);
       }
     }
     $on(t, c) {
@@ -2547,7 +2548,7 @@ function bn() {
     }
     $emt(t) {
       var c;
-      const g = (s) => {
+      const f = (s) => {
         try {
           s(t);
         } catch (E) {
@@ -2555,37 +2556,37 @@ function bn() {
             this._errorBoundary.logError(`__emit:${t.name}`, E);
             return;
           }
-          f.Log.error(
+          g.Log.error(
             "An error occurred in a StatsigClientEvent listener. This is not an issue with Statsig.",
             t,
           );
         }
       };
-      (this._listeners[t.name] && this._listeners[t.name].forEach((s) => g(s)),
-        (c = this._listeners["*"]) === null || c === void 0 || c.forEach(g));
+      (this._listeners[t.name] && this._listeners[t.name].forEach((s) => f(s)),
+        (c = this._listeners["*"]) === null || c === void 0 || c.forEach(f));
     }
     _setStatus(t, c) {
       ((this.loadingStatus = t),
         (this._memoCache = {}),
         this.$emt({ name: "values_updated", status: t, values: c }));
     }
-    _enqueueExposure(t, c, g) {
-      if (g?.disableExposureLog === !0) {
+    _enqueueExposure(t, c, f) {
+      if (f?.disableExposureLog === !0) {
         this._logger.incrementNonExposureCount(t);
         return;
       }
       this._logger.enqueue(c);
     }
     _memoize(t, c) {
-      return (g, s) => {
-        if (this._options.disableEvaluationMemoization) return c(g, s);
-        const E = (0, _.createMemoKey)(t, g, s);
+      return (f, s) => {
+        if (this._options.disableEvaluationMemoization) return c(f, s);
+        const E = (0, _.createMemoKey)(t, f, s);
         return E
           ? (E in this._memoCache ||
               (Object.keys(this._memoCache).length >= r && (this._memoCache = {}),
-              (this._memoCache[E] = c(g, s))),
+              (this._memoCache[E] = c(f, s))),
             this._memoCache[E])
-          : c(g, s);
+          : c(f, s);
       };
     }
   };
@@ -2593,17 +2594,17 @@ function bn() {
   function o(n, t) {
     var c;
     if ((0, m._isServerEnv)()) return;
-    const g = (0, y._getStatsigGlobal)(),
-      s = (c = g.instances) !== null && c !== void 0 ? c : {},
+    const f = (0, y._getStatsigGlobal)(),
+      s = (c = f.instances) !== null && c !== void 0 ? c : {},
       E = t;
     (s[n] != null &&
-      f.Log.warn(
+      g.Log.warn(
         "Creating multiple Statsig clients with the same SDK key can lead to unexpected behavior. Multi-instance support requires different SDK keys.",
       ),
       (s[n] = E),
-      g.firstInstance || (g.firstInstance = E),
-      (g.instances = s),
-      (__STATSIG__ = g));
+      f.firstInstance || (f.firstInstance = E),
+      (f.instances = s),
+      (__STATSIG__ = f));
   }
   return se;
 }
@@ -2656,15 +2657,15 @@ function wn() {
     });
   }
   A._makeFeatureGate = h;
-  function f(l, a, r) {
+  function g(l, a, r) {
     var i;
     const o = (i = r?.value) !== null && i !== void 0 ? i : {};
     return Object.assign(Object.assign({}, u(l, a, r, o)), { get: v(l, r?.value) });
   }
-  A._makeDynamicConfig = f;
+  A._makeDynamicConfig = g;
   function _(l, a, r) {
     var i;
-    const o = f(l, a, r);
+    const o = g(l, a, r);
     return Object.assign(Object.assign({}, o), {
       groupName: (i = r?.group_name) !== null && i !== void 0 ? i : null,
     });
@@ -2711,11 +2712,11 @@ function kn() {
   ((Ht = 1),
     Object.defineProperty(ae, "__esModule", { value: !0 }),
     (ae.UPDATE_DETAIL_ERROR_MESSAGES = ae.createUpdateDetails = void 0));
-  const e = (y, u, h, f, _, m) => ({
+  const e = (y, u, h, g, _, m) => ({
     duration: h,
     source: u,
     success: y,
-    error: f,
+    error: g,
     sourceUrl: _,
     warnings: m,
   });
@@ -2762,11 +2763,11 @@ function On() {
           (e.Storage = e.Log = e.EventLogger = e.Diagnostics = void 0),
           H());
         const h = H(),
-          f = Ye();
+          g = Ye();
         Object.defineProperty(e, "Diagnostics", {
           enumerable: !0,
           get: function () {
-            return f.Diagnostics;
+            return g.Diagnostics;
           },
         });
         const _ = Zt();
@@ -2837,4 +2838,4 @@ function On() {
   );
 }
 var An = On();
-export { In as a, st as c, Cn as g, On as r, An as s };
+export { Cn as a, st as c, In as g, On as r, An as s };

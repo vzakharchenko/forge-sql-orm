@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchSchemaWebTrigger, dropSchemaMigrations, applySchemaMigrations } from '../../../src/webtriggers';
+import { fetchSchemaWebTrigger, dropSchemaMigrations, applySchemaMigrations, dropTableSchemaMigrations } from '../../../src/webtriggers';
 import { getTables} from '../../../src/core/SystemTables';
 import { generateDropTableStatements } from '../../../src/utils/sqlUtils';
 import {sql} from "@forge/sql";
@@ -114,6 +114,38 @@ describe('WebTriggers', () => {
             (sql.executeDDL as any).mockResolvedValue({ rows: [] });
 
             const result = await dropSchemaMigrations();
+
+            expect(result.statusCode).toBe(200);
+            expect(result.body).toBe('⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.');
+            expect(sql.executeDDL).toHaveBeenCalledTimes(2);
+        });
+
+        it('should handle errors during table dropping', async () => {
+            (getTables as any).mockResolvedValue(['table1']);
+            (generateDropTableStatements as any).mockReturnValue(['DROP TABLE IF EXISTS table1']);
+            (sql.executeDDL as any).mockRejectedValue(new Error('Failed to drop table'));
+
+            const result = await dropSchemaMigrations();
+
+            expect(result.statusCode).toBe(500);
+            expect(result.body).toContain('Failed to drop table');
+        });
+    });
+    describe('dropTableSchemaMigrations', () => {
+        it('should drop all tables/squence successfully', async () => {
+            // Mock getTables to return some table names
+            (getTables as any).mockResolvedValue(['table1', 'table2']);
+
+            // Mock generateDropTableStatements to return drop statements
+            (generateDropTableStatements as any).mockReturnValue([
+                'DROP TABLE IF EXISTS table1',
+                'DROP TABLE IF EXISTS table2'
+            ]);
+
+            // Mock executeDDL to succeed
+            (sql.executeDDL as any).mockResolvedValue({ rows: [] });
+
+            const result = await dropTableSchemaMigrations();
 
             expect(result.statusCode).toBe(200);
             expect(result.body).toBe('⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.');

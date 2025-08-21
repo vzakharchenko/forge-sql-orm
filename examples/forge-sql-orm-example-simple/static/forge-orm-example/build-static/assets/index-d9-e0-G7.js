@@ -3,16 +3,16 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-CfJtU4M0.js",
+      "./body-Z7OcvaZq.js",
       "./react-dom-vendor-DTSHKYJW.js",
-      "./client-core-vendor-eV4IZqkN.js",
-      "./lodash-vendor-CSXQM1bK.js",
+      "./client-core-vendor-C5rZga0K.js",
+      "./lodash-vendor-GnTikVJG.js",
       "./body-BBWlFbG-.css",
     ]),
 ) => i.map((i) => d[i]);
 import { r as lt, a as bi, c as uh } from "./react-dom-vendor-DTSHKYJW.js";
-import { g as er, a as Es, r as Zt, s as Ue } from "./client-core-vendor-eV4IZqkN.js";
-import { r as lh } from "./lodash-vendor-CSXQM1bK.js";
+import { g as er, a as Es, r as Zt, s as Ue } from "./client-core-vendor-C5rZga0K.js";
+import { r as lh } from "./lodash-vendor-GnTikVJG.js";
 function dh(e, t) {
   for (var r = 0; r < t.length; r++) {
     const n = t[r];
@@ -8897,7 +8897,7 @@ var f_ = y.forwardRef(function (e, t) {
         action: "clicked",
         componentName: u || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "14.11.2",
+        packageVersion: "14.11.3",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -15075,14 +15075,14 @@ var nO = function (t) {
         action: "sorted",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.2.8",
+        packageVersion: "18.2.9",
       }),
       Be = ca({
         fn: V,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.2.8",
+        packageVersion: "18.2.9",
       });
     y.useEffect(
       function () {
@@ -15200,7 +15200,7 @@ var nO = function (t) {
   },
   aO = y.lazy(function () {
     return sg(
-      () => import("./body-CfJtU4M0.js"),
+      () => import("./body-Z7OcvaZq.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
