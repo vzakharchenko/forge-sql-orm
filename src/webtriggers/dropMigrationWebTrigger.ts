@@ -30,7 +30,7 @@ export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
   try {
     const tables = await getTables();
     // Generate drop statements
-    const dropStatements = generateStatements(tables, {sequence: true, table: true});
+    const dropStatements = generateStatements(tables, { sequence: true, table: true });
 
     // Execute each statement
     for (const statement of dropStatements) {
