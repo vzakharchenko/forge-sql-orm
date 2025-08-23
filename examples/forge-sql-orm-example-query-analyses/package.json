@@ -8,7 +8,7 @@
     "@forge/events": "^2.0.4",
     "@forge/resolver": "1.7.0",
     "@forge/sql": "^3.0.4",
-    "forge-sql-orm": "2.0.27",
+    "forge-sql-orm": "2.0.28",
     "uuid": "^11.1.0"
   },
   "scripts": {
@@ -20,7 +20,7 @@
     "forge:debug": "forge tunnel -d -f index.handler"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.27"
+    "forge-sql-orm-cli": "^2.0.28"
   },
   "overrides": {
     "esbuild": "npm:esbuild@latest",
