@@ -15,21 +15,21 @@ function Cn(e) {
   if (Object.prototype.hasOwnProperty.call(e, "__esModule")) return e;
   var y = e.default;
   if (typeof y == "function") {
-    var u = function h() {
+    var l = function h() {
       var g = !1;
       try {
         g = this instanceof h;
       } catch {}
       return g ? Reflect.construct(y, arguments, this.constructor) : y.apply(this, arguments);
     };
-    u.prototype = y.prototype;
-  } else u = {};
+    l.prototype = y.prototype;
+  } else l = {};
   return (
-    Object.defineProperty(u, "__esModule", { value: !0 }),
+    Object.defineProperty(l, "__esModule", { value: !0 }),
     Object.keys(e).forEach(function (h) {
       var g = Object.getOwnPropertyDescriptor(e, h);
       Object.defineProperty(
-        u,
+        l,
         h,
         g.get
           ? g
@@ -41,7 +41,7 @@ function Cn(e) {
             },
       );
     }),
-    u
+    l
   );
 }
 var X = {},
@@ -55,7 +55,7 @@ function j() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e.Log = e.LogLevel = void 0));
         const y = " DEBUG ",
-          u = "  INFO ",
+          l = "  INFO ",
           h = "  WARN ",
           g = " ERROR ";
         function _(b) {
@@ -64,7 +64,7 @@ function j() {
         e.LogLevel = { None: 0, Error: 1, Warn: 2, Info: 3, Debug: 4 };
         class m {
           static info(...v) {
-            m.level >= e.LogLevel.Info && console.info(u, ..._(v));
+            m.level >= e.LogLevel.Info && console.info(l, ..._(v));
           }
           static debug(...v) {
             m.level >= e.LogLevel.Debug && console.debug(y, ..._(v));
@@ -87,7 +87,7 @@ function H() {
     lt ||
       ((lt = 1),
       (function (e) {
-        var y, u, h;
+        var y, l, h;
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._getInstance = e._getStatsigGlobalFlag = e._getStatsigGlobal = void 0));
         const g = j(),
@@ -114,17 +114,17 @@ function H() {
         };
         e._getInstance = b;
         const v = "__STATSIG__",
-          l = typeof window < "u" ? window : {},
+          u = typeof window < "u" ? window : {},
           a = typeof st < "u" ? st : {},
           r = typeof globalThis < "u" ? globalThis : {},
           i =
             (h =
-              (u = (y = l[v]) !== null && y !== void 0 ? y : a[v]) !== null && u !== void 0
-                ? u
+              (l = (y = u[v]) !== null && y !== void 0 ? y : a[v]) !== null && l !== void 0
+                ? l
                 : r[v]) !== null && h !== void 0
               ? h
               : { instance: e._getInstance };
-        ((l[v] = i), (a[v] = i), (r[v] = i));
+        ((u[v] = i), (a[v] = i), (r[v] = i));
       })(Ue)),
     Ue
   );
@@ -138,17 +138,17 @@ function Ye() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e.Diagnostics = void 0));
         const y = new Map(),
-          u = "start",
+          l = "start",
           h = "end",
           g = "statsig::diagnostics";
         e.Diagnostics = {
-          _getMarkers: (l) => y.get(l),
-          _markInitOverallStart: (l) => {
-            b(l, _({}, u, "overall"));
+          _getMarkers: (u) => y.get(u),
+          _markInitOverallStart: (u) => {
+            b(u, _({}, l, "overall"));
           },
-          _markInitOverallEnd: (l, a, r) => {
+          _markInitOverallEnd: (u, a, r) => {
             b(
-              l,
+              u,
               _(
                 {
                   success: a,
@@ -160,59 +160,59 @@ function Ye() {
               ),
             );
           },
-          _markInitNetworkReqStart: (l, a) => {
-            b(l, _(a, u, "initialize", "network_request"));
+          _markInitNetworkReqStart: (u, a) => {
+            b(u, _(a, l, "initialize", "network_request"));
           },
-          _markInitNetworkReqEnd: (l, a) => {
-            b(l, _(a, h, "initialize", "network_request"));
+          _markInitNetworkReqEnd: (u, a) => {
+            b(u, _(a, h, "initialize", "network_request"));
           },
-          _markInitProcessStart: (l) => {
-            b(l, _({}, u, "initialize", "process"));
+          _markInitProcessStart: (u) => {
+            b(u, _({}, l, "initialize", "process"));
           },
-          _markInitProcessEnd: (l, a) => {
-            b(l, _(a, h, "initialize", "process"));
+          _markInitProcessEnd: (u, a) => {
+            b(u, _(a, h, "initialize", "process"));
           },
-          _clearMarkers: (l) => {
-            y.delete(l);
+          _clearMarkers: (u) => {
+            y.delete(u);
           },
-          _formatError(l) {
-            if (l && typeof l == "object")
-              return { code: v(l, "code"), name: v(l, "name"), message: v(l, "message") };
+          _formatError(u) {
+            if (u && typeof u == "object")
+              return { code: v(u, "code"), name: v(u, "name"), message: v(u, "message") };
           },
-          _getDiagnosticsData(l, a, r, i) {
+          _getDiagnosticsData(u, a, r, i) {
             var o;
             return {
-              success: l?.ok === !0,
-              statusCode: l?.status,
+              success: u?.ok === !0,
+              statusCode: u?.status,
               sdkRegion:
-                (o = l?.headers) === null || o === void 0 ? void 0 : o.get("x-statsig-region"),
+                (o = u?.headers) === null || o === void 0 ? void 0 : o.get("x-statsig-region"),
               isDelta: r.includes('"is_delta":true') === !0 ? !0 : void 0,
               attempt: a,
               error: e.Diagnostics._formatError(i),
             };
           },
-          _enqueueDiagnosticsEvent(l, a, r, i) {
+          _enqueueDiagnosticsEvent(u, a, r, i) {
             const o = e.Diagnostics._getMarkers(r);
             if (o == null || o.length <= 0) return -1;
             const n = o[o.length - 1].timestamp - o[0].timestamp;
             e.Diagnostics._clearMarkers(r);
-            const t = m(l, { context: "initialize", markers: o.slice(), statsigOptions: i });
+            const t = m(u, { context: "initialize", markers: o.slice(), statsigOptions: i });
             return (a.enqueue(t), n);
           },
         };
-        function _(l, a, r, i) {
-          return Object.assign({ key: r, action: a, step: i, timestamp: Date.now() }, l);
+        function _(u, a, r, i) {
+          return Object.assign({ key: r, action: a, step: i, timestamp: Date.now() }, u);
         }
-        function m(l, a) {
-          return { eventName: g, user: l, value: null, metadata: a, time: Date.now() };
+        function m(u, a) {
+          return { eventName: g, user: u, value: null, metadata: a, time: Date.now() };
         }
-        function b(l, a) {
+        function b(u, a) {
           var r;
-          const i = (r = y.get(l)) !== null && r !== void 0 ? r : [];
-          (i.push(a), y.set(l, i));
+          const i = (r = y.get(u)) !== null && r !== void 0 ? r : [];
+          (i.push(a), y.set(u, i));
         }
-        function v(l, a) {
-          if (a in l) return l[a];
+        function v(u, a) {
+          if (a in u) return u[a];
         }
       })(Pe)),
     Pe
@@ -228,18 +228,18 @@ function Ze() {
   ((ct = 1),
     Object.defineProperty(ee, "__esModule", { value: !0 }),
     (ee._isTypeMatch = ee._typeOf = void 0));
-  function e(u) {
-    return Array.isArray(u) ? "array" : typeof u;
+  function e(l) {
+    return Array.isArray(l) ? "array" : typeof l;
   }
   ee._typeOf = e;
-  function y(u, h) {
+  function y(l, h) {
     const g = (_) => (Array.isArray(_) ? "array" : _ === null ? "null" : typeof _);
-    return g(u) === g(h);
+    return g(l) === g(h);
   }
   return ((ee._isTypeMatch = y), ee);
 }
 var dt;
-function fe() {
+function ge() {
   return (
     dt ||
       ((dt = 1),
@@ -247,7 +247,7 @@ function fe() {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._getSortedObject = e._DJB2Object = e._DJB2 = void 0));
         const y = Ze(),
-          u = (_) => {
+          l = (_) => {
             let m = 0;
             for (let b = 0; b < _.length; b++) {
               const v = _.charCodeAt(b);
@@ -255,7 +255,7 @@ function fe() {
             }
             return String(m >>> 0);
           };
-        e._DJB2 = u;
+        e._DJB2 = l;
         const h = (_, m) => (0, e._DJB2)(JSON.stringify((0, e._getSortedObject)(_, m)));
         e._DJB2Object = h;
         const g = (_, m) => {
@@ -263,13 +263,13 @@ function fe() {
           const b = Object.keys(_).sort(),
             v = {};
           return (
-            b.forEach((l) => {
-              const a = _[l];
+            b.forEach((u) => {
+              const a = _[u];
               if (m === 0 || (0, y._typeOf)(a) !== "object") {
-                v[l] = a;
+                v[u] = a;
                 return;
               }
-              v[l] = (0, e._getSortedObject)(a, m != null ? m - 1 : m);
+              v[u] = (0, e._getSortedObject)(a, m != null ? m - 1 : m);
             }),
             v
           );
@@ -285,7 +285,7 @@ function Ie() {
   ((_t = 1),
     Object.defineProperty(Z, "__esModule", { value: !0 }),
     (Z._getStorageKey = Z._getUserStorageKey = void 0));
-  const e = fe();
+  const e = ge();
   function y(h, g, _) {
     var m;
     if (_) return _(h, g);
@@ -293,18 +293,18 @@ function Ie() {
       v = [
         `uid:${(m = g?.userID) !== null && m !== void 0 ? m : ""}`,
         `cids:${Object.keys(b)
-          .sort((l, a) => l.localeCompare(a))
-          .map((l) => `${l}-${b[l]}`)
+          .sort((u, a) => u.localeCompare(a))
+          .map((u) => `${u}-${b[u]}`)
           .join(",")}`,
         `k:${h}`,
       ];
     return (0, e._DJB2)(v.join("|"));
   }
   Z._getUserStorageKey = y;
-  function u(h, g, _) {
+  function l(h, g, _) {
     return g ? y(h, g, _) : (0, e._DJB2)(`k:${h}`);
   }
-  return ((Z._getStorageKey = u), Z);
+  return ((Z._getStorageKey = l), Z);
 }
 var je = {},
   ft;
@@ -341,7 +341,7 @@ function Ce() {
 }
 var Ne = {},
   gt;
-function le() {
+function ue() {
   return (
     gt ||
       ((gt = 1),
@@ -357,12 +357,12 @@ function le() {
               void 0));
         const y = () => (typeof window < "u" ? window : null);
         e._getWindowSafe = y;
-        const u = () => {
+        const l = () => {
           var v;
-          const l = (0, e._getWindowSafe)();
-          return (v = l?.document) !== null && v !== void 0 ? v : null;
+          const u = (0, e._getWindowSafe)();
+          return (v = u?.document) !== null && v !== void 0 ? v : null;
         };
-        e._getDocumentSafe = u;
+        e._getDocumentSafe = l;
         const h = () => {
           if ((0, e._getDocumentSafe)() !== null) return !1;
           const v =
@@ -370,14 +370,14 @@ function le() {
           return typeof EdgeRuntime == "string" || v;
         };
         e._isServerEnv = h;
-        const g = (v, l) => {
+        const g = (v, u) => {
           const a = (0, e._getWindowSafe)();
-          typeof a?.addEventListener == "function" && a.addEventListener(v, l);
+          typeof a?.addEventListener == "function" && a.addEventListener(v, u);
         };
         e._addWindowEventListenerSafe = g;
-        const _ = (v, l) => {
+        const _ = (v, u) => {
           const a = (0, e._getDocumentSafe)();
-          typeof a?.addEventListener == "function" && a.addEventListener(v, l);
+          typeof a?.addEventListener == "function" && a.addEventListener(v, u);
         };
         e._addDocumentEventListenerSafe = _;
         const m = () => {
@@ -414,19 +414,19 @@ function Xt() {
         void 0));
   const e = "statsig::config_exposure",
     y = "statsig::gate_exposure",
-    u = "statsig::layer_exposure",
+    l = "statsig::layer_exposure",
     h = (a, r, i, o, n) => (
       i.bootstrapMetadata && (o.bootstrapMetadata = i.bootstrapMetadata),
       {
         eventName: a,
         user: r,
         value: null,
-        metadata: l(i, o),
+        metadata: u(i, o),
         secondaryExposures: n,
         time: Date.now(),
       }
     ),
-    g = ({ eventName: a }) => a === y || a === e || a === u;
+    g = ({ eventName: a }) => a === y || a === e || a === l;
   q._isExposureEvent = g;
   const _ = (a, r, i) => {
     var o, n, t;
@@ -498,11 +498,11 @@ function Xt() {
     return (
       ((w = r.__evaluation) === null || w === void 0 ? void 0 : w.version) != null &&
         (U.configVersion = r.__evaluation.version),
-      h(u, a, r.details, U, m(k, o))
+      h(l, a, r.details, U, m(k, o))
     );
   };
   q._createLayerParameterExposure = v;
-  const l = (a, r) => (
+  const u = (a, r) => (
     (r.reason = a.reason),
     a.lcut && (r.lcut = String(a.lcut)),
     a.receivedAt && (r.receivedAt = String(a.receivedAt)),
@@ -537,7 +537,7 @@ function Q() {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._setObjectInStorage = e._getObjectFromStorage = e.Storage = void 0));
         const y = j(),
-          u = le(),
+          l = ue(),
           h = {},
           g = {
             isReady: () => !0,
@@ -554,7 +554,7 @@ function Q() {
           };
         let _ = null;
         try {
-          const r = (0, u._getWindowSafe)();
+          const r = (0, l._getWindowSafe)();
           r &&
             r.localStorage &&
             typeof r.localStorage.getItem == "function" &&
@@ -600,11 +600,11 @@ function Q() {
             r ? (b = g) : (b = m);
           },
         };
-        function l(r) {
+        function u(r) {
           const i = e.Storage.getItem(r);
           return JSON.parse(i ?? "null");
         }
-        e._getObjectFromStorage = l;
+        e._getObjectFromStorage = u;
         function a(r, i) {
           e.Storage.setItem(r, JSON.stringify(i));
         }
@@ -613,16 +613,16 @@ function Q() {
     Fe
   );
 }
-var he = {},
+var ye = {},
   mt;
 function Yt() {
-  if (mt) return he;
+  if (mt) return ye;
   ((mt = 1),
-    Object.defineProperty(he, "__esModule", { value: !0 }),
-    (he.UrlConfiguration = void 0));
-  const e = fe(),
+    Object.defineProperty(ye, "__esModule", { value: !0 }),
+    (ye.UrlConfiguration = void 0));
+  const e = ge(),
     y = Ce(),
-    u = {
+    l = {
       [y.Endpoint._initialize]: "i",
       [y.Endpoint._rgstr]: "e",
       [y.Endpoint._download_config_specs]: "d",
@@ -632,12 +632,12 @@ function Yt() {
       ((this.customUrl = null),
         (this.fallbackUrls = null),
         (this.endpoint = _),
-        (this.endpointDnsKey = u[_]),
+        (this.endpointDnsKey = l[_]),
         m && (this.customUrl = m),
         !m && b && (this.customUrl = b.endsWith("/") ? `${b}${_}` : `${b}/${_}`),
         v && (this.fallbackUrls = v));
-      const l = y.NetworkDefault[_];
-      this.defaultUrl = `${l}/${_}`;
+      const u = y.NetworkDefault[_];
+      this.defaultUrl = `${u}/${_}`;
     }
     getUrl() {
       var _;
@@ -649,7 +649,7 @@ function Yt() {
       return (0, e._DJB2)(this.customUrl + m);
     }
   };
-  return ((he.UrlConfiguration = h), he);
+  return ((ye.UrlConfiguration = h), ye);
 }
 var qe = {},
   St;
@@ -664,30 +664,30 @@ function et() {
             e._isUnloading =
             e._isCurrentlyVisible =
               void 0));
-        const y = le(),
-          u = "foreground",
+        const y = ue(),
+          l = "foreground",
           h = "background",
           g = [];
-        let _ = u,
+        let _ = l,
           m = !1;
-        const b = () => _ === u;
+        const b = () => _ === l;
         e._isCurrentlyVisible = b;
         const v = () => m;
         e._isUnloading = v;
-        const l = (r) => {
+        const u = (r) => {
           g.unshift(r);
         };
-        e._subscribeToVisiblityChanged = l;
+        e._subscribeToVisiblityChanged = u;
         const a = (r) => {
           r !== _ && ((_ = r), g.forEach((i) => i(r)));
         };
         ((e._notifyVisibilityChanged = a),
           (0, y._addWindowEventListenerSafe)("focus", () => {
-            ((m = !1), (0, e._notifyVisibilityChanged)(u));
+            ((m = !1), (0, e._notifyVisibilityChanged)(l));
           }),
           (0, y._addWindowEventListenerSafe)("blur", () => (0, e._notifyVisibilityChanged)(h)),
           (0, y._addDocumentEventListenerSafe)("visibilitychange", () => {
-            (0, e._notifyVisibilityChanged)(document.visibilityState === "visible" ? u : h);
+            (0, e._notifyVisibilityChanged)(document.visibilityState === "visible" ? l : h);
           }),
           (0, y._addWindowEventListenerSafe)((0, y._getUnloadEvent)(), () => {
             ((m = !0), (0, e._notifyVisibilityChanged)(h));
@@ -733,14 +733,14 @@ function Zt() {
     };
   (Object.defineProperty(Y, "__esModule", { value: !0 }), (Y.EventLogger = void 0));
   const y = Ie(),
-    u = fe(),
+    l = ge(),
     h = j(),
     g = Ce(),
-    _ = le(),
+    _ = ue(),
     m = Xt(),
     b = Te(),
     v = Q(),
-    l = Yt(),
+    u = Yt(),
     a = et(),
     r = 100,
     i = 1e4,
@@ -750,7 +750,7 @@ function Zt() {
     c = 200,
     f = {},
     s = { Startup: "startup", GainedFocus: "gained_focus" };
-  let E = class _e {
+  let E = class fe {
     static _safeFlushAndForget(d) {
       var S;
       (S = f[d]) === null || S === void 0 || S.flush().catch(() => {});
@@ -783,7 +783,7 @@ function Zt() {
           ),
         (this._maxQueueSize = (U = k?.loggingBufferMaxSize) !== null && U !== void 0 ? U : r));
       const L = k?.networkConfig;
-      this._logEventUrlConfig = new l.UrlConfiguration(
+      this._logEventUrlConfig = new u.UrlConfiguration(
         g.Endpoint._rgstr,
         L?.logEventUrl,
         L?.api,
@@ -800,7 +800,7 @@ function Zt() {
       this._shouldLogEvent(d) &&
         (this._normalizeAndAppendEvent(d),
         this._quickFlushIfNeeded(),
-        this._queue.length > this._maxQueueSize && _e._safeFlushAndForget(this._sdkKey));
+        this._queue.length > this._maxQueueSize && fe._safeFlushAndForget(this._sdkKey));
     }
     incrementNonExposureCount(d) {
       var S;
@@ -819,8 +819,8 @@ function Zt() {
         S ||
           (0, a._subscribeToVisiblityChanged)((D) => {
             D === "background"
-              ? _e._safeFlushAndForget(this._sdkKey)
-              : D === "foreground" && _e._safeRetryFailedLogs(this._sdkKey);
+              ? fe._safeFlushAndForget(this._sdkKey)
+              : D === "foreground" && fe._safeRetryFailedLogs(this._sdkKey);
           }),
         this._retryFailedLogs(s.Startup),
         this._startBackgroundFlushInterval());
@@ -844,7 +844,7 @@ function Zt() {
       this._hasRunQuickFlush ||
         ((this._hasRunQuickFlush = !0),
         !(Date.now() - this._creationTime > c) &&
-          setTimeout(() => _e._safeFlushAndForget(this._sdkKey), c));
+          setTimeout(() => fe._safeFlushAndForget(this._sdkKey), c));
     }
     _shouldLogEvent(d) {
       var S;
@@ -943,7 +943,7 @@ function Zt() {
       });
     }
     _getStorageKey() {
-      return `statsig.failed_logs.${(0, u._DJB2)(this._sdkKey)}`;
+      return `statsig.failed_logs.${(0, l._DJB2)(this._sdkKey)}`;
     }
     _normalizeAndAppendEvent(d) {
       d.user && ((d.user = Object.assign({}, d.user)), delete d.user.privateAttributes);
@@ -981,7 +981,7 @@ function Zt() {
             : i,
         k = setInterval(() => {
           const C = f[this._sdkKey];
-          !C || C._flushIntervalId !== k ? clearInterval(k) : _e._safeFlushAndForget(this._sdkKey);
+          !C || C._flushIntervalId !== k ? clearInterval(k) : fe._safeFlushAndForget(this._sdkKey);
         }, D);
       this._flushIntervalId = k;
     }
@@ -997,12 +997,12 @@ function Oe() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigMetadataProvider = e.SDK_VERSION = void 0),
-          (e.SDK_VERSION = "3.24.3"));
+          (e.SDK_VERSION = "3.24.4"));
         let y = { sdkVersion: e.SDK_VERSION, sdkType: "js-mono" };
         e.StatsigMetadataProvider = {
           get: () => y,
-          add: (u) => {
-            y = Object.assign(Object.assign({}, y), u);
+          add: (l) => {
+            y = Object.assign(Object.assign({}, y), l);
           },
         };
       })(Ke)),
@@ -1015,7 +1015,7 @@ function ln() {
   return (Et || ((Et = 1), Object.defineProperty(Be, "__esModule", { value: !0 })), Be);
 }
 var z = {},
-  ye = {},
+  ne = {},
   me = {},
   wt;
 function tt() {
@@ -1024,7 +1024,7 @@ function tt() {
   function e() {
     if (typeof crypto < "u" && typeof crypto.randomUUID == "function") return crypto.randomUUID();
     let y = new Date().getTime(),
-      u = (typeof performance < "u" && performance.now && performance.now() * 1e3) || 0;
+      l = (typeof performance < "u" && performance.now && performance.now() * 1e3) || 0;
     return `xxxxxxxx-xxxx-4xxx-${"89ab"[Math.floor(Math.random() * 4)]}xxx-xxxxxxxxxxxx`.replace(
       /[xy]/g,
       (g) => {
@@ -1032,7 +1032,7 @@ function tt() {
         return (
           y > 0
             ? ((_ = (y + _) % 16 | 0), (y = Math.floor(y / 16)))
-            : ((_ = (u + _) % 16 | 0), (u = Math.floor(u / 16))),
+            : ((_ = (l + _) % 16 | 0), (l = Math.floor(l / 16))),
           (g === "x" ? _ : (_ & 7) | 8).toString(16)
         );
       },
@@ -1042,17 +1042,19 @@ function tt() {
 }
 var Dt;
 function Re() {
-  if (Dt) return ye;
-  ((Dt = 1), Object.defineProperty(ye, "__esModule", { value: !0 }), (ye.StableID = void 0));
+  if (Dt) return ne;
+  ((Dt = 1),
+    Object.defineProperty(ne, "__esModule", { value: !0 }),
+    (ne.getCookieName = ne.StableID = void 0));
   const e = Ie(),
     y = j(),
-    u = le(),
+    l = ue(),
     h = Q(),
     g = tt(),
     _ = {},
     m = {},
     b = {};
-  ye.StableID = {
+  ne.StableID = {
     cookiesEnabled: !1,
     randomID: Math.random().toString(36),
     get: (n) => {
@@ -1062,12 +1064,12 @@ function Re() {
       return (
         (t = r(n)),
         t != null
-          ? ((_[n] = t), l(t, n), t)
-          : ((t = a(n)), t == null && (t = (0, g.getUUID)()), l(t, n), i(t, n), (_[n] = t), t)
+          ? ((_[n] = t), u(t, n), t)
+          : ((t = a(n)), t == null && (t = (0, g.getUUID)()), u(t, n), i(t, n), (_[n] = t), t)
       );
     },
     setOverride: (n, t) => {
-      ((_[t] = n), l(n, t), i(n, t));
+      ((_[t] = n), u(n, t), i(n, t));
     },
     _setCookiesEnabled: (n, t) => {
       m[n] = t;
@@ -1079,7 +1081,7 @@ function Re() {
   function v(n) {
     return `statsig.stable_id.${(0, e._getStorageKey)(n)}`;
   }
-  function l(n, t) {
+  function u(n, t) {
     const c = v(t);
     try {
       (0, h._setObjectInStorage)(c, n);
@@ -1092,7 +1094,7 @@ function Re() {
     return (0, h._getObjectFromStorage)(t);
   }
   function r(n) {
-    if (!m[n] || (0, u._getDocumentSafe)() == null) return null;
+    if (!m[n] || (0, l._getDocumentSafe)() == null) return null;
     const t = document.cookie.split(";");
     for (const c of t) {
       const [f, s] = c.trim().split("=");
@@ -1101,7 +1103,7 @@ function Re() {
     return null;
   }
   function i(n, t) {
-    if (!m[t] || !document) return;
+    if (!m[t] || (0, l._getDocumentSafe)() == null) return;
     const c = new Date();
     (c.setFullYear(c.getFullYear() + 1),
       (document.cookie = `${o(t)}=${encodeURIComponent(n)}; expires=${c.toUTCString()}; path=/`));
@@ -1109,18 +1111,18 @@ function Re() {
   function o(n) {
     return `statsig.stable_id.${(0, e._getStorageKey)(n)}`;
   }
-  return ye;
+  return ((ne.getCookieName = o), ne);
 }
-var ne = {},
+var re = {},
   kt;
 function en() {
-  if (kt) return ne;
+  if (kt) return re;
   ((kt = 1),
-    Object.defineProperty(ne, "__esModule", { value: !0 }),
-    (ne._getFullUserHash = ne._normalizeUser = void 0));
-  const e = fe(),
+    Object.defineProperty(re, "__esModule", { value: !0 }),
+    (re._getFullUserHash = re._normalizeUser = void 0));
+  const e = ge(),
     y = j();
-  function u(g, _, m) {
+  function l(g, _, m) {
     try {
       const b = JSON.parse(JSON.stringify(g));
       return (
@@ -1133,11 +1135,11 @@ function en() {
       return (y.Log.error("Failed to JSON.stringify user"), { statsigEnvironment: void 0 });
     }
   }
-  ne._normalizeUser = u;
+  re._normalizeUser = l;
   function h(g) {
     return g ? (0, e._DJB2Object)(g) : null;
   }
-  return ((ne._getFullUserHash = h), ne);
+  return ((re._getFullUserHash = h), re);
 }
 var Se = {},
   Ot;
@@ -1145,9 +1147,9 @@ function tn() {
   if (Ot) return Se;
   ((Ot = 1), Object.defineProperty(Se, "__esModule", { value: !0 }), (Se._typedJsonParse = void 0));
   const e = j();
-  function y(u, h, g) {
+  function y(l, h, g) {
     try {
-      const _ = JSON.parse(u);
+      const _ = JSON.parse(l);
       if (_ && typeof _ == "object" && h in _) return _;
     } catch {}
     return (e.Log.error(`Failed to parse ${g}`), null);
@@ -1192,7 +1194,7 @@ function un() {
   (Object.defineProperty(z, "__esModule", { value: !0 }),
     (z._makeDataAdapterResult = z.DataAdapterCore = void 0));
   const y = j(),
-    u = Re(),
+    l = Re(),
     h = en(),
     g = Q(),
     _ = tn(),
@@ -1204,7 +1206,7 @@ function un() {
         (this._options = null),
         (this._sdkKey = null),
         (this._lastModifiedStoreKey = `statsig.last_modified_time.${o}`),
-        (this._inMemoryCache = new l()));
+        (this._inMemoryCache = new u()));
     }
     attach(i, o, n) {
       ((this._sdkKey = i), (this._options = o));
@@ -1225,7 +1227,7 @@ function un() {
       this._inMemoryCache.add(t, v("Bootstrap", i, null, n));
     }
     _getIsCacheValueValid(i) {
-      return i.stableID == null || i.stableID === u.StableID.get(this._getSdkKey());
+      return i.stableID == null || i.stableID === l.StableID.get(this._getSdkKey());
     }
     _getDataAsyncImpl(i, o, n) {
       return e(this, void 0, void 0, function* () {
@@ -1261,7 +1263,7 @@ function un() {
         if (!s) return (y.Log.debug("No response returned for latest value"), null);
         const E = (0, _._typedJsonParse)(s, "has_updates", "Response"),
           w = this._getSdkKey(),
-          d = u.StableID.get(w);
+          d = l.StableID.get(w);
         let S = null;
         if (E?.has_updates === !0) S = v("Network", s, d, o);
         else if (c && E?.has_updates === !1) S = v("NetworkNotModified", c, d, o);
@@ -1308,7 +1310,7 @@ function un() {
     };
   }
   z._makeDataAdapterResult = v;
-  class l {
+  class u {
     constructor() {
       this._data = {};
     }
@@ -1362,15 +1364,15 @@ function nt() {
   let y;
   return (
     (pe.SDKType = {
-      _get: (u) => {
+      _get: (l) => {
         var h;
-        return ((h = e[u]) !== null && h !== void 0 ? h : "js-mono") + (y ?? "");
+        return ((h = e[l]) !== null && h !== void 0 ? h : "js-mono") + (y ?? "");
       },
-      _setClientType(u, h) {
-        e[u] = h;
+      _setClientType(l, h) {
+        e[l] = h;
       },
-      _setBindingType(u) {
-        (!y || y === "-react") && (y = "-" + u);
+      _setBindingType(l) {
+        (!y || y === "-react") && (y = "-" + l);
       },
     }),
     pe
@@ -1415,7 +1417,7 @@ function nn() {
           };
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.ErrorBoundary = e.EXCEPTION_ENDPOINT = void 0));
-        const u = j(),
+        const l = j(),
           h = nt(),
           g = Oe();
         e.EXCEPTION_ENDPOINT = "https://statsigapi.net/v1/sdk_exception";
@@ -1431,7 +1433,7 @@ function nn() {
           wrap(i, o) {
             try {
               const n = i;
-              l(n).forEach((t) => {
+              u(n).forEach((t) => {
                 const c = n[t];
                 "$EB" in c ||
                   ((n[t] = (...f) => this._capture(o ? `${o}:${t}` : t, () => c.apply(i, f))),
@@ -1461,7 +1463,7 @@ function nn() {
           }
           _onError(i, o) {
             try {
-              (u.Log.warn(`Caught error in ${i}`, { error: o }),
+              (l.Log.warn(`Caught error in ${i}`, { error: o }),
                 y(this, void 0, void 0, function* () {
                   var t, c, f, s, E, w, d;
                   const S = o || Error(_),
@@ -1532,7 +1534,7 @@ function nn() {
             return _;
           }
         }
-        function l(r) {
+        function u(r) {
           const i = new Set();
           let o = Object.getPrototypeOf(r);
           for (; o && o !== Object.prototype; )
@@ -1587,14 +1589,14 @@ var ze = {},
 function fn() {
   return (Lt || ((Lt = 1), Object.defineProperty(ze, "__esModule", { value: !0 })), ze);
 }
-var re = {},
+var ie = {},
   Pt;
 function rn() {
-  if (Pt) return re;
+  if (Pt) return ie;
   ((Pt = 1),
-    Object.defineProperty(re, "__esModule", { value: !0 }),
-    (re.createMemoKey = re.MemoPrefix = void 0),
-    (re.MemoPrefix = {
+    Object.defineProperty(ie, "__esModule", { value: !0 }),
+    (ie.createMemoKey = ie.MemoPrefix = void 0),
+    (ie.MemoPrefix = {
       _gate: "g",
       _dynamicConfig: "c",
       _experiment: "e",
@@ -1604,7 +1606,7 @@ function rn() {
     }));
   const e = new Set([]),
     y = new Set(["userPersistedValues"]);
-  function u(h, g, _) {
+  function l(h, g, _) {
     let m = `${h}|${g}`;
     if (!_) return m;
     for (const b of Object.keys(_)) {
@@ -1613,26 +1615,26 @@ function rn() {
     }
     return m;
   }
-  return ((re.createMemoKey = u), re);
+  return ((ie.createMemoKey = l), ie);
 }
-var ie = {},
+var oe = {},
   J = {},
-  oe = {},
+  se = {},
   At;
 function gn() {
-  if (At) return oe;
+  if (At) return se;
   At = 1;
   var e =
-    (oe && oe.__awaiter) ||
-    function (b, v, l, a) {
+    (se && se.__awaiter) ||
+    function (b, v, u, a) {
       function r(i) {
-        return i instanceof l
+        return i instanceof u
           ? i
-          : new l(function (o) {
+          : new u(function (o) {
               o(i);
             });
       }
-      return new (l || (l = Promise))(function (i, o) {
+      return new (u || (u = Promise))(function (i, o) {
         function n(f) {
           try {
             c(a.next(f));
@@ -1653,17 +1655,17 @@ function gn() {
         c((a = a.apply(b, v || [])).next());
       });
     };
-  (Object.defineProperty(oe, "__esModule", { value: !0 }), (oe._fetchTxtRecords = void 0));
+  (Object.defineProperty(se, "__esModule", { value: !0 }), (se._fetchTxtRecords = void 0));
   const y = new Uint8Array([
       0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 13, 102, 101, 97, 116, 117, 114, 101, 97, 115, 115, 101,
       116, 115, 3, 111, 114, 103, 0, 0, 16, 0, 1,
     ]),
-    u = "https://cloudflare-dns.com/dns-query",
+    l = "https://cloudflare-dns.com/dns-query",
     h = ["i", "e", "d"],
     g = 200;
   function _(b) {
     return e(this, void 0, void 0, function* () {
-      const v = yield b(u, {
+      const v = yield b(l, {
         method: "POST",
         headers: { "Content-Type": "application/dns-message", Accept: "application/dns-message" },
         body: y,
@@ -1672,12 +1674,12 @@ function gn() {
         const r = new Error("Failed to fetch TXT records from DNS");
         throw ((r.name = "DnsTxtFetchError"), r);
       }
-      const l = yield v.arrayBuffer(),
-        a = new Uint8Array(l);
+      const u = yield v.arrayBuffer(),
+        a = new Uint8Array(u);
       return m(a);
     });
   }
-  oe._fetchTxtRecords = _;
+  se._fetchTxtRecords = _;
   function m(b) {
     const v = b.findIndex(
       (a, r) =>
@@ -1687,11 +1689,11 @@ function gn() {
       const a = new Error("Failed to parse TXT records from DNS");
       throw ((a.name = "DnsTxtParseError"), a);
     }
-    let l = "";
-    for (let a = v - 1; a < b.length; a++) l += String.fromCharCode(b[a]);
-    return l.split(",");
+    let u = "";
+    for (let a = v - 1; a < b.length; a++) u += String.fromCharCode(b[a]);
+    return u.split(",");
   }
-  return oe;
+  return se;
 }
 var jt;
 function vn() {
@@ -1731,7 +1733,7 @@ function vn() {
   (Object.defineProperty(J, "__esModule", { value: !0 }),
     (J._isDomainFailure = J.NetworkFallbackResolver = void 0));
   const y = gn(),
-    u = fe(),
+    l = ge(),
     h = j(),
     g = Q(),
     _ = 10080 * 60 * 1e3,
@@ -1863,11 +1865,11 @@ function vn() {
     );
   }
   J._isDomainFailure = v;
-  function l(o) {
-    return `statsig.network_fallback.${(0, u._DJB2)(o)}`;
+  function u(o) {
+    return `statsig.network_fallback.${(0, l._DJB2)(o)}`;
   }
   function a(o, n) {
-    const t = l(o);
+    const t = u(o);
     if (!n || Object.keys(n).length === 0) {
       g.Storage.removeItem(t);
       return;
@@ -1875,7 +1877,7 @@ function vn() {
     g.Storage.setItem(t, JSON.stringify(n));
   }
   function r(o) {
-    const n = l(o),
+    const n = u(o),
       t = g.Storage.getItem(n);
     if (!t) return null;
     try {
@@ -1901,12 +1903,12 @@ function on() {
   const e = {};
   return (
     (Ee.SDKFlags = {
-      setFlags: (y, u) => {
-        e[y] = u;
+      setFlags: (y, l) => {
+        e[y] = l;
       },
-      get: (y, u) => {
+      get: (y, l) => {
         var h, g;
-        return (g = (h = e[y]) === null || h === void 0 ? void 0 : h[u]) !== null && g !== void 0
+        return (g = (h = e[y]) === null || h === void 0 ? void 0 : h[l]) !== null && g !== void 0
           ? g
           : !1;
       },
@@ -1924,7 +1926,7 @@ function rt() {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigSession = e.SessionID = void 0));
         const y = H(),
-          u = Ie(),
+          l = Ie(),
           h = j(),
           g = Q(),
           _ = tt(),
@@ -1934,7 +1936,7 @@ function rt() {
         ((e.SessionID = { get: (s) => e.StatsigSession.get(s).data.sessionID }),
           (e.StatsigSession = {
             get: (s) => {
-              v[s] == null && (v[s] = l(s));
+              v[s] == null && (v[s] = u(s));
               const E = v[s];
               return r(E);
             },
@@ -1942,7 +1944,7 @@ function rt() {
               v[E] = a(s, E);
             },
           }));
-        function l(s) {
+        function u(s) {
           let E = f(s);
           const w = Date.now();
           return (
@@ -1985,7 +1987,7 @@ function rt() {
           return Date.now() - s > b;
         }
         function t(s) {
-          return `statsig.session_id.${(0, u._getStorageKey)(s)}`;
+          return `statsig.session_id.${(0, l._getStorageKey)(s)}`;
         }
         function c(s, E) {
           const w = t(E);
@@ -2017,10 +2019,10 @@ function sn() {
 }
 var Kt;
 function hn() {
-  if (Kt) return ie;
+  if (Kt) return oe;
   Kt = 1;
   var e =
-    (ie && ie.__awaiter) ||
+    (oe && oe.__awaiter) ||
     function (I, p, O, T) {
       function R(M) {
         return M instanceof O
@@ -2030,7 +2032,7 @@ function hn() {
             });
       }
       return new (O || (O = Promise))(function (M, P) {
-        function ge(N) {
+        function ve(N) {
           try {
             $(T.next(N));
           } catch (F) {
@@ -2045,21 +2047,21 @@ function hn() {
           }
         }
         function $(N) {
-          N.done ? M(N.value) : R(N.value).then(ge, V);
+          N.done ? M(N.value) : R(N.value).then(ve, V);
         }
         $((T = T.apply(I, p || [])).next());
       });
     };
-  (Object.defineProperty(ie, "__esModule", { value: !0 }), (ie.NetworkCore = void 0), H());
+  (Object.defineProperty(oe, "__esModule", { value: !0 }), (oe.NetworkCore = void 0), H());
   const y = H(),
-    u = Ye(),
+    l = Ye(),
     h = j(),
     g = Ce(),
     _ = vn(),
     m = on(),
     b = nt(),
-    v = le(),
-    l = rt(),
+    v = ue(),
+    u = rt(),
     a = Re(),
     r = sn(),
     i = Oe(),
@@ -2124,7 +2126,7 @@ function hn() {
       return e(this, void 0, void 0, function* () {
         var O, T, R, M;
         if (!D(p) || this._netConfig.preventAllNetworkTraffic) return null;
-        const { method: P, body: ge, retries: V, attempt: $ } = p,
+        const { method: P, body: ve, retries: V, attempt: $ } = p,
           N = p.urlConfig.endpoint;
         if (this._isRateLimited(N))
           return (
@@ -2135,33 +2137,33 @@ function hn() {
           );
         const F = $ ?? 1,
           K = typeof AbortController < "u" ? new AbortController() : null,
-          ue = setTimeout(() => {
+          ce = setTimeout(() => {
             K?.abort(`Timeout of ${this._timeout}ms expired.`);
           }, this._timeout),
-          ve = this._getPopulatedURL(p);
+          he = this._getPopulatedURL(p);
         let G = null;
         const an = (0, n._isUnloading)();
         try {
-          const ce = {
+          const de = {
             method: P,
-            body: ge,
+            body: ve,
             headers: Object.assign({}, p.headers),
             signal: K?.signal,
             priority: p.priority,
             keepalive: an,
           };
           W(p, F);
-          const de = this._leakyBucket[N];
+          const _e = this._leakyBucket[N];
           if (
-            (de && ((de.lastRequestTime = Date.now()), (this._leakyBucket[N] = de)),
+            (_e && ((_e.lastRequestTime = Date.now()), (this._leakyBucket[N] = _e)),
             (G = yield (
               (O = this._netConfig.networkOverrideFunc) !== null && O !== void 0 ? O : fetch
-            )(ve, ce)),
-            clearTimeout(ue),
+            )(he, de)),
+            clearTimeout(ce),
             !G.ok)
           ) {
             const ke = yield G.text().catch(() => "No Text"),
-              ot = new Error(`NetworkError: ${ve} ${ke}`);
+              ot = new Error(`NetworkError: ${he} ${ke}`);
             throw ((ot.name = "NetworkError"), ot);
           }
           const Me = yield G.text();
@@ -2170,15 +2172,15 @@ function hn() {
             this._fallbackResolver.tryBumpExpiryTime(p.sdkKey, p.urlConfig),
             { body: Me, code: G.status }
           );
-        } catch (ce) {
-          const de = U(K, ce),
+        } catch (de) {
+          const _e = U(K, de),
             it = L(K);
           if (
-            (x(p, G, F, "", ce),
+            (x(p, G, F, "", de),
             (yield this._fallbackResolver.tryFetchUpdatedFallbackInfo(
               p.sdkKey,
               p.urlConfig,
-              de,
+              _e,
               it,
             )) &&
               (p.fallbackUrl = this._fallbackResolver.getActiveFallbackUrl(p.sdkKey, p.urlConfig)),
@@ -2188,13 +2190,13 @@ function hn() {
               R === void 0 ||
               R.call(this, {
                 name: "error",
-                error: ce,
+                error: de,
                 tag: r.ErrorTag.NetworkError,
                 requestArgs: p,
               });
-            const ke = `A networking error occurred during ${P} request to ${ve}.`;
+            const ke = `A networking error occurred during ${P} request to ${he}.`;
             return (
-              h.Log.error(ke, de, ce),
+              h.Log.error(ke, _e, de),
               (M = this._errorBoundary) === null || M === void 0 || M.attachErrorIfNoneExists(ke),
               null
             );
@@ -2242,7 +2244,7 @@ function hn() {
             [g.NetworkParam.SdkType]: b.SDKType._get(p.sdkKey),
             [g.NetworkParam.SdkVersion]: i.SDK_VERSION,
             [g.NetworkParam.Time]: String(Date.now()),
-            [g.NetworkParam.SessionID]: l.SessionID.get(p.sdkKey),
+            [g.NetworkParam.SessionID]: u.SessionID.get(p.sdkKey),
           },
           p.params,
         ),
@@ -2284,14 +2286,14 @@ function hn() {
               M = new CompressionStream("gzip"),
               P = M.writable.getWriter();
             (P.write(R).catch(h.Log.error), P.close().catch(h.Log.error));
-            const ge = M.readable.getReader(),
+            const ve = M.readable.getReader(),
               V = [];
             let $;
-            for (; !($ = yield ge.read()).done; ) V.push($.value);
-            const N = V.reduce((ue, ve) => ue + ve.length, 0),
+            for (; !($ = yield ve.read()).done; ) V.push($.value);
+            const N = V.reduce((ce, he) => ce + he.length, 0),
               F = new Uint8Array(N);
             let K = 0;
-            for (const ue of V) (F.set(ue, K), (K += ue.length));
+            for (const ce of V) (F.set(ce, K), (K += ce.length));
             ((p.body = F),
               (p.params = Object.assign(
                 Object.assign({}, (O = p.params) !== null && O !== void 0 ? O : {}),
@@ -2308,12 +2310,12 @@ function hn() {
       return ("data" in O && k(R, O.data), R);
     }
   };
-  ie.NetworkCore = S;
+  oe.NetworkCore = S;
   const D = (I) => (I.sdkKey ? !0 : (h.Log.warn("Unable to make request without an SDK key"), !1)),
     k = (I, p) => {
       const { sdkKey: O, fallbackUrl: T } = I,
         R = a.StableID.get(O),
-        M = l.SessionID.get(O),
+        M = u.SessionID.get(O),
         P = b.SDKType._get(O);
       I.body = JSON.stringify(
         Object.assign(Object.assign({}, p), {
@@ -2366,18 +2368,18 @@ function hn() {
   }
   function W(I, p) {
     I.urlConfig.endpoint === g.Endpoint._initialize &&
-      u.Diagnostics._markInitNetworkReqStart(I.sdkKey, { attempt: p });
+      l.Diagnostics._markInitNetworkReqStart(I.sdkKey, { attempt: p });
   }
   function x(I, p, O, T, R) {
     I.urlConfig.endpoint === g.Endpoint._initialize &&
-      u.Diagnostics._markInitNetworkReqEnd(I.sdkKey, u.Diagnostics._getDiagnosticsData(p, O, T, R));
+      l.Diagnostics._markInitNetworkReqEnd(I.sdkKey, l.Diagnostics._getDiagnosticsData(p, O, T, R));
   }
   function B(I) {
     return e(this, void 0, void 0, function* () {
       yield new Promise((p) => setTimeout(p, Math.min(c * (I * I), f)));
     });
   }
-  return ie;
+  return oe;
 }
 var We = {},
   Bt;
@@ -2398,18 +2400,18 @@ function Sn() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e._fastApproxSizeOf = void 0));
         const y = 2,
-          u = 1,
+          l = 1,
           h = (g, _) => {
             let m = 0;
             const b = Object.keys(g);
             for (let v = 0; v < b.length; v++) {
-              const l = b[v],
-                a = g[l];
+              const u = b[v],
+                a = g[u];
               if (
-                ((m += l.length),
+                ((m += u.length),
                 typeof a == "object" && a !== null
                   ? (m += (0, e._fastApproxSizeOf)(a, _) + y)
-                  : (m += String(a).length + u),
+                  : (m += String(a).length + l),
                 m >= _)
               )
                 return m;
@@ -2421,13 +2423,13 @@ function Sn() {
     He
   );
 }
-var se = {},
+var ae = {},
   Vt;
 function bn() {
-  if (Vt) return se;
+  if (Vt) return ae;
   Vt = 1;
   var e =
-    (se && se.__awaiter) ||
+    (ae && ae.__awaiter) ||
     function (n, t, c, f) {
       function s(E) {
         return E instanceof c
@@ -2457,16 +2459,16 @@ function bn() {
         D((f = f.apply(n, t || [])).next());
       });
     };
-  (Object.defineProperty(se, "__esModule", { value: !0 }), (se.StatsigClientBase = void 0), H());
+  (Object.defineProperty(ae, "__esModule", { value: !0 }), (ae.StatsigClientBase = void 0), H());
   const y = H(),
-    u = nn(),
+    l = nn(),
     h = Zt(),
     g = j(),
     _ = rn(),
-    m = le(),
+    m = ue(),
     b = rt(),
     v = Re(),
-    l = Te(),
+    u = Te(),
     a = Q(),
     r = 3e3;
   let i = class {
@@ -2487,7 +2489,7 @@ function bn() {
         (this._memoCache = {}),
         (this.overrideAdapter = (E = s?.overrideAdapter) !== null && E !== void 0 ? E : null),
         (this._logger = new h.EventLogger(t, D, f, s)),
-        (this._errorBoundary = new u.ErrorBoundary(t, s, D)),
+        (this._errorBoundary = new l.ErrorBoundary(t, s, D)),
         this._errorBoundary.wrap(this),
         this._errorBoundary.wrap(c),
         this._errorBoundary.wrap(this._logger),
@@ -2521,7 +2523,7 @@ function bn() {
         t.logEventCompressionMode
           ? this._logger.setLogEventCompressionMode(t.logEventCompressionMode)
           : t.disableCompression &&
-            this._logger.setLogEventCompressionMode(l.LogEventCompressionMode.Disabled));
+            this._logger.setLogEventCompressionMode(u.LogEventCompressionMode.Disabled));
     }
     flush() {
       return this._logger.flush();
@@ -2590,7 +2592,7 @@ function bn() {
       };
     }
   };
-  se.StatsigClientBase = i;
+  ae.StatsigClientBase = i;
   function o(n, t) {
     var c;
     if ((0, m._isServerEnv)()) return;
@@ -2606,7 +2608,7 @@ function bn() {
       (f.instances = s),
       (__STATSIG__ = f));
   }
-  return se;
+  return ae;
 }
 var De = {},
   zt;
@@ -2640,51 +2642,51 @@ function wn() {
         void 0));
   const e = j(),
     y = Ze();
-  function u(l, a, r, i) {
+  function l(u, a, r, i) {
     var o;
     return {
-      name: l,
+      name: u,
       details: a,
       ruleID: (o = r?.rule_id) !== null && o !== void 0 ? o : "",
       __evaluation: r,
       value: i,
     };
   }
-  function h(l, a, r) {
+  function h(u, a, r) {
     var i;
-    return Object.assign(Object.assign({}, u(l, a, r, r?.value === !0)), {
+    return Object.assign(Object.assign({}, l(u, a, r, r?.value === !0)), {
       idType: (i = r?.id_type) !== null && i !== void 0 ? i : null,
     });
   }
   A._makeFeatureGate = h;
-  function g(l, a, r) {
+  function g(u, a, r) {
     var i;
     const o = (i = r?.value) !== null && i !== void 0 ? i : {};
-    return Object.assign(Object.assign({}, u(l, a, r, o)), { get: v(l, r?.value) });
+    return Object.assign(Object.assign({}, l(u, a, r, o)), { get: v(u, r?.value) });
   }
   A._makeDynamicConfig = g;
-  function _(l, a, r) {
+  function _(u, a, r) {
     var i;
-    const o = g(l, a, r);
+    const o = g(u, a, r);
     return Object.assign(Object.assign({}, o), {
       groupName: (i = r?.group_name) !== null && i !== void 0 ? i : null,
     });
   }
   A._makeExperiment = _;
-  function m(l, a, r, i) {
+  function m(u, a, r, i) {
     var o, n;
-    return Object.assign(Object.assign({}, u(l, a, r, void 0)), {
-      get: v(l, r?.value, i),
+    return Object.assign(Object.assign({}, l(u, a, r, void 0)), {
+      get: v(u, r?.value, i),
       groupName: (o = r?.group_name) !== null && o !== void 0 ? o : null,
       __value: (n = r?.value) !== null && n !== void 0 ? n : {},
     });
   }
   A._makeLayer = m;
-  function b(l, a, r, i) {
-    return Object.assign(Object.assign(Object.assign({}, l), a), { get: v(l.name, r, i) });
+  function b(u, a, r, i) {
+    return Object.assign(Object.assign(Object.assign({}, u), a), { get: v(u.name, r, i) });
   }
   A._mergeOverride = b;
-  function v(l, a, r) {
+  function v(u, a, r) {
     return (i, o) => {
       var n;
       const t = (n = a?.[i]) !== null && n !== void 0 ? n : null;
@@ -2692,7 +2694,7 @@ function wn() {
         ? (o ?? null)
         : o != null && !(0, y._isTypeMatch)(t, o)
           ? (e.Log.warn(
-              `Parameter type mismatch. '${l}.${i}' was found to be type '${typeof t}' but fallback/return type is '${typeof o}'. See https://docs.statsig.com/client/javascript-sdk/#typed-getters`,
+              `Parameter type mismatch. '${u}.${i}' was found to be type '${typeof t}' but fallback/return type is '${typeof o}'. See https://docs.statsig.com/client/javascript-sdk/#typed-getters`,
             ),
             o ?? null)
           : (r?.(i), t);
@@ -2705,28 +2707,28 @@ var Xe = {},
 function Dn() {
   return (xt || ((xt = 1), Object.defineProperty(Xe, "__esModule", { value: !0 })), Xe);
 }
-var ae = {},
+var le = {},
   Ht;
 function kn() {
-  if (Ht) return ae;
+  if (Ht) return le;
   ((Ht = 1),
-    Object.defineProperty(ae, "__esModule", { value: !0 }),
-    (ae.UPDATE_DETAIL_ERROR_MESSAGES = ae.createUpdateDetails = void 0));
-  const e = (y, u, h, g, _, m) => ({
+    Object.defineProperty(le, "__esModule", { value: !0 }),
+    (le.UPDATE_DETAIL_ERROR_MESSAGES = le.createUpdateDetails = void 0));
+  const e = (y, l, h, g, _, m) => ({
     duration: h,
-    source: u,
+    source: l,
     success: y,
     error: g,
     sourceUrl: _,
     warnings: m,
   });
   return (
-    (ae.createUpdateDetails = e),
-    (ae.UPDATE_DETAIL_ERROR_MESSAGES = {
+    (le.createUpdateDetails = e),
+    (le.UPDATE_DETAIL_ERROR_MESSAGES = {
       NO_NETWORK_DATA:
         "No data was returned from the network. This may be due to a network timeout if a timeout value was specified in the options or ad blocker error.",
     }),
-    ae
+    le
   );
 }
 var Qt;
@@ -2738,7 +2740,7 @@ function On() {
         var y =
             (X && X.__createBinding) ||
             (Object.create
-              ? function (l, a, r, i) {
+              ? function (u, a, r, i) {
                   i === void 0 && (i = r);
                   var o = Object.getOwnPropertyDescriptor(a, r);
                   ((!o || ("get" in o ? !a.__esModule : o.writable || o.configurable)) &&
@@ -2748,16 +2750,16 @@ function On() {
                         return a[r];
                       },
                     }),
-                    Object.defineProperty(l, i, o));
+                    Object.defineProperty(u, i, o));
                 }
-              : function (l, a, r, i) {
-                  (i === void 0 && (i = r), (l[i] = a[r]));
+              : function (u, a, r, i) {
+                  (i === void 0 && (i = r), (u[i] = a[r]));
                 }),
-          u =
+          l =
             (X && X.__exportStar) ||
-            function (l, a) {
-              for (var r in l)
-                r !== "default" && !Object.prototype.hasOwnProperty.call(a, r) && y(a, l, r);
+            function (u, a) {
+              for (var r in u)
+                r !== "default" && !Object.prototype.hasOwnProperty.call(a, r) && y(a, u, r);
             };
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.Storage = e.Log = e.EventLogger = e.Diagnostics = void 0),
@@ -2792,50 +2794,50 @@ function On() {
             return v.Storage;
           },
         }),
-          u(H(), e),
-          u(Ie(), e),
-          u(ln(), e),
-          u(un(), e),
-          u(Ye(), e),
-          u(cn(), e),
-          u(nn(), e),
-          u(dn(), e),
-          u(_n(), e),
-          u(fe(), e),
-          u(fn(), e),
-          u(j(), e),
-          u(rn(), e),
-          u(Ce(), e),
-          u(hn(), e),
-          u(yn(), e),
-          u(mn(), e),
-          u(le(), e),
-          u(nt(), e),
-          u(rt(), e),
-          u(Sn(), e),
-          u(Re(), e),
-          u(bn(), e),
-          u(sn(), e),
-          u(pn(), e),
-          u(Xt(), e),
-          u(Oe(), e),
-          u(Te(), e),
-          u(En(), e),
-          u(wn(), e),
-          u(Dn(), e),
-          u(en(), e),
-          u(Q(), e),
-          u(tn(), e),
-          u(Ze(), e),
-          u(Yt(), e),
-          u(tt(), e),
-          u(et(), e),
-          u(kn(), e),
-          u(on(), e),
+          l(H(), e),
+          l(Ie(), e),
+          l(ln(), e),
+          l(un(), e),
+          l(Ye(), e),
+          l(cn(), e),
+          l(nn(), e),
+          l(dn(), e),
+          l(_n(), e),
+          l(ge(), e),
+          l(fn(), e),
+          l(j(), e),
+          l(rn(), e),
+          l(Ce(), e),
+          l(hn(), e),
+          l(yn(), e),
+          l(mn(), e),
+          l(ue(), e),
+          l(nt(), e),
+          l(rt(), e),
+          l(Sn(), e),
+          l(Re(), e),
+          l(bn(), e),
+          l(sn(), e),
+          l(pn(), e),
+          l(Xt(), e),
+          l(Oe(), e),
+          l(Te(), e),
+          l(En(), e),
+          l(wn(), e),
+          l(Dn(), e),
+          l(en(), e),
+          l(Q(), e),
+          l(tn(), e),
+          l(Ze(), e),
+          l(Yt(), e),
+          l(tt(), e),
+          l(et(), e),
+          l(kn(), e),
+          l(on(), e),
           Object.assign((0, h._getStatsigGlobal)(), { Log: m.Log, SDK_VERSION: b.SDK_VERSION }));
       })(X)),
     X
   );
 }
 var An = On();
-export { In as a, st as c, Cn as g, On as r, An as s };
+export { Cn as a, st as c, In as g, On as r, An as s };

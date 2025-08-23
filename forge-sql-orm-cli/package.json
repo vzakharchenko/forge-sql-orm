@@ -50,7 +50,7 @@
     "drizzle-orm": "^0.44.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^9.34.0",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
