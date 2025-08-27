@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-CB_tuz8G.js",
+      "./body-4N2TVMZn.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-CjUpGILb.js",
       "./lodash-vendor-ChTTYVmI.js",
@@ -7831,7 +7831,8 @@ var Tn = {},
       h = n.LEGACY_margin,
       v = n.spacing,
       g = v === void 0 ? "none" : v,
-      b = f ? { __html: f } : void 0;
+      b = n.name,
+      m = f ? { __html: f } : void 0;
     if (d && !Ot("platform-visual-refresh-icons"))
       return y.createElement(d, {
         primaryColor: c ?? i,
@@ -7841,14 +7842,18 @@ var Tn = {},
         testId: o,
         UNSAFE_margin: h,
       });
-    var m = (r = t.type) !== null && r !== void 0 ? r : "core",
-      w =
-        "size" in t && t.size !== void 0 && (t.size === "small" || t.size === "medium")
-          ? t.size
-          : "medium",
-      O = yy[m],
-      _ = _y[m][w][g],
-      S = O + 2 * _;
+    var w = (r = t.type) !== null && r !== void 0 ? r : "core",
+      O = "medium";
+    if ("size" in t && t.size !== void 0) {
+      if (typeof t.size == "string") O = t.size === "small" || t.size === "medium" ? t.size : O;
+      else if (b) {
+        var _ = t.size(b);
+        O = _ === "small" || _ === "medium" ? _ : O;
+      }
+    }
+    var S = yy[w],
+      x = _y[w][O][g],
+      j = S + 2 * x;
     return y.createElement(
       "span",
       {
@@ -7861,21 +7866,21 @@ var Tn = {},
           "_1e0c1o8l _vchhusvi _1o9zidpf _vwz4kb7n _y4ti1igz _bozg1mb9",
           "_12va1onz _jcxd1r8n",
           p && "_1bsb1kw7 _4t3i1kw7",
-          (m === "utility" || w === "small") && "_vwz4utpp",
+          (w === "utility" || O === "small") && "_vwz4utpp",
         ]),
       },
       y.createElement("svg", {
         fill: "none",
         viewBox: ""
-          .concat(0 - _, " ")
-          .concat(0 - _, " ")
-          .concat(S, " ")
-          .concat(S),
+          .concat(0 - x, " ")
+          .concat(0 - x, " ")
+          .concat(j, " ")
+          .concat(j),
         role: "presentation",
-        dangerouslySetInnerHTML: b,
+        dangerouslySetInnerHTML: m,
         className: R([
           "_1reo15vq _18m915vq _syaz1r31 _lcxvglyw _s7n4yfq0 _vc881r31",
-          p ? "_1bsb1kw7 _4t3i1kw7" : m === "utility" ? by[g] : w === "small" ? gy[g] : hy[g],
+          p ? "_1bsb1kw7 _4t3i1kw7" : w === "utility" ? by[g] : O === "small" ? gy[g] : hy[g],
         ]),
       }),
     );
@@ -7900,6 +7905,7 @@ function wy() {
       t.default,
       Object.assign(
         {
+          name: "ChevronLeftIcon",
           dangerouslySetGlyph:
             '<path fill="currentcolor" d="m9.97 1.47-6 6a.75.75 0 0 0-.052 1.004l.052.056 6 6 1.06-1.06L5.56 8l5.47-5.47z"/>',
         },
@@ -8026,8 +8032,11 @@ function Ey() {
     return i && i.__esModule ? i : { default: i };
   }
   const a = (i) =>
-    e.default.createElement(t.default, Object.assign({ LEGACY_fallbackIcon: r.default }, i));
-  return ((a.Name = "ChevronLeftIconMigration"), (Tn.default = a), Tn);
+    e.default.createElement(
+      t.default,
+      Object.assign({ name: "ChevronLeftIcon", LEGACY_fallbackIcon: r.default }, i),
+    );
+  return ((a.displayName = "ChevronLeftIconMigration"), (Tn.default = a), Tn);
 }
 var xy = Ey();
 const Cy = er(xy);
@@ -8047,6 +8056,7 @@ function Ry() {
       t.default,
       Object.assign(
         {
+          name: "ChevronRightIcon",
           dangerouslySetGlyph:
             '<path fill="currentcolor" d="m6.03 1.47 6 6a.75.75 0 0 1 .052 1.004l-.052.056-6 6-1.06-1.06L10.44 8 4.97 2.53z"/>',
         },
@@ -8089,8 +8099,11 @@ function Ay() {
     return i && i.__esModule ? i : { default: i };
   }
   const a = (i) =>
-    e.default.createElement(t.default, Object.assign({ LEGACY_fallbackIcon: r.default }, i));
-  return ((a.Name = "ChevronRightIconMigration"), ($n.default = a), $n);
+    e.default.createElement(
+      t.default,
+      Object.assign({ name: "ChevronRightIcon", LEGACY_fallbackIcon: r.default }, i),
+    );
+  return ((a.displayName = "ChevronRightIconMigration"), ($n.default = a), $n);
 }
 var jy = Ay();
 const Iy = er(jy);
@@ -8897,7 +8910,7 @@ var f_ = y.forwardRef(function (e, t) {
         action: "clicked",
         componentName: u || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "14.11.3",
+        packageVersion: "14.11.4",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -11173,7 +11186,7 @@ var Jm = {
         action: "clicked",
         componentName: "button",
         packageName: "@atlaskit/button",
-        packageVersion: "23.4.0",
+        packageVersion: "23.4.2",
         analyticsData: n,
       }),
       fe = y.useCallback(
@@ -11848,6 +11861,7 @@ function O0() {
       t.default,
       Object.assign(
         {
+          name: "ArrowDownIcon",
           dangerouslySetGlyph:
             '<path fill="currentcolor" fill-rule="evenodd" d="M8.75 1v11.44l3.72-3.72 1.06 1.06-5 5a.75.75 0 0 1-1.06 0l-5-5 1.06-1.06 3.72 3.72V1z" clip-rule="evenodd"/>',
         },
@@ -11873,6 +11887,7 @@ function E0() {
       t.default,
       Object.assign(
         {
+          name: "ArrowUpIcon",
           dangerouslySetGlyph:
             '<path fill="currentcolor" fill-rule="evenodd" d="M8.75 15V3.56l3.72 3.72 1.06-1.06-5-5a.75.75 0 0 0-1.06 0l-5 5 1.06 1.06 3.72-3.72V15z" clip-rule="evenodd"/>',
         },
@@ -14311,7 +14326,7 @@ function Mr(e) {
   return e;
 }
 var $1 = R_.tooltip(),
-  wd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.1" },
+  wd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.2" },
   N1 = { top: "bottom", bottom: "top", left: "right", right: "left" },
   F1 = function (t) {
     return t.split("-")[0];
@@ -15075,14 +15090,14 @@ var nO = function (t) {
         action: "sorted",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.2.9",
+        packageVersion: "18.2.10",
       }),
       Be = ca({
         fn: V,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.2.9",
+        packageVersion: "18.2.10",
       });
     y.useEffect(
       function () {
@@ -15200,7 +15215,7 @@ var nO = function (t) {
   },
   aO = y.lazy(function () {
     return sg(
-      () => import("./body-CB_tuz8G.js"),
+      () => import("./body-4N2TVMZn.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

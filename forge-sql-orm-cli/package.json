@@ -15,7 +15,8 @@
     "build": "npm run clean && vite build && npm run build:types",
     "build:types": "tsc --emitDeclarationOnly",
     "prepublish:npm": "npm run build",
-    "publish:npm": "npm publish --access public"
+    "publish:npm": "npm publish --access public",
+    "knip": "knip"
   },
   "files": [
     "dist-cli",
@@ -43,20 +44,20 @@
     "commander": "^14.0.0",
     "dotenv": "^17.2.1",
     "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.5",
     "forge-sql-orm": "^2.0.28",
     "inquirer": "^12.9.4",
     "mysql2": "^3.14.3",
-    "reflect-metadata": "^0.2.2",
-    "drizzle-orm": "^0.44.5"
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
-    "@types/inquirer": "^9.0.9",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
+    "knip": "^5.63.0",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.9.2",
     "vite": "^7.1.3"

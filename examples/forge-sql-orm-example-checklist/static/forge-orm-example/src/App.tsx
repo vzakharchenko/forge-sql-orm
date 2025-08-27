@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { invoke, showFlag } from "@forge/bridge";
-import { observer } from "mobx-react";
 import "./App.css";
 import { FlagType } from "@forge/bridge/out/flag/flag";
 
@@ -159,4 +158,4 @@ function App() {
   );
 }
 
-export default observer(App);
+export default App;

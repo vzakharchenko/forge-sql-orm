@@ -1,7 +1,6 @@
 {
   "name": "jira-global-page-custom-ui",
   "version": "1.1.4",
-  "main": "index.js",
   "license": "MIT",
   "private": true,
   "dependencies": {
@@ -16,10 +15,14 @@
     "migration:drop": "forge-sql-orm-cli migrations:drop",
     "build:ci": "tsc --target esnext --project tsconfig.json  --outDir dist && rm -rf dist",
     "forge:debug": "forge tunnel -d -f index.handler",
-    "build:husky": "tsc --project tsconfig.json  --outDir ./dist && rm -rf ./dist"
+    "build:husky": "tsc --project tsconfig.json  --outDir ./dist && rm -rf ./dist",
+    "knip": "knip"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.28"
+    "@types/node": "^24.3.0",
+    "forge-sql-orm-cli": "^2.0.28",
+    "knip": "^5.63.0",
+    "typescript": "^5.9.2"
   },
   "overrides": {
     "esbuild": "npm:esbuild@latest",

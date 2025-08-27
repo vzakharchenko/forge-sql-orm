@@ -1,15 +1,14 @@
 {
   "name": "jira-global-page-custom-ui",
   "version": "1.1.4",
-  "main": "index.js",
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/events": "^2.0.4",
+    "@forge/api": "^6.1.0",
     "@forge/resolver": "1.7.0",
     "@forge/sql": "^3.0.4",
-    "forge-sql-orm": "2.0.28",
-    "uuid": "^11.1.0"
+    "drizzle-orm": "^0.44.5",
+    "forge-sql-orm": "2.0.28"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
@@ -17,10 +16,14 @@
     "migration:update": "forge-sql-orm-cli migrations:update",
     "migration:drop": "forge-sql-orm-cli migrations:drop",
     "build:ci": "tsc --target esnext --project tsconfig.json  --outDir dist && rm -rf dist",
-    "forge:debug": "forge tunnel -d -f index.handler"
+    "forge:debug": "forge tunnel -d -f index.handler",
+    "knip": "knip"
   },
   "devDependencies": {
-    "forge-sql-orm-cli": "^2.0.28"
+    "@types/node": "^24.3.0",
+    "forge-sql-orm-cli": "^2.0.28",
+    "knip": "^5.63.0",
+    "typescript": "^5.9.2"
   },
   "overrides": {
     "esbuild": "npm:esbuild@latest",
