@@ -56,20 +56,20 @@ jobs:
         files: ./coverage/lcov.info
     - run: echo BUILD CLI
     - run: cd forge-sql-orm-cli && npm ci
-    - run: cd forge-sql-orm-cli && npm knip
+    - run: cd forge-sql-orm-cli && npm run knip
     - run: cd forge-sql-orm-cli && npm run lint
     - run: cd forge-sql-orm-cli && npm run build
     - run: echo BUILD EXAMPLES
     - run: cd examples/forge-sql-orm-example-dynamic && npm i
-    - run: cd examples/forge-sql-orm-example-dynamic && npm knip
+    - run: cd examples/forge-sql-orm-example-dynamic && npm run knip
     - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-dynamic/static/forge-orm-example && npm run build
 
     - run: cd examples/forge-sql-orm-example-drizzle-driver-simple && npm i
-    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple && npm knip
+    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple && npm run knip
     - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-drizzle-driver-simple/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push'
@@ -85,10 +85,10 @@ jobs:
       run: cd examples/forge-sql-orm-example-drizzle-driver-simple && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
 
     - run: cd examples/forge-sql-orm-example-simple && npm i
-    - run: cd examples/forge-sql-orm-example-simple && npm knip
+    - run: cd examples/forge-sql-orm-example-simple && npm run knip
     - run: cd examples/forge-sql-orm-example-simple && npm run build:ci
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-simple/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push'
@@ -104,10 +104,10 @@ jobs:
       run: cd examples/forge-sql-orm-example-simple && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
 
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
-    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm knip
+    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm run knip
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm run build:ci
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push'
@@ -123,10 +123,10 @@ jobs:
       run: cd examples/forge-sql-orm-example-optimistic-locking && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
 
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm i
-    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm knip
+    - run: cd examples/forge-sql-orm-example-optimistic-locking && npm run knip
     - run: cd examples/forge-sql-orm-example-optimistic-locking && npm run build:ci
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-optimistic-locking/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push'
@@ -142,10 +142,10 @@ jobs:
       run: cd examples/forge-sql-orm-example-optimistic-locking && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
 
     - run: cd examples/forge-sql-orm-example-query-analyses && npm i
-    - run: cd examples/forge-sql-orm-example-query-analyses && npm knip
+    - run: cd examples/forge-sql-orm-example-query-analyses && npm run knip
     - run: cd examples/forge-sql-orm-example-query-analyses && npm run build:ci
     - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-query-analyses/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push'
@@ -161,10 +161,10 @@ jobs:
       run: cd examples/forge-sql-orm-example-query-analyses && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
 
     - run: cd examples/forge-sql-orm-example-checklist && npm i
-    - run: cd examples/forge-sql-orm-example-checklist && npm knip
+    - run: cd examples/forge-sql-orm-example-checklist && npm run knip
     - run: cd examples/forge-sql-orm-example-checklist && npm run build:ci
     - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-checklist/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push'
@@ -180,10 +180,10 @@ jobs:
       run: cd examples/forge-sql-orm-example-checklist && export FORGE_EMAIL=${{ secrets.FORGE_EMAIL }} && export FORGE_API_TOKEN=${{ secrets.FORGE_API_TOKEN }} && forge install -e development  -s  ${{ secrets.FORGE_HOSTNAME }} -p Jira --confirm-scopes  --non-interactive --upgrade
 
     - run: cd examples/forge-sql-orm-example-org-tracker && npm i
-    - run: cd examples/forge-sql-orm-example-org-tracker && npm knip
+    - run: cd examples/forge-sql-orm-example-org-tracker && npm run knip
     - run: cd examples/forge-sql-orm-example-org-tracker && npm run build:ci
     - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm i
-    - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm knip
+    - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm run knip
     - run: cd examples/forge-sql-orm-example-org-tracker/static/forge-orm-example && npm run build
     - name: Forge Deploy (Production)
       if: github.event_name == 'push' && github.actor != 'dependabot[bot]'
