@@ -19,5 +19,5 @@ export const defaultConfig: KnipConfig = {
     },
 };
 
-const config: KnipConfig = { ...defaultConfig, project: ["src/**/*.ts"] };
+const config: KnipConfig = { ...defaultConfig, project: ["src/**/*.ts"] , ignoreDependencies:["uuid"]};
 export default config;
