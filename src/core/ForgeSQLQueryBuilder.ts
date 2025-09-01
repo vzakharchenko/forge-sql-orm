@@ -371,7 +371,7 @@ export const forgeDateTimeString = customType<{
     return "datetime";
   },
   toDriver(value: Date) {
-    return DateTime.fromJSDate(value).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
+    return DateTime.fromJSDate(new Date(value)).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
     const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";

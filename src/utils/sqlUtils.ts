@@ -50,20 +50,21 @@ interface ConfigBuilderData {
 export const parseDateTime = (value: string | Date, format: string): Date => {
   let result: Date;
   if (value instanceof Date) {
-    return value;
-  }
-  // 1. Try to parse using the provided format (strict mode)
-  const dt = DateTime.fromFormat(value, format);
-  if (dt.isValid) {
-    result = dt.toJSDate();
+    result = value;
   } else {
-    // 2. Try to parse as ISO string
-    const isoDt = DateTime.fromISO(value);
-    if (isoDt.isValid) {
-      result = isoDt.toJSDate();
+    // 1. Try to parse using the provided format (strict mode)
+    const dt = DateTime.fromFormat(value, format);
+    if (dt.isValid) {
+      result = dt.toJSDate();
     } else {
-      // 3. Fallback: use native Date constructor
-      result = new Date(value);
+      // 2. Try to parse as ISO string
+      const isoDt = DateTime.fromISO(value);
+      if (isoDt.isValid) {
+        result = isoDt.toJSDate();
+      } else {
+        // 3. Fallback: use native Date constructor
+        result = new Date(value);
+      }
     }
   }
   // 4. Ensure the result is a valid Date object
