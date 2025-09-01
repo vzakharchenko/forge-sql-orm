@@ -3,7 +3,7 @@ import { defaultConfig } from "../../knip.config";
 const config: KnipConfig = {
   ...defaultConfig,
   project: ["src/**/*.ts"],
-    ignoreDependencies:["drizzle-kit"]
+  ignoreDependencies: ["drizzle-kit"],
 };
 
 export default config;
