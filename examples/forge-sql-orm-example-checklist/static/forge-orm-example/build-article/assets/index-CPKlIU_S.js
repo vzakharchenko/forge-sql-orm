@@ -49,16 +49,16 @@ function ur() {
     o = Object.prototype.hasOwnProperty,
     r = e.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,
     i = { key: !0, ref: !0, __self: !0, __source: !0 };
-  function a(u, l, s) {
-    var c,
+  function a(u, c, s) {
+    var l,
       f = {},
       h = null,
       d = null;
     (s !== void 0 && (h = "" + s),
-      l.key !== void 0 && (h = "" + l.key),
-      l.ref !== void 0 && (d = l.ref));
-    for (c in l) o.call(l, c) && !i.hasOwnProperty(c) && (f[c] = l[c]);
-    if (u && u.defaultProps) for (c in ((l = u.defaultProps), l)) f[c] === void 0 && (f[c] = l[c]);
+      c.key !== void 0 && (h = "" + c.key),
+      c.ref !== void 0 && (d = c.ref));
+    for (l in c) o.call(c, l) && !i.hasOwnProperty(l) && (f[l] = c[l]);
+    if (u && u.defaultProps) for (l in ((c = u.defaultProps), c)) f[l] === void 0 && (f[l] = c[l]);
     return { $$typeof: t, type: u, key: h, ref: d, props: f, _owner: r.current };
   }
   return ((S.Fragment = n), (S.jsx = a), (S.jsxs = a), S);
@@ -140,9 +140,9 @@ function It(e, t, n, o, r, i) {
   }
   for (
     var u = o.kind,
-      l = u === "getter" ? "get" : u === "setter" ? "set" : "value",
+      c = u === "getter" ? "get" : u === "setter" ? "set" : "value",
       s = !t && e ? (o.static ? e : e.prototype) : null,
-      c = t || (s ? Object.getOwnPropertyDescriptor(s, o.name) : {}),
+      l = t || (s ? Object.getOwnPropertyDescriptor(s, o.name) : {}),
       f,
       h = !1,
       d = n.length - 1;
@@ -156,16 +156,16 @@ function It(e, t, n, o, r, i) {
       if (h) throw new TypeError("Cannot add initializers after decoration has completed");
       i.push(a(p || null));
     };
-    var y = (0, n[d])(u === "accessor" ? { get: c.get, set: c.set } : c[l], v);
+    var y = (0, n[d])(u === "accessor" ? { get: l.get, set: l.set } : l[c], v);
     if (u === "accessor") {
       if (y === void 0) continue;
       if (y === null || typeof y != "object") throw new TypeError("Object expected");
-      ((f = a(y.get)) && (c.get = f),
-        (f = a(y.set)) && (c.set = f),
+      ((f = a(y.get)) && (l.get = f),
+        (f = a(y.set)) && (l.set = f),
         (f = a(y.init)) && r.unshift(f));
-    } else (f = a(y)) && (u === "field" ? r.unshift(f) : (c[l] = f));
+    } else (f = a(y)) && (u === "field" ? r.unshift(f) : (l[c] = f));
   }
-  (s && Object.defineProperty(s, o.name, c), (h = !0));
+  (s && Object.defineProperty(s, o.name, l), (h = !0));
 }
 function Tt(e, t, n) {
   for (var o = arguments.length > 2, r = 0; r < t.length; r++)
@@ -194,22 +194,22 @@ function Ct(e, t, n, o) {
         });
   }
   return new (n || (n = Promise))(function (i, a) {
-    function u(c) {
+    function u(l) {
       try {
-        s(o.next(c));
+        s(o.next(l));
       } catch (f) {
         a(f);
       }
     }
-    function l(c) {
+    function c(l) {
       try {
-        s(o.throw(c));
+        s(o.throw(l));
       } catch (f) {
         a(f);
       }
     }
-    function s(c) {
-      c.done ? i(c.value) : r(c.value).then(u, l);
+    function s(l) {
+      l.done ? i(l.value) : r(l.value).then(u, c);
     }
     s((o = o.apply(e, t || [])).next());
   });
@@ -239,11 +239,11 @@ function kt(e, t) {
     a
   );
   function u(s) {
-    return function (c) {
-      return l([s, c]);
+    return function (l) {
+      return c([s, l]);
     };
   }
-  function l(s) {
+  function c(s) {
     if (o) throw new TypeError("Generator is already executing.");
     for (; a && ((a = 0), s[0] && (n = 0)), n; )
       try {
@@ -291,8 +291,8 @@ function kt(e, t) {
             continue;
         }
         s = t.call(e, n);
-      } catch (c) {
-        ((s = [6, c]), (r = 0));
+      } catch (l) {
+        ((s = [6, l]), (r = 0));
       } finally {
         o = i = 0;
       }
@@ -395,12 +395,12 @@ function Nt(e, t, n) {
     o[d] &&
       ((r[d] = function (_) {
         return new Promise(function (y, p) {
-          i.push([d, _, y, p]) > 1 || l(d, _);
+          i.push([d, _, y, p]) > 1 || c(d, _);
         });
       }),
       v && (r[d] = v(r[d])));
   }
-  function l(d, v) {
+  function c(d, v) {
     try {
       s(o[d](v));
     } catch (_) {
@@ -408,16 +408,16 @@ function Nt(e, t, n) {
     }
   }
   function s(d) {
-    d.value instanceof T ? Promise.resolve(d.value.v).then(c, f) : h(i[0][2], d);
+    d.value instanceof T ? Promise.resolve(d.value.v).then(l, f) : h(i[0][2], d);
   }
-  function c(d) {
-    l("next", d);
+  function l(d) {
+    c("next", d);
   }
   function f(d) {
-    l("throw", d);
+    c("throw", d);
   }
   function h(d, v) {
-    (d(v), i.shift(), i.length && l(i[0][0], i[0][1]));
+    (d(v), i.shift(), i.length && c(i[0][0], i[0][1]));
   }
 }
 function Dt(e) {
@@ -461,13 +461,13 @@ function $t(e) {
     n[i] =
       e[i] &&
       function (a) {
-        return new Promise(function (u, l) {
-          ((a = e[i](a)), r(u, l, a.done, a.value));
+        return new Promise(function (u, c) {
+          ((a = e[i](a)), r(u, c, a.done, a.value));
         });
       };
   }
-  function r(i, a, u, l) {
-    Promise.resolve(l).then(function (s) {
+  function r(i, a, u, c) {
+    Promise.resolve(c).then(function (s) {
       i({ value: s, done: u });
     }, a);
   }
@@ -734,11 +734,11 @@ function Xt() {
     t = (n, o, r, i) => {
       let a = Date.now(),
         u = 0;
-      return async (...l) => {
+      return async (...c) => {
         const s = Date.now();
         if ((s - a > r && ((a = s), (u = 0)), u >= o))
           throw new e.BridgeAPIError(i || "Too many invocations.");
-        return ((u = u + 1), n(...l));
+        return ((u = u + 1), n(...c));
       };
     };
   return ((k.withRateLimiter = t), k);
@@ -754,15 +754,15 @@ function _r() {
           n = w(),
           o = Xt(),
           r = (0, t.getCallBridge)(),
-          i = (l) => {
-            if (l && Object.values(l).some((s) => typeof s == "function"))
+          i = (c) => {
+            if (c && Object.values(c).some((s) => typeof s == "function"))
               throw new n.BridgeAPIError(
                 "Passing functions as part of the payload is not supported!",
               );
           },
-          a = (l, s) => {
-            if (typeof l != "string") throw new n.BridgeAPIError("functionKey must be a string!");
-            return (i(s), r("invoke", { functionKey: l, payload: s }));
+          a = (c, s) => {
+            if (typeof c != "string") throw new n.BridgeAPIError("functionKey must be a string!");
+            return (i(s), r("invoke", { functionKey: c, payload: s }));
           };
         e.invoke = (0, o.withRateLimiter)(
           a,
@@ -810,14 +810,14 @@ function Yt() {
           ((f.REMOTE = "Remote"), (f.SERVICE = "Container"));
         })(e.InvokeType || (e.InvokeType = {}));
         const u = (0, t.getCallBridge)(),
-          l = (f) => {
+          c = (f) => {
             if (f && Object.values(f).some((h) => typeof h == "function"))
               throw new n.BridgeAPIError(
                 "Passing functions as part of the payload is not supported!",
               );
           },
           s = (f) => async (h) => {
-            l(h);
+            c(h);
             const d = { ...h, invokeType: `ui-${f.toLowerCase()}-fetch` },
               v = await u("invoke", d),
               { success: _, payload: y, error: p } = v ?? {},
@@ -827,7 +827,7 @@ function Yt() {
                 Array.isArray(O.headers[ae]) && (O.headers[ae] = O.headers[ae].join(","));
             return O;
           },
-          c = (f) => {
+          l = (f) => {
             const h = s(f);
             return (0, o.withRateLimiter)(
               h,
@@ -836,7 +836,7 @@ function Yt() {
               `${f} invocation calls are rate limited at ${r}/${i}s`,
             );
           };
-        e._invokeEndpointFn = c;
+        e._invokeEndpointFn = l;
       })(de)),
     de
   );
@@ -1024,15 +1024,15 @@ function Rr() {
       const a = await this.getI18nInfoConfig(),
         { fallback: u } = i;
       if (!u) {
-        let l;
+        let c;
         return (
-          a.locales.includes(r) && (l = await this.getTranslationResource(r)),
-          { translations: l ?? null, locale: r }
+          a.locales.includes(r) && (c = await this.getTranslationResource(r)),
+          { translations: c ?? null, locale: r }
         );
       }
-      for (const l of this.getLocaleLookupOrder(r, a)) {
-        const s = await this.getTranslationResource(l);
-        if (s) return { translations: s, locale: l };
+      for (const c of this.getLocaleLookupOrder(r, a)) {
+        const s = await this.getTranslationResource(c);
+        if (s) return { translations: s, locale: c };
       }
       return { translations: null, locale: r };
     }
@@ -1041,8 +1041,8 @@ function Rr() {
         a = this.getLocaleLookupOrder(r, i);
       return await Promise.all(
         a.map(async (u) => {
-          const l = await this.getTranslationResource(u);
-          return { locale: u, translations: l };
+          const c = await this.getTranslationResource(u);
+          return { locale: u, translations: c };
         }),
       );
     }
@@ -1071,12 +1071,12 @@ function Rr() {
     }
     getLocaleLookupOrder(r, i) {
       const { locales: a, fallback: u } = i,
-        l = [r],
+        c = [r],
         s = u[r];
       return (
-        s && Array.isArray(s) && s.length > 0 && l.push(...s),
-        e(l, i.fallback.default),
-        l.filter((c) => a.includes(c))
+        s && Array.isArray(s) && s.length > 0 && c.push(...s),
+        e(c, i.fallback.default),
+        c.filter((l) => a.includes(l))
       );
     }
   }
@@ -1094,15 +1094,15 @@ function Qt() {
           (e.getTranslationValueFromContent = e.getTranslationValue = void 0));
         const n = m.__importDefault(sr()),
           o = (i, a, u) => {
-            const l = i[u];
-            return l ? (0, e.getTranslationValueFromContent)(l, a) : null;
+            const c = i[u];
+            return c ? (0, e.getTranslationValueFromContent)(c, a) : null;
           };
         e.getTranslationValue = o;
         const r = (i, a) => {
           let u = i[a];
           if (!u) {
-            const l = a.split(".");
-            l.length > 1 && (u = (0, n.default)(i, l, null));
+            const c = a.split(".");
+            c.length > 1 && (u = (0, n.default)(i, c, null));
           }
           return typeof u == "string" ? u : null;
         };
@@ -1185,11 +1185,11 @@ function Tr() {
           o = (s) => s.startsWith("connect-"),
           r = (s) => s.startsWith("core:"),
           i = (s) => {
-            const c = new Set(),
+            const l = new Set(),
               f = (h, d) =>
-                !t(h) || c.has(h)
+                !t(h) || l.has(h)
                   ? []
-                  : (c.add(h),
+                  : (l.add(h),
                     Object.entries(h).flatMap(([v, _]) => {
                       const y = [...d, v];
                       return n(_)
@@ -1201,28 +1201,28 @@ function Tr() {
             return f(s, []);
           },
           a = (s) =>
-            Object.entries(s).flatMap(([c, f]) =>
-              !o(c) && !r(c) && f && Array.isArray(f) && f.length > 0 ? f.map((h) => [h, c]) : [],
+            Object.entries(s).flatMap(([l, f]) =>
+              !o(l) && !r(l) && f && Array.isArray(f) && f.length > 0 ? f.map((h) => [h, l]) : [],
             );
         e.getI18nSupportedModuleEntries = a;
         const u = (s) => {
-          const c = new Set();
+          const l = new Set();
           for (const f of (0, e.getI18nSupportedModuleEntries)(s)) {
             const h = i(f[0]);
-            for (const { key: d } of h) c.add(d);
+            for (const { key: d } of h) l.add(d);
           }
-          return c.size > 0 ? Array.from(c) : [];
+          return l.size > 0 ? Array.from(l) : [];
         };
         e.extractI18nKeysFromModules = u;
-        const l = (s) => {
-          const c = [];
+        const c = (s) => {
+          const l = [];
           for (const f of (0, e.getI18nSupportedModuleEntries)(s)) {
             const h = i(f[0]);
-            for (const d of h) c.push({ moduleName: f[1], ...d });
+            for (const d of h) l.push({ moduleName: f[1], ...d });
           }
-          return c;
+          return l;
         };
-        e.extractI18nPropertiesFromModules = l;
+        e.extractI18nPropertiesFromModules = c;
       })(ye)),
     ye
   );
@@ -1335,7 +1335,7 @@ function tr() {
     const r = n.includes(";base64") ? n.split(",")[1] : n,
       i = atob(r),
       a = new Array(i.length);
-    for (let l = 0; l < i.length; l++) a[l] = i.charCodeAt(l);
+    for (let c = 0; c < i.length; c++) a[c] = i.charCodeAt(c);
     const u = new Uint8Array(a);
     return new Blob([u], { type: o });
   };
@@ -1371,9 +1371,9 @@ function kr() {
               Object.prototype.toString.call(s) !== "[object Object]"
             )
               return !1;
-            const c = Object.getPrototypeOf(s);
-            if (c === null) return !0;
-            const f = Object.prototype.hasOwnProperty.call(c, "constructor") && c.constructor;
+            const l = Object.getPrototypeOf(s);
+            if (l === null) return !0;
+            const f = Object.prototype.hasOwnProperty.call(l, "constructor") && l.constructor;
             return (
               typeof f == "function" &&
               f instanceof f &&
@@ -1385,29 +1385,29 @@ function kr() {
           i = async (s) => {
             if (s instanceof Blob) return { ...(await o(s)), __isBlobData: !0 };
             if (Array.isArray(s))
-              return Promise.all(s.map((c) => (0, e.serialiseBlobsInPayload)(c)));
+              return Promise.all(s.map((l) => (0, e.serialiseBlobsInPayload)(l)));
             if (s && n(s)) {
-              const c = await Promise.all(
+              const l = await Promise.all(
                 Object.entries(s).map(async ([f, h]) => [
                   f,
                   await (0, e.serialiseBlobsInPayload)(h),
                 ]),
               );
-              return Object.fromEntries(c);
+              return Object.fromEntries(l);
             }
             return s;
           };
         e.serialiseBlobsInPayload = i;
         const a = (s) => {
           if (s && n(s) && "__isBlobData" in s) {
-            const c = s;
-            return r({ data: c.data, type: c.type });
+            const l = s;
+            return r({ data: l.data, type: l.type });
           }
-          if (Array.isArray(s)) return s.map((c) => (0, e.deserialiseBlobsInPayload)(c));
+          if (Array.isArray(s)) return s.map((l) => (0, e.deserialiseBlobsInPayload)(l));
           if (s && n(s)) {
-            const c = {};
-            for (const [f, h] of Object.entries(s)) c[f] = (0, e.deserialiseBlobsInPayload)(h);
-            return c;
+            const l = {};
+            for (const [f, h] of Object.entries(s)) l[f] = (0, e.deserialiseBlobsInPayload)(h);
+            return l;
           }
           return s;
         };
@@ -1416,20 +1416,20 @@ function kr() {
           s instanceof Blob
             ? !0
             : Array.isArray(s)
-              ? s.some((c) => (0, e.containsBlobs)(c))
+              ? s.some((l) => (0, e.containsBlobs)(l))
               : s && n(s)
-                ? Object.values(s).some((c) => (0, e.containsBlobs)(c))
+                ? Object.values(s).some((l) => (0, e.containsBlobs)(l))
                 : !1;
         e.containsBlobs = u;
-        const l = (s) =>
+        const c = (s) =>
           s && n(s) && "__isBlobData" in s
             ? !0
             : Array.isArray(s)
-              ? s.some((c) => (0, e.containsSerialisedBlobs)(c))
+              ? s.some((l) => (0, e.containsSerialisedBlobs)(l))
               : s && n(s)
-                ? Object.values(s).some((c) => (0, e.containsSerialisedBlobs)(c))
+                ? Object.values(s).some((l) => (0, e.containsSerialisedBlobs)(l))
                 : !1;
-        e.containsSerialisedBlobs = l;
+        e.containsSerialisedBlobs = c;
       })(ge)),
     ge
   );
@@ -1451,10 +1451,10 @@ function rr() {
     r = (i, a) =>
       n("on", {
         event: i,
-        callback: (l) => {
-          let s = l;
+        callback: (c) => {
+          let s = c;
           return (
-            (0, t.containsSerialisedBlobs)(l) && (s = (0, t.deserialiseBlobsInPayload)(l)),
+            (0, t.containsSerialisedBlobs)(c) && (s = (0, t.deserialiseBlobsInPayload)(c)),
             a(s)
           );
         },
@@ -1486,7 +1486,7 @@ function nr() {
     i = Br(),
     a = qr(),
     u = Cr(),
-    l = Mr();
+    c = Mr();
   return (
     (F.view = {
       submit: e.submit,
@@ -1497,7 +1497,7 @@ function nr() {
       getContext: i.getContext,
       theme: u.theme,
       changeWindowTitle: a.changeWindowTitle,
-      emitReadyEvent: l.emitReadyEvent,
+      emitReadyEvent: c.emitReadyEvent,
     }),
     F
   );
@@ -1526,8 +1526,8 @@ function Ar() {
       if (!u) throw new Error("Failed to get URL");
       try {
         return new URL(u);
-      } catch (l) {
-        throw new Error(`Failed to parse URL: ${u} (${l})`);
+      } catch (c) {
+        throw new Error(`Failed to parse URL: ${u} (${c})`);
       }
     },
     o = (a) => {
@@ -1566,14 +1566,14 @@ function Lr() {
     o = () => {};
   class r {
     constructor(a) {
-      var u, l;
+      var u, c;
       ((this.resource = a?.resource || null),
         (this.onClose = a?.onClose || o),
         (this.size = a?.size || "medium"),
         (this.context = a?.context || {}),
         (this.closeOnEscape = (u = a?.closeOnEscape) !== null && u !== void 0 ? u : !0),
         (this.closeOnOverlayClick =
-          (l = a?.closeOnOverlayClick) !== null && l !== void 0 ? l : !0));
+          (c = a?.closeOnOverlayClick) !== null && c !== void 0 ? c : !0));
     }
     async open() {
       try {
@@ -1617,9 +1617,9 @@ function Dr() {
       const i = {};
       for (const [a, u] of r.entries())
         if (a === "file") {
-          const l = u.name,
+          const c = u.name,
             s = u.type;
-          ((i.file = await (0, e.blobToBase64)(u)), (i.__fileName = l), (i.__fileType = s));
+          ((i.file = await (0, e.blobToBase64)(u)), (i.__fileName = c), (i.__fileType = s));
         } else i[a] = u;
       return JSON.stringify(i);
     },
@@ -1627,21 +1627,21 @@ function Dr() {
       const i = r?.body instanceof FormData,
         a = i ? await t(r?.body) : r?.body,
         u = new Request("", { body: a, method: r?.method, headers: r?.headers }),
-        l = Object.fromEntries(u.headers.entries());
+        c = Object.fromEntries(u.headers.entries());
       return {
         body: u.method !== "GET" ? await u.text() : null,
-        headers: new Headers(l),
+        headers: new Headers(c),
         isMultipartFormData: i,
       };
     },
     o = (r) => {
-      const i = async (a, u, l) => {
-        const { body: s, headers: c, isMultipartFormData: f } = await n(l);
-        c.has("X-Atlassian-Token") || c.set("X-Atlassian-Token", "no-check");
+      const i = async (a, u, c) => {
+        const { body: s, headers: l, isMultipartFormData: f } = await n(c);
+        l.has("X-Atlassian-Token") || l.set("X-Atlassian-Token", "no-check");
         const h = {
             product: a,
             restPath: u,
-            fetchRequestInit: { ...l, body: s, headers: [...c.entries()] },
+            fetchRequestInit: { ...c, body: s, headers: [...l.entries()] },
             isMultipartFormData: f,
           },
           {
@@ -1730,14 +1730,15 @@ var Ee = {},
   yt;
 function Vr() {
   if (yt) return Q;
-  ((yt = 1), Object.defineProperty(Q, "__esModule", { value: !0 }), (Q.__realtime = void 0));
+  ((yt = 1), Object.defineProperty(Q, "__esModule", { value: !0 }), (Q.realtime = void 0));
   const t = (0, g().getCallBridge)(),
-    n = (a, u) => t("publishRealtimeChannel", { channelName: a, eventPayload: u }),
-    o = (a, u, l) => t("subscribeRealtimeChannel", { channelName: a, onEvent: u, options: l }),
-    r = (a, u) => t("publishRealtimeChannel", { channelName: a, eventPayload: u, isGlobal: !0 }),
-    i = (a, u, l) =>
-      t("subscribeRealtimeChannel", { channelName: a, onEvent: u, options: l, isGlobal: !0 });
-  return ((Q.__realtime = { publish: n, subscribe: o, publishGlobal: r, subscribeGlobal: i }), Q);
+    n = (a, u, c) => t("publishRealtimeChannel", { channelName: a, eventPayload: u, options: c }),
+    o = (a, u, c) => t("subscribeRealtimeChannel", { channelName: a, onEvent: u, options: c }),
+    r = (a, u, c) =>
+      t("publishRealtimeChannel", { channelName: a, eventPayload: u, options: c, isGlobal: !0 }),
+    i = (a, u, c) =>
+      t("subscribeRealtimeChannel", { channelName: a, onEvent: u, options: c, isGlobal: !0 });
+  return ((Q.realtime = { publish: n, subscribe: o, publishGlobal: r, subscribeGlobal: i }), Q);
 }
 var bt;
 function Hr() {
@@ -1766,9 +1767,9 @@ function Wr() {
         return (await u.json()).config;
       },
       getTranslationResource: async (u) => {
-        const l = await fetch(`./${e.I18N_BUNDLE_FOLDER_NAME}/${u}.json`);
-        if (!l.ok) throw new Error(`Failed to get translation resource for locale: ${u}`);
-        return l.json();
+        const c = await fetch(`./${e.I18N_BUNDLE_FOLDER_NAME}/${u}.json`);
+        if (!c.ok) throw new Error(`Failed to get translation resource for locale: ${u}`);
+        return c.json();
       },
     },
     o = new e.TranslationsGetter(n),
@@ -1776,22 +1777,22 @@ function Wr() {
       o.reset();
     };
   R.resetTranslationsCache = r;
-  const i = async (u = null, l = { fallback: !0 }) => {
+  const i = async (u = null, c = { fallback: !0 }) => {
     let s = u;
-    return (s || (s = (await t.view.getContext()).locale), await o.getTranslations(s, l));
+    return (s || (s = (await t.view.getContext()).locale), await o.getTranslations(s, c));
   };
   R.getTranslations = i;
   const a = async (u = null) => {
-    let l = u;
-    l || (l = (await t.view.getContext()).locale);
-    const s = new e.Translator(l, o);
+    let c = u;
+    c || (c = (await t.view.getContext()).locale);
+    const s = new e.Translator(c, o);
     return (
       await s.init(),
-      (c, f) => {
+      (l, f) => {
         var h, d;
-        return (d = (h = s.translate(c)) !== null && h !== void 0 ? h : f) !== null && d !== void 0
+        return (d = (h = s.translate(l)) !== null && h !== void 0 ? h : f) !== null && d !== void 0
           ? d
-          : c;
+          : l;
       }
     );
   };
@@ -1883,22 +1884,22 @@ function zr() {
     u = async (s) => {
       try {
         i(!0);
-        const c = await oe.invoke(s ? "updateWithOptimisticLocking" : "update", e);
-        c.error
-          ? c.concurrent
+        const l = await oe.invoke(s ? "updateWithOptimisticLocking" : "update", e);
+        l.error
+          ? l.concurrent
             ? (await ee(
                 "Concurrent Modification Detected",
-                `User ${c.data?.updateDisplayName} has modified the checklist before you. Your changes could not be saved.`,
+                `User ${l.data?.updateDisplayName} has modified the checklist before you. Your changes could not be saved.`,
                 "error",
               ),
               await a())
             : await ee(
                 "Update Failed",
-                c.message || "Unable to update the checklist. Please try again later.",
+                l.message || "Unable to update the checklist. Please try again later.",
                 "error",
               )
-          : c.data &&
-            (t(c.data),
+          : l.data &&
+            (t(l.data),
             await ee(
               "Update Successful",
               "The checklist has been successfully updated",
@@ -1914,9 +1915,9 @@ function zr() {
         i(!1);
       }
     },
-    l = (s) => {
-      const c = [...JSON.parse(e.checkList)];
-      ((c[s] = { ...c[s], done: !c[s].done }), t({ ...e, checkList: JSON.stringify(c) }));
+    c = (s) => {
+      const l = [...JSON.parse(e.checkList)];
+      ((l[s] = { ...l[s], done: !l[s].done }), t({ ...e, checkList: JSON.stringify(l) }));
     };
   return n
     ? b.jsx("div", { className: "checklist-container", children: b.jsx(wt, {}) })
@@ -1936,17 +1937,17 @@ function zr() {
           }),
           b.jsx("div", {
             className: "checklist",
-            children: JSON.parse(e.checkList).map((s, c) =>
+            children: JSON.parse(e.checkList).map((s, l) =>
               b.jsxs(
                 "div",
                 {
                   className: "checklist-item",
                   children: [
-                    b.jsx("input", { type: "checkbox", checked: s.done, onChange: () => l(c) }),
+                    b.jsx("input", { type: "checkbox", checked: s.done, onChange: () => c(l) }),
                     b.jsx("span", { children: s.label }),
                   ],
                 },
-                c,
+                l,
               ),
             ),
           }),

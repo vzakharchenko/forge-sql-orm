@@ -1730,14 +1730,15 @@ var Pe = {},
   gt;
 function Xr() {
   if (gt) return ne;
-  ((gt = 1), Object.defineProperty(ne, "__esModule", { value: !0 }), (ne.__realtime = void 0));
+  ((gt = 1), Object.defineProperty(ne, "__esModule", { value: !0 }), (ne.realtime = void 0));
   const t = (0, O().getCallBridge)(),
-    n = (a, c) => t("publishRealtimeChannel", { channelName: a, eventPayload: c }),
+    n = (a, c, u) => t("publishRealtimeChannel", { channelName: a, eventPayload: c, options: u }),
     o = (a, c, u) => t("subscribeRealtimeChannel", { channelName: a, onEvent: c, options: u }),
-    r = (a, c) => t("publishRealtimeChannel", { channelName: a, eventPayload: c, isGlobal: !0 }),
+    r = (a, c, u) =>
+      t("publishRealtimeChannel", { channelName: a, eventPayload: c, options: u, isGlobal: !0 }),
     i = (a, c, u) =>
       t("subscribeRealtimeChannel", { channelName: a, onEvent: c, options: u, isGlobal: !0 });
-  return ((ne.__realtime = { publish: n, subscribe: o, publishGlobal: r, subscribeGlobal: i }), ne);
+  return ((ne.realtime = { publish: n, subscribe: o, publishGlobal: r, subscribeGlobal: i }), ne);
 }
 var pt;
 function Yr() {

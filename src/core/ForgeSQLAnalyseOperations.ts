@@ -8,7 +8,7 @@ import {
 import { SqlParameters } from "@forge/sql/out/sql-statement";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core/index";
 import { getTableName } from "drizzle-orm/table";
-import {DateTime} from "luxon";
+import { DateTime } from "luxon";
 
 /**
  * Interface representing a row from the EXPLAIN ANALYZE output
@@ -358,7 +358,8 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
    * @returns {string} The SQL query for cluster statement history
    */
   buildClusterStatementQuery(tables: string[], from?: Date, to?: Date): string {
-    const formatDateTime = (date: Date): string => DateTime.fromJSDate(date).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
+    const formatDateTime = (date: Date): string =>
+      DateTime.fromJSDate(date).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
 
     const tableConditions = tables
       .map((table) => `TABLE_NAMES LIKE CONCAT(SCHEMA_NAME, '.', '%', '${table}', '%')`)

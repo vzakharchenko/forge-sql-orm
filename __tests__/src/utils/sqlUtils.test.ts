@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
-import moment from "moment";
 import {formatLimitOffset, generateDropTableStatements, nextVal, parseDateTime} from "../../../src/utils/sqlUtils";
+import {DateTime} from "luxon";
 
 // Test suite for transformValue function
 describe("transformValue", () => {
@@ -9,16 +9,16 @@ describe("transformValue", () => {
     describe("parseDateTime", () => {
         it("should correctly parse a datetime string", () => {
             const dateString = "2024-03-03T12:34:56.789";
-            const format = "YYYY-MM-DDTHH:mm:ss.SSS";
+            const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
             const parsedDate = parseDateTime(dateString, format);
-            expect(moment(parsedDate).format(format)).toBe(dateString);
+            expect(DateTime.fromJSDate(parsedDate).toFormat(format)).toBe(dateString);
         });
 
         it("should correctly parse a date string", () => {
             const dateString = "2024-03-03";
-            const format = "YYYY-MM-DD";
+            const format = "yyyy-LL-dd";
             const parsedDate = parseDateTime(dateString, format);
-            expect(moment(parsedDate).format(format)).toBe(dateString);
+            expect(DateTime.fromJSDate(parsedDate).toFormat(format)).toBe(dateString);
         });
     });
 

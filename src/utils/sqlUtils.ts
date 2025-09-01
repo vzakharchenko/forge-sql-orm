@@ -42,33 +42,35 @@ interface ConfigBuilderData {
 
 /**
  * Parses a date string into a Date object using the specified format
- * @param value - The date string to parse
+ * @param value - The date string to parse or Date
  * @param format - The format to use for parsing
  * @returns Date object
  */
 
-export const parseDateTime = (value: string, format: string): Date => {
-    let result: Date;
-
-    // 1. Try to parse using the provided format (strict mode)
-    const dt = DateTime.fromFormat(value, format);
-    if (dt.isValid) {
-        result = dt.toJSDate();
+export const parseDateTime = (value: string | Date, format: string): Date => {
+  let result: Date;
+  if (value instanceof Date) {
+    return value;
+  }
+  // 1. Try to parse using the provided format (strict mode)
+  const dt = DateTime.fromFormat(value, format);
+  if (dt.isValid) {
+    result = dt.toJSDate();
+  } else {
+    // 2. Try to parse as ISO string
+    const isoDt = DateTime.fromISO(value);
+    if (isoDt.isValid) {
+      result = isoDt.toJSDate();
     } else {
-        // 2. Try to parse as ISO string
-        const isoDt = DateTime.fromISO(value);
-        if (isoDt.isValid) {
-            result = isoDt.toJSDate();
-        } else {
-            // 3. Fallback: use native Date constructor
-            result = new Date(value);
-        }
+      // 3. Fallback: use native Date constructor
+      result = new Date(value);
     }
-    // 4. Ensure the result is a valid Date object
-    if (isNaN(result.getTime())) {
-        result = new Date(value);
-    }
-    return result;
+  }
+  // 4. Ensure the result is a valid Date object
+  if (isNaN(result.getTime())) {
+    result = new Date(value);
+  }
+  return result;
 };
 
 /**

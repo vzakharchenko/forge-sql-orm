@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-BWSPUKO3.js",
+      "./body-C_L43EIT.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-DT7bX-99.js",
       "./lodash-vendor-Dz6G5T07.js",
@@ -1760,14 +1760,15 @@ var lo = {},
   Zc;
 function Jh() {
   if (Zc) return Cn;
-  ((Zc = 1), Object.defineProperty(Cn, "__esModule", { value: !0 }), (Cn.__realtime = void 0));
+  ((Zc = 1), Object.defineProperty(Cn, "__esModule", { value: !0 }), (Cn.realtime = void 0));
   const t = (0, Oe().getCallBridge)(),
-    r = (o, s) => t("publishRealtimeChannel", { channelName: o, eventPayload: s }),
+    r = (o, s, c) => t("publishRealtimeChannel", { channelName: o, eventPayload: s, options: c }),
     n = (o, s, c) => t("subscribeRealtimeChannel", { channelName: o, onEvent: s, options: c }),
-    a = (o, s) => t("publishRealtimeChannel", { channelName: o, eventPayload: s, isGlobal: !0 }),
+    a = (o, s, c) =>
+      t("publishRealtimeChannel", { channelName: o, eventPayload: s, options: c, isGlobal: !0 }),
     i = (o, s, c) =>
       t("subscribeRealtimeChannel", { channelName: o, onEvent: s, options: c, isGlobal: !0 });
-  return ((Cn.__realtime = { publish: r, subscribe: n, publishGlobal: a, subscribeGlobal: i }), Cn);
+  return ((Cn.realtime = { publish: r, subscribe: n, publishGlobal: a, subscribeGlobal: i }), Cn);
 }
 var eu;
 function Xh() {
@@ -12711,7 +12712,7 @@ var F0 = y.forwardRef(function (e, t) {
         action: "clicked",
         componentName: u || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "14.11.4",
+        packageVersion: "0.0.0-development",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -19016,7 +19017,7 @@ var AS = function (t) {
   },
   jS = y.lazy(function () {
     return Ty(
-      () => import("./body-BWSPUKO3.js"),
+      () => import("./body-C_L43EIT.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

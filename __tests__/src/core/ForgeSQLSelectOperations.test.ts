@@ -227,8 +227,8 @@ describe("ForgeSQLSelectOperations", () => {
             bindParams: vi.fn(),
             execute: vi.fn().mockResolvedValue({
                 rows: [
-                    { name: "Test1", version: DateTime.fromISO("2024-09-19T06:40:34.999999", { zone: "utc" }).toJSDate(), count: "0" },
-                    { name: "Test2", version: DateTime.fromISO("2023-09-19T06:40:34.999999", { zone: "utc" }).toJSDate(), count: "1" },
+                    { name: "Test1", version: DateTime.fromJSDate(DateTime.fromISO("2024-09-19T06:40:34.999999", { zone: "utc" }).toJSDate()).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS"), count: "0" },
+                    { name: "Test2", version: DateTime.fromJSDate(DateTime.fromISO("2023-09-19T06:40:34.999999", { zone: "utc" }).toJSDate()).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS"), count: "1" },
                     { name: "Test3", version: DateTime.fromISO("2022-09-19T06:40:34.999999", { zone: "utc" }).toJSDate(), count: "2" },
                          ]
             }),
