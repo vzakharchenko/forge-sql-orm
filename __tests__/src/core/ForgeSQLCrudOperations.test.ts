@@ -279,6 +279,7 @@ describe("ForgeSQLCrudOperations", () => {
     expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "2023-04-12T00:00:01.000",1, "2010-01-01T00:00:00.000");
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
+
   it("should call SQL prepare and execute on updateById With version TimeStamp", async () => {
     await forgeSqlOperation
       .modify()
