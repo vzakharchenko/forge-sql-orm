@@ -2536,11 +2536,11 @@ button {
 ._14mj1kw7:after {
   border-radius: inherit;
 }
-._2rko14q2 {
-  border-radius: var(--ds-border-radius-circle, 2002pc);
+._2rko1twn {
+  border-radius: var(--ds-border-radius-circle, 9999px);
 }
-._2rkosqtm {
-  border-radius: var(--ds-border-radius-100, 3px);
+._2rkofajl {
+  border-radius: var(--ds-radius-small, 3px);
 }
 ._9v7aze3t:after {
   inset: var(--ds-space-0, 0);

@@ -6,11 +6,11 @@
   "dependencies": {
     "@forge/resolver": "1.7.0",
     "@forge/sql": "^3.0.5",
-    "forge-sql-orm": "2.0.28"
+    "forge-sql-orm": "2.0.29"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
-    "migration:create": "forge-sql-orm-cli migrations:create",
+    "migration:create": "forge-sql-orm-cli migrations:create --force",
     "migration:update": "forge-sql-orm-cli migrations:update",
     "migration:drop": "forge-sql-orm-cli migrations:drop",
     "build:ci": "tsc --target esnext --project tsconfig.json  --outDir dist && rm -rf dist",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
-    "forge-sql-orm-cli": "^2.0.28",
+    "forge-sql-orm-cli": "^2.0.29",
     "knip": "^5.63.0",
     "typescript": "^5.9.2"
   },

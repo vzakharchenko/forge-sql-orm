@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-mGrYkacO.js",
+      "./body-DAMOfSqN.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-CjUpGILb.js",
       "./lodash-vendor-ChTTYVmI.js",
@@ -8911,7 +8911,7 @@ var f_ = y.forwardRef(function (e, t) {
         action: "clicked",
         componentName: u || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "0.0.0-development",
+        packageVersion: "14.12.1",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -11187,7 +11187,7 @@ var Jm = {
         action: "clicked",
         componentName: "button",
         packageName: "@atlaskit/button",
-        packageVersion: "23.4.2",
+        packageVersion: "23.4.3",
         analyticsData: n,
       }),
       fe = y.useCallback(
@@ -14327,7 +14327,7 @@ function Mr(e) {
   return e;
 }
 var $1 = R_.tooltip(),
-  wd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.2" },
+  wd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.3" },
   N1 = { top: "bottom", bottom: "top", left: "right", right: "left" },
   F1 = function (t) {
     return t.split("-")[0];
@@ -15216,7 +15216,7 @@ var nO = function (t) {
   },
   aO = y.lazy(function () {
     return sg(
-      () => import("./body-mGrYkacO.js"),
+      () => import("./body-DAMOfSqN.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

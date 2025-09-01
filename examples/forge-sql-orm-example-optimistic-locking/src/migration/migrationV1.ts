@@ -4,18 +4,18 @@ export default (migrationRunner: MigrationRunner): MigrationRunner => {
   return migrationRunner
     .enqueue(
       "v1_MIGRATION0",
-      "create table `test_data` (`id` int not null auto_increment primary key, `test_date_column` datetime null, `test_name_column` varchar(100) null)",
+      "CREATE TABLE `test_data` ( `id` int AUTO_INCREMENT NOT NULL, `test_date_column` datetime, `test_name_column` varchar(100), CONSTRAINT `test_data_id` PRIMARY KEY(`id`) )",
     )
     .enqueue(
       "v1_MIGRATION1",
-      "create table `test_data_optimistic_date` (`id` int not null auto_increment primary key, `test_date_column` datetime null, `version` datetime not null, `test_name_column` varchar(255) null)",
+      "CREATE TABLE `test_data_optimistic_date` ( `id` int AUTO_INCREMENT NOT NULL, `test_date_column` datetime, `version` datetime NOT NULL, `test_name_column` varchar(255), CONSTRAINT `test_data_optimistic_date_id` PRIMARY KEY(`id`) )",
     )
     .enqueue(
       "v1_MIGRATION2",
-      "create table `test_data_optimistic_number` (`id` int not null auto_increment primary key, `test_date_column` datetime null, `test_name_column` varchar(100) null, `version` int not null)",
+      "CREATE TABLE `test_data_optimistic_number` ( `id` int AUTO_INCREMENT NOT NULL, `test_date_column` datetime, `test_name_column` varchar(100), `version` int NOT NULL, CONSTRAINT `test_data_optimistic_number_id` PRIMARY KEY(`id`) )",
     )
     .enqueue(
       "v1_MIGRATION3",
-      "create table `test_data_optimistic_timestamp` (`id` int not null auto_increment primary key, `test_date_column` datetime null, `test_name_column` varchar(100) null, `version` timestamp not null)",
+      "CREATE TABLE `test_data_optimistic_timestamp` ( `id` int AUTO_INCREMENT NOT NULL, `test_date_column` datetime, `test_name_column` varchar(100), `version` timestamp NOT NULL, CONSTRAINT `test_data_optimistic_timestamp_id` PRIMARY KEY(`id`) )",
     );
 };
