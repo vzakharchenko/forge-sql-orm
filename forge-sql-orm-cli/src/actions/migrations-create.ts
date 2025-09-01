@@ -122,7 +122,6 @@ export function saveMigrationFiles(migrationCode: string, version: number, outpu
     callLines.push(`  v${i}(migrationRunner);`);
   }
   const indexFileContent = `import { MigrationRunner } from "@forge/sql/out/migration";
-import { MIGRATION_VERSION } from "./migrationCount";
 ${importLines.join("\n")}
 
 export type MigrationType = (
