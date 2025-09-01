@@ -1,4 +1,3 @@
-import moment from "moment";
 import {sql} from "@forge/sql";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import {eq, sql as rawSql} from "drizzle-orm";
@@ -11,6 +10,7 @@ import {testEntityDateVersion} from "../../entities/TestEntityDateVersion";
 import {testEntityJoin1} from "../../entities/TestEntityJoin1";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
 import {testEntityVersionDifferentDateField} from "../../entities/TestEntityVersionDifferentFieldDate";
+import {DateTime} from "luxon";
 
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
@@ -227,10 +227,10 @@ describe("ForgeSQLSelectOperations", () => {
             bindParams: vi.fn(),
             execute: vi.fn().mockResolvedValue({
                 rows: [
-                    {name: "Test1", version: moment.utc('2024-09-19 06:40:34.999999').toDate(), count: '0'},
-                    {name: "Test2", version: moment.utc('2023-09-19 06:40:34.999999').toDate(), count: '1'},
-                    {name: "Test3", version: moment.utc('2022-09-19 06:40:34.999999').toDate(), count: '2'}
-                ]
+                    { name: "Test1", version: DateTime.fromJSDate(DateTime.fromISO("2024-09-19T06:40:34.999999", { zone: "utc" }).toJSDate()).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS"), count: "0" },
+                    { name: "Test2", version: DateTime.fromJSDate(DateTime.fromISO("2023-09-19T06:40:34.999999", { zone: "utc" }).toJSDate()).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS"), count: "1" },
+                    { name: "Test3", version: DateTime.fromISO("2022-09-19T06:40:34.999999", { zone: "utc" }).toJSDate(), count: "2" },
+                         ]
             }),
         } as any));
 
@@ -244,19 +244,19 @@ describe("ForgeSQLSelectOperations", () => {
             .groupBy(testEntityDateVersion.name, testEntityDateVersion.version)
         expect(result).toEqual([
             {
-                "count": "0",
-                "name": "Test1",
-                "version": moment.utc('2024-09-19T06:40:34.999Z').toDate(),
+                count: "0",
+                name: "Test1",
+                version: DateTime.fromISO("2024-09-19T06:40:34.999Z", { zone: "utc" }).toJSDate(),
             },
             {
-                "count": "1",
-                "name": "Test2",
-                "version": moment.utc('2023-09-19T06:40:34.999Z').toDate(),
+                count: "1",
+                name: "Test2",
+                version: DateTime.fromISO("2023-09-19T06:40:34.999Z", { zone: "utc" }).toJSDate(),
             },
             {
-                "count": "2",
-                "name": "Test3",
-                "version": moment.utc('2022-09-19T06:40:34.999Z').toDate(),
+                count: "2",
+                name: "Test3",
+                version: DateTime.fromISO("2022-09-19T06:40:34.999Z", { zone: "utc" }).toJSDate(),
             },
         ]);
     });
@@ -378,9 +378,18 @@ describe("ForgeSQLSelectOperations", () => {
             bindParams: vi.fn(),
             execute: vi.fn().mockResolvedValue({
                 rows: [
-                    {id: 1, name: "Test1", date: moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss"), date2:moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss")},
-                    {id: 1, name: "Test2", date: moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss"), date2:moment(moment("2025-04-07 18:06:21").toDate()).format("YYYY-MM-DD HH:mm:ss")},
-
+                    {
+                        id: 1,
+                        name: "Test1",
+                        date: DateTime.fromSQL("2025-04-07 18:06:21").toFormat("yyyy-LL-dd HH:mm:ss"),
+                        date2: DateTime.fromSQL("2025-04-07 18:06:21").toFormat("yyyy-LL-dd HH:mm:ss"),
+                    },
+                    {
+                        id: 1,
+                        name: "Test2",
+                        date: DateTime.fromSQL("2025-04-07 18:06:21").toFormat("yyyy-LL-dd HH:mm:ss"),
+                        date2: DateTime.fromSQL("2025-04-07 18:06:21").toFormat("yyyy-LL-dd HH:mm:ss"),
+                    },
                 ]
             }),
         } as any));
@@ -400,26 +409,27 @@ describe("ForgeSQLSelectOperations", () => {
             "select `test_entity_diff_date_version`.`id` as `a_table1_test_entity_diff_date_version_id`, `test_entity_diff_date_version`.`name` as `a_table1_test_entity_diff_date_version_name`, `test_entity_diff_date_version`.`version_different_date_field` as `a_table1_test_entity_diff_date_version_version_different_date_field`, `test_entity_diff_date_version`.`version_different_date_field` as `a_table2_column_version_different_date_field` from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_diff_date_version`.`id`",
         );
         expect(result).toEqual([
-             {
-                "table1":  {
-                "id": 1,
-                "name": "Test1",
-                "versionField": moment("2025-04-07 18:06:21").toDate(),
-    },
-        "table2":  {
-            "column": moment("2025-04-07 18:06:21").toDate(),
-        },
-    },
-         {
-            "table1":  {
-                "id": 1,
-                    "name": "Test2",
-                    "versionField": moment("2025-04-07 18:06:21").toDate(),
+            {
+                table1: {
+                    id: 1,
+                    name: "Test1",
+                    versionField: DateTime.fromSQL("2025-04-07 18:06:21").toJSDate(),
+                },
+                table2: {
+                    column: DateTime.fromSQL("2025-04-07 18:06:21").toJSDate(),
+                },
             },
-            "table2":  {
-                "column": moment("2025-04-07 18:06:21").toDate(),
+            {
+                table1: {
+                    id: 1,
+                    name: "Test2",
+                    versionField: DateTime.fromSQL("2025-04-07 18:06:21").toJSDate(),
+                },
+                table2: {
+                    column: DateTime.fromSQL("2025-04-07 18:06:21").toJSDate(),
+                },
             },
-        },]);
+        ]);
     });
 
     it("should execute inner join with the same fields distinct", async () => {

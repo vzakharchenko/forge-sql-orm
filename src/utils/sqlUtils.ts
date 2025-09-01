@@ -1,6 +1,6 @@
-import moment from "moment";
 import { AnyColumn, Column, isTable, SQL, sql, StringChunk } from "drizzle-orm";
 import { AnyMySqlTable, MySqlCustomColumn } from "drizzle-orm/mysql-core/index";
+import { DateTime } from "luxon";
 import { PrimaryKeyBuilder } from "drizzle-orm/mysql-core/primary-keys";
 import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
 import { CheckBuilder } from "drizzle-orm/mysql-core/checks";
@@ -42,23 +42,31 @@ interface ConfigBuilderData {
 
 /**
  * Parses a date string into a Date object using the specified format
- * @param value - The date string to parse
+ * @param value - The date string to parse or Date
  * @param format - The format to use for parsing
  * @returns Date object
  */
-export const parseDateTime = (value: string, format: string): Date => {
+
+export const parseDateTime = (value: string | Date, format: string): Date => {
   let result: Date;
-  const m = moment(value, format, true);
-  if (!m.isValid()) {
-    const momentDate = moment(value);
-    if (momentDate.isValid()) {
-      result = momentDate.toDate();
+  if (value instanceof Date) {
+    return value;
+  }
+  // 1. Try to parse using the provided format (strict mode)
+  const dt = DateTime.fromFormat(value, format);
+  if (dt.isValid) {
+    result = dt.toJSDate();
+  } else {
+    // 2. Try to parse as ISO string
+    const isoDt = DateTime.fromISO(value);
+    if (isoDt.isValid) {
+      result = isoDt.toJSDate();
     } else {
+      // 3. Fallback: use native Date constructor
       result = new Date(value);
     }
-  } else {
-    result = m.toDate();
   }
+  // 4. Ensure the result is a valid Date object
   if (isNaN(result.getTime())) {
     result = new Date(value);
   }

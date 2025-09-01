@@ -110,9 +110,19 @@ export function saveMigrationFiles(migrationCode: string, version: number, outpu
   // Write the migration count file
   fs.writeFileSync(migrationCountPath, `export const MIGRATION_VERSION = ${version};`);
 
-  // Generate the migration index file
+  // Generate the migration index file with static imports
+  // Build import lines for each migration version
+  const importLines = [];
+  for (let i = 1; i <= version; i++) {
+    importLines.push(`import v${i} from "./migrationV${i}";`);
+  }
+  // Build call lines for each migration version
+  const callLines = [];
+  for (let i = 1; i <= version; i++) {
+    callLines.push(`  v${i}(migrationRunner);`);
+  }
   const indexFileContent = `import { MigrationRunner } from "@forge/sql/out/migration";
-import { MIGRATION_VERSION } from "./migrationCount";
+${importLines.join("\n")}
 
 export type MigrationType = (
   migrationRunner: MigrationRunner,
@@ -121,12 +131,7 @@ export type MigrationType = (
 export default async (
   migrationRunner: MigrationRunner,
 ): Promise<MigrationRunner> => {
-  for (let i = 1; i <= MIGRATION_VERSION; i++) {
-    const migrations = (await import(\`./migrationV\${i}\`)) as {
-      default: MigrationType;
-    };
-    migrations.default(migrationRunner);
-  }
+${callLines.join("\n")}
   return migrationRunner;
 };`;
 

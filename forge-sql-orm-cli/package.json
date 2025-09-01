@@ -13,6 +13,7 @@
     "format": "prettier --write src",
     "clean": "rm -rf dist",
     "build": "npm run clean && vite build && npm run build:types",
+    "postbuild": "chmod +x dist-cli/cli.js dist-cli/forgeSqlOrmCLI.js dist-cli/cli.mjs ",
     "build:types": "tsc --emitDeclarationOnly",
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
@@ -47,7 +48,7 @@
     "drizzle-orm": "^0.44.5",
     "forge-sql-orm": "^2.0.28",
     "inquirer": "^12.9.4",
-    "mysql2": "^3.14.3",
+    "mysql2": "^3.14.4",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {

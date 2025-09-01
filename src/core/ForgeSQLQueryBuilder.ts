@@ -11,7 +11,7 @@ import {
   type SelectedFields,
 } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { InferInsertModel, Query, SQL } from "drizzle-orm";
-import moment from "moment/moment";
+import { DateTime } from "luxon";
 import { parseDateTime } from "../utils/sqlUtils";
 import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy/index";
 import { SqlHints } from "../utils/sqlHints";
@@ -371,10 +371,10 @@ export const forgeDateTimeString = customType<{
     return "datetime";
   },
   toDriver(value: Date) {
-    return moment(value as Date).format("YYYY-MM-DDTHH:mm:ss.SSS");
+    return DateTime.fromJSDate(value).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
-    const format = "YYYY-MM-DDTHH:mm:ss.SSS";
+    const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
     return parseDateTime(value as string, format);
   },
 });
@@ -394,10 +394,10 @@ export const forgeTimestampString = customType<{
     return "timestamp";
   },
   toDriver(value: Date) {
-    return moment(new Date(value)).format("YYYY-MM-DDTHH:mm:ss.SSS");
+    return DateTime.fromJSDate(value).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
-    const format = "YYYY-MM-DDTHH:mm:ss.SSS";
+    const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
     return parseDateTime(value as string, format);
   },
 });
@@ -417,10 +417,10 @@ export const forgeDateString = customType<{
     return "date";
   },
   toDriver(value: Date) {
-    return moment(value as Date).format("YYYY-MM-DD");
+    return DateTime.fromJSDate(value).toFormat("yyyy-LL-dd");
   },
   fromDriver(value: unknown) {
-    const format = "YYYY-MM-DD";
+    const format = "yyyy-LL-dd";
     return parseDateTime(value as string, format);
   },
 });
@@ -440,7 +440,7 @@ export const forgeTimeString = customType<{
     return "time";
   },
   toDriver(value: Date) {
-    return moment(value as Date).format("HH:mm:ss.SSS");
+    return DateTime.fromJSDate(value).toFormat("HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
     return parseDateTime(value as string, "HH:mm:ss.SSS");

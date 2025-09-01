@@ -150,20 +150,20 @@ function jr(e, r, o, n, t, i) {
     f--
   ) {
     var p = {};
-    for (var _ in n) p[_] = _ === "access" ? {} : n[_];
-    for (var _ in n.access) p.access[_] = n.access[_];
+    for (var b in n) p[b] = b === "access" ? {} : n[b];
+    for (var b in n.access) p.access[b] = n.access[b];
     p.addInitializer = function (m) {
       if (h) throw new TypeError("Cannot add initializers after decoration has completed");
       i.push(s(m || null));
     };
-    var b = (0, o[f])(u === "accessor" ? { get: l.get, set: l.set } : l[c], p);
+    var _ = (0, o[f])(u === "accessor" ? { get: l.get, set: l.set } : l[c], p);
     if (u === "accessor") {
-      if (b === void 0) continue;
-      if (b === null || typeof b != "object") throw new TypeError("Object expected");
-      ((d = s(b.get)) && (l.get = d),
-        (d = s(b.set)) && (l.set = d),
-        (d = s(b.init)) && t.unshift(d));
-    } else (d = s(b)) && (u === "field" ? t.unshift(d) : (l[c] = d));
+      if (_ === void 0) continue;
+      if (_ === null || typeof _ != "object") throw new TypeError("Object expected");
+      ((d = s(_.get)) && (l.get = d),
+        (d = s(_.set)) && (l.set = d),
+        (d = s(_.init)) && t.unshift(d));
+    } else (d = s(_)) && (u === "field" ? t.unshift(d) : (l[c] = d));
   }
   (a && Object.defineProperty(a, n.name, l), (h = !0));
 }
@@ -393,9 +393,9 @@ function Ar(e, r, o) {
   }
   function u(f, p) {
     n[f] &&
-      ((t[f] = function (_) {
-        return new Promise(function (b, m) {
-          i.push([f, _, b, m]) > 1 || c(f, _);
+      ((t[f] = function (b) {
+        return new Promise(function (_, m) {
+          i.push([f, b, _, m]) > 1 || c(f, b);
         });
       }),
       p && (t[f] = p(t[f])));
@@ -403,8 +403,8 @@ function Ar(e, r, o) {
   function c(f, p) {
     try {
       a(n[f](p));
-    } catch (_) {
-      h(i[0][3], _);
+    } catch (b) {
+      h(i[0][3], b);
     }
   }
   function a(f) {
@@ -744,7 +744,7 @@ function zr() {
   return ((k.withRateLimiter = r), k);
 }
 var qe;
-function _t() {
+function bt() {
   return (
     qe ||
       ((qe = 1),
@@ -779,12 +779,12 @@ function _t() {
   );
 }
 var Fe;
-function bt() {
+function _t() {
   return (
     Fe ||
       ((Fe = 1),
       (function (e) {
-        (Object.defineProperty(e, "__esModule", { value: !0 }), O.__exportStar(_t(), e));
+        (Object.defineProperty(e, "__esModule", { value: !0 }), O.__exportStar(bt(), e));
       })(ce)),
     ce
   );
@@ -820,8 +820,8 @@ function Qr() {
             c(h);
             const f = { ...h, invokeType: `ui-${d.toLowerCase()}-fetch` },
               p = await u("invoke", f),
-              { success: _, payload: b, error: m } = p ?? {},
-              w = { ...(_ ? b : m) };
+              { success: b, payload: _, error: m } = p ?? {},
+              w = { ...(b ? _ : m) };
             if (w && w.headers)
               for (const S in w.headers)
                 Array.isArray(w.headers[S]) && (w.headers[S] = w.headers[S].join(","));
@@ -1190,13 +1190,13 @@ function Bt() {
                 !r(h) || l.has(h)
                   ? []
                   : (l.add(h),
-                    Object.entries(h).flatMap(([p, _]) => {
-                      const b = [...f, p];
-                      return o(_)
-                        ? [{ propertyPath: b, key: _.i18n }]
-                        : Array.isArray(_)
-                          ? _.flatMap((m) => d(m, b))
-                          : d(_, b);
+                    Object.entries(h).flatMap(([p, b]) => {
+                      const _ = [...f, p];
+                      return o(b)
+                        ? [{ propertyPath: _, key: b.i18n }]
+                        : Array.isArray(b)
+                          ? b.flatMap((m) => d(m, _))
+                          : d(b, _);
                     }));
             return d(a, []);
           },
@@ -1227,10 +1227,10 @@ function Bt() {
     pe
   );
 }
-var _e = {},
+var be = {},
   Qe;
 function St() {
-  return (Qe || ((Qe = 1), Object.defineProperty(_e, "__esModule", { value: !0 })), _e);
+  return (Qe || ((Qe = 1), Object.defineProperty(be, "__esModule", { value: !0 })), be);
 }
 var Xe;
 function Zr() {
@@ -1322,7 +1322,7 @@ function Ft() {
 }
 var Q = {},
   X = {},
-  be = {},
+  _e = {},
   C = {},
   rr;
 function et() {
@@ -1430,8 +1430,8 @@ function Mt() {
                 ? Object.values(a).some((l) => (0, e.containsSerialisedBlobs)(l))
                 : !1;
         e.containsSerialisedBlobs = c;
-      })(be)),
-    be
+      })(_e)),
+    _e
   );
 }
 var nr;
@@ -1647,12 +1647,12 @@ function $t() {
           {
             body: f,
             headers: p,
-            statusText: _,
-            status: b,
+            statusText: b,
+            status: _,
             isAttachment: m,
           } = await t("fetchProduct", h),
           w = m ? (0, e.base64ToBlob)(f, p["content-type"]) : f;
-        return new Response(w || null, { headers: p, status: b, statusText: _ });
+        return new Response(w || null, { headers: p, status: _, statusText: b });
       };
       return {
         requestConfluence: (s, u) => i("confluence", s, u),
@@ -1730,20 +1730,21 @@ var Oe = {},
   pr;
 function Wt() {
   if (pr) return te;
-  ((pr = 1), Object.defineProperty(te, "__esModule", { value: !0 }), (te.__realtime = void 0));
+  ((pr = 1), Object.defineProperty(te, "__esModule", { value: !0 }), (te.realtime = void 0));
   const r = (0, g().getCallBridge)(),
-    o = (s, u) => r("publishRealtimeChannel", { channelName: s, eventPayload: u }),
+    o = (s, u, c) => r("publishRealtimeChannel", { channelName: s, eventPayload: u, options: c }),
     n = (s, u, c) => r("subscribeRealtimeChannel", { channelName: s, onEvent: u, options: c }),
-    t = (s, u) => r("publishRealtimeChannel", { channelName: s, eventPayload: u, isGlobal: !0 }),
+    t = (s, u, c) =>
+      r("publishRealtimeChannel", { channelName: s, eventPayload: u, options: c, isGlobal: !0 }),
     i = (s, u, c) =>
       r("subscribeRealtimeChannel", { channelName: s, onEvent: u, options: c, isGlobal: !0 });
-  return ((te.__realtime = { publish: o, subscribe: n, publishGlobal: t, subscribeGlobal: i }), te);
+  return ((te.realtime = { publish: o, subscribe: n, publishGlobal: t, subscribeGlobal: i }), te);
 }
-var _r;
+var br;
 function Kt() {
   return (
-    _r ||
-      ((_r = 1),
+    br ||
+      ((br = 1),
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }), O.__exportStar(Wt(), e));
       })(Oe)),
@@ -1751,10 +1752,10 @@ function Kt() {
   );
 }
 var j = {},
-  br;
+  _r;
 function Jt() {
-  if (br) return j;
-  ((br = 1),
+  if (_r) return j;
+  ((_r = 1),
     Object.defineProperty(j, "__esModule", { value: !0 }),
     (j.createTranslationFunction = j.getTranslations = j.resetTranslationsCache = void 0));
   const e = Zr(),
@@ -1813,7 +1814,7 @@ function zt() {
             return o.NavigationTarget;
           },
         }),
-          r.__exportStar(bt(), e),
+          r.__exportStar(_t(), e),
           r.__exportStar(wt(), e),
           r.__exportStar(nt(), e),
           r.__exportStar(Lt(), e),
@@ -1839,7 +1840,7 @@ function Qt() {
     p = (y, ot, it) => {
       f((st) => [{ id: Date.now(), query: y, result: ot, timestamp: new Date(), type: it }, ...st]);
     },
-    _ = async () => {
+    b = async () => {
       try {
         (i(""), u(!0));
         const y = await ne.invoke("execute", { query: e });
@@ -1850,7 +1851,7 @@ function Qt() {
         u(!1);
       }
     },
-    b = async () => {
+    _ = async () => {
       try {
         (i(""), a(!0));
         const y = await ne.invoke("executeDDL", { query: e });
@@ -1915,7 +1916,7 @@ function Qt() {
             style: { display: "flex", gap: "10px" },
             children: [
               v.jsx("button", {
-                onClick: _,
+                onClick: b,
                 disabled: s || c || l,
                 style: {
                   padding: "10px 20px",
@@ -1947,7 +1948,7 @@ function Qt() {
                   : "Execute Query",
               }),
               v.jsx("button", {
-                onClick: b,
+                onClick: _,
                 disabled: s || c || l,
                 style: {
                   padding: "10px 20px",

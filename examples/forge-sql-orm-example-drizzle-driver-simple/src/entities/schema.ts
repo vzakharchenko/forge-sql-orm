@@ -5,7 +5,8 @@ export const users = mysqlTable(
   {
     id: int().autoincrement().notNull(),
     name: varchar({ length: 200 }),
-    email: varchar({ length: 255 }),
+    email: varchar({ length: 200 }),
   },
+
   (table) => [primaryKey({ columns: [table.id], name: "users_id" })],
 );
