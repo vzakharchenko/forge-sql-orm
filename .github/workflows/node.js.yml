@@ -33,7 +33,7 @@ jobs:
         cache: 'npm'
     - name: Clear npm cache
       run: npm cache clean --force
-    - run: npm install -g @forge/cli && forge settings set usage-analytics true
+    - run: npm install -g @forge/cli@12.4.0 && forge settings set usage-analytics true
     - run: echo APPLICATION
     - run: npm ci
     - run: npm run knip
