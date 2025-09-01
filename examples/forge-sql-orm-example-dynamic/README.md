@@ -18,18 +18,19 @@ npm install
 
 ### Start MySQL in Docker and create a database
 
+```shell
+./create-and-run-db.sh
+```
+
+or
+
 ```sh
 export MYSQL_ROOT_PASSWORD=admin
 docker run -d --name forge-sql-orm-example-db -p 3366:3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} --security-opt seccomp=unconfined --restart=always mysql
 # wait 30 sec
-docker exec forge-sql-orm-example-db mysql -uroot -padmin -e "create database forgesqlorm"
-```
-
-### Create the `users` table
-
-```sh
-docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "grant all privileges on forgesqlorm.* TO 'root'@'%';"
-docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "use forgesqlorm; create table users (id int not null auto_increment primary key, name varchar(200) null)"
+docker exec forge-sql-orm-example-db mysql -uroot -padmin -e "create database dynamicforgesqlorm"
+docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "grant all privileges on dynamicforgesqlorm.* TO 'root'@'%';"
+docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "use dynamicforgesqlorm; create table users (id int not null auto_increment primary key, name varchar(200) null)"
 ```
 
 ### Generate models
@@ -106,7 +107,7 @@ Go to `<environment>.atlassian.net` and open the `Forge SQL ORM Data Sync` app.
 
 ```sh
 export MYSQL_ROOT_PASSWORD=admin
-docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "use forgesqlorm; ALTER TABLE users ADD email VARCHAR(255);"
+docker exec forge-sql-orm-example-db mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "use dynamicforgesqlorm; ALTER TABLE users ADD email VARCHAR(255);"
 ```
 
 2. Update migrations:

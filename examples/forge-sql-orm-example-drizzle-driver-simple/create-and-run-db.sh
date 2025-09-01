@@ -57,6 +57,14 @@ done
 docker exec -i "${CONTAINER_NAME}" \
   mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "SELECT 1;" >/dev/null
 
+# extra sanity check
+docker exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -i "${CONTAINER_NAME}" \
+  mysql -uroot -e "SELECT VERSION();" >/dev/null
+
+echo "==> Ensure database '${MYSQL_DATABASE}' exists"
+docker exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -i "${CONTAINER_NAME}" \
+  mysql -uroot -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;"
+
 echo "==> Creating table 'users' in database '${MYSQL_DATABASE}'"
 docker exec -i "${CONTAINER_NAME}" \
   mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" "${MYSQL_DATABASE}" <<'SQL'

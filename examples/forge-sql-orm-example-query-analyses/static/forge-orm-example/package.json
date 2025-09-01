@@ -6,7 +6,7 @@
     "@atlaskit/css-reset": "^7.3.5",
     "@atlaskit/dynamic-table": "^18.2.11",
     "@forge/bridge": "^5.4.0",
-    "forge-sql-orm": "^2.0.28",
+    "forge-sql-orm": "^2.0.29",
     "mobx": "6.13.7",
     "mobx-react": "9.2.0",
     "react": "^18.3.1",
@@ -24,7 +24,7 @@
     "prettier-plugin-pkg": "^0.21.2",
     "rollup-plugin-visualizer": "^6.0.3",
     "typescript": "^5.9.2",
-    "vite": "^7.1.3"
+    "vite": "^7.1.4"
   },
   "scripts": {
     "build": "vite build",

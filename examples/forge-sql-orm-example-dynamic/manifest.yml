@@ -4,7 +4,7 @@ modules:
       resource: main
       resolver:
         function: resolver
-      title: Forge SQL ORM Data Sync
+      title: Forge SQL ORM Data Sync(Dynamic)
   scheduledTrigger:
     - key: scheduled-schema-migration
       function: runSchemaMigration

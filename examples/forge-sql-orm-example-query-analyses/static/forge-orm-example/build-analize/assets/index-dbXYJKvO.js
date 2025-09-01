@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-C_L43EIT.js",
+      "./body-Bifd5lTA.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-DT7bX-99.js",
       "./lodash-vendor-Dz6G5T07.js",
@@ -12712,7 +12712,7 @@ var F0 = y.forwardRef(function (e, t) {
         action: "clicked",
         componentName: u || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "0.0.0-development",
+        packageVersion: "14.12.1",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -14988,7 +14988,7 @@ var k1 = {
         action: "clicked",
         componentName: "button",
         packageName: "@atlaskit/button",
-        packageVersion: "23.4.2",
+        packageVersion: "23.4.3",
         analyticsData: n,
       }),
       fe = y.useCallback(
@@ -18128,7 +18128,7 @@ function Nr(e) {
   return e;
 }
 var lS = tw.tooltip(),
-  Zd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.2" },
+  Zd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.4.3" },
   dS = { top: "bottom", bottom: "top", left: "right", right: "left" },
   fS = function (t) {
     return t.split("-")[0];
@@ -19017,7 +19017,7 @@ var AS = function (t) {
   },
   jS = y.lazy(function () {
     return Ty(
-      () => import("./body-C_L43EIT.js"),
+      () => import("./body-Bifd5lTA.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
