@@ -2613,8 +2613,8 @@ button {
     sans-serif
   );
 }
-._2rko1sit {
-  border-radius: var(--ds-border-radius, 3px);
+._2rkofajl {
+  border-radius: var(--ds-radius-small, 3px);
 }
 ._152tze3t {
   inset-block-start: var(--ds-space-0, 0);
