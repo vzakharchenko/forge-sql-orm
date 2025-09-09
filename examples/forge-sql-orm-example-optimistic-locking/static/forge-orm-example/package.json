@@ -5,7 +5,7 @@
   "dependencies": {
     "@atlaskit/button": "^23.4.4",
     "@atlaskit/css-reset": "^7.3.5",
-    "@atlaskit/dynamic-table": "^18.2.11",
+    "@atlaskit/dynamic-table": "^18.2.15",
     "@atlaskit/tabs": "^18.1.9",
     "@atlaskit/tokens": "^6.1.4",
     "@forge/bridge": "^5.4.0",
