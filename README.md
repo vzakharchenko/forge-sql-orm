@@ -181,7 +181,64 @@ await forgeSQL.executeWithCacheContext(async () => {
 
 ## Setting Up Caching with @forge/kvs (Optional)
 
-The caching system is optional and only needed if you want to use cache-related features. To enable the caching system, you need to install the required dependency and configure your manifest:
+The caching system is optional and only needed if you want to use cache-related features. To enable the caching system, you need to install the required dependency and configure your manifest.
+
+### How Caching Works
+
+To use caching, you need to use Forge-SQL-ORM methods that support cache management:
+
+**Methods that perform cache eviction after execution and in cache context (batch eviction):**
+- `forgeSQL.insertAndEvictCache()`
+- `forgeSQL.updateAndEvictCache()`
+- `forgeSQL.deleteAndEvictCache()`
+- `forgeSQL.modifyWithVersioningAndEvictCache()`
+- `forgeSQL.getDrizzleQueryBuilder().insertAndEvictCache()`
+- `forgeSQL.getDrizzleQueryBuilder().updateAndEvictCache()`
+- `forgeSQL.getDrizzleQueryBuilder().deleteAndEvictCache()`
+
+**Methods that participate in cache context only (batch eviction):**
+- All methods except the default Drizzle methods:
+  - `forgeSQL.insert()`
+  - `forgeSQL.update()`
+  - `forgeSQL.delete()`
+  - `forgeSQL.modifyWithVersioning()`
+  - `forgeSQL.getDrizzleQueryBuilder().insertWithCacheContext()`
+  - `forgeSQL.getDrizzleQueryBuilder().updateWithCacheContext()`
+  - `forgeSQL.getDrizzleQueryBuilder().deleteWithCacheContext()`
+
+**Methods do not do evict cache, better do not use with cache feature:**
+  - `forgeSQL.getDrizzleQueryBuilder().insert()`
+  - `forgeSQL.getDrizzleQueryBuilder().update()`
+  - `forgeSQL.getDrizzleQueryBuilder().delete()`
+
+**Cacheable methods:**
+  - `forgeSQL.selectCacheable()`
+  - `forgeSQL.selectDistinctCacheable()`
+  - `forgeSQL.getDrizzleQueryBuilder().selectAliasedCacheable()`
+  - `forgeSQL.getDrizzleQueryBuilder().selectAliasedDistinctCacheable()`
+
+**Cache context example:**
+```typescript
+await forgeSQL.executeWithCacheContext(async () => {
+  // These methods participate in batch cache clearing
+  await forgeSQL.insert(Users).values(userData);
+  await forgeSQL.update(Users).set(updateData).where(eq(Users.id, 1));
+  await forgeSQL.delete(Users).where(eq(Users.id, 1));
+  // Cache is cleared only once at the end for all affected tables
+});
+```
+
+### Important Considerations
+
+**@forge/kvs Limits:**
+Please review the [official @forge/kvs quotas and limits](https://developer.atlassian.com/platform/forge/platform-quotas-and-limits/#kvs-and-custom-entity-store-quotas) before implementing caching.
+
+**Caching Guidelines:**
+- Don't cache everything - be selective about what to cache
+- Don't cache simple and fast queries - sometimes direct query is faster than cache
+- Consider data size and frequency of changes
+- Monitor cache usage to stay within quotas
+- Use appropriate TTL values
 
 ### Step 1: Install Dependencies
 
@@ -191,10 +248,14 @@ npm install @forge/kvs -S
 
 ### Step 2: Configure Manifest
 
-Add the storage entity configuration to your `manifest.yml`:
+Add the storage entity configuration and scheduler trigger to your `manifest.yml`:
 
 ```yaml
 modules:
+  scheduledTrigger:
+    - key: clear-cache-trigger
+      function: clearCache
+      interval: fiveMinute
   storage:
     entities:
       - name: cache
@@ -211,7 +272,21 @@ modules:
   sql:
     - key: main
       engine: mysql
+  function:
+    - key: clearCache
+      handler: index.clearCache
 ```
+```typescript
+// Example usage in your Forge app
+import { clearCacheSchedulerTrigger } from "forge-sql-orm";
+
+export const clearCache = () => {
+  return clearCacheSchedulerTrigger({ 
+    cacheEntityName: "cache",
+  });
+};
+```
+
 
 ### Step 3: Configure ORM Options
 
@@ -325,36 +400,24 @@ const users = await forgeSQL.selectCacheable(getTableColumns(users)).from(Users)
 |--------|----------|------------|------------------|
 | `modifyWithVersioningAndEvictCache()` | High-concurrency scenarios with Cache support| ✅ Yes | ✅ Yes |
 | `modifyWithVersioning()` | High-concurrency scenarios | ✅ Yes | Cache Context |
-| `insertAndEvictCache()` | Simple inserts without conflicts | ❌ No | ✅ Yes |
-| `updateAndEvictCache()` | Simple updates without conflicts | ❌ No | ✅ Yes |
-| `deleteAndEvictCache()` | Simple deletes without conflicts | ❌ No | ✅ Yes |
+| `insertAndEvictCache()` | Simple inserts | ❌ No | ✅ Yes |
+| `updateAndEvictCache()` | Simple updates | ❌ No | ✅ Yes |
+| `deleteAndEvictCache()` | Simple deletes | ❌ No | ✅ Yes |
 | `insert/update/delete` | Basic Drizzle operations | ❌ No | Cache Context |
 
 
-## Choosing the Right Method ForgeSqlOrm
+## Choosing the Right Method direct drizzle
 
 ### When to Use Each Approach
 
 | Method | Use Case | Versioning | Cache Management |
 |--------|----------|------------|------------------|
-| `modifyWithVersioningAndEvictCache()` | High-concurrency scenarios with Cache support| ✅ Yes | ✅ Yes |
-| `modifyWithVersioning()` | High-concurrency scenarios | ✅ Yes | Cache Context |
+| `insertWithCacheContext/insertWithCacheContext/updateWithCacheContext` | Basic Drizzle operations | ❌ No | Cache Context |
 | `insertAndEvictCache()` | Simple inserts without conflicts | ❌ No | ✅ Yes |
 | `updateAndEvictCache()` | Simple updates without conflicts | ❌ No | ✅ Yes |
 | `deleteAndEvictCache()` | Simple deletes without conflicts | ❌ No | ✅ Yes |
-| `insert/update/delete` | Basic Drizzle operations | ❌ No | Cache Context |
-
-### Best Practices
-
-1. **For new projects with caching**: Use `modifyWithVersioningAndEvictCache()` for all Modify operations (requires @forge/kvs)
-2. **For new projects without caching**: Use `modifyWithVersioning()` for all Modify operations (no additional dependencies)
-3. **For high-concurrency scenarios**: Use `modifyWithVersioning()` when cache management is not needed
-4. **For simple operations with caching**: Use `insertAndEvictCache()`, `updateAndEvictCache()`, `deleteAndEvictCache()` when optimistic locking is not required (requires @forge/kvs)
-5. **For basic Drizzle operations**: Use `insert/update/delete` for simple operations that work like standard Drizzle (no additional dependencies)
-6. **For batch operations with caching**: Use `executeWithCacheContext()` to batch cache invalidation events (requires @forge/kvs)
-7. **For queries with caching**: Use `modifyWithVersioningAndEvictCache().executeQuery()` for cached query results (requires @forge/kvs)
-8. **For queries without caching**: Use direct Drizzle queries or `modifyWithVersioning().executeQuery()` (no additional dependencies)
-
+| `insert/update/delete` | Basic Drizzle operations | ❌ No | ❌ No |
+where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
 
 ## Step-by-Step Migration Workflow
@@ -925,9 +988,6 @@ await forgeSQL.modifyWithVersioningAndEvictCache().evictCache(["users", "orders"
 
 // Clear cache for specific entities
 await forgeSQL.modifyWithVersioningAndEvictCache().evictCacheEntities([Users, Orders]);
-
-// Clear all cache
-await forgeSQL.modifyWithVersioningAndEvictCache().evictCache();
 ```
 
 ## Optimistic Locking
@@ -1135,8 +1195,7 @@ import { clearCacheSchedulerTrigger } from "forge-sql-orm";
 
 export const clearCache = () => {
   return clearCacheSchedulerTrigger({ 
-    cacheEntityName: "cache", 
-    logRawSqlQuery: true 
+    cacheEntityName: "cache",
   });
 };
 ```
@@ -1154,7 +1213,6 @@ Configure in `manifest.yml`:
 
 **Available Intervals**:
 - `fiveMinute` - Every 5 minutes
-- `fifteenMinute` - Every 15 minutes
 - `hour` - Every hour
 - `day` - Every day
 

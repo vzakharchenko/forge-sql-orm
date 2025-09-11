@@ -298,13 +298,16 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @returns A Drizzle query builder instance for query construction only.
    */
   getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> & {
-    selectAliased: SelectAliasedType;
-    selectAliasedDistinct: SelectAliasedDistinctType;
-    selectAliasedCacheable: SelectAliasedCacheableType;
-    selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
-    insertAndEvictCache: InsertAndEvictCacheType;
-    updateAndEvictCache: UpdateAndEvictCacheType;
-    deleteAndEvictCache: DeleteAndEvictCacheType;
+      selectAliased: SelectAliasedType;
+      selectAliasedDistinct: SelectAliasedDistinctType;
+      selectAliasedCacheable: SelectAliasedCacheableType;
+      selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+      insertWithCacheContext: InsertAndEvictCacheType;
+      insertAndEvictCache: InsertAndEvictCacheType;
+      updateAndEvictCache: UpdateAndEvictCacheType;
+      updateWithCacheContext: UpdateAndEvictCacheType;
+      deleteAndEvictCache: DeleteAndEvictCacheType;
+      deleteWithCacheContext: DeleteAndEvictCacheType;
   } {
     return this.drizzle;
   }
