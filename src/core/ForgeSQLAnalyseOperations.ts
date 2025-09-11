@@ -6,7 +6,7 @@ import {
   SlowQueryNormalized,
 } from "./SystemTables";
 import { SqlParameters } from "@forge/sql/out/sql-statement";
-import { AnyMySqlTable } from "drizzle-orm/mysql-core/index";
+import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { getTableName } from "drizzle-orm/table";
 import { DateTime } from "luxon";
 

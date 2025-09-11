@@ -5,6 +5,7 @@ import {
   AnyMySqlTable,
   customType,
   MySqlSelectBuilder,
+  MySqlTable,
 } from "drizzle-orm/mysql-core";
 import {
   MySqlSelectDynamic,
@@ -20,27 +21,56 @@ import {
   ExplainAnalyzeRow,
   SlowQueryNormalized,
 } from "./SystemTables";
+import { ForgeSQLCacheOperations } from "./ForgeSQLCacheOperations";
+import {
+  DeleteAndEvictCacheType,
+  InsertAndEvictCacheType,
+  SelectAliasedCacheableType,
+  SelectAliasedDistinctCacheableType,
+  SelectAliasedDistinctType,
+  SelectAliasedType,
+  UpdateAndEvictCacheType,
+} from "..";
+import {
+  MySqlDeleteBase,
+  MySqlInsertBuilder,
+  MySqlUpdateBuilder,
+} from "drizzle-orm/mysql-core/query-builders";
+import { MySqlRemoteQueryResultHKT } from "drizzle-orm/mysql-proxy";
 
 /**
  * Core interface for ForgeSQL operations.
  * Provides access to CRUD operations, schema-level SQL operations, and query analysis capabilities.
+ *
+ * This is the main interface that developers interact with when using ForgeSQL ORM.
+ * It combines query building capabilities with database operations and caching.
  *
  * @interface ForgeSqlOperation
  * @extends {QueryBuilderForgeSql}
  */
 export interface ForgeSqlOperation extends QueryBuilderForgeSql {
   /**
-   * Provides CRUD (Create, Update, Delete) operations.
-   * @deprecated Use modify() instead for better type safety and consistency
-   * @returns {CRUDForgeSQL} Interface for performing CRUD operations
+   * Creates a new query builder for the given entity.
+   * @returns {MySqlRemoteDatabase<Record<string, unknown>>} The Drizzle database instance for building queries
    */
-  crud(): CRUDForgeSQL;
+  getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> & {
+    selectAliased: SelectAliasedType;
+    selectAliasedDistinct: SelectAliasedDistinctType;
+    selectAliasedCacheable: SelectAliasedCacheableType;
+    selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+    insertWithCacheContext: InsertAndEvictCacheType;
+    insertAndEvictCache: InsertAndEvictCacheType;
+    updateAndEvictCache: UpdateAndEvictCacheType;
+    updateWithCacheContext: UpdateAndEvictCacheType;
+    deleteAndEvictCache: DeleteAndEvictCacheType;
+    deleteWithCacheContext: DeleteAndEvictCacheType;
+  };
 
   /**
    * Provides modify (Create, Update, Delete) operations with optimistic locking support.
-   * @returns {CRUDForgeSQL} Interface for performing CRUD operations
+   * @returns {VerioningModificationForgeSQL} Interface for performing CRUD operations
    */
-  modify(): CRUDForgeSQL;
+  modifyWithVersioning(): VerioningModificationForgeSQL;
 
   /**
    * Provides schema-level SQL fetch operations with type safety.
@@ -53,11 +83,28 @@ export interface ForgeSqlOperation extends QueryBuilderForgeSql {
    * @returns {SchemaAnalyzeForgeSql} Interface for analyzing query performance
    */
   analyze(): SchemaAnalyzeForgeSql;
+
+  /**
+   * Provides schema-level SQL operations with optimistic locking/versioning and automatic cache eviction.
+   *
+   * This method returns operations that use `modifyWithVersioning()` internally, providing:
+   * - Optimistic locking support
+   * - Automatic version field management
+   * - Cache eviction after successful operations
+   *
+   * @returns {ForgeSQLCacheOperations} Interface for executing versioned SQL operations with cache management
+   */
+  modifyWithVersioningAndEvictCache(): ForgeSQLCacheOperations;
 }
 
 /**
  * Interface for Query Builder operations.
  * Provides access to the underlying Drizzle ORM query builder with enhanced functionality.
+ *
+ * This interface extends Drizzle's query building capabilities with:
+ * - Field aliasing to prevent name collisions in joins
+ * - Caching support for select operations
+ * - Automatic cache eviction for modify operations
  *
  * @interface QueryBuilderForgeSql
  */
@@ -66,7 +113,18 @@ export interface QueryBuilderForgeSql {
    * Creates a new query builder for the given entity.
    * @returns {MySqlRemoteDatabase<Record<string, unknown>>} The Drizzle database instance for building queries
    */
-  getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>>;
+  getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> & {
+    selectAliased: SelectAliasedType;
+    selectAliasedDistinct: SelectAliasedDistinctType;
+    selectAliasedCacheable: SelectAliasedCacheableType;
+    selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+    insertWithCacheContext: InsertAndEvictCacheType;
+    insertAndEvictCache: InsertAndEvictCacheType;
+    updateAndEvictCache: UpdateAndEvictCacheType;
+    updateWithCacheContext: UpdateAndEvictCacheType;
+    deleteAndEvictCache: DeleteAndEvictCacheType;
+    deleteWithCacheContext: DeleteAndEvictCacheType;
+  };
 
   /**
    * Creates a select query with unique field aliases to prevent field name collisions in joins.
@@ -107,15 +165,156 @@ export interface QueryBuilderForgeSql {
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates a cacheable select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   *
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @param {number} cacheTTL - cache ttl optional default is 60 sec.
+   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .selectCacheable({user: users, order: orders},60)
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
+  selectCacheable<TSelection extends SelectedFields>(
+    fields: TSelection,
+    cacheTTL?: number,
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates a cacheable distinct select query with unique field aliases to prevent field name collisions in joins.
+   * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
+   *
+   * @template TSelection - The type of the selected fields
+   * @param {TSelection} fields - Object containing the fields to select, with table schemas as values
+   * @param {number} cacheTTL - cache ttl optional default is 60 sec.
+   * @returns {MySqlSelectBuilder<TSelection, MySql2PreparedQueryHKT>} A distinct select query builder with unique field aliases
+   * @throws {Error} If fields parameter is empty
+   * @example
+   * ```typescript
+   * await forgeSQL
+   *   .selectDistinctCacheable({user: users, order: orders}, 60)
+   *   .from(orders)
+   *   .innerJoin(users, eq(orders.userId, users.id));
+   * ```
+   */
+  selectDistinctCacheable<TSelection extends SelectedFields>(
+    fields: TSelection,
+    cacheTTL?: number,
+  ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates an insert query builder.
+   *
+   * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
+   * For versioned inserts, use `modifyWithVersioning().insert()` or `modifyWithVersioningAndEvictCache().insert()` instead.
+   *
+   * @param table - The table to insert into
+   * @returns Insert query builder (no versioning, no cache management)
+   */
+  insert<TTable extends MySqlTable>(
+    table: TTable,
+  ): MySqlInsertBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates an insert query builder that automatically evicts cache after execution.
+   *
+   * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
+   * For versioned inserts, use `modifyWithVersioning().insert()` or `modifyWithVersioningAndEvictCache().insert()` instead.
+   *
+   * @param table - The table to insert into
+   * @returns Insert query builder with automatic cache eviction (no versioning)
+   */
+  insertAndEvictCache<TTable extends MySqlTable>(
+    table: TTable,
+  ): MySqlInsertBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates an update query builder.
+   *
+   * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
+   * For versioned updates, use `modifyWithVersioning().updateById()` or `modifyWithVersioningAndEvictCache().updateById()` instead.
+   *
+   * @param table - The table to update
+   * @returns Update query builder (no versioning, no cache management)
+   */
+  update<TTable extends MySqlTable>(
+    table: TTable,
+  ): MySqlUpdateBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates an update query builder that automatically evicts cache after execution.
+   *
+   * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
+   * For versioned updates, use `modifyWithVersioning().updateById()` or `modifyWithVersioningAndEvictCache().updateById()` instead.
+   *
+   * @param table - The table to update
+   * @returns Update query builder with automatic cache eviction (no versioning)
+   */
+  updateAndEvictCache<TTable extends MySqlTable>(
+    table: TTable,
+  ): MySqlUpdateBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Creates a delete query builder.
+   *
+   * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
+   * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
+   *
+   * @param table - The table to delete from
+   * @returns Delete query builder (no versioning, no cache management)
+   */
+  delete<TTable extends MySqlTable>(
+    table: TTable,
+  ): MySqlDeleteBase<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+  /**
+   * Creates a delete query builder that automatically evicts cache after execution.
+   *
+   * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
+   * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
+   *
+   * @param table - The table to delete from
+   * @returns Delete query builder with automatic cache eviction (no versioning)
+   */
+  deleteAndEvictCache<TTable extends MySqlTable>(
+    table: TTable,
+  ): MySqlDeleteBase<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+
+  /**
+   * Executes operations within a cache context that collects cache eviction events.
+   * All clearCache calls within the context are collected and executed in batch at the end.
+   * Queries executed within this context will bypass cache for tables that were marked for clearing.
+   *
+   * @param cacheContext - Function containing operations that may trigger cache evictions
+   * @returns Promise that resolves when all operations and cache clearing are complete
+   */
+  executeWithCacheContext(cacheContext: () => Promise<void>): Promise<void>;
+
+  /**
+   * Executes operations within a cache context and returns a value.
+   * All clearCache calls within the context are collected and executed in batch at the end.
+   * Queries executed within this context will bypass cache for tables that were marked for clearing.
+   *
+   * @param cacheContext - Function containing operations that may trigger cache evictions
+   * @returns Promise that resolves to the return value of the cacheContext function
+   */
+  executeWithCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T>;
 }
 
 /**
  * Interface for Modify (Create, Update, Delete) operations.
  * Provides methods for basic database operations with support for optimistic locking.
  *
- * @interface CRUDForgeSQL
+ * @interface VerioningModificationForgeSQL
  */
-export interface CRUDForgeSQL {
+export interface VerioningModificationForgeSQL {
   /**
    * Inserts multiple records into the database.
    * @template T - The type of the table schema
@@ -178,6 +377,11 @@ export interface CRUDForgeSQL {
     schema: T,
     where?: SQL<unknown>,
   ): Promise<number>;
+}
+
+export interface CacheForgeSQL extends VerioningModificationForgeSQL {
+  evictCache(tables: string[]): Promise<void>;
+  evictCacheEntities(tables: AnyMySqlTable[]): Promise<void>;
 }
 
 /**
@@ -283,10 +487,11 @@ export interface SchemaSqlForgeSql {
 
   /**
    * Executes a raw SQL update query.
-   * @param {string} query - The raw SQL update query
-   * @param {SqlParameters[]} [params] - Optional SQL parameters
-   * @returns {Promise<UpdateQueryResponse>} The update response containing affected rows
-   * @throws {Error} If the update operation fails
+   *
+   * @param query - The raw SQL update query
+   * @param params - Optional SQL parameters
+   * @returns Promise that resolves to the update response containing affected rows
+   * @throws Error if the update operation fails
    */
   executeRawUpdateSQL(query: string, params?: unknown[]): Promise<UpdateQueryResponse>;
 }
@@ -335,6 +540,12 @@ export interface ForgeSqlOrmOptions {
   disableOptimisticLocking?: boolean;
   /** SQL hints to be applied to queries */
   hints?: SqlHints;
+  cacheTTL?: number;
+  cacheEntityName?: string;
+  cacheEntityQueryName?: string;
+  cacheWrapTable?: boolean;
+  cacheEntityExpirationName?: string;
+  cacheEntityDataName?: string;
 
   /**
    * Additional metadata for table configuration.

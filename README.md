@@ -17,6 +17,7 @@
 
 ## Key Features
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
+- ✅ **Advanced Caching System** with automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -36,7 +37,7 @@ import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
 const db = drizzle(forgeDriver);
 ```
-Best for: Simple CRUD operations without optimistic locking. Note that you need to manually patch drizzle `patchDbWithSelectAliased` for select fields to prevent field name collisions in Atlassian Forge SQL.
+Best for: Simple Modify operations without optimistic locking. Note that you need to manually patch drizzle `patchDbWithSelectAliased` for select fields to prevent field name collisions in Atlassian Forge SQL.
 
 ### 2. Full Forge-SQL-ORM Usage
 ```typescript
@@ -91,17 +92,56 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 
 ✅ Step 1: Install Dependencies
 
+**Basic installation (without caching):**
 ```sh
 npm install forge-sql-orm @forge/sql drizzle-orm momment -S
+npm install forge-sql-orm-cli  -D
+```
+
+**With caching support:**
+```sh
+npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm momment -S
 npm install forge-sql-orm-cli  -D
 ```
 
 This will:
 - Install Forge-SQL-ORM (the ORM for @forge/sql)
 - Install @forge/sql, the Forge database layer
+- Install @forge/kvs, the Forge Key-Value Store for caching (optional, only needed for caching features)
 - Install Drizzle ORM and its MySQL driver
 - Install TypeScript types for MySQL
 - Install forge-sql-orm-cli A command-line interface tool for managing Atlassian Forge SQL migrations and model generation with Drizzle ORM integration.
+
+##  Drizzle Usage with forge-sql-orm
+
+If you prefer to use Drizzle ORM with the additional features of Forge-SQL-ORM (like optimistic locking and caching), you can use the enhanced API:
+
+```typescript
+import ForgeSQL from "forge-sql-orm";
+const forgeSQL = new ForgeSQL();
+
+// Versioned operations with cache management (recommended)
+await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [userData]);
+await forgeSQL.modifyWithVersioningAndEvictCache().updateById(updateData, Users);
+
+// Versioned operations without cache management
+await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+await forgeSQL.modifyWithVersioning().updateById(updateData, Users);
+
+// Non-versioned operations with cache management
+await forgeSQL.insertAndEvictCache(Users).values(userData);
+await forgeSQL.updateAndEvictCache(Users).set(updateData).where(eq(Users.id, 1));
+
+// Basic Drizzle operations (cache context aware)
+await forgeSQL.insert(Users).values(userData);
+await forgeSQL.update(Users).set(updateData).where(eq(Users.id, 1));
+
+// Direct Drizzle access
+const db = forgeSQL.getDrizzleQueryBuilder();
+const users = await db.select().from(users);
+```
+
+This approach gives you direct access to all Drizzle ORM features while still using the @forge/sql backend with enhanced caching and versioning capabilities.
 
 ## Direct Drizzle Usage with Custom Driver
 
@@ -116,24 +156,267 @@ const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 
 // Use drizzle directly
 const users = await db.select().from(users);
+const users = await db.selectAliased(getTableColumns(users)).from(users);
+const users = await db.selectAliasedDistinct(getTableColumns(users)).from(users);
+await db.insert(users)...;
+await db.update(users)...;
+await db.delete(users)...;
+// Use drizzle with kvs cache
+const users = await db.selectAliasedCacheable(getTableColumns(users)).from(users);
+const users = await db.selectAliasedDistinctCacheable(getTableColumns(users)).from(users);
+await db.insertAndEvictCache(users)...;
+await db.updateAndEvictCache(users)...;
+await db.deleteAndEvictCache(users)...;
+
+// Use drizzle with kvs cache context
+await forgeSQL.executeWithCacheContext(async () => {
+  await db.insertWithCacheContext(users)...;
+  await db.updateWithCacheContext(users)...;
+  await db.deleteWithCacheContext(users)...;
+  // invoke without cache
+   const users = await db.selectAliasedCacheable(getTableColumns(users)).from(users);  
+  // Cache is cleared only once at the end for all affected tables
+});
 ```
 
-##  Drizzle Usage with forge-sql-orm
+## Setting Up Caching with @forge/kvs (Optional)
 
-If you prefer to use Drizzle ORM  with the additional features of Forge-SQL-ORM (like optimistic locking), you can use the custom driver:
+The caching system is optional and only needed if you want to use cache-related features. To enable the caching system, you need to install the required dependency and configure your manifest.
+
+### How Caching Works
+
+To use caching, you need to use Forge-SQL-ORM methods that support cache management:
+
+**Methods that perform cache eviction after execution and in cache context (batch eviction):**
+- `forgeSQL.insertAndEvictCache()`
+- `forgeSQL.updateAndEvictCache()`
+- `forgeSQL.deleteAndEvictCache()`
+- `forgeSQL.modifyWithVersioningAndEvictCache()`
+- `forgeSQL.getDrizzleQueryBuilder().insertAndEvictCache()`
+- `forgeSQL.getDrizzleQueryBuilder().updateAndEvictCache()`
+- `forgeSQL.getDrizzleQueryBuilder().deleteAndEvictCache()`
+
+**Methods that participate in cache context only (batch eviction):**
+- All methods except the default Drizzle methods:
+  - `forgeSQL.insert()`
+  - `forgeSQL.update()`
+  - `forgeSQL.delete()`
+  - `forgeSQL.modifyWithVersioning()`
+  - `forgeSQL.getDrizzleQueryBuilder().insertWithCacheContext()`
+  - `forgeSQL.getDrizzleQueryBuilder().updateWithCacheContext()`
+  - `forgeSQL.getDrizzleQueryBuilder().deleteWithCacheContext()`
+
+**Methods do not do evict cache, better do not use with cache feature:**
+  - `forgeSQL.getDrizzleQueryBuilder().insert()`
+  - `forgeSQL.getDrizzleQueryBuilder().update()`
+  - `forgeSQL.getDrizzleQueryBuilder().delete()`
+
+**Cacheable methods:**
+  - `forgeSQL.selectCacheable()`
+  - `forgeSQL.selectDistinctCacheable()`
+  - `forgeSQL.getDrizzleQueryBuilder().selectAliasedCacheable()`
+  - `forgeSQL.getDrizzleQueryBuilder().selectAliasedDistinctCacheable()`
+
+**Cache context example:**
+```typescript
+await forgeSQL.executeWithCacheContext(async () => {
+  // These methods participate in batch cache clearing
+  await forgeSQL.insert(Users).values(userData);
+  await forgeSQL.update(Users).set(updateData).where(eq(Users.id, 1));
+  await forgeSQL.delete(Users).where(eq(Users.id, 1));
+  // Cache is cleared only once at the end for all affected tables
+});
+```
+
+### Important Considerations
+
+**@forge/kvs Limits:**
+Please review the [official @forge/kvs quotas and limits](https://developer.atlassian.com/platform/forge/platform-quotas-and-limits/#kvs-and-custom-entity-store-quotas) before implementing caching.
+
+**Caching Guidelines:**
+- Don't cache everything - be selective about what to cache
+- Don't cache simple and fast queries - sometimes direct query is faster than cache
+- Consider data size and frequency of changes
+- Monitor cache usage to stay within quotas
+- Use appropriate TTL values
+
+### Step 1: Install Dependencies
+
+```bash
+npm install @forge/kvs -S
+```
+
+### Step 2: Configure Manifest
+
+Add the storage entity configuration and scheduler trigger to your `manifest.yml`:
+
+```yaml
+modules:
+  scheduledTrigger:
+    - key: clear-cache-trigger
+      function: clearCache
+      interval: fiveMinute
+  storage:
+    entities:
+      - name: cache
+        attributes:
+          sql:
+            type: string
+          expiration:
+            type: integer
+          data:
+            type: string
+        indexes:
+          - sql
+          - expiration
+  sql:
+    - key: main
+      engine: mysql
+  function:
+    - key: clearCache
+      handler: index.clearCache
+```
+```typescript
+// Example usage in your Forge app
+import { clearCacheSchedulerTrigger } from "forge-sql-orm";
+
+export const clearCache = () => {
+  return clearCacheSchedulerTrigger({ 
+    cacheEntityName: "cache",
+  });
+};
+```
+
+
+### Step 3: Configure ORM Options
+
+Set the cache entity name in your ForgeSQL configuration:
 
 ```typescript
-import ForgeSQL from "forge-sql-orm";
-const forgeSQL = new ForgeSQL();
-forgeSQL.crud().insert(...);
-forgeSQL.crud().updateById(...);
-const db = forgeSQL.getDrizzleQueryBuilder();
+const options = {
+  cacheEntityName: "cache", // Must match the entity name in manifest.yml
+  cacheTTL: 300, // Default cache TTL in seconds (5 minutes)
+  cacheWrapTable: true, // Wrap table names with backticks in cache keys
+  // ... other options
+};
 
-// Use drizzle
-const users = await db.select().from(users);
+const forgeSQL = new ForgeSQL(options);
 ```
 
-This approach gives you direct access to all Drizzle ORM features while still using the @forge/sql backend.
+**Important Notes:**
+- The `cacheEntityName` must exactly match the `name` in your manifest storage entities
+- The entity attributes (`sql`, `expiration`, `data`) are required for proper cache functionality
+- Indexes on `sql` and `expiration` improve cache lookup performance
+- Cache data is automatically cleaned up based on TTL settings
+- No additional permissions are required beyond standard Forge app permissions
+
+### Complete Setup Examples
+
+**Basic setup (without caching):**
+
+**package.json:**
+```json
+{
+  "dependencies": {
+    "forge-sql-orm": "latest",
+    "@forge/sql": "latest",
+    "drizzle-orm": "latest"
+  }
+}
+```
+
+**manifest.yml:**
+```yaml
+modules:
+  sql:
+    - key: main
+      engine: mysql
+```
+
+**app.js:**
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+// Use versioned operations without caching
+const users = await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+```
+
+**With caching support:**
+
+**package.json:**
+```json
+{
+  "dependencies": {
+    "forge-sql-orm": "latest",
+    "@forge/sql": "latest",
+    "@forge/kvs": "latest",
+    "drizzle-orm": "latest"
+  }
+}
+```
+
+**manifest.yml:**
+```yaml
+modules:
+  storage:
+    entities:
+      - name: cache
+        attributes:
+          sql:
+            type: string
+          expiration:
+            type: integer
+          data:
+            type: string
+        indexes:
+          - sql
+          - expiration
+  sql:
+    - key: main
+      engine: mysql
+```
+
+**app.js:**
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL({
+  cacheEntityName: "cache"
+});
+
+// Now you can use caching features
+const users = await forgeSQL.selectCacheable(getTableColumns(users)).from(Users).where(eq(Users.active, true))
+```
+
+## Choosing the Right Method ForgeSqlOrm
+
+### When to Use Each Approach
+
+| Method | Use Case | Versioning | Cache Management |
+|--------|----------|------------|------------------|
+| `modifyWithVersioningAndEvictCache()` | High-concurrency scenarios with Cache support| ✅ Yes | ✅ Yes |
+| `modifyWithVersioning()` | High-concurrency scenarios | ✅ Yes | Cache Context |
+| `insertAndEvictCache()` | Simple inserts | ❌ No | ✅ Yes |
+| `updateAndEvictCache()` | Simple updates | ❌ No | ✅ Yes |
+| `deleteAndEvictCache()` | Simple deletes | ❌ No | ✅ Yes |
+| `insert/update/delete` | Basic Drizzle operations | ❌ No | Cache Context |
+
+
+## Choosing the Right Method direct drizzle
+
+### When to Use Each Approach
+
+| Method | Use Case | Versioning | Cache Management |
+|--------|----------|------------|------------------|
+| `insertWithCacheContext/insertWithCacheContext/updateWithCacheContext` | Basic Drizzle operations | ❌ No | Cache Context |
+| `insertAndEvictCache()` | Simple inserts without conflicts | ❌ No | ✅ Yes |
+| `updateAndEvictCache()` | Simple updates without conflicts | ❌ No | ✅ Yes |
+| `deleteAndEvictCache()` | Simple deletes without conflicts | ❌ No | ✅ Yes |
+| `insert/update/delete` | Basic Drizzle operations | ❌ No | ❌ No |
+where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
+
 
 ## Step-by-Step Migration Workflow
 
@@ -442,30 +725,101 @@ const users = await forgeSQL
   .executeRawSQL<Users>("SELECT * FROM users");
 ```
 
-## CRUD Operations
+## Modify Operations
 
-### Insert Operations
+Forge-SQL-ORM provides multiple approaches for Modify operations, each with different characteristics:
 
-  ```js
-// Single insert
-const userId = await forgeSQL.crud().insert(Users, [{ id: 1, name: "Smith" }]);
+### 1. Versioned Operations with Cache Management (Recommended)
 
-// Bulk insert
-await forgeSQL.crud().insert(Users, [
+These operations use optimistic locking and automatic cache invalidation:
+
+```js
+// Insert with versioning and cache management
+const userId = await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [{ id: 1, name: "Smith" }]);
+
+// Bulk insert with versioning
+await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [
     { id: 2, name: "Smith" },
     { id: 3, name: "Vasyl" },
   ]);
 
-// Insert with duplicate handling
-  await forgeSQL.crud().insert(
-  Users,
-    [
-      { id: 4, name: "Smith" },
-      { id: 4, name: "Vasyl" },
-    ],
-  true
-  );
+// Update by ID with optimistic locking and cache invalidation
+await forgeSQL.modifyWithVersioningAndEvictCache().updateById({ id: 1, name: "Smith Updated" }, Users);
 
+// Delete by ID with versioning and cache invalidation
+await forgeSQL.modifyWithVersioningAndEvictCache().deleteById(1, Users);
+```
+
+### 2. Versioned Operations without Cache Management
+
+These operations use optimistic locking but don't manage cache:
+
+```js
+// Insert with versioning only (no cache management)
+const userId = await forgeSQL.modifyWithVersioning().insert(Users, [{ id: 1, name: "Smith" }]);
+
+// Update with versioning only
+await forgeSQL.modifyWithVersioning().updateById({ id: 1, name: "Smith Updated" }, Users);
+
+// Delete with versioning only
+await forgeSQL.modifyWithVersioning().deleteById(1, Users);
+```
+
+### 3. Non-Versioned Operations with Cache Management
+
+These operations don't use optimistic locking but provide cache invalidation:
+
+```js
+// Insert without versioning but with cache invalidation
+await forgeSQL.insertAndEvictCache(Users).values({ id: 1, name: "Smith" });
+
+// Update without versioning but with cache invalidation
+await forgeSQL.updateAndEvictCache(Users)
+  .set({ name: "Smith Updated" })
+  .where(eq(Users.id, 1));
+
+// Delete without versioning but with cache invalidation
+await forgeSQL.deleteAndEvictCache(Users)
+  .where(eq(Users.id, 1));
+```
+
+### 4. Basic Drizzle Operations (Cache Context Aware)
+
+These operations work like standard Drizzle methods but participate in cache context when used within `executeWithCacheContext()`:
+
+```js
+// Basic insert (participates in cache context when used within executeWithCacheContext)
+await forgeSQL.insert(Users).values({ id: 1, name: "Smith" });
+
+// Basic update (participates in cache context when used within executeWithCacheContext)
+await forgeSQL.update(Users)
+  .set({ name: "Smith Updated" })
+  .where(eq(Users.id, 1));
+
+// Basic delete (participates in cache context when used within executeWithCacheContext)
+await forgeSQL.delete(Users)
+  .where(eq(Users.id, 1));
+```
+
+### 5. Legacy Modify Operations (Removed in 2.1.x)
+
+⚠️ **BREAKING CHANGE**: The `crud()` and `modify()` methods have been completely removed in version 2.1.x.
+
+```js
+// ❌ These methods no longer exist in 2.1.x
+// const userId = await forgeSQL.crud().insert(Users, [{ id: 1, name: "Smith" }]);
+// await forgeSQL.crud().updateById({ id: 1, name: "Smith Updated" }, Users);
+// await forgeSQL.crud().deleteById(1, Users);
+
+// ✅ Use the new methods instead
+const userId = await forgeSQL.modifyWithVersioning().insert(Users, [{ id: 1, name: "Smith" }]);
+await forgeSQL.modifyWithVersioning().updateById({ id: 1, name: "Smith Updated" }, Users);
+await forgeSQL.modifyWithVersioning().deleteById(1, Users);
+```
+
+### Advanced Operations
+
+```js
 // Insert with sequence (nextVal)
 import { nextVal } from "forge-sql-orm";
 
@@ -474,38 +828,24 @@ const user = {
   name: "user test",
   organization_id: 1
 };
-const id = await forgeSQL.modify().insert(appUser, [user]);
-
-// The generated SQL will be:
-// INSERT INTO app_user (id, name, organization_id) 
-// VALUES (NEXTVAL(user_id_seq), ?, ?) -- params: ["user test", 1]
-  ```
-
-### Update Operations
-
-  ```js
-// Update by ID with optimistic locking
-await forgeSQL.crud().updateById({ id: 1, name: "Smith Updated" }, Users);
-
-// Update specific fields
-await forgeSQL.crud().updateById(
-  { id: 1,  age: 35 },
-  Users
-);
+const id = await forgeSQL.modifyWithVersioning().insert(appUser, [user]);
 
 // Update with custom WHERE condition
-await forgeSQL.crud().updateFields(
+await forgeSQL.modifyWithVersioning().updateFields(
     { name: "New Name", age: 35 },
   Users,
   eq(Users.email, "smith@example.com")
 );
-```
 
-### Delete Operations
-
-```js
-// Delete by ID
-await forgeSQL.crud().deleteById(1, Users);
+// Insert with duplicate handling
+await forgeSQL.modifyWithVersioning().insert(
+  Users,
+  [
+    { id: 4, name: "Smith" },
+    { id: 4, name: "Vasyl" },
+  ],
+  true
+);
 ```
 
 ## SQL Utilities
@@ -543,6 +883,111 @@ const result = await forgeSQL
 - This prevents SQL injection by ensuring only numeric values are inserted
 - Always use this function instead of string concatenation for LIMIT and OFFSET values
 
+## Advanced Caching System
+
+Forge-SQL-ORM includes a sophisticated caching system that provides automatic cache invalidation and context-aware operations. The caching system is built on top of [@forge/kvs Custom entity store](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) and provides multiple levels of cache management with automatic serialization/deserialization of complex data structures.
+
+### Cache Configuration
+
+The caching system uses Atlassian Forge's Custom entity store to persist cache data. Each cache entry is stored as a custom entity with automatic TTL management and efficient key-based retrieval.
+
+```typescript
+const options = {
+  cacheEntityName: "cache", // KVS Custom entity name for cache storage
+  cacheTTL: 300, // Default cache TTL in seconds (5 minutes)
+  cacheWrapTable: true, // Wrap table names with backticks in cache keys
+  additionalMetadata: {
+    users: {
+      tableName: "users",
+      versionField: {
+        fieldName: "updatedAt",
+      }
+    }
+  }
+};
+
+const forgeSQL = new ForgeSQL(options);
+```
+
+### How Caching Works with @forge/kvs
+
+The caching system leverages Forge's Custom entity store to provide:
+
+- **Persistent Storage**: Cache data survives app restarts and deployments
+- **Automatic TTL**: Built-in expiration handling through Forge's entity lifecycle
+- **Efficient Retrieval**: Fast key-based lookups using Forge's optimized storage
+- **Data Serialization**: Automatic handling of complex objects and query results
+- **Batch Operations**: Efficient bulk cache operations for better performance
+
+```typescript
+// Cache entries are stored as custom entities in Forge's KVS
+// Example cache key structure:
+// Key: "query:users:active:true:limit:10"
+// Value: { data: [...], timestamp: 1234567890, ttl: 300 }
+```
+
+
+### Cache Context Operations
+
+The cache context allows you to batch cache invalidation events and bypass cache reads for affected tables:
+
+```typescript
+// Execute operations within a cache context
+await forgeSQL.executeWithCacheContext(async () => {
+  // All cache invalidation events are collected and executed in batch
+  await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [userData]);
+  await forgeSQL.modifyWithVersioningAndEvictCache().updateById(updateData, Users);
+  // Cache is cleared only once at the end for all affected tables
+});
+
+// Execute with return value
+const result = await forgeSQL.executeWithCacheContextAndReturnValue(async () => {
+  const user = await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [userData]);
+  return user;
+});
+
+// Basic operations also participate in cache context
+await forgeSQL.executeWithCacheContext(async () => {
+  // These operations will participate in batch cache clearing
+  await forgeSQL.insert(Users).values(userData);
+  await forgeSQL.update(Users).set(updateData).where(eq(Users.id, 1));
+  await forgeSQL.delete(Users).where(eq(Users.id, 1));
+  // Cache is cleared only once at the end for all affected tables
+});
+```
+
+### Cache-Aware Query Operations
+
+```typescript
+// Execute queries with caching
+const users = await forgeSQL.modifyWithVersioningAndEvictCache().executeQuery(
+  forgeSQL.select().from(Users).where(eq(Users.active, true)),
+  600 // Custom TTL in seconds
+);
+
+// Execute single result queries with caching
+const user = await forgeSQL.modifyWithVersioningAndEvictCache().executeQueryOnlyOne(
+  forgeSQL.select().from(Users).where(eq(Users.id, 1))
+);
+
+// Execute raw SQL with caching
+const results = await forgeSQL.modifyWithVersioningAndEvictCache().executeRawSQL(
+  "SELECT * FROM users WHERE active = ?",
+  [true],
+  300 // TTL in seconds
+);
+```
+
+### Manual Cache Management
+
+```typescript
+// Clear cache for specific tables
+await forgeSQL.modifyWithVersioningAndEvictCache().evictCache(["users", "orders"]);
+
+// Clear cache for specific entities
+await forgeSQL.modifyWithVersioningAndEvictCache().evictCacheEntities([Users, Orders]);
+```
+
 ## Optimistic Locking
 
 Optimistic locking is a concurrency control mechanism that prevents data conflicts when multiple transactions attempt to update the same record concurrently. Instead of using locks, this technique relies on a version field in your entity models.
@@ -575,7 +1020,19 @@ const forgeSQL = new ForgeSQL(options);
 
 ```typescript
 // The version field will be automatically handled
-await forgeSQL.crud().updateById(
+await forgeSQL.modifyWithVersioning().updateById(
+  { 
+    id: 1, 
+    name: "Updated Name",
+    updatedAt: new Date() // Will be automatically set if not provided
+  }, 
+  Users
+);
+```
+or with cache support
+```typescript
+// The version field will be automatically handled
+await forgeSQL.modifyWithVersioningAndEvictCache().updateById(
   { 
     id: 1, 
     name: "Updated Name",
@@ -594,6 +1051,10 @@ The `ForgeSqlOrmOptions` object allows customization of ORM behavior:
 | `logRawSqlQuery`           | `boolean` | Enables logging of raw SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`.                                                                                         |
 | `disableOptimisticLocking` | `boolean` | Disables optimistic locking. When set to `true`, no additional condition (e.g., a version check) is added during record updates, which can improve performance. However, this may lead to conflicts when multiple transactions attempt to update the same record concurrently. |
 | `additionalMetadata`       | `object`  | Allows adding custom metadata to all entities. This is useful for tracking common fields across all tables (e.g., `createdAt`, `updatedAt`, `createdBy`, etc.). The metadata will be automatically added to all generated entities. |
+| `cacheEntityName`          | `string`  | KVS Custom entity name for cache storage. Must match the `name` in your `manifest.yml` storage entities configuration. Required for caching functionality. Defaults to `"cache"`.                                                                                                                         |
+| `cacheTTL`                 | `number`  | Default cache TTL in seconds. Defaults to `120` (2 minutes).                                                                                                                                                                   |
+| `cacheWrapTable`           | `boolean` | Whether to wrap table names with backticks in cache keys. Defaults to `true`.                                                                                                                                                  |
+| `hints`                    | `object`  | SQL hints for query optimization. Optional configuration for advanced query tuning.                                                                                                                                             |
 
 ## CLI Commands
 
@@ -718,6 +1179,41 @@ CREATE TABLE IF NOT EXISTS orders (...);
 SET foreign_key_checks = 1;
 ```
 
+### 4. Clear Cache Scheduler Trigger
+
+This trigger automatically cleans up expired cache entries based on their TTL (Time To Live). It's useful for:
+- Automatic cache maintenance
+- Preventing cache storage from growing indefinitely
+- Ensuring optimal cache performance
+- Reducing storage costs
+
+```typescript
+// Example usage in your Forge app
+import { clearCacheSchedulerTrigger } from "forge-sql-orm";
+
+export const clearCache = () => {
+  return clearCacheSchedulerTrigger({ 
+    cacheEntityName: "cache",
+  });
+};
+```
+
+Configure in `manifest.yml`:
+```yaml
+  scheduledTrigger:
+    - key: clear-cache-trigger
+      function: clearCache
+      interval: fiveMinute
+  function:
+    - key: clearCache
+      handler: index.clearCache
+```
+
+**Available Intervals**:
+- `fiveMinute` - Every 5 minutes
+- `hour` - Every hour
+- `day` - Every day
+
 ### Important Notes
 
 **Security Considerations**:
@@ -810,6 +1306,88 @@ This analysis helps you understand:
 - Resource usage at each step
 - Potential performance bottlenecks
 
+
+## Migration Guide
+
+### Migrating from 2.0.x to 2.1.x
+
+This section covers the breaking changes introduced in version 2.1.x and how to migrate your existing code.
+
+#### 1. Method Renaming (BREAKING CHANGES)
+
+**Removed Methods:**
+- `forgeSQL.modify()` → **REMOVED** (use `forgeSQL.modifyWithVersioning()`)
+- `forgeSQL.crud()` → **REMOVED** (use `forgeSQL.modifyWithVersioning()`)
+
+**Migration Steps:**
+
+1. **Replace `modify()` calls:**
+   ```typescript
+   // ❌ Old (2.0.x) - NO LONGER WORKS
+   await forgeSQL.modify().insert(Users, [userData]);
+   await forgeSQL.modify().updateById(updateData, Users);
+   await forgeSQL.modify().deleteById(1, Users);
+   
+   // ✅ New (2.1.x) - REQUIRED
+   await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+   await forgeSQL.modifyWithVersioning().updateById(updateData, Users);
+   await forgeSQL.modifyWithVersioning().deleteById(1, Users);
+   ```
+
+2. **Replace `crud()` calls:**
+   ```typescript
+   // ❌ Old (2.0.x) - NO LONGER WORKS
+   await forgeSQL.crud().insert(Users, [userData]);
+   await forgeSQL.crud().updateById(updateData, Users);
+   await forgeSQL.crud().deleteById(1, Users);
+   
+   // ✅ New (2.1.x) - REQUIRED
+   await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+   await forgeSQL.modifyWithVersioning().updateById(updateData, Users);
+   await forgeSQL.modifyWithVersioning().deleteById(1, Users);
+   ```
+
+#### 2. New API Methods
+
+**New Methods Available:**
+- `forgeSQL.insert()` - Basic Drizzle operations
+- `forgeSQL.update()` - Basic Drizzle operations  
+- `forgeSQL.delete()` - Basic Drizzle operations
+- `forgeSQL.insertAndEvictCache()` - Basic Drizzle operations with evict cache after execution
+- `forgeSQL.updateAndEvictCache()` - Basic Drizzle operations with evict cache after execution
+- `forgeSQL.deleteAndEvictCache()` -Basic Drizzle operations with evict cache after execution
+
+**Optional Migration:**
+You can optionally migrate to the new API methods for better performance and cache management:
+
+```typescript
+// ❌ Old approach (still works)
+await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+
+// ✅ New approach (recommended for new code)
+await forgeSQL.insert(Users).values(userData);
+// or for versioned operations with cache management
+await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [userData]);
+```
+
+#### 3. Automatic Migration Script
+
+You can use a simple find-and-replace to migrate your code:
+
+```bash
+# Replace modify() calls
+find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/forgeSQL\.modify()/forgeSQL.modifyWithVersioning()/g'
+
+# Replace crud() calls  
+find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/forgeSQL\.crud()/forgeSQL.modifyWithVersioning()/g'
+```
+
+#### 4. Breaking Changes
+
+**Important:** The old methods (`modify()` and `crud()`) have been completely removed in version 2.1.x.
+
+- ❌ **2.1.x**: Old methods are no longer available
+- ✅ **Migration Required**: You must update your code to use the new methods
 
 ## License
 This project is licensed under the **MIT License**.  

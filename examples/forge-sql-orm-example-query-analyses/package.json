@@ -9,7 +9,7 @@
     "@forge/sql": "^3.0.5",
     "drizzle-orm": "^0.44.5",
     "forge-sql-orm": "2.0.30",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
@@ -21,9 +21,9 @@
     "knip": "knip"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.3.1",
     "forge-sql-orm-cli": "^2.0.30",
-    "knip": "^5.63.0",
+    "knip": "^5.63.1",
     "typescript": "^5.9.2"
   },
   "overrides": {

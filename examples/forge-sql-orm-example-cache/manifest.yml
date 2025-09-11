@@ -1,0 +1,76 @@
+modules:
+  jira:globalPage:
+    - key: forge-sql-orm-example-hello-world-page
+      resource: main
+      resolver:
+        function: resolver
+      title: Forge SQL ORM Data Sync(Cache example)
+  scheduledTrigger:
+    - key: scheduled-schema-migration
+      function: runSchemaMigration
+      interval: hour
+    - key: clear-cache-trigger
+      function: clearCache
+      interval: fiveMinute
+  trigger:
+    - key: post-install-schema-migration
+      function: runSchemaMigration
+      events:
+        - avi:forge:installed:app
+  webtrigger:
+    - key: invoke-schema-migration
+      function: runSchemaMigration
+      security:
+        egress:
+          allowDataEgress: false
+          allowedResponses:
+            - statusCode: 200
+              body: '{"body": "Migrations successfully executed"}'
+    - key: drop-schema-migration
+      function: dropMigrations
+    - key: fetch-schema
+      function: fetchSchema
+    - key: clearCacheWeb
+      function: clearCache
+  sql:
+    - key: main
+      engine: mysql
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: runSchemaMigration
+      handler: index.handlerMigration
+    - key: dropMigrations
+      handler: index.dropMigrations
+    - key: fetchSchema
+      handler: index.fetchMigrations
+    - key: clearCache
+      handler: index.clearCache
+resources:
+  - key: main
+    path: static/forge-orm-example/build-static
+    tunnel:
+      port: 3099
+app:
+  runtime:
+    name: nodejs22.x
+  id: ari:cloud:ecosystem::app/18964d3c-440a-4ec3-a5d4-e0475c5831a5
+  storage:
+    entities:
+      - name: cache
+        attributes:
+          sql:
+            type: string
+          expiration:
+            type: integer
+          data:
+            type: string
+        indexes:
+          - sql
+          - expiration
+permissions:
+  content:
+    styles:
+      - "unsafe-inline"
+  scopes:
+    - "storage:app"

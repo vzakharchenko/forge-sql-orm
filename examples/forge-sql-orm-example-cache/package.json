@@ -1,0 +1,36 @@
+{
+  "name": "jira-global-page-custom-ui",
+  "version": "1.1.4",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@forge/kvs": "^1.0.5",
+    "@forge/resolver": "1.7.0",
+    "@forge/sql": "^3.0.5",
+    "drizzle-orm": "^0.44.5",
+    "forge-sql-orm": "file:../.."
+  },
+  "scripts": {
+    "models:create": "forge-sql-orm-cli generate:model --output src/entities",
+    "migration:create": "forge-sql-orm-cli migrations:create --force",
+    "migration:update": "forge-sql-orm-cli migrations:update",
+    "migration:drop": "forge-sql-orm-cli migrations:drop",
+    "build:ci": "tsc --target esnext --project tsconfig.json  --outDir dist && rm -rf dist",
+    "forge:debug": "forge tunnel -d -f index.handler",
+    "build:husky": "tsc --project tsconfig.json  --outDir ./dist && rm -rf ./dist",
+    "knip": "knip"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "forge-sql-orm-cli": "^2.0.30",
+    "knip": "^5.63.0",
+    "typescript": "^5.9.2"
+  },
+  "overrides": {
+    "package-json": "npm:package-json@latest",
+    "esbuild": "npm:esbuild@latest",
+    "parse-url": "npm:parsed-url@latest",
+    "gry": "npm:gry@latest"
+  }
+}
