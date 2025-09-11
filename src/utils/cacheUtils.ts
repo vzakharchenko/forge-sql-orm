@@ -112,7 +112,7 @@ async function clearCursorCache(
 
   for (const table of tables) {
     const wrapIfNeeded = options.cacheWrapTable ? `\`${table}\`` : table;
-    filters = filters.or(entityQueryName, FilterConditions.contains(wrapIfNeeded?.toLowerCase()));
+    filters.or(entityQueryName, FilterConditions.contains(wrapIfNeeded?.toLowerCase()));
   }
 
   let entityQueryBuilder = kvs
