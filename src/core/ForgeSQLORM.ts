@@ -45,16 +45,16 @@ import { clearTablesCache } from "../utils/cacheUtils";
 class ForgeSQLORMImpl implements ForgeSqlOperation {
   private static instance: ForgeSQLORMImpl | null = null;
   private readonly drizzle: MySqlRemoteDatabase<any> & {
-      selectAliased: SelectAliasedType;
-      selectAliasedDistinct: SelectAliasedDistinctType;
-      selectAliasedCacheable: SelectAliasedCacheableType;
-      selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
-      insertWithCacheContext: InsertAndEvictCacheType;
-      insertAndEvictCache: InsertAndEvictCacheType;
-      updateAndEvictCache: UpdateAndEvictCacheType;
-      updateWithCacheContext: UpdateAndEvictCacheType;
-      deleteAndEvictCache: DeleteAndEvictCacheType;
-      deleteWithCacheContext: DeleteAndEvictCacheType;
+    selectAliased: SelectAliasedType;
+    selectAliasedDistinct: SelectAliasedDistinctType;
+    selectAliasedCacheable: SelectAliasedCacheableType;
+    selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+    insertWithCacheContext: InsertAndEvictCacheType;
+    insertAndEvictCache: InsertAndEvictCacheType;
+    updateAndEvictCache: UpdateAndEvictCacheType;
+    updateWithCacheContext: UpdateAndEvictCacheType;
+    deleteAndEvictCache: DeleteAndEvictCacheType;
+    deleteWithCacheContext: DeleteAndEvictCacheType;
   };
   private readonly crudOperations: VerioningModificationForgeSQL;
   private readonly fetchOperations: SchemaSqlForgeSql;
@@ -101,15 +101,15 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * Executes operations within a cache context that collects cache eviction events.
    * All clearCache calls within the context are collected and executed in batch at the end.
    * Queries executed within this context will bypass cache for tables that were marked for clearing.
-   * 
+   *
    * This is useful for:
    * - Batch operations that affect multiple tables
    * - Transaction-like operations where you want to clear cache only at the end
    * - Performance optimization by reducing cache clear operations
-   * 
+   *
    * @param cacheContext - Function containing operations that may trigger cache evictions
    * @returns Promise that resolves when all operations and cache clearing are complete
-   * 
+   *
    * @example
    * ```typescript
    * await forgeSQL.executeWithCacheContext(async () => {
@@ -127,10 +127,10 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * Executes operations within a cache context and returns a value.
    * All clearCache calls within the context are collected and executed in batch at the end.
    * Queries executed within this context will bypass cache for tables that were marked for clearing.
-   * 
+   *
    * @param cacheContext - Function containing operations that may trigger cache evictions
    * @returns Promise that resolves to the return value of the cacheContext function
-   * 
+   *
    * @example
    * ```typescript
    * const result = await forgeSQL.executeWithCacheContextAndReturnValue(async () => {
@@ -154,10 +154,10 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
 
   /**
    * Creates an insert query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned inserts, use `modifyWithVersioning().insert()` or `modifyWithVersioningAndEvictCache().insert()` instead.
-   * 
+   *
    * @param table - The table to insert into
    * @returns Insert query builder (no versioning, no cache management)
    */
@@ -183,10 +183,10 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
 
   /**
    * Creates an update query builder that automatically evicts cache after execution.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned updates, use `modifyWithVersioning().updateById()` or `modifyWithVersioningAndEvictCache().updateById()` instead.
-   * 
+   *
    * @param table - The table to update
    * @returns Update query builder with automatic cache eviction (no versioning)
    */
@@ -213,10 +213,10 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
 
   /**
    * Creates a delete query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
-   * 
+   *
    * @param table - The table to delete from
    * @returns Delete query builder (no versioning, no cache management)
    */
@@ -230,7 +230,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
-   * 
+   *
    * @param table - The table to delete from
    * @returns Delete query builder with automatic cache eviction (no versioning)
    */
@@ -276,12 +276,12 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
 
   /**
    * Provides schema-level SQL operations with optimistic locking/versioning and automatic cache eviction.
-   * 
+   *
    * This method returns operations that use `modifyWithVersioning()` internally, providing:
    * - Optimistic locking support
    * - Automatic version field management
    * - Cache eviction after successful operations
-   * 
+   *
    * @returns {ForgeSQLCacheOperations} Interface for executing versioned SQL operations with cache management
    */
   modifyWithVersioningAndEvictCache(): ForgeSQLCacheOperations {
@@ -298,16 +298,16 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @returns A Drizzle query builder instance for query construction only.
    */
   getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> & {
-      selectAliased: SelectAliasedType;
-      selectAliasedDistinct: SelectAliasedDistinctType;
-      selectAliasedCacheable: SelectAliasedCacheableType;
-      selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
-      insertWithCacheContext: InsertAndEvictCacheType;
-      insertAndEvictCache: InsertAndEvictCacheType;
-      updateAndEvictCache: UpdateAndEvictCacheType;
-      updateWithCacheContext: UpdateAndEvictCacheType;
-      deleteAndEvictCache: DeleteAndEvictCacheType;
-      deleteWithCacheContext: DeleteAndEvictCacheType;
+    selectAliased: SelectAliasedType;
+    selectAliasedDistinct: SelectAliasedDistinctType;
+    selectAliasedCacheable: SelectAliasedCacheableType;
+    selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+    insertWithCacheContext: InsertAndEvictCacheType;
+    insertAndEvictCache: InsertAndEvictCacheType;
+    updateAndEvictCache: UpdateAndEvictCacheType;
+    updateWithCacheContext: UpdateAndEvictCacheType;
+    deleteAndEvictCache: DeleteAndEvictCacheType;
+    deleteWithCacheContext: DeleteAndEvictCacheType;
   } {
     return this.drizzle;
   }
@@ -451,10 +451,10 @@ class ForgeSQLORM implements ForgeSqlOperation {
 
   /**
    * Creates an insert query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned inserts, use `modifyWithVersioning().insert()` or `modifyWithVersioningAndEvictCache().insert()` instead.
-   * 
+   *
    * @param table - The table to insert into
    * @returns Insert query builder (no versioning, no cache management)
    */
@@ -481,10 +481,10 @@ class ForgeSQLORM implements ForgeSqlOperation {
 
   /**
    * Creates an update query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned updates, use `modifyWithVersioning().updateById()` or `modifyWithVersioningAndEvictCache().updateById()` instead.
-   * 
+   *
    * @param table - The table to update
    * @returns Update query builder (no versioning, no cache management)
    */
@@ -511,10 +511,10 @@ class ForgeSQLORM implements ForgeSqlOperation {
 
   /**
    * Creates a delete query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
-   * 
+   *
    * @param table - The table to delete from
    * @returns Delete query builder (no versioning, no cache management)
    */
@@ -529,7 +529,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
-   * 
+   *
    * @param table - The table to delete from
    * @returns Delete query builder with automatic cache eviction (no versioning)
    */

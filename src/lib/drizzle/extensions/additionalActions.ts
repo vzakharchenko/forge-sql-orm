@@ -1,11 +1,19 @@
-import {MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT, MySqlRemoteQueryResultHKT,} from "drizzle-orm/mysql-proxy";
-import type {SelectedFields} from "drizzle-orm/mysql-core/query-builders/select.types";
-import {applyFromDriverTransform, ForgeSqlOrmOptions, mapSelectFieldsWithAlias} from "../../..";
-import {MySqlSelectBuilder} from "drizzle-orm/mysql-core";
-import type {MySqlTable} from "drizzle-orm/mysql-core/table";
-import {MySqlDeleteBase, MySqlInsertBuilder, MySqlUpdateBuilder,} from "drizzle-orm/mysql-core/query-builders";
-import {clearCache, getFromCache, setCacheResult} from "../../../utils/cacheUtils";
-import {saveTableIfInsideCacheContext} from "../../../utils/cacheContextUtils";
+import {
+  MySqlRemoteDatabase,
+  MySqlRemotePreparedQueryHKT,
+  MySqlRemoteQueryResultHKT,
+} from "drizzle-orm/mysql-proxy";
+import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
+import { applyFromDriverTransform, ForgeSqlOrmOptions, mapSelectFieldsWithAlias } from "../../..";
+import { MySqlSelectBuilder } from "drizzle-orm/mysql-core";
+import type { MySqlTable } from "drizzle-orm/mysql-core/table";
+import {
+  MySqlDeleteBase,
+  MySqlInsertBuilder,
+  MySqlUpdateBuilder,
+} from "drizzle-orm/mysql-core/query-builders";
+import { clearCache, getFromCache, setCacheResult } from "../../../utils/cacheUtils";
+import { saveTableIfInsideCacheContext } from "../../../utils/cacheContextUtils";
 
 // Types for better type safety
 type QueryBuilder = {
@@ -17,27 +25,31 @@ type QueryBuilder = {
 /**
  * Determines whether cache should be cleared based on the error type.
  * Only clears cache for errors that might indicate data consistency issues.
- * 
+ *
  * @param error - The error that occurred during query execution
  * @returns true if cache should be cleared, false otherwise
  */
 function shouldClearCacheOnError(error: any): boolean {
   // Don't clear cache for client-side errors (validation, etc.)
-  if (error?.code === 'VALIDATION_ERROR' || 
-      error?.code === 'CONSTRAINT_ERROR' ||
-      (error?.message && /validation/i.exec(error.message))) {
+  if (
+    error?.code === "VALIDATION_ERROR" ||
+    error?.code === "CONSTRAINT_ERROR" ||
+    (error?.message && /validation/i.exec(error.message))
+  ) {
     return false;
   }
-  
+
   // Clear cache for database-level errors that might affect data consistency
-  if (error?.code === 'DEADLOCK' ||
-      error?.code === 'LOCK_WAIT_TIMEOUT' ||
-      error?.code === 'CONNECTION_ERROR' ||
-      (error?.message && /timeout/i.exec(error.message)) ||
-      (error?.message && /connection/i.exec(error.message))) {
+  if (
+    error?.code === "DEADLOCK" ||
+    error?.code === "LOCK_WAIT_TIMEOUT" ||
+    error?.code === "CONNECTION_ERROR" ||
+    (error?.message && /timeout/i.exec(error.message)) ||
+    (error?.message && /connection/i.exec(error.message))
+  ) {
     return true;
   }
-  
+
   // For unknown errors, be conservative and clear cache
   return true;
 }
@@ -72,7 +84,7 @@ export type DeleteAndEvictCacheType = <TTable extends MySqlTable>(
 
 /**
  * Handles successful query execution with cache management.
- * 
+ *
  * @param rows - Query result rows
  * @param onfulfilled - Success callback
  * @param table - The table being modified
@@ -85,7 +97,7 @@ async function handleSuccessfulExecution(
   onfulfilled: any,
   table: MySqlTable,
   options: ForgeSqlOrmOptions,
-  isCached: boolean
+  isCached: boolean,
 ): Promise<any> {
   try {
     const result = onfulfilled?.(rows);
@@ -100,7 +112,7 @@ async function handleSuccessfulExecution(
     if (shouldClearCacheOnError(error)) {
       if (isCached) {
         await clearCache(table, options).catch(() => {
-          console.warn('Ignore cache clear errors');
+          console.warn("Ignore cache clear errors");
         });
       } else {
         await saveTableIfInsideCacheContext(table);
@@ -112,7 +124,7 @@ async function handleSuccessfulExecution(
 
 /**
  * Handles function calls on the wrapped builder.
- * 
+ *
  * @param value - The function to call
  * @param target - The target object
  * @param args - Function arguments
@@ -127,7 +139,7 @@ function handleFunctionCall(
   args: any[],
   table: MySqlTable,
   options: ForgeSqlOrmOptions,
-  isCached: boolean
+  isCached: boolean,
 ): any {
   const result = value.apply(target, args);
   if (typeof result === "object" && result !== null && "execute" in result) {
@@ -139,7 +151,7 @@ function handleFunctionCall(
 /**
  * Wraps a query builder with cache eviction functionality.
  * Automatically clears cache after successful execution of insert/update/delete operations.
- * 
+ *
  * @param rawBuilder - The original query builder to wrap
  * @param table - The table being modified (used for cache eviction)
  * @param options - ForgeSQL ORM options including cache configuration
@@ -156,16 +168,20 @@ const wrapCacheEvictBuilder = <TTable extends MySqlTable>(
     get(target, prop, receiver) {
       if (prop === "then") {
         return (onfulfilled?: any, onrejected?: any) =>
-          target.execute().then(
-            (rows: unknown[]) => handleSuccessfulExecution(rows, onfulfilled, table, options, isCached),
-            onrejected
-          );
+          target
+            .execute()
+            .then(
+              (rows: unknown[]) =>
+                handleSuccessfulExecution(rows, onfulfilled, table, options, isCached),
+              onrejected,
+            );
       }
 
       const value = Reflect.get(target, prop, receiver);
 
       if (typeof value === "function") {
-        return (...args: any[]) => handleFunctionCall(value, target, args, table, options, isCached);
+        return (...args: any[]) =>
+          handleFunctionCall(value, target, args, table, options, isCached);
       }
 
       return value;
@@ -175,7 +191,7 @@ const wrapCacheEvictBuilder = <TTable extends MySqlTable>(
 
 /**
  * Creates an insert query builder that automatically evicts cache after execution.
- * 
+ *
  * @param db - The database instance
  * @param table - The table to insert into
  * @param options - ForgeSQL ORM options
@@ -185,20 +201,24 @@ function insertAndEvictCacheBuilder<TTable extends MySqlTable>(
   db: MySqlRemoteDatabase<any>,
   table: TTable,
   options: ForgeSqlOrmOptions,
-  isCached:boolean,
+  isCached: boolean,
 ): MySqlInsertBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT> {
   const builder = db.insert(table);
   return wrapCacheEvictBuilder(
     builder as unknown as QueryBuilder,
     table,
     options,
-      isCached
-  ) as unknown as MySqlInsertBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+    isCached,
+  ) as unknown as MySqlInsertBuilder<
+    TTable,
+    MySqlRemoteQueryResultHKT,
+    MySqlRemotePreparedQueryHKT
+  >;
 }
 
 /**
  * Creates an update query builder that automatically evicts cache after execution.
- * 
+ *
  * @param db - The database instance
  * @param table - The table to update
  * @param options - ForgeSQL ORM options
@@ -208,20 +228,24 @@ function updateAndEvictCacheBuilder<TTable extends MySqlTable>(
   db: MySqlRemoteDatabase<any>,
   table: TTable,
   options: ForgeSqlOrmOptions,
-  isCached: boolean
+  isCached: boolean,
 ): MySqlUpdateBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT> {
   const builder = db.update(table);
   return wrapCacheEvictBuilder(
     builder as unknown as QueryBuilder,
     table,
     options,
-      isCached
-  ) as unknown as MySqlUpdateBuilder<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
+    isCached,
+  ) as unknown as MySqlUpdateBuilder<
+    TTable,
+    MySqlRemoteQueryResultHKT,
+    MySqlRemotePreparedQueryHKT
+  >;
 }
 
 /**
  * Creates a delete query builder that automatically evicts cache after execution.
- * 
+ *
  * @param db - The database instance
  * @param table - The table to delete from
  * @param options - ForgeSQL ORM options
@@ -231,20 +255,20 @@ function deleteAndEvictCacheBuilder<TTable extends MySqlTable>(
   db: MySqlRemoteDatabase<any>,
   table: TTable,
   options: ForgeSqlOrmOptions,
-  isCached:boolean
+  isCached: boolean,
 ): MySqlDeleteBase<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT> {
   const builder = db.delete(table);
   return wrapCacheEvictBuilder(
     builder as unknown as QueryBuilder,
     table,
     options,
-      isCached
+    isCached,
   ) as unknown as MySqlDeleteBase<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
 }
 
 /**
  * Handles cached query execution with proper error handling.
- * 
+ *
  * @param target - The query target
  * @param options - ForgeSQL ORM options
  * @param cacheTtl - Cache TTL
@@ -261,23 +285,22 @@ async function handleCachedQuery(
   selections: any,
   aliasMap: any,
   onfulfilled?: any,
-  onrejected?: any
+  onrejected?: any,
 ): Promise<any> {
   try {
     const cacheResult = await getFromCache(target, options);
     if (cacheResult) {
       return onfulfilled?.(cacheResult);
     }
-    
+
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
-    
-    await setCacheResult(target, options, transformed, cacheTtl)
-      .catch((cacheError) => {
-        // Log cache error but don't fail the query
-        console.warn('Cache set error:', cacheError);
-      });
-    
+
+    await setCacheResult(target, options, transformed, cacheTtl).catch((cacheError) => {
+      // Log cache error but don't fail the query
+      console.warn("Cache set error:", cacheError);
+    });
+
     return onfulfilled?.(transformed);
   } catch (error) {
     return onrejected?.(error);
@@ -286,7 +309,7 @@ async function handleCachedQuery(
 
 /**
  * Handles non-cached query execution.
- * 
+ *
  * @param target - The query target
  * @param selections - Field selections
  * @param aliasMap - Field alias mapping
@@ -299,7 +322,7 @@ async function handleNonCachedQuery(
   selections: any,
   aliasMap: any,
   onfulfilled?: any,
-  onrejected?: any
+  onrejected?: any,
 ): Promise<any> {
   try {
     const rows = await target.execute();
@@ -312,7 +335,7 @@ async function handleNonCachedQuery(
 
 /**
  * Creates a select query builder with field aliasing and optional caching support.
- * 
+ *
  * @param db - The database instance
  * @param fields - The fields to select with aliases
  * @param selectFn - Function to create the base select query
@@ -337,8 +360,8 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
       get(target, prop, receiver) {
         if (prop === "execute") {
           return async (...args: any[]) => {
-              const rows = await target.execute(...args);
-              return applyFromDriverTransform(rows, selections, aliasMap);
+            const rows = await target.execute(...args);
+            return applyFromDriverTransform(rows, selections, aliasMap);
           };
         }
 
@@ -346,7 +369,15 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
           return (onfulfilled?: any, onrejected?: any) => {
             if (useCache) {
               const ttl = cacheTtl ?? options.cacheTTL ?? 120;
-              return handleCachedQuery(target, options, ttl, selections, aliasMap, onfulfilled, onrejected);
+              return handleCachedQuery(
+                target,
+                options,
+                ttl,
+                selections,
+                aliasMap,
+                onfulfilled,
+                onrejected,
+              );
             } else {
               return handleNonCachedQuery(target, selections, aliasMap, onfulfilled, onrejected);
             }
@@ -388,7 +419,7 @@ const DEFAULT_OPTIONS: ForgeSqlOrmOptions = {
 
 /**
  * Patches a Drizzle database instance with additional methods for aliased selects and cache management.
- * 
+ *
  * This function extends the database instance with:
  * - selectAliased: Select with field aliasing support
  * - selectAliasedDistinct: Select distinct with field aliasing support
@@ -397,7 +428,7 @@ const DEFAULT_OPTIONS: ForgeSqlOrmOptions = {
  * - insertAndEvictCache: Insert operations that automatically evict cache
  * - updateAndEvictCache: Update operations that automatically evict cache
  * - deleteAndEvictCache: Delete operations that automatically evict cache
- * 
+ *
  * @param db - The Drizzle database instance to patch
  * @param options - Optional ForgeSQL ORM configuration
  * @returns The patched database instance with additional methods
@@ -477,7 +508,7 @@ export function patchDbWithSelectAliased(
   };
   // Insert with cache eviction
   db.insertAndEvictCache = function <TTable extends MySqlTable>(table: TTable) {
-    return insertAndEvictCacheBuilder(db, table, newOptions,true);
+    return insertAndEvictCacheBuilder(db, table, newOptions, true);
   };
 
   // Update with cache context support (participates in cache clearing when used within cache context)
@@ -486,7 +517,7 @@ export function patchDbWithSelectAliased(
   };
   // Update with cache eviction
   db.updateAndEvictCache = function <TTable extends MySqlTable>(table: TTable) {
-    return updateAndEvictCacheBuilder(db, table, newOptions,true);
+    return updateAndEvictCacheBuilder(db, table, newOptions, true);
   };
 
   // Delete with cache context support (participates in cache clearing when used within cache context)
@@ -495,7 +526,7 @@ export function patchDbWithSelectAliased(
   };
   // Delete with cache eviction
   db.deleteAndEvictCache = function <TTable extends MySqlTable>(table: TTable) {
-    return deleteAndEvictCacheBuilder(db, table, newOptions,true);
+    return deleteAndEvictCacheBuilder(db, table, newOptions, true);
   };
 
   return db;

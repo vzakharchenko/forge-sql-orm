@@ -41,7 +41,7 @@ import { MySqlRemoteQueryResultHKT } from "drizzle-orm/mysql-proxy";
 /**
  * Core interface for ForgeSQL operations.
  * Provides access to CRUD operations, schema-level SQL operations, and query analysis capabilities.
- * 
+ *
  * This is the main interface that developers interact with when using ForgeSQL ORM.
  * It combines query building capabilities with database operations and caching.
  *
@@ -86,12 +86,12 @@ export interface ForgeSqlOperation extends QueryBuilderForgeSql {
 
   /**
    * Provides schema-level SQL operations with optimistic locking/versioning and automatic cache eviction.
-   * 
+   *
    * This method returns operations that use `modifyWithVersioning()` internally, providing:
    * - Optimistic locking support
    * - Automatic version field management
    * - Cache eviction after successful operations
-   * 
+   *
    * @returns {ForgeSQLCacheOperations} Interface for executing versioned SQL operations with cache management
    */
   modifyWithVersioningAndEvictCache(): ForgeSQLCacheOperations;
@@ -100,7 +100,7 @@ export interface ForgeSqlOperation extends QueryBuilderForgeSql {
 /**
  * Interface for Query Builder operations.
  * Provides access to the underlying Drizzle ORM query builder with enhanced functionality.
- * 
+ *
  * This interface extends Drizzle's query building capabilities with:
  * - Field aliasing to prevent name collisions in joins
  * - Caching support for select operations
@@ -212,10 +212,10 @@ export interface QueryBuilderForgeSql {
 
   /**
    * Creates an insert query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned inserts, use `modifyWithVersioning().insert()` or `modifyWithVersioningAndEvictCache().insert()` instead.
-   * 
+   *
    * @param table - The table to insert into
    * @returns Insert query builder (no versioning, no cache management)
    */
@@ -238,10 +238,10 @@ export interface QueryBuilderForgeSql {
 
   /**
    * Creates an update query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned updates, use `modifyWithVersioning().updateById()` or `modifyWithVersioningAndEvictCache().updateById()` instead.
-   * 
+   *
    * @param table - The table to update
    * @returns Update query builder (no versioning, no cache management)
    */
@@ -264,10 +264,10 @@ export interface QueryBuilderForgeSql {
 
   /**
    * Creates a delete query builder.
-   * 
+   *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
-   * 
+   *
    * @param table - The table to delete from
    * @returns Delete query builder (no versioning, no cache management)
    */
@@ -279,7 +279,7 @@ export interface QueryBuilderForgeSql {
    *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
    * For versioned deletes, use `modifyWithVersioning().deleteById()` or `modifyWithVersioningAndEvictCache().deleteById()` instead.
-   * 
+   *
    * @param table - The table to delete from
    * @returns Delete query builder with automatic cache eviction (no versioning)
    */
@@ -287,12 +287,11 @@ export interface QueryBuilderForgeSql {
     table: TTable,
   ): MySqlDeleteBase<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
 
-
   /**
    * Executes operations within a cache context that collects cache eviction events.
    * All clearCache calls within the context are collected and executed in batch at the end.
    * Queries executed within this context will bypass cache for tables that were marked for clearing.
-   * 
+   *
    * @param cacheContext - Function containing operations that may trigger cache evictions
    * @returns Promise that resolves when all operations and cache clearing are complete
    */
@@ -302,7 +301,7 @@ export interface QueryBuilderForgeSql {
    * Executes operations within a cache context and returns a value.
    * All clearCache calls within the context are collected and executed in batch at the end.
    * Queries executed within this context will bypass cache for tables that were marked for clearing.
-   * 
+   *
    * @param cacheContext - Function containing operations that may trigger cache evictions
    * @returns Promise that resolves to the return value of the cacheContext function
    */
@@ -488,7 +487,7 @@ export interface SchemaSqlForgeSql {
 
   /**
    * Executes a raw SQL update query.
-   * 
+   *
    * @param query - The raw SQL update query
    * @param params - Optional SQL parameters
    * @returns Promise that resolves to the update response containing affected rows

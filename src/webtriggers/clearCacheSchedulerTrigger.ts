@@ -3,27 +3,27 @@ import { ForgeSqlOrmOptions } from "../core/ForgeSQLQueryBuilder";
 
 /**
  * Scheduler trigger for clearing expired cache entries.
- * 
+ *
  * This trigger should be configured as a Forge scheduler to automatically
  * clean up expired cache entries based on their TTL (Time To Live).
- * 
+ *
  * @param options - Optional ForgeSQL ORM configuration. If not provided,
  *                  uses default cache settings with cacheEntityName: "cache"
  * @returns Promise that resolves to HTTP response object
- * 
+ *
  * @example
  * ```typescript
  * // In your index.ts
  * import { clearCacheSchedulerTrigger } from "forge-sql-orm";
- * 
+ *
  * export const clearCache = () => {
- *   return clearCacheSchedulerTrigger({ 
- *     cacheEntityName: "cache", 
- *     logRawSqlQuery: true 
+ *   return clearCacheSchedulerTrigger({
+ *     cacheEntityName: "cache",
+ *     logRawSqlQuery: true
  *   });
  * };
  * ```
- * 
+ *
  * @example
  * ```yaml
  * # In manifest.yml
@@ -31,7 +31,7 @@ import { ForgeSqlOrmOptions } from "../core/ForgeSQLQueryBuilder";
  *   - key: clear-cache-trigger
  *     function: clearCache
  *     interval: fiveMinute
- * 
+ *
  * function:
  *   - key: clearCache
  *     handler: index.clearCache
@@ -60,7 +60,7 @@ export const clearCacheSchedulerTrigger = async (options?: ForgeSqlOrmOptions) =
       body: JSON.stringify({
         success: true,
         message: "Cache cleanup completed successfully",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
     };
   } catch (error) {
@@ -72,7 +72,7 @@ export const clearCacheSchedulerTrigger = async (options?: ForgeSqlOrmOptions) =
       body: JSON.stringify({
         success: false,
         error: error instanceof Error ? error.message : "Unknown error during cache cleanup",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
     };
   }

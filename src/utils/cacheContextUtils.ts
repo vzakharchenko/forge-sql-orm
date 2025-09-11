@@ -23,16 +23,18 @@ export const cacheApplicationContext = new AsyncLocalStorage<CacheApplicationCon
  * Saves a table name to the current cache context if one exists.
  * This function is used to track which tables are being processed within
  * a cache context for proper cache invalidation.
- * 
+ *
  * @param table - The Drizzle table schema to track
  * @returns Promise that resolves when the table is saved to context
- * 
+ *
  * @example
  * ```typescript
  * await saveTableIfInsideCacheContext(usersTable);
  * ```
  */
-export async function saveTableIfInsideCacheContext<T extends AnyMySqlTable>(table: T): Promise<void> {
+export async function saveTableIfInsideCacheContext<T extends AnyMySqlTable>(
+  table: T,
+): Promise<void> {
   const context = cacheApplicationContext.getStore();
   if (context) {
     const tableName = getTableName(table).toLowerCase();
@@ -44,11 +46,11 @@ export async function saveTableIfInsideCacheContext<T extends AnyMySqlTable>(tab
  * Checks if the given SQL query contains any tables that are currently being processed
  * within a cache context. This is used to determine if cache should be bypassed
  * for queries that affect tables being modified within the context.
- * 
+ *
  * @param sql - The SQL query string to check
  * @param options - ForgeSQL ORM options containing cache configuration
  * @returns Promise that resolves to true if the SQL contains tables in cache context
- * 
+ *
  * @example
  * ```typescript
  * const shouldBypassCache = await isTableContainsTableInCacheContext(
@@ -68,7 +70,7 @@ export async function isTableContainsTableInCacheContext(
 
   const tables = Array.from(context.tables);
   const lowerSql = sql.toLowerCase();
-  
+
   return tables.some((table) => {
     const tablePattern = options.cacheWrapTable ? `\`${table}\`` : table;
     return lowerSql.includes(tablePattern);

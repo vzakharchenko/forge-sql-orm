@@ -14,17 +14,17 @@ declare module "drizzle-orm/mysql-proxy" {
      * Select with field aliasing support
      */
     selectAliased: SelectAliasedType;
-    
+
     /**
      * Select distinct with field aliasing support
      */
     selectAliasedDistinct: SelectAliasedDistinctType;
-    
+
     /**
      * Select with field aliasing and caching support
      */
     selectAliasedCacheable: SelectAliasedCacheableType;
-    
+
     /**
      * Select distinct with field aliasing and caching support
      */
@@ -36,7 +36,7 @@ declare module "drizzle-orm/mysql-proxy" {
      * Does not immediately clear cache, but marks table for batch cache clearing.
      */
     insertWithCacheContext: InsertAndEvictCacheType;
-    
+
     /**
      * Insert operation that automatically evicts cache immediately after execution.
      * Always clears cache for the affected table, regardless of cache context.
@@ -49,7 +49,7 @@ declare module "drizzle-orm/mysql-proxy" {
      * Does not immediately clear cache, but marks table for batch cache clearing.
      */
     updateWithCacheContext: UpdateAndEvictCacheType;
-    
+
     /**
      * Update operation that automatically evicts cache immediately after execution.
      * Always clears cache for the affected table, regardless of cache context.
@@ -62,7 +62,7 @@ declare module "drizzle-orm/mysql-proxy" {
      * Does not immediately clear cache, but marks table for batch cache clearing.
      */
     deleteWithCacheContext: DeleteAndEvictCacheType;
-    
+
     /**
      * Delete operation that automatically evicts cache immediately after execution.
      * Always clears cache for the affected table, regardless of cache context.

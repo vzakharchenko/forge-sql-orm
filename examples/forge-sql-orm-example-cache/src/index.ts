@@ -20,9 +20,9 @@ resolver.define(
   "create",
   async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
     const payload = req.payload.data;
-      const values = forgeSQL.insert(users).values([payload]);
-      const newVar: MySqlRawQueryResult = await values;
-      return newVar[0].insertId;
+    const values = forgeSQL.insert(users).values([payload]);
+    const newVar: MySqlRawQueryResult = await values;
+    return newVar[0].insertId;
   },
 );
 
@@ -54,8 +54,8 @@ resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {
 
 resolver.define("fetch", async (req: Request<{ sortType?: SortType }>): Promise<UserResponse[]> => {
   const sortType = req.payload.sortType;
-  const baseQuery = forgeSQL.selectCacheable(getTableColumns(users),30).from(users);
-    // Apply sorting if specified
+  const baseQuery = forgeSQL.selectCacheable(getTableColumns(users), 30).from(users);
+  // Apply sorting if specified
   const query = sortType?.name
     ? baseQuery.orderBy(
         sortType.sortType === "ASC"
@@ -80,7 +80,7 @@ resolver.define("fetch", async (req: Request<{ sortType?: SortType }>): Promise<
   //}
 
   const result = await query;
-  console.log("error: "+JSON.stringify(result))
+  console.log("error: " + JSON.stringify(result));
   return result.map(
     (r): UserResponse => ({
       id: r.id,

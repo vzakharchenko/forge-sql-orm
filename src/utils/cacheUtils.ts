@@ -26,7 +26,7 @@ type CacheEntity = {
 
 /**
  * Gets the current Unix timestamp in seconds.
- * 
+ *
  * @returns Current timestamp as integer
  */
 function getCurrentTime(): number {
@@ -37,7 +37,7 @@ function getCurrentTime(): number {
 /**
  * Calculates a future timestamp by adding seconds to the current time.
  * Validates that the result is within 32-bit integer range.
- * 
+ *
  * @param secondsToAdd - Number of seconds to add to current time
  * @returns Future timestamp in seconds
  * @throws Error if the result is out of 32-bit integer range
@@ -55,7 +55,7 @@ function nowPlusSeconds(secondsToAdd: number): number {
 
 /**
  * Generates a hash key for a query based on its SQL and parameters.
- * 
+ *
  * @param query - The Drizzle query object
  * @returns 32-character hexadecimal hash
  */
@@ -68,7 +68,7 @@ function hashKey(query: Query): string {
 
 /**
  * Deletes cache entries in batches to respect Forge limits and timeouts.
- * 
+ *
  * @param results - Array of cache entries to delete
  * @param cacheEntityName - Name of the cache entity
  * @returns Promise that resolves when all deletions are complete
@@ -89,7 +89,7 @@ async function deleteCacheEntriesInBatches(
 
 /**
  * Clears cache entries for specific tables using cursor-based pagination.
- * 
+ *
  * @param tables - Array of table names to clear cache for
  * @param cursor - Pagination cursor for large result sets
  * @param options - ForgeSQL ORM options
@@ -104,7 +104,7 @@ async function clearCursorCache(
   if (!cacheEntityName) {
     throw new Error("cacheEntityName is not configured");
   }
-  
+
   const entityQueryName = options.cacheEntityQueryName ?? CACHE_CONSTANTS.DEFAULT_ENTITY_QUERY_NAME;
   let filters = new Filter<{
     [entityQueryName]: string;
@@ -112,7 +112,7 @@ async function clearCursorCache(
 
   for (const table of tables) {
     const wrapIfNeeded = options.cacheWrapTable ? `\`${table}\`` : table;
-    filters.or(entityQueryName, FilterConditions.contains(wrapIfNeeded?.toLowerCase()));
+    filters = filters.or(entityQueryName, FilterConditions.contains(wrapIfNeeded?.toLowerCase()));
   }
 
   let entityQueryBuilder = kvs
@@ -122,19 +122,19 @@ async function clearCursorCache(
     .query()
     .index(entityQueryName)
     .filters(filters);
-    
+
   if (cursor) {
     entityQueryBuilder = entityQueryBuilder.cursor(cursor);
   }
-  
+
   const listResult = await entityQueryBuilder.limit(100).getMany();
-  
+
   if (options.logRawSqlQuery) {
     console.warn(`clear cache Records: ${JSON.stringify(listResult.results.map((r) => r.key))}`);
   }
-  
+
   await deleteCacheEntriesInBatches(listResult.results, cacheEntityName);
-  
+
   if (listResult.nextCursor) {
     return (
       listResult.results.length + (await clearCursorCache(tables, listResult.nextCursor, options))
@@ -146,7 +146,7 @@ async function clearCursorCache(
 
 /**
  * Clears expired cache entries using cursor-based pagination.
- * 
+ *
  * @param cursor - Pagination cursor for large result sets
  * @param options - ForgeSQL ORM options
  * @returns Total number of deleted expired cache entries
@@ -159,8 +159,9 @@ async function clearExpirationCursorCache(
   if (!cacheEntityName) {
     throw new Error("cacheEntityName is not configured");
   }
-  
-  const entityExpirationName = options.cacheEntityExpirationName ?? CACHE_CONSTANTS.DEFAULT_EXPIRATION_NAME;
+
+  const entityExpirationName =
+    options.cacheEntityExpirationName ?? CACHE_CONSTANTS.DEFAULT_EXPIRATION_NAME;
   let entityQueryBuilder = kvs
     .entity<{
       [entityExpirationName]: number;
@@ -172,15 +173,15 @@ async function clearExpirationCursorCache(
   if (cursor) {
     entityQueryBuilder = entityQueryBuilder.cursor(cursor);
   }
-  
+
   const listResult = await entityQueryBuilder.limit(100).getMany();
-  
+
   if (options.logRawSqlQuery) {
     console.warn(`clear expired Records: ${JSON.stringify(listResult.results.map((r) => r.key))}`);
   }
-  
+
   await deleteCacheEntriesInBatches(listResult.results, cacheEntityName);
-  
+
   if (listResult.nextCursor) {
     return (
       listResult.results.length + (await clearExpirationCursorCache(listResult.nextCursor, options))
@@ -192,47 +193,47 @@ async function clearExpirationCursorCache(
 
 /**
  * Executes a function with retry logic and exponential backoff.
- * 
+ *
  * @param operation - Function to execute with retry
  * @param operationName - Name of the operation for logging
  * @param options - ForgeSQL ORM options for logging
  * @returns Promise that resolves to the operation result
  */
-async function executeWithRetry<T>(
-  operation: () => Promise<T>,
-  operationName: string
-): Promise<T> {
+async function executeWithRetry<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
   let attempt = 0;
   let delay = CACHE_CONSTANTS.INITIAL_RETRY_DELAY;
-  
+
   while (attempt < CACHE_CONSTANTS.MAX_RETRY_ATTEMPTS) {
     try {
       return await operation();
     } catch (err: any) {
       console.warn(`Error during ${operationName}: ${err.message}, retry ${attempt}`, err);
       attempt++;
-      
+
       if (attempt >= CACHE_CONSTANTS.MAX_RETRY_ATTEMPTS) {
         console.error(`Error during ${operationName}: ${err.message}`, err);
         throw err;
       }
-      
+
       await new Promise((resolve) => setTimeout(resolve, delay));
       delay *= CACHE_CONSTANTS.RETRY_DELAY_MULTIPLIER;
     }
   }
-  
+
   throw new Error(`Maximum retry attempts exceeded for ${operationName}`);
 }
 
 /**
  * Clears cache for a specific table.
  * Uses cache context if available, otherwise clears immediately.
- * 
+ *
  * @param schema - The table schema to clear cache for
  * @param options - ForgeSQL ORM options
  */
-export async function clearCache<T extends AnyMySqlTable>(schema: T, options: ForgeSqlOrmOptions): Promise<void> {
+export async function clearCache<T extends AnyMySqlTable>(
+  schema: T,
+  options: ForgeSqlOrmOptions,
+): Promise<void> {
   const tableName = getTableName(schema);
   if (cacheApplicationContext.getStore()) {
     cacheApplicationContext.getStore()?.tables.add(tableName);
@@ -243,19 +244,22 @@ export async function clearCache<T extends AnyMySqlTable>(schema: T, options: Fo
 
 /**
  * Clears cache for multiple tables with retry logic and performance logging.
- * 
+ *
  * @param tables - Array of table names to clear cache for
  * @param options - ForgeSQL ORM options
  * @returns Promise that resolves when cache clearing is complete
  */
-export async function clearTablesCache(tables: string[], options: ForgeSqlOrmOptions): Promise<void> {
+export async function clearTablesCache(
+  tables: string[],
+  options: ForgeSqlOrmOptions,
+): Promise<void> {
   if (!options.cacheEntityName) {
     throw new Error("cacheEntityName is not configured");
   }
-  
+
   const startTime = DateTime.now();
   let totalRecords = 0;
-  
+
   try {
     totalRecords = await executeWithRetry(
       () => clearCursorCache(tables, "", options),
@@ -270,7 +274,7 @@ export async function clearTablesCache(tables: string[], options: ForgeSqlOrmOpt
 }
 /**
  * Clears expired cache entries with retry logic and performance logging.
- * 
+ *
  * @param options - ForgeSQL ORM options
  * @returns Promise that resolves when expired cache clearing is complete
  */
@@ -278,10 +282,10 @@ export async function clearExpiredCache(options: ForgeSqlOrmOptions): Promise<vo
   if (!options.cacheEntityName) {
     throw new Error("cacheEntityName is not configured");
   }
-  
+
   const startTime = DateTime.now();
   let totalRecords = 0;
-  
+
   try {
     totalRecords = await executeWithRetry(
       () => clearExpirationCursorCache("", options),
@@ -295,7 +299,7 @@ export async function clearExpiredCache(options: ForgeSqlOrmOptions): Promise<vo
 
 /**
  * Retrieves data from cache if it exists and is not expired.
- * 
+ *
  * @param query - Query object with toSQL method
  * @param options - ForgeSQL ORM options
  * @returns Cached data if found and valid, undefined otherwise
@@ -309,12 +313,13 @@ export async function getFromCache<T>(
   }
 
   const entityQueryName = options.cacheEntityQueryName ?? CACHE_CONSTANTS.DEFAULT_ENTITY_QUERY_NAME;
-  const expirationName = options.cacheEntityExpirationName ?? CACHE_CONSTANTS.DEFAULT_EXPIRATION_NAME;
+  const expirationName =
+    options.cacheEntityExpirationName ?? CACHE_CONSTANTS.DEFAULT_EXPIRATION_NAME;
   const dataName = options.cacheEntityDataName ?? CACHE_CONSTANTS.DEFAULT_DATA_NAME;
-  
+
   const sqlQuery = query.toSQL();
   const key = hashKey(sqlQuery);
-  
+
   // Skip cache if table is in cache context (will be cleared)
   if (await isTableContainsTableInCacheContext(sqlQuery.sql, options)) {
     if (options.logRawSqlQuery) {
@@ -322,12 +327,10 @@ export async function getFromCache<T>(
     }
     return undefined;
   }
-  
+
   try {
-    const cacheResult = await kvs
-      .entity<CacheEntity>(options.cacheEntityName)
-      .get(key);
-      
+    const cacheResult = await kvs.entity<CacheEntity>(options.cacheEntityName).get(key);
+
     if (
       cacheResult &&
       (cacheResult[expirationName] as number) >= getCurrentTime() &&
@@ -348,7 +351,7 @@ export async function getFromCache<T>(
 
 /**
  * Stores query results in cache with specified TTL.
- * 
+ *
  * @param query - Query object with toSQL method
  * @param options - ForgeSQL ORM options
  * @param results - Data to cache
@@ -364,21 +367,23 @@ export async function setCacheResult(
   if (!options.cacheEntityName) {
     throw new Error("cacheEntityName is not configured");
   }
-  
+
   try {
-    const entityQueryName = options.cacheEntityQueryName ?? CACHE_CONSTANTS.DEFAULT_ENTITY_QUERY_NAME;
-    const expirationName = options.cacheEntityExpirationName ?? CACHE_CONSTANTS.DEFAULT_EXPIRATION_NAME;
+    const entityQueryName =
+      options.cacheEntityQueryName ?? CACHE_CONSTANTS.DEFAULT_ENTITY_QUERY_NAME;
+    const expirationName =
+      options.cacheEntityExpirationName ?? CACHE_CONSTANTS.DEFAULT_EXPIRATION_NAME;
     const dataName = options.cacheEntityDataName ?? CACHE_CONSTANTS.DEFAULT_DATA_NAME;
-    
+
     const sqlQuery = query.toSQL();
     const key = hashKey(sqlQuery);
-    
+
     await kvs.entity(options.cacheEntityName).set(key, {
       [entityQueryName]: sqlQuery.sql.toLowerCase(),
       [expirationName]: nowPlusSeconds(cacheTtl),
       [dataName]: JSON.stringify(results),
     });
-    
+
     if (options.logRawSqlQuery) {
       console.warn(`Store value to cache, cacheKey: ${key}`);
     }

@@ -26,7 +26,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
   /**
    * Inserts records into the database with optional versioning support.
    * If a version field exists in the schema, versioning is applied.
-   * 
+   *
    * This method automatically handles:
    * - Version field initialization for optimistic locking
    * - Batch insertion for multiple records
@@ -55,9 +55,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
     );
 
     // Build insert query
-    const queryBuilder = this.forgeOperations
-      .insert(schema)
-      .values(preparedModels);
+    const queryBuilder = this.forgeOperations.insert(schema).values(preparedModels);
 
     // Add onDuplicateKeyUpdate if needed
     const finalQuery = updateIfExists
@@ -77,7 +75,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
   /**
    * Deletes a record by its primary key with optional version check.
    * If versioning is enabled, ensures the record hasn't been modified since last read.
-   * 
+   *
    * This method automatically handles:
    * - Single primary key validation
    * - Optimistic locking checks if versioning is enabled
@@ -118,9 +116,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
     }
 
     // Execute delete query
-    const queryBuilder = this.forgeOperations
-      .delete(schema)
-      .where(and(...conditions));
+    const queryBuilder = this.forgeOperations.delete(schema).where(and(...conditions));
 
     const result = await queryBuilder;
     if (versionMetadata && result[0].affectedRows === 0) {
@@ -136,7 +132,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
    * - Retrieves the current version
    * - Checks for concurrent modifications
    * - Increments the version on successful update
-   * 
+   *
    * This method automatically handles:
    * - Primary key validation
    * - Version field retrieval and validation
@@ -231,10 +227,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
       throw new Error("WHERE conditions must be provided");
     }
 
-    const queryBuilder = this.forgeOperations
-      .update(schema)
-      .set(updateData)
-      .where(where);
+    const queryBuilder = this.forgeOperations.update(schema).set(updateData).where(where);
 
     const result = await queryBuilder;
     await saveTableIfInsideCacheContext(schema);
