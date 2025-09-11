@@ -24,11 +24,6 @@ type CacheEntity = {
   [key: string]: string | number;
 };
 
-type CacheQueryResult = {
-  results: Array<{ key: string }>;
-  nextCursor?: string;
-};
-
 /**
  * Gets the current Unix timestamp in seconds.
  * 
@@ -205,8 +200,7 @@ async function clearExpirationCursorCache(
  */
 async function executeWithRetry<T>(
   operation: () => Promise<T>,
-  operationName: string,
-  options: ForgeSqlOrmOptions,
+  operationName: string
 ): Promise<T> {
   let attempt = 0;
   let delay = CACHE_CONSTANTS.INITIAL_RETRY_DELAY;
@@ -266,7 +260,6 @@ export async function clearTablesCache(tables: string[], options: ForgeSqlOrmOpt
     totalRecords = await executeWithRetry(
       () => clearCursorCache(tables, "", options),
       "clearing cache",
-      options
     );
   } finally {
     if (options.logRawSqlQuery) {
@@ -293,7 +286,6 @@ export async function clearExpiredCache(options: ForgeSqlOrmOptions): Promise<vo
     totalRecords = await executeWithRetry(
       () => clearExpirationCursorCache("", options),
       "clearing expired cache",
-      options
     );
   } finally {
     const duration = DateTime.now().toSeconds() - startTime.toSeconds();

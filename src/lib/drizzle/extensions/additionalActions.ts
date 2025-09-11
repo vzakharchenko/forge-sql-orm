@@ -14,11 +14,6 @@ type QueryBuilder = {
   toSQL?: () => any;
 };
 
-type CacheableQueryBuilder = QueryBuilder & {
-  then: (onfulfilled?: any, onrejected?: any) => Promise<any>;
-  toSQL: () => any;
-};
-
 /**
  * Determines whether cache should be cleared based on the error type.
  * Only clears cache for errors that might indicate data consistency issues.
@@ -30,7 +25,7 @@ function shouldClearCacheOnError(error: any): boolean {
   // Don't clear cache for client-side errors (validation, etc.)
   if (error?.code === 'VALIDATION_ERROR' || 
       error?.code === 'CONSTRAINT_ERROR' ||
-      error?.message?.includes('validation')) {
+      (error?.message && /validation/i.exec(error.message))) {
     return false;
   }
   
@@ -38,8 +33,8 @@ function shouldClearCacheOnError(error: any): boolean {
   if (error?.code === 'DEADLOCK' ||
       error?.code === 'LOCK_WAIT_TIMEOUT' ||
       error?.code === 'CONNECTION_ERROR' ||
-      error?.message?.includes('timeout') ||
-      error?.message?.includes('connection')) {
+      (error?.message && /timeout/i.exec(error.message)) ||
+      (error?.message && /connection/i.exec(error.message))) {
     return true;
   }
   
