@@ -78,6 +78,9 @@
     "@forge/sql": "^3.0.5",
     "drizzle-orm": "^0.44.5"
   },
+  "optionalDependencies": {
+    "@forge/kvs": "^1.0.5"
+  },
   "dependencies": {
     "luxon": "^3.7.1"
   }

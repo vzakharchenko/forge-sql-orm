@@ -1,16 +1,15 @@
 import { ForgeSqlOrmOptions } from "..";
-import { CRUDForgeSQL, ForgeSqlOperation } from "./ForgeSQLQueryBuilder";
-import { AnyMySqlTable } from "drizzle-orm/mysql-core/index";
-import { AnyColumn, InferInsertModel } from "drizzle-orm";
-import { eq, and } from "drizzle-orm";
-import { SQL } from "drizzle-orm";
+import { VerioningModificationForgeSQL, ForgeSqlOperation } from "./ForgeSQLQueryBuilder";
+import { AnyMySqlTable } from "drizzle-orm/mysql-core";
+import { and, AnyColumn, eq, InferInsertModel, SQL } from "drizzle-orm";
 import { getPrimaryKeys, getTableMetadata } from "../utils/sqlUtils";
+import { saveTableIfInsideCacheContext } from "../utils/cacheContextUtils";
 
 /**
- * Class implementing CRUD operations for ForgeSQL ORM.
+ * Class implementing Modification operations for ForgeSQL ORM.
  * Provides methods for inserting, updating, and deleting records with support for optimistic locking.
  */
-export class ForgeSQLCrudOperations implements CRUDForgeSQL {
+export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
   private readonly forgeOperations: ForgeSqlOperation;
   private readonly options: ForgeSqlOrmOptions;
 
@@ -27,13 +26,18 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
   /**
    * Inserts records into the database with optional versioning support.
    * If a version field exists in the schema, versioning is applied.
+   * 
+   * This method automatically handles:
+   * - Version field initialization for optimistic locking
+   * - Batch insertion for multiple records
+   * - Duplicate key handling with optional updates
    *
    * @template T - The type of the table schema
-   * @param {T} schema - The entity schema
-   * @param {Partial<InferInsertModel<T>>[]} models - Array of entities to insert
-   * @param {boolean} [updateIfExists=false] - Whether to update existing records
-   * @returns {Promise<number>} The number of inserted rows
-   * @throws {Error} If the insert operation fails
+   * @param schema - The entity schema
+   * @param models - Array of entities to insert
+   * @param updateIfExists - Whether to update existing records (default: false)
+   * @returns Promise that resolves to the number of inserted rows
+   * @throws Error if the insert operation fails
    */
   async insert<T extends AnyMySqlTable>(
     schema: T,
@@ -52,7 +56,6 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
 
     // Build insert query
     const queryBuilder = this.forgeOperations
-      .getDrizzleQueryBuilder()
       .insert(schema)
       .values(preparedModels);
 
@@ -67,19 +70,26 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
 
     // Execute query
     const result = await finalQuery;
+    await saveTableIfInsideCacheContext(schema);
     return result[0].insertId;
   }
 
   /**
    * Deletes a record by its primary key with optional version check.
    * If versioning is enabled, ensures the record hasn't been modified since last read.
+   * 
+   * This method automatically handles:
+   * - Single primary key validation
+   * - Optimistic locking checks if versioning is enabled
+   * - Version field validation before deletion
    *
    * @template T - The type of the table schema
-   * @param {unknown} id - The ID of the record to delete
-   * @param {T} schema - The entity schema
-   * @returns {Promise<number>} Number of affected rows
-   * @throws {Error} If the delete operation fails
-   * @throws {Error} If multiple primary keys are found
+   * @param id - The ID of the record to delete
+   * @param schema - The entity schema
+   * @returns Promise that resolves to the number of affected rows
+   * @throws Error if the delete operation fails
+   * @throws Error if multiple primary keys are found
+   * @throws Error if optimistic locking check fails
    */
   async deleteById<T extends AnyMySqlTable>(id: unknown, schema: T): Promise<number> {
     const { tableName, columns } = getTableMetadata(schema);
@@ -109,12 +119,14 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
 
     // Execute delete query
     const queryBuilder = this.forgeOperations
-      .getDrizzleQueryBuilder()
       .delete(schema)
       .where(and(...conditions));
 
     const result = await queryBuilder;
-
+    if (versionMetadata && result[0].affectedRows === 0) {
+      throw new Error(`Optimistic locking failed: record with primary key ${id} has been modified`);
+    }
+    await saveTableIfInsideCacheContext(schema);
     return result[0].affectedRows;
   }
 
@@ -124,14 +136,20 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
    * - Retrieves the current version
    * - Checks for concurrent modifications
    * - Increments the version on successful update
+   * 
+   * This method automatically handles:
+   * - Primary key validation
+   * - Version field retrieval and validation
+   * - Optimistic locking conflict detection
+   * - Version field incrementation
    *
    * @template T - The type of the table schema
-   * @param {Partial<InferInsertModel<T>>} entity - The entity with updated values
-   * @param {T} schema - The entity schema
-   * @returns {Promise<number>} Number of affected rows
-   * @throws {Error} If the primary key is not provided
-   * @throws {Error} If optimistic locking check fails
-   * @throws {Error} If multiple primary keys are found
+   * @param entity - The entity with updated values (must include primary key)
+   * @param schema - The entity schema
+   * @returns Promise that resolves to the number of affected rows
+   * @throws Error if the primary key is not provided
+   * @throws Error if optimistic locking check fails
+   * @throws Error if multiple primary keys are found
    */
   async updateById<T extends AnyMySqlTable>(
     entity: Partial<InferInsertModel<T>>,
@@ -177,7 +195,6 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
 
     // Execute update query
     const queryBuilder = this.forgeOperations
-      .getDrizzleQueryBuilder()
       .update(schema)
       .set(updateData)
       .where(and(...conditions));
@@ -189,7 +206,7 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
         `Optimistic locking failed: record with primary key ${entity[primaryKeyName as keyof typeof entity]} has been modified`,
       );
     }
-
+    await saveTableIfInsideCacheContext(schema);
     return result[0].affectedRows;
   }
 
@@ -215,12 +232,12 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
     }
 
     const queryBuilder = this.forgeOperations
-      .getDrizzleQueryBuilder()
       .update(schema)
       .set(updateData)
       .where(where);
 
     const result = await queryBuilder;
+    await saveTableIfInsideCacheContext(schema);
     return result[0].affectedRows;
   }
 
@@ -421,7 +438,6 @@ export class ForgeSQLCrudOperations implements CRUDForgeSQL {
     const [primaryKeyName, primaryKeyColumn] = primaryKeys[0];
 
     const resultQuery = this.forgeOperations
-      .getDrizzleQueryBuilder()
       .select({
         [primaryKeyName]: primaryKeyColumn as any,
         [versionFieldName]: versionFieldColumn as any,

@@ -1,0 +1,55 @@
+{
+  "name": "forge_sql_orm_example_frontend",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "@atlaskit/css-reset": "^7.3.5",
+    "@atlaskit/dynamic-table": "^18.2.11",
+    "@forge/bridge": "^5.4.0",
+    "mobx": "6.13.7",
+    "mobx-react": "9.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.3.0",
+    "@types/react": "^18.3.1",
+    "@vitejs/plugin-react": "^5.0.2",
+    "dotenv": "17.2.2",
+    "knip": "^5.63.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-pkg": "^0.21.2",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4"
+  },
+  "scripts": {
+    "build": "vite build",
+    "build:husky": "vite build",
+    "build:deploy": "vite build && cd .. && ./deploy.sh ",
+    "build:tunnel": "cd .. && forge tunnel",
+    "start": "PORT=3099 vite serve",
+    "prettier": "prettier src vite.config.ts --write",
+    "test": "jest --ci --collectCoverage",
+    "test:watch": "jest --watchAll",
+    "knip": "knip"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "overrides": {
+    "esbuild": "npm:esbuild@latest",
+    "parse-url": "npm:parsed-url@latest",
+    "gry": "npm:gry@latest"
+  }
+}

@@ -6,7 +6,7 @@ export * from "./core/ForgeSQLSelectOperations";
 export * from "./utils/sqlUtils";
 export * from "./utils/forgeDriver";
 export * from "./webtriggers";
-export * from "./lib/drizzle/extensions/selectAliased";
+export * from "./lib/drizzle/extensions/additionalActions";
 export * from "./core/SystemTables";
 
 export default ForgeSQLORM;
