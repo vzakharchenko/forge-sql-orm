@@ -463,7 +463,7 @@ export function getTableNameFromModifyQuery(sqlText: string): string {
 
   // Some forms: DELETE t1 FROM t1 JOIN t2 ...
   const deleteBeforeFromRe = new RegExp(
-    String.raw`\bdelete\b\s+` + hint + `(` + ident + `)\s+from\b`,
+    String.raw`\bdelete\b\s+` + hint + `(` + ident + `)\\s+from\b`,
     "i",
   );
 
