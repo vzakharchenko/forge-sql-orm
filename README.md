@@ -17,6 +17,7 @@
 
 ## Key Features
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
+- ✅ **Advanced Caching System** with automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -26,7 +27,6 @@
 - ✅ **Schema Fetching** Development-only web trigger to retrieve current database schema and generate SQL statements for schema recreation
 - ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying migrations, dropping tables (development-only), and fetching schema (development-only) with proper error handling and security controls
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
-- ✅ **Advanced Caching System** with automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
 - ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights (Performance analysis and Troubleshooting only)
 
 ## Usage Approaches
@@ -318,10 +318,9 @@ const forgeSQL = new ForgeSQL(options);
 ```json
 {
   "dependencies": {
-    "forge-sql-orm": "^1.0.0",
-    "@forge/sql": "^1.0.0",
-    "drizzle-orm": "^0.29.0",
-    "moment": "^2.29.4"
+    "forge-sql-orm": "latest",
+    "@forge/sql": "latest",
+    "drizzle-orm": "latest"
   }
 }
 ```
@@ -350,11 +349,10 @@ const users = await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
 ```json
 {
   "dependencies": {
-    "forge-sql-orm": "^1.0.0",
-    "@forge/sql": "^1.0.0",
-    "@forge/kvs": "^1.0.0",
-    "drizzle-orm": "^0.29.0",
-    "moment": "^2.29.4"
+    "forge-sql-orm": "latest",
+    "@forge/sql": "latest",
+    "@forge/kvs": "latest",
+    "drizzle-orm": "latest"
   }
 }
 ```
