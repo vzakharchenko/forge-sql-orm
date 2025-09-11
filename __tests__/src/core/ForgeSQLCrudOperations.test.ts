@@ -8,7 +8,8 @@ vi.mock("@forge/sql", () => ({
     prepare: vi.fn((query: string) => {
       if (
         query ===
-        "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?"
+        "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?" ||
+          query === "select `id` as `a_id_id`, `version` as `a_version_version` from `test_entity_version` where `test_entity_version`.`id` = ?"
       ) {
         const testEntityVersion = {
           id: 1,
@@ -221,7 +222,7 @@ describe("ForgeSQLCrudOperations", () => {
     await forgeSqlOperation.modifyWithVersioning().deleteById(1, testEntityVersion);
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-        "select `id`, `version` from `test_entity_version` where `test_entity_version`.`id` = ?",
+        "select `id` as `a_id_id`, `version` as `a_version_version` from `test_entity_version` where `test_entity_version`.`id` = ?",
     );
 
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
