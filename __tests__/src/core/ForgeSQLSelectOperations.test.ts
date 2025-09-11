@@ -11,6 +11,10 @@ import {testEntityJoin1} from "../../entities/TestEntityJoin1";
 import {testEntityJoin2} from "../../entities/TestEntityJoin2";
 import {testEntityVersionDifferentDateField} from "../../entities/TestEntityVersionDifferentFieldDate";
 import {DateTime} from "luxon";
+vi.mock("../../../src/utils/cacheUtils", ()=>({
+    getFromCache: async ()=>{return undefined},
+    setCacheResult: async()=>{},
+}));
 
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
@@ -38,7 +42,7 @@ describe("ForgeSQLSelectOperations", () => {
     let forgeSqlOperation: ForgeSqlOperation;
 
     beforeEach(() => {
-        forgeSqlOperation = new ForgeSQLORM({logRawSqlQuery: true});
+        forgeSqlOperation = new ForgeSQLORM({logRawSqlQuery: true, cacheEntityName: 'cache'});
     });
 
     it("test analyses", async () => {
@@ -370,6 +374,48 @@ describe("ForgeSQLSelectOperations", () => {
         ]);
     });
 
+it("should execute inner join with the same fields Cacheable", async () => {
+        // Mock result without aliases
+        vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+            query: "MOCK_QUERY",
+            params: [],
+            bindParams: vi.fn(),
+            execute: vi.fn().mockResolvedValue({
+                rows: [
+                    {test_entity_join1_id: 1, name: "Test1", data: "t1", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test21", data2: "t21", count:1},
+                    {test_entity_join1_id: 2, name: "Test2", data: "t2", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test22", data2: "t22", count:2}
+                ]
+            }),
+        } as any));
+
+        const query = forgeSqlOperation.selectCacheable(
+            {
+                table1: testEntityJoin1,
+              table2: {name: testEntityJoin2.name, email: testEntityJoin2.email},
+                count: rawSql<number>`COUNT(*)`
+            })
+            .from(testEntityJoin1)
+            .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id));
+
+        const result = await query;
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "select `test_entity_join1`.`id` as `a_table1_test_entity_join1_id`, `test_entity_join1`.`name` as `a_table1_test_entity_join1_name`, `test_entity_join1`.`email` as `a_table1_test_entity_join1_email`, `test_entity_join1`.`custom_type` as `a_table1_test_entity_join1_custom_type`, `test_entity_join2`.`name` as `a_table2_name_name`, `test_entity_join2`.`email` as `a_table2_email_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
+        );
+        expect(result).toEqual([
+            {table1: {id: 1,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
+            {table1: {id: 2,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
+        ]);
+    });
+
     it("should execute inner join with the same diff fields", async () => {
         // Mock result without aliases
         vi.mocked(sql.prepare).mockImplementationOnce(() => ({
@@ -453,6 +499,47 @@ describe("ForgeSQLSelectOperations", () => {
         } as any));
 
         const query = forgeSqlOperation.selectDistinct(
+            {
+                table1: testEntityJoin1,
+              table2: {name: testEntityJoin2.name, email: testEntityJoin2.email},
+                count: rawSql<number>`COUNT(*)`
+            })
+            .from(testEntityJoin1)
+            .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id));
+
+        const result = await query
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "select distinct `test_entity_join1`.`id` as `a_table1_test_entity_join1_id`, `test_entity_join1`.`name` as `a_table1_test_entity_join1_name`, `test_entity_join1`.`email` as `a_table1_test_entity_join1_email`, `test_entity_join1`.`custom_type` as `a_table1_test_entity_join1_custom_type`, `test_entity_join2`.`name` as `a_table2_name_name`, `test_entity_join2`.`email` as `a_table2_email_email`, COUNT(*) from `test_entity_join1` inner join `test_entity_join2` on `test_entity_join1`.`id` = `test_entity_join2`.`id`",
+        );
+        expect(result).toEqual([
+            {table1: {id: 1,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test1", email: "t1"}, table2: {name: "Test21", email: "t21"}, count: 1},
+            {table1: {id: 2,
+                    "customType": "1e63cfa1-117d-40e1-b8e8-3f4d9bc7d1b8", name: "Test2", email: "t2"}, table2: {name: "Test22", email: "t22"}, count: 2}
+        ]);
+    });
+
+    it("should execute inner join with the same fields distinct cacheable", async () => {
+        // Mock result without aliases
+        vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+            query: "MOCK_QUERY",
+            params: [],
+            bindParams: vi.fn(),
+            execute: vi.fn().mockResolvedValue({
+                rows: [
+                    {test_entity_join1_id: 1, name: "Test1", data: "t1", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test21", data2: "t21", count:1},
+                    {test_entity_join1_id: 2, name: "Test2", data: "t2", uuid: {
+                            "type": "Buffer",
+                            "data": [30,99,207,161,17,125,64,225,184,232,63,77,155,199,209,184]
+                        }, name2: "Test22", data2: "t22", count:2}
+                ]
+            }),
+        } as any));
+
+        const query = forgeSqlOperation.selectDistinctCacheable(
             {
                 table1: testEntityJoin1,
               table2: {name: testEntityJoin2.name, email: testEntityJoin2.email},

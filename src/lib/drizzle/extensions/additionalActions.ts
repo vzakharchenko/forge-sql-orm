@@ -13,7 +13,7 @@ import {
   MySqlUpdateBuilder,
 } from "drizzle-orm/mysql-core/query-builders";
 import { clearCache, getFromCache, setCacheResult } from "../../../utils/cacheUtils";
-import { saveTableIfInsideCacheContext } from "../../../utils/cacheContextUtils";
+import {cacheApplicationContext, saveTableIfInsideCacheContext} from "../../../utils/cacheContextUtils";
 
 // Types for better type safety
 type QueryBuilder = {
@@ -100,13 +100,12 @@ async function handleSuccessfulExecution(
   isCached: boolean,
 ): Promise<any> {
   try {
-    const result = onfulfilled?.(rows);
-    if (isCached) {
-      await clearCache(table, options);
-    } else {
       await saveTableIfInsideCacheContext(table);
-    }
-    return result;
+      if (isCached && !cacheApplicationContext.getStore()) {
+          await clearCache(table, options);
+      }
+      const result = onfulfilled?.(rows);
+      return result;
   } catch (error) {
     // Only clear cache for certain types of errors
     if (shouldClearCacheOnError(error)) {
@@ -170,9 +169,8 @@ const wrapCacheEvictBuilder = <TTable extends MySqlTable>(
         return (onfulfilled?: any, onrejected?: any) =>
           target
             .execute()
-            .then(
-              (rows: unknown[]) =>
-                handleSuccessfulExecution(rows, onfulfilled, table, options, isCached),
+            .then((rows: unknown[]) =>
+                 handleSuccessfulExecution(rows, onfulfilled, table, options, isCached),
               onrejected,
             );
       }

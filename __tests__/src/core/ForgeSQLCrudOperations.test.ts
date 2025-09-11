@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 const OriginalDate = global.Date;
+import {clearCache, clearTablesCache} from "../../../src/utils/cacheUtils";
+vi.mock("../../../src/utils/cacheUtils");
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
-
 vi.mock("@forge/sql", () => ({
   sql: {
     prepare: vi.fn((query: string) => {
@@ -90,12 +91,14 @@ import {
 import {eq} from "drizzle-orm";
 import {testEntityTimeStampVersion} from "../../entities/TestEntityTimeStampVersion";
 import {TestEntityVersionDifferentField} from "../../entities/TestEntityVersionDifferentField";
+import {cacheApplicationContext} from "../../../src/utils/cacheContextUtils";
 
 describe("ForgeSQLCrudOperations", () => {
   let forgeSqlOperation: ForgeSqlOperation;
 
   beforeEach(() => {
     forgeSqlOperation = new ForgeSQLORM( {
+        cacheEntityName: 'cache',
       logRawSqlQuery: true,
       additionalMetadata: {
         "test_entity_version": {
@@ -134,6 +137,30 @@ describe("ForgeSQLCrudOperations", () => {
       execute: vi.fn().mockResolvedValue( {"rows":{"fieldCount":0,"affectedRows":1,"insertId":30006,"info":"","serverStatus":2,"warningStatus":0,"changedRows":0},"metadata":{"dbExecutionTime":5,"responseSize":111,"fields":[]}}),
     } as any));
     let number = await forgeSqlOperation.modifyWithVersioning().insert(testEntity, [{ id: 1, name: "Test" }]);
+    expect(number).toEqual(30006);
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+      "insert into `test_entity` (`id`, `name`) values (?, ?)",
+    );
+
+
+
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test");
+    expect(preparedStatement.execute).toHaveBeenCalled();
+  });
+
+  it("should call SQL prepare and execute on insert cacheable", async () => {
+    vi.mocked(sql.prepare).mockImplementationOnce(() => ({
+      query: "MOCK_QUERY",
+      params: [],
+      bindParams: vi.fn(),
+      execute: vi.fn().mockResolvedValue( {"rows":{"fieldCount":0,"affectedRows":1,"insertId":30006,"info":"","serverStatus":2,"warningStatus":0,"changedRows":0},"metadata":{"dbExecutionTime":5,"responseSize":111,"fields":[]}}),
+    } as any));
+    let number = await forgeSqlOperation.modifyWithVersioningAndEvictCache().insert(testEntity, [{ id: 1, name: "Test" }]);
+      expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+      );
+      expect(vi.mocked(clearCache)).toHaveBeenCalled(
+      );
     expect(number).toEqual(30006);
     expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
       "insert into `test_entity` (`id`, `name`) values (?, ?)",
@@ -473,4 +500,224 @@ describe("ForgeSQLCrudOperations", () => {
       );
     });
   });
+
+
+    it("simple Insert", async () => {
+        await forgeSqlOperation
+            .insert(testEntityDateVersion).values([{
+                id: 1,
+                name: "Test",
+                version: new Date()
+            } as { id: number; name: string; version: Date }]);
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
+        );
+        expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+        );
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+    it("simple Insert with cache Context", async () => {
+        await forgeSqlOperation.executeWithCacheContext(async ()=>{
+            await forgeSqlOperation
+                .insert(testEntityDateVersion).values([{
+                    id: 1,
+                    name: "Test",
+                    version: new Date()
+                } as { id: number; name: string; version: Date }]);
+            expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+        })
+        expect(vi.mocked(clearTablesCache)).toHaveBeenCalled(
+        );
+        expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+        );
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+    it("simple Insert with cache", async () => {
+        await forgeSqlOperation
+            .insertAndEvictCache(testEntityDateVersion).values([{
+                id: 1,
+                name: "Test",
+                version: new Date()
+            } as { id: number; name: string; version: Date }]);
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
+        );
+        expect(vi.mocked(clearCache)).toHaveBeenCalled(
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+    it("simple Insert with cache and cache context", async () => {
+        await forgeSqlOperation.executeWithCacheContext(async ()=>{
+            await forgeSqlOperation
+                .insertAndEvictCache(testEntityDateVersion).values([{
+                    id: 1,
+                    name: "Test",
+                    version: new Date()
+                } as { id: number; name: string; version: Date }]);
+            expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+        })
+        expect(vi.mocked(clearTablesCache)).toHaveBeenCalled(
+        );
+        expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+        );
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+        it('simple update', async () => {
+            await forgeSqlOperation.update(testEntity).set({name: "Updated"}).where(    eq(testEntity.id, 1));
+            expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+                "update `test_entity` set `name` = ? where `test_entity`.`id` = ?"
+            );
+        });
+
+        it('simple update cache', async () => {
+            await forgeSqlOperation.updateAndEvictCache(testEntity).set({name: "Updated"}).where(    eq(testEntity.id, 1));
+            expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).toHaveBeenCalled(
+            );
+            expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+                "update `test_entity` set `name` = ? where `test_entity`.`id` = ?"
+            );
+        });
+
+        it('simple update cache context', async () => {
+            await forgeSqlOperation.executeWithCacheContext(async ()=>{
+                await forgeSqlOperation.update(testEntity).set({name: "Updated"}).where(    eq(testEntity.id, 1));
+                expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+                );
+                expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+                );
+            })
+            expect(vi.mocked(clearTablesCache)).toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+
+            expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+                "update `test_entity` set `name` = ? where `test_entity`.`id` = ?"
+            );
+        });
+
+        it('simple update cache inside cache context', async () => {
+            await forgeSqlOperation.executeWithCacheContext(async ()=>{
+                await forgeSqlOperation.updateAndEvictCache(testEntity).set({name: "Updated"}).where(    eq(testEntity.id, 1));
+                expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+                );
+                expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+                );
+            })
+            expect(vi.mocked(clearTablesCache)).toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+
+            expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+                "update `test_entity` set `name` = ? where `test_entity`.`id` = ?"
+            );
+        });
+
+    it("simple delete", async () => {
+        await forgeSqlOperation.delete(testEntity).where(eq(testEntity.id, 1));
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "delete from `test_entity` where `test_entity`.`id` = ?",
+        );
+
+        expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+        );
+        expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1);
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+    it("simple delete cache context", async () => {
+        await forgeSqlOperation.executeWithCacheContext(async ()=>{
+            await forgeSqlOperation.delete(testEntity).where(eq(testEntity.id, 1));
+            expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+        })
+        expect(vi.mocked(clearTablesCache)).toHaveBeenCalled(
+        );
+        expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1);
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+    it("simple delete cache", async () => {
+        await forgeSqlOperation.deleteAndEvictCache(testEntity).where(eq(testEntity.id, 1));
+
+        expect(vi.mocked(clearCache)).toHaveBeenCalled(
+        );
+
+        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+            "delete from `test_entity` where `test_entity`.`id` = ?",
+        );
+        expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1);
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
+
+    it("simple delete cache in cache context", async () => {
+        await forgeSqlOperation.executeWithCacheContext(async ()=>{
+            await forgeSqlOperation.deleteAndEvictCache(testEntity).where(eq(testEntity.id, 1));
+            expect(vi.mocked(clearTablesCache)).not.toHaveBeenCalled(
+            );
+            expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+            );
+        })
+        expect(vi.mocked(clearTablesCache)).toHaveBeenCalled(
+        );
+        expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
+        );
+
+        const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1);
+        expect(preparedStatement.execute).toHaveBeenCalled();
+    });
 });
