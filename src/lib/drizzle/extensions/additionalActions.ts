@@ -76,49 +76,93 @@ export type DeleteAndEvictCacheType = <TTable extends MySqlTable>(
 ) => MySqlDeleteBase<TTable, MySqlRemoteQueryResultHKT, MySqlRemotePreparedQueryHKT>;
 
 /**
+ * Handles successful query execution with cache management.
+ * 
+ * @param rows - Query result rows
+ * @param onfulfilled - Success callback
+ * @param table - The table being modified
+ * @param options - ForgeSQL ORM options
+ * @param isCached - Whether to clear cache immediately
+ * @returns Promise with result
+ */
+async function handleSuccessfulExecution(
+  rows: unknown[],
+  onfulfilled: any,
+  table: MySqlTable,
+  options: ForgeSqlOrmOptions,
+  isCached: boolean
+): Promise<any> {
+  try {
+    const result = onfulfilled?.(rows);
+    if (isCached) {
+      await clearCache(table, options);
+    } else {
+      await saveTableIfInsideCacheContext(table);
+    }
+    return result;
+  } catch (error) {
+    // Only clear cache for certain types of errors
+    if (shouldClearCacheOnError(error)) {
+      if (isCached) {
+        await clearCache(table, options).catch(() => {
+          console.warn('Ignore cache clear errors');
+        });
+      } else {
+        await saveTableIfInsideCacheContext(table);
+      }
+    }
+    throw error;
+  }
+}
+
+/**
+ * Handles function calls on the wrapped builder.
+ * 
+ * @param value - The function to call
+ * @param target - The target object
+ * @param args - Function arguments
+ * @param table - The table being modified
+ * @param options - ForgeSQL ORM options
+ * @param isCached - Whether to clear cache immediately
+ * @returns Function result or wrapped builder
+ */
+function handleFunctionCall(
+  value: Function,
+  target: any,
+  args: any[],
+  table: MySqlTable,
+  options: ForgeSqlOrmOptions,
+  isCached: boolean
+): any {
+  const result = value.apply(target, args);
+  if (typeof result === "object" && result !== null && "execute" in result) {
+    return wrapCacheEvictBuilder(result as QueryBuilder, table, options, isCached);
+  }
+  return result;
+}
+
+/**
  * Wraps a query builder with cache eviction functionality.
  * Automatically clears cache after successful execution of insert/update/delete operations.
  * 
  * @param rawBuilder - The original query builder to wrap
  * @param table - The table being modified (used for cache eviction)
  * @param options - ForgeSQL ORM options including cache configuration
+ * @param isCached - Whether to clear cache immediately
  * @returns Wrapped query builder with cache eviction
  */
 const wrapCacheEvictBuilder = <TTable extends MySqlTable>(
   rawBuilder: QueryBuilder,
   table: TTable,
   options: ForgeSqlOrmOptions,
-  isCached:boolean,
+  isCached: boolean,
 ): QueryBuilder => {
   return new Proxy(rawBuilder, {
     get(target, prop, receiver) {
-
       if (prop === "then") {
         return (onfulfilled?: any, onrejected?: any) =>
           target.execute().then(
-            async (rows: unknown[]) => {
-              try {
-                const result = onfulfilled?.(rows);
-                if (isCached){
-                    await clearCache(table, options);
-                } else {
-                    await saveTableIfInsideCacheContext(table);
-                }
-                return result;
-              } catch (error) {
-                // Only clear cache for certain types of errors
-                if (shouldClearCacheOnError(error)) {
-                    if (isCached) {
-                        await clearCache(table, options).catch(() => {
-                            console.warn('Ignore cache clear errors')
-                        });
-                    } else {
-                        await saveTableIfInsideCacheContext(table);
-                    }
-                }
-                throw error;
-              }
-            },
+            (rows: unknown[]) => handleSuccessfulExecution(rows, onfulfilled, table, options, isCached),
             onrejected
           );
       }
@@ -126,13 +170,7 @@ const wrapCacheEvictBuilder = <TTable extends MySqlTable>(
       const value = Reflect.get(target, prop, receiver);
 
       if (typeof value === "function") {
-        return (...args: any[]) => {
-          const result = value.apply(target, args);
-          if (typeof result === "object" && result !== null && "execute" in result) {
-            return wrapCacheEvictBuilder(result as QueryBuilder, table, options, isCached);
-          }
-          return result;
-        };
+        return (...args: any[]) => handleFunctionCall(value, target, args, table, options, isCached);
       }
 
       return value;
@@ -210,6 +248,74 @@ function deleteAndEvictCacheBuilder<TTable extends MySqlTable>(
 }
 
 /**
+ * Handles cached query execution with proper error handling.
+ * 
+ * @param target - The query target
+ * @param options - ForgeSQL ORM options
+ * @param cacheTtl - Cache TTL
+ * @param selections - Field selections
+ * @param aliasMap - Field alias mapping
+ * @param onfulfilled - Success callback
+ * @param onrejected - Error callback
+ * @returns Promise with cached result
+ */
+async function handleCachedQuery(
+  target: any,
+  options: ForgeSqlOrmOptions,
+  cacheTtl: number,
+  selections: any,
+  aliasMap: any,
+  onfulfilled?: any,
+  onrejected?: any
+): Promise<any> {
+  try {
+    const cacheResult = await getFromCache(target, options);
+    if (cacheResult) {
+      return onfulfilled?.(cacheResult);
+    }
+    
+    const rows = await target.execute();
+    const transformed = applyFromDriverTransform(rows, selections, aliasMap);
+    
+    await setCacheResult(target, options, transformed, cacheTtl)
+      .catch((cacheError) => {
+        // Log cache error but don't fail the query
+        console.warn('Cache set error:', cacheError);
+      });
+    
+    return onfulfilled?.(transformed);
+  } catch (error) {
+    return onrejected?.(error);
+  }
+}
+
+/**
+ * Handles non-cached query execution.
+ * 
+ * @param target - The query target
+ * @param selections - Field selections
+ * @param aliasMap - Field alias mapping
+ * @param onfulfilled - Success callback
+ * @param onrejected - Error callback
+ * @returns Promise with transformed result
+ */
+async function handleNonCachedQuery(
+  target: any,
+  selections: any,
+  aliasMap: any,
+  onfulfilled?: any,
+  onrejected?: any
+): Promise<any> {
+  try {
+    const rows = await target.execute();
+    const transformed = applyFromDriverTransform(rows, selections, aliasMap);
+    return onfulfilled?.(transformed);
+  } catch (error) {
+    return onrejected?.(error);
+  }
+}
+
+/**
  * Creates a select query builder with field aliasing and optional caching support.
  * 
  * @param db - The database instance
@@ -236,45 +342,18 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
       get(target, prop, receiver) {
         if (prop === "execute") {
           return async (...args: any[]) => {
-            try {
               const rows = await target.execute(...args);
               return applyFromDriverTransform(rows, selections, aliasMap);
-            } catch (error) {
-              throw error;
-            }
           };
         }
 
         if (prop === "then") {
           return (onfulfilled?: any, onrejected?: any) => {
             if (useCache) {
-              return getFromCache(target, options)
-                .then((cacheResult) => {
-                  if (cacheResult) {
-                    return onfulfilled?.(cacheResult);
-                  }
-                  
-                  return target.execute().then((rows: unknown[]) => {
-                    const transformed = applyFromDriverTransform(rows, selections, aliasMap);
-                    const ttl = cacheTtl ?? options.cacheTTL ?? 120;
-                    
-                    return setCacheResult(target, options, transformed, ttl)
-                      .then(() => onfulfilled?.(transformed))
-                      .catch((cacheError) => {
-                        // Log cache error but don't fail the query
-                        console.warn('Cache set error:', cacheError);
-                        return onfulfilled?.(transformed);
-                      });
-                  }, onrejected);
-                }, onrejected);
+              const ttl = cacheTtl ?? options.cacheTTL ?? 120;
+              return handleCachedQuery(target, options, ttl, selections, aliasMap, onfulfilled, onrejected);
             } else {
-              return target.execute().then(
-                (rows: unknown[]) => {
-                  const transformed = applyFromDriverTransform(rows, selections, aliasMap);
-                  return onfulfilled?.(transformed);
-                },
-                onrejected
-              );
+              return handleNonCachedQuery(target, selections, aliasMap, onfulfilled, onrejected);
             }
           };
         }
