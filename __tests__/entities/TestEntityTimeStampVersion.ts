@@ -1,5 +1,5 @@
-import {forgeTimestampString} from "../../src";
-import { mysqlTable, int, varchar } from 'drizzle-orm/mysql-core';
+import { forgeTimestampString } from "../../src";
+import { mysqlTable, int, varchar } from "drizzle-orm/mysql-core";
 
 export class TestEntityTimeStampVersion {
   id!: number;
@@ -7,9 +7,8 @@ export class TestEntityTimeStampVersion {
   version!: Date;
 }
 
-export const testEntityTimeStampVersion = mysqlTable('test_entity_timestamp_version', {
-  id: int('id').primaryKey().autoincrement(),
-  name: varchar('name', { length: 255 }).notNull(),
-  version: forgeTimestampString('version').notNull(),
+export const testEntityTimeStampVersion = mysqlTable("test_entity_timestamp_version", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  version: forgeTimestampString("version").notNull(),
 });
-

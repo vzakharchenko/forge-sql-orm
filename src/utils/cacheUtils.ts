@@ -59,11 +59,11 @@ function nowPlusSeconds(secondsToAdd: number): number {
  * @param query - The Drizzle query object
  * @returns 32-character hexadecimal hash
  */
-function hashKey(query: Query): string {
+export function hashKey(query: Query): string {
   const h = crypto.createHash("sha256");
-  h.update(query.sql);
+  h.update(query.sql.toLowerCase());
   h.update(JSON.stringify(query.params));
-  return h.digest("hex").slice(0, CACHE_CONSTANTS.HASH_LENGTH);
+  return "CachedQuery_" + h.digest("hex").slice(0, CACHE_CONSTANTS.HASH_LENGTH);
 }
 
 /**

@@ -15,7 +15,10 @@ import {
 import { clearCache, getFromCache, setCacheResult } from "../../../utils/cacheUtils";
 import {
   cacheApplicationContext,
+  evictLocalCacheQuery,
+  getQueryLocalCacheQuery,
   saveTableIfInsideCacheContext,
+  saveQueryLocalCacheQuery,
 } from "../../../utils/cacheContextUtils";
 
 // Types for better type safety
@@ -103,6 +106,7 @@ async function handleSuccessfulExecution(
   isCached: boolean,
 ): Promise<any> {
   try {
+    await evictLocalCacheQuery(table, options);
     await saveTableIfInsideCacheContext(table);
     if (isCached && !cacheApplicationContext.getStore()) {
       await clearCache(table, options);
@@ -112,6 +116,7 @@ async function handleSuccessfulExecution(
   } catch (error) {
     // Only clear cache for certain types of errors
     if (shouldClearCacheOnError(error)) {
+      await evictLocalCacheQuery(table, options);
       if (isCached) {
         await clearCache(table, options).catch(() => {
           console.warn("Ignore cache clear errors");
@@ -290,14 +295,17 @@ async function handleCachedQuery(
   onrejected?: any,
 ): Promise<any> {
   try {
+    const localCached = await getQueryLocalCacheQuery(target);
+    if (localCached) {
+      return onfulfilled?.(localCached);
+    }
     const cacheResult = await getFromCache(target, options);
     if (cacheResult) {
       return onfulfilled?.(cacheResult);
     }
-
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
-
+    await saveQueryLocalCacheQuery(target, transformed);
     await setCacheResult(target, options, transformed, cacheTtl).catch((cacheError) => {
       // Log cache error but don't fail the query
       console.warn("Cache set error:", cacheError);
@@ -327,8 +335,13 @@ async function handleNonCachedQuery(
   onrejected?: any,
 ): Promise<any> {
   try {
+    const localCached = await getQueryLocalCacheQuery(target);
+    if (localCached) {
+      return onfulfilled?.(localCached);
+    }
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
+    await saveQueryLocalCacheQuery(target, transformed);
     return onfulfilled?.(transformed);
   } catch (error) {
     return onrejected?.(error);

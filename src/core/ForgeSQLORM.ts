@@ -34,7 +34,7 @@ import {
   MySqlInsertBuilder,
   MySqlUpdateBuilder,
 } from "drizzle-orm/mysql-core/query-builders";
-import { cacheApplicationContext } from "../utils/cacheContextUtils";
+import { cacheApplicationContext, localCacheApplicationContext } from "../utils/cacheContextUtils";
 import { clearTablesCache } from "../utils/cacheUtils";
 
 /**
@@ -140,18 +140,43 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * ```
    */
   async executeWithCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
-    return await cacheApplicationContext.run({ tables: new Set<string>() }, async () => {
-      try {
-        return await cacheContext();
-      } finally {
-        await clearTablesCache(
-          Array.from(cacheApplicationContext.getStore()?.tables ?? []),
-          this.options,
-        );
-      }
+    return await this.executeWithLocalCacheContextAndReturnValue(
+      async () =>
+        await cacheApplicationContext.run({ tables: new Set<string>() }, async () => {
+          try {
+            return await cacheContext();
+          } finally {
+            await clearTablesCache(
+              Array.from(cacheApplicationContext.getStore()?.tables ?? []),
+              this.options,
+            );
+          }
+        }),
+    );
+  }
+  /**
+   * Executes operations within a local cache context and returns a value.
+   * This provides in-memory caching for select queries within a single request scope.
+   * 
+   * @param cacheContext - Function containing operations that will benefit from local caching
+   * @returns Promise that resolves to the return value of the cacheContext function
+   */
+  async executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
+    return await localCacheApplicationContext.run({ cache: {} }, async () => {
+      return await cacheContext();
     });
   }
 
+  /**
+   * Executes operations within a local cache context.
+   * This provides in-memory caching for select queries within a single request scope.
+   * 
+   * @param cacheContext - Function containing operations that will benefit from local caching
+   * @returns Promise that resolves when all operations are complete
+   */
+  executeWithLocalContext(cacheContext: () => Promise<void>): Promise<void> {
+    return this.executeWithLocalCacheContextAndReturnValue<void>(cacheContext);
+  }
   /**
    * Creates an insert query builder.
    *
@@ -447,6 +472,27 @@ class ForgeSQLORM implements ForgeSqlOperation {
   }
   executeWithCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
     return this.ormInstance.executeWithCacheContextAndReturnValue(cacheContext);
+  }
+  /**
+   * Executes operations within a local cache context.
+   * This provides in-memory caching for select queries within a single request scope.
+   * 
+   * @param cacheContext - Function containing operations that will benefit from local caching
+   * @returns Promise that resolves when all operations are complete
+   */
+  executeWithLocalContext(cacheContext: () => Promise<void>): Promise<void> {
+    return this.ormInstance.executeWithLocalContext(cacheContext);
+  }
+
+  /**
+   * Executes operations within a local cache context and returns a value.
+   * This provides in-memory caching for select queries within a single request scope.
+   * 
+   * @param cacheContext - Function containing operations that will benefit from local caching
+   * @returns Promise that resolves to the return value of the cacheContext function
+   */
+  executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
+    return this.ormInstance.executeWithLocalCacheContextAndReturnValue(cacheContext);
   }
 
   /**

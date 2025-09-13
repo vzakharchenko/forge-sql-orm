@@ -1,0 +1,69 @@
+@startuml Local Cache Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+
+title Local Cache Flow in Forge-SQL-ORM
+
+actor "Resolver" as Resolver
+participant "ForgeSQL" as ForgeSQL
+participant "Local Cache\n(AsyncLocalStorage)" as LocalCache
+participant "Global Cache\n(KVS)" as GlobalCache
+participant "Database\n(@forge/sql)" as Database
+
+== Request Start ==
+Resolver -> ForgeSQL: executeWithLocalContext()
+ForgeSQL -> LocalCache: Initialize context { cache: {} }
+
+== First Query ==
+Resolver -> ForgeSQL: select().from(users).where(active = true)
+ForgeSQL -> LocalCache: getQueryLocalCacheQuery()
+LocalCache --> ForgeSQL: undefined (cache miss)
+ForgeSQL -> GlobalCache: getFromCache()
+GlobalCache --> ForgeSQL: undefined (cache miss)
+ForgeSQL -> Database: execute query
+Database --> ForgeSQL: query results
+ForgeSQL -> LocalCache: saveQueryLocalCacheQuery()
+ForgeSQL --> Resolver: query results
+
+== Second Query (Same) ==
+Resolver -> ForgeSQL: select().from(users).where(active = true)
+ForgeSQL -> LocalCache: getQueryLocalCacheQuery()
+LocalCache --> ForgeSQL: cached results (cache hit)
+ForgeSQL --> Resolver: cached results
+
+== Third Query (Different) ==
+Resolver -> ForgeSQL: select().from(orders).where(userId = 1)
+ForgeSQL -> LocalCache: getQueryLocalCacheQuery()
+LocalCache --> ForgeSQL: undefined (cache miss)
+ForgeSQL -> GlobalCache: getFromCache()
+GlobalCache --> ForgeSQL: undefined (cache miss)
+ForgeSQL -> Database: execute query
+Database --> ForgeSQL: query results
+ForgeSQL -> LocalCache: saveQueryLocalCacheQuery()
+ForgeSQL --> Resolver: query results
+
+== Data Modification ==
+Resolver -> ForgeSQL: insert(users).values(newUser)
+ForgeSQL -> Database: execute insert
+Database --> ForgeSQL: success
+ForgeSQL -> LocalCache: evictLocalCacheQuery(users)
+LocalCache -> LocalCache: remove all queries containing "users"
+ForgeSQL --> Resolver: success
+
+== Fourth Query (After Modification) ==
+Resolver -> ForgeSQL: select().from(users).where(active = true)
+ForgeSQL -> LocalCache: getQueryLocalCacheQuery()
+LocalCache --> ForgeSQL: undefined (cache miss - was evicted)
+ForgeSQL -> GlobalCache: getFromCache()
+GlobalCache --> ForgeSQL: undefined (cache miss)
+ForgeSQL -> Database: execute query
+Database --> ForgeSQL: query results
+ForgeSQL -> LocalCache: saveQueryLocalCacheQuery()
+ForgeSQL --> Resolver: query results
+
+== Request End ==
+ForgeSQL -> LocalCache: Context destroyed
+LocalCache -> LocalCache: All data cleared
+
+@enduml

@@ -80,4 +80,4 @@ describe("SystemTables", () => {
       expect(sql.executeDDL).toHaveBeenCalledWith("SHOW TABLES");
     });
   });
-}); 
+});

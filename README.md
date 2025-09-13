@@ -18,6 +18,7 @@
 ## Key Features
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
 - ✅ **Advanced Caching System** with automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
+- ✅ **Local Cache System** for in-memory query optimization within single resolver invocation scope
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -27,11 +28,94 @@
 - ✅ **Schema Fetching** Development-only web trigger to retrieve current database schema and generate SQL statements for schema recreation
 - ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying migrations, dropping tables (development-only), and fetching schema (development-only) with proper error handling and security controls
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
-- ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights (Performance analysis and Troubleshooting only)
+- ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights
+
+## Table of Contents
+
+### 🚀 Getting Started
+- [Key Features](#key-features)
+- [Usage Approaches](#usage-approaches)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+
+### 📖 Core Features
+- [Field Name Collision Prevention](#field-name-collision-prevention-in-complex-queries)
+- [Drizzle Usage with forge-sql-orm](#drizzle-usage-with-forge-sql-orm)
+- [Direct Drizzle Usage with Custom Driver](#direct-drizzle-usage-with-custom-driver)
+
+### 🗄️ Database Operations
+- [Fetch Data](#fetch-data)
+- [Modify Operations](#modify-operations)
+- [SQL Utilities](#sql-utilities)
+
+### ⚡ Caching System
+- [Setting Up Caching with @forge/kvs](#setting-up-caching-with-forgekvs-optional)
+- [Advanced Caching System](#advanced-caching-system)
+- [Cache Context Operations](#cache-context-operations)
+- [Local Cache Operations](#local-cache-operations)
+- [Cache-Aware Query Operations](#cache-aware-query-operations)
+- [Manual Cache Management](#manual-cache-management)
+
+### 🔒 Advanced Features
+- [Optimistic Locking](#optimistic-locking)
+- [Query Analysis and Performance Optimization](#query-analysis-and-performance-optimization)
+- [Date and Time Types](#date-and-time-types)
+
+### 🛠️ Development Tools
+- [CLI Commands](#cli-commands)
+- [Web Triggers for Migrations](#web-triggers-for-migrations)
+- [Step-by-Step Migration Workflow](#step-by-step-migration-workflow)
+- [Drop Migrations](#drop-migrations)
+
+### 📚 Examples
+- [Simple Example](examples/forge-sql-orm-example-simple)
+- [Drizzle Driver Example](examples/forge-sql-orm-example-drizzle-driver-simple)
+- [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking)
+- [Dynamic Queries Example](examples/forge-sql-orm-example-dynamic)
+- [Query Analysis Example](examples/forge-sql-orm-example-query-analyses)
+- [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker)
+- [Checklist Example](examples/forge-sql-orm-example-checklist)
+
+### 📚 Reference
+- [ForgeSqlOrmOptions](#forgesqlormoptions)
+- [Choosing the Right Method - ForgeSQL ORM](#choosingtherightmethod-forgesqlorm)
+- [Choosing the Right Method - Direct Drizzle](#choosingtherightmethod-directdrizzle)
+- [Migration Guide](#migration-guide)
+
+## 🚀 Quick Navigation
+
+**New to Forge-SQL-ORM?** Start here:
+- [Quick Start](#quick-start) - Get up and running in 5 minutes
+- [Installation](#installation) - Complete setup guide
+- [Basic Usage Examples](#fetch-data) - Simple query examples
+
+**Looking for specific features?**
+- [Advanced Caching System](#advanced-caching-system) - Global and local caching
+- [Optimistic Locking](#optimistic-locking) - Data consistency
+- [Migration Tools](#web-triggers-for-migrations) - Database migrations
+- [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
+
+**Need help choosing the right approach?**
+- [Usage Approaches](#usage-approaches) - Different ways to use the ORM
+- [Method Selection Guide](#choosingtherightmethod-forgesqlorm) - Which method to use when
+
+**Looking for practical examples?**
+- [Simple Example](examples/forge-sql-orm-example-simple) - Basic ORM usage
+- [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking) - Real-world conflict handling
+- [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker) - Complex relationships
+- [Checklist Example](examples/forge-sql-orm-example-checklist) - Jira integration
 
 ## Usage Approaches
 
-### 1. Direct Drizzle Usage
+
+### 1. Full Forge-SQL-ORM Usage
+```typescript
+import ForgeSQL from "forge-sql-orm";
+const forgeSQL = new ForgeSQL();
+```
+Best for: Advanced features like optimistic locking, automatic versioning, and automatic field name collision prevention in complex queries.
+
+### 2. Direct Drizzle Usage
 ```typescript
 import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
@@ -39,12 +123,24 @@ const db = drizzle(forgeDriver);
 ```
 Best for: Simple Modify operations without optimistic locking. Note that you need to manually patch drizzle `patchDbWithSelectAliased` for select fields to prevent field name collisions in Atlassian Forge SQL.
 
-### 2. Full Forge-SQL-ORM Usage
+
+### 3. Local Cache Optimization
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 const forgeSQL = new ForgeSQL();
+
+// Optimize repeated queries within a single invocation
+await forgeSQL.executeWithLocalContext(async () => {
+  // Multiple queries here will benefit from local caching
+  const users = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+  
+  // This query will use local cache (no database call)
+  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+});
 ```
-Best for: Advanced features like optimistic locking, automatic versioning, and automatic field name collision prevention in complex queries.
+Best for: Performance optimization of repeated queries within resolvers or single invocation contexts.
 
 ## Field Name Collision Prevention in Complex Queries
 
@@ -110,7 +206,54 @@ This will:
 - Install TypeScript types for MySQL
 - Install forge-sql-orm-cli A command-line interface tool for managing Atlassian Forge SQL migrations and model generation with Drizzle ORM integration.
 
-##  Drizzle Usage with forge-sql-orm
+## Quick Start
+
+### 1. Basic Setup
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+// Initialize ForgeSQL
+const forgeSQL = new ForgeSQL();
+
+// Simple query
+const users = await forgeSQL.select().from(users);
+```
+
+### 2. With Caching (Optional)
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+// Initialize with caching
+const forgeSQL = new ForgeSQL({
+  cacheEntityName: "cache",
+  cacheTTL: 300
+});
+
+// Cached query
+const users = await forgeSQL.selectCacheable({ id: users.id, name: users.name })
+  .from(users).where(eq(users.active, true));
+```
+
+### 3. Local Cache Optimization
+```typescript
+// Optimize repeated queries within a single invocation
+await forgeSQL.executeWithLocalContext(async () => {
+  const users = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+  
+  // This query will use local cache (no database call)
+  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+});
+```
+
+### 4. Next Steps
+- [Full Installation Guide](#installation) - Complete setup instructions
+- [Core Features](#core-features) - Learn about key capabilities
+- [Advanced Caching System](#advanced-caching-system) - Advanced caching features
+- [API Reference](#reference) - Complete API documentation
+
+## Drizzle Usage with forge-sql-orm
 
 If you prefer to use Drizzle ORM with the additional features of Forge-SQL-ORM (like optimistic locking and caching), you can use the enhanced API:
 
@@ -449,16 +592,52 @@ await forgeSQL.modifyWithVersioningAndEvictCache().insert(users, [userData]);
 
 // use Cache Context
 const data = await forgeSQL.executeWithCacheContextAndReturnValue(async () => {
+    // after insert mark users to evict
     await forgeSQL.insert(users, [userData]);
+       // after insertAndEvictCache mark orders to evict
     await forgeSQL.insertAndEvictCache(orders, [order1, order2]);
+    // execute query and put result to local cache
+    await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
+        .from(users)
+        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
+    // use local cache without @forge/kvs and @forge/sql
     return await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
         .from(users)
-        .innerJoin(users, eq(orders.userId, users.id)).where(eq(users.active, true))
+        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
 })
+// execute query and put result to kvs cache
+await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
+        .from(users)
+        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
+
+// get result from @foge/kvs cache without real @forge/sql call
+await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
+        .from(users)
+        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
+
+// use Local Cache for performance optimization
+const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
+    // First query - hits database and caches result
+    const users = await forgeSQL.select({id: users.id, name: users.name})
+        .from(users).where(eq(users.active, true));
+    
+    // Second query - uses local cache (no database call)
+    const cachedUsers = await forgeSQL.select({id: users.id, name: users.name})
+        .from(users).where(eq(users.active, true));
+    
+    // Insert operation - evicts local cache
+    await forgeSQL.insert(users).values({name: 'New User', active: true});
+    
+    // Third query - hits database again and caches new result
+    const updatedUsers = await forgeSQL.select({id: users.id, name: users.name})
+        .from(users).where(eq(users.active, true));
+    
+    return { users, cachedUsers, updatedUsers };
+});
 
 ```
 
-## Choosing the Right Method ForgeSqlOrm
+## Choosing the Right Method - ForgeSQL ORM
 
 ### When to Use Each Approach
 
@@ -472,7 +651,7 @@ const data = await forgeSQL.executeWithCacheContextAndReturnValue(async () => {
 | `insert/update/delete` | Basic Drizzle operations | ❌ No | Cache Context |
 
 
-## Choosing the Right Method direct drizzle
+## Choosing the Right Method - Direct Drizzle
 
 ### When to Use Each Approach
 
@@ -953,6 +1132,8 @@ const result = await forgeSQL
 
 ## Advanced Caching System
 
+[↑ Back to Top](#table-of-contents)
+
 Forge-SQL-ORM includes a sophisticated caching system that provides automatic cache invalidation and context-aware operations. The caching system is built on top of [@forge/kvs Custom entity store](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) and provides multiple levels of cache management with automatic serialization/deserialization of complex data structures.
 
 ### Cache Configuration
@@ -1024,6 +1205,147 @@ await forgeSQL.executeWithCacheContext(async () => {
 });
 ```
 
+### Local Cache Operations
+
+Forge-SQL-ORM provides a local cache system that stores query results in memory for the duration of a single resolver invocation. This is particularly useful for optimizing repeated queries within the same execution context(resolver invocation).
+
+#### What is Local Cache?
+
+Local cache is an in-memory caching layer that operates within a single resolver invocation scope. Unlike the global KVS cache, local cache:
+
+- **Stores data in memory** using Node.js `AsyncLocalStorage`
+- **Automatically clears** when the invocation completes (Resolver call)
+- **Provides instant access** to previously executed queries in resolver invocation
+- **Reduces database load** for repeated operations within the same invocation
+- **Works alongside** the global KVS cache system
+
+#### Key Features of Local Cache
+
+- **In-Memory Storage**: Query results are cached in memory using Node.js `AsyncLocalStorage`
+- **Invocation-Scoped**: Cache is automatically cleared when the invocation completes
+- **Automatic Eviction**: Cache is cleared when insert/update/delete operations are performed
+- **No Persistence**: Data is not stored between Invocations (unlike global KVS cache)
+- **Performance Optimization**: Reduces database queries for repeated operations
+- **Simple Configuration**: Works out of the box with simple setup
+
+#### Usage Examples
+
+##### Basic Local Cache Usage
+
+```typescript
+// Execute operations within a local cache context
+await forgeSQL.executeWithLocalContext(async () => {
+  // First call - executes query and caches result
+  const users = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+  
+  // Second call - gets result from local cache (no database query)
+  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+  
+  // Insert operation - evicts local cache for users table
+  await forgeSQL.insert(users).values({ name: 'New User', active: true });
+  
+  // Third call - executes query again and caches new result
+  const updatedUsers = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+});
+
+// Execute with return value
+const result = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
+  // First call - executes query and caches result
+  const users = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+  
+  // Second call - gets result from local cache (no database query)
+  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+  
+  return { users, cachedUsers };
+});
+```
+
+##### Real-World Resolver Example
+
+```typescript
+// Atlassian forge resolver with local cache optimization
+const userResolver = async (req) => {
+  return await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
+    // Get user details
+    const user = await forgeSQL.select({ id: users.id, name: users.name, email: users.email })
+      .from(users).where(eq(users.id, args.userId));
+    
+    // Get user's orders (this query will be cached if called again)
+    const orders = await forgeSQL.select({ 
+      id: orders.id, 
+      product: orders.product, 
+      amount: orders.amount 
+    }).from(orders).where(eq(orders.userId, args.userId));
+    
+    // Get user's profile (this query will be cached if called again)
+    const profile = await forgeSQL.select({ 
+      id: profiles.id, 
+      bio: profiles.bio, 
+      avatar: profiles.avatar 
+    }).from(profiles).where(eq(profiles.userId, args.userId));
+    
+    // If any of these queries are repeated within the same resolver,
+    // they will use the local cache instead of hitting the database
+    
+    return {
+      ...user[0],
+      orders,
+      profile: profile[0]
+    };
+  });
+};
+```
+
+
+#### Local Cache vs Global Cache
+
+| Feature | Local Cache | Global Cache (KVS) |
+|---------|-------------|-------------------|
+| **Storage** | In-memory (Node.js process) | Persistent (KVS Custom Entities) |
+| **Scope** | Single forge invocation | Across all requests |
+| **Persistence** | No (cleared on invocation end) | Yes (survives app redeploy) |
+| **Performance** | Very fast (memory access) | Fast (KVS optimized storage) |
+| **Memory Usage** | Low (invocation-scoped) | Higher (persistent storage) |
+| **Use Case** | Invocation optimization | Cross-request caching |
+| **Configuration** | None required | Requires KVS setup |
+| **TTL Support** | No (invocation-scoped) | Yes (automatic expiration) |
+| **Cache Eviction** | Automatic on DML operations | Manual or scheduled cleanup |
+| **Best For** | Repeated queries in single invocation | Frequently accessed data across requests |
+
+#### Integration with Global Cache
+
+Local cache works alongside the global KVS cache system:
+
+```typescript
+// Local cache is checked first, then global cache, then database
+await forgeSQL.executeWithLocalContext(async () => {
+  // This will check:
+  // 1. Local cache (in-memory)
+  // 2. Global cache (KVS) 
+  // 3. Database query
+  const users = await forgeSQL.selectCacheable({ id: users.id, name: users.name })
+    .from(users).where(eq(users.active, true));
+});
+```
+
+#### Local Cache Flow Diagram
+
+The diagram below shows how local cache works in Forge-SQL-ORM:
+
+1. **Request Start**: Local cache context is initialized with empty cache
+2. **First Query**: Cache miss → Global cache miss → Database query → Save to local cache
+3. **Repeated Query**: Cache hit → Return cached result (no database call)
+4. **Data Modification**: Insert/Update/Delete → Evict local cache for affected table
+5. **Query After Modification**: Cache miss (was evicted) → Database query → Save to local cache
+6. **Request End**: Local cache context is destroyed, all data cleared
+
+![umlLocalCache.png](img/umlLocalCache.png)![Local Cache Flow](img/localCacheFlow.txt)
+
 ### Cache-Aware Query Operations
 
 ```typescript
@@ -1057,6 +1379,8 @@ await forgeSQL.modifyWithVersioningAndEvictCache().evictCacheEntities([Users, Or
 ```
 
 ## Optimistic Locking
+
+[↑ Back to Top](#table-of-contents)
 
 Optimistic locking is a concurrency control mechanism that prevents data conflicts when multiple transactions attempt to update the same record concurrently. Instead of using locks, this technique relies on a version field in your entity models.
 
@@ -1297,34 +1621,20 @@ Configure in `manifest.yml`:
 
 ## Query Analysis and Performance Optimization
 
-⚠️ **IMPORTANT NOTE**: The query analysis features described below are experimental and should be used only for troubleshooting purposes. These features rely on TiDB's `information_schema` and `performance_schema` which may change in future updates. As of April 2025, these features are available but their future availability is not guaranteed.
+[↑ Back to Top](#table-of-contents)
+
+Forge-SQL-ORM provides comprehensive query analysis tools to help you optimize your database queries and identify performance bottlenecks.
 
 ### About Atlassian's Built-in Analysis Tools
 
-Atlassian already provides comprehensive query analysis tools in the development console, including:
+Atlassian provides comprehensive query analysis tools in the development console, including:
 - Basic query performance metrics
 - Slow query tracking (queries over 500ms)
 - Basic execution statistics
 - Query history and patterns
 
-Our analysis tools are designed to complement these built-in features by providing additional insights directly from TiDB's system schemas. However, they should be used with caution and only for troubleshooting purposes.
+Our analysis tools complement these built-in features by providing additional insights directly from TiDB's system schemas.
 
-### Usage Guidelines
-
-1. **Development and Troubleshooting Only**
-   - These tools should not be used in production code
-   - Intended only for development and debugging
-   - Use for identifying and fixing performance issues
-
-2. **Schema Stability**
-   - Features rely on TiDB's `information_schema` and `performance_schema`
-   - Schema structure may change in future TiDB updates
-   - No guarantee of long-term availability
-
-3. **Current Availability (April 2025)**
-   - `information_schema` based analysis is currently functional
-   - Query plan analysis is available
-   - Performance metrics collection is working
 
 ### Available Analysis Tools
 
@@ -1337,10 +1647,10 @@ const analyzeForgeSql = forgeSQL.analyze();
 
 #### Query Plan Analysis
 
-⚠️ **For Troubleshooting Only**: This feature should only be used during development and debugging sessions.
+Query plan analysis helps you understand how your queries are executed and identify optimization opportunities.
 
 ```typescript
-// Example usage for troubleshooting a specific query
+// Example usage for analyzing a specific query
 const forgeSQL = new ForgeSQL();
 const analyzeForgeSql = forgeSQL.analyze();
 
@@ -1367,12 +1677,12 @@ const rawPlan = await analyzeForgeSql.explainRaw(
 );
 ```
 
-This analysis helps you understand:
+This analysis provides insights into:
 - How the database executes your query
 - Which indexes are being used
 - Estimated vs actual row counts
 - Resource usage at each step
-- Potential performance bottlenecks
+- Performance optimization opportunities
 
 
 ## Migration Guide
@@ -1423,7 +1733,7 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
 - `forgeSQL.delete()` - Basic Drizzle operations
 - `forgeSQL.insertAndEvictCache()` - Basic Drizzle operations with evict cache after execution
 - `forgeSQL.updateAndEvictCache()` - Basic Drizzle operations with evict cache after execution
-- `forgeSQL.deleteAndEvictCache()` -Basic Drizzle operations with evict cache after execution
+- `forgeSQL.deleteAndEvictCache()` - Basic Drizzle operations with evict cache after execution
 
 **Optional Migration:**
 You can optionally migrate to the new API methods for better performance and cache management:

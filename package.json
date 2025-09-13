@@ -59,7 +59,7 @@
     "test:watch": "vitest --watch",
     "lint": "eslint src  --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "format": "prettier --write src examples",
+    "format": "prettier --write src examples __tests__",
     "clean": "rm -rf dist",
     "build": "npm run clean && vite build && npm run build:types",
     "build:types": "tsc --emitDeclarationOnly",
