@@ -75,6 +75,22 @@ export const parseDateTime = (value: string | Date, format: string): Date => {
 };
 
 /**
+ * Helper function to validate and format Date objects using DateTime
+ * @param value - Date object to validate and format
+ * @param format - DateTime format string
+ * @returns Formatted date string
+ * @throws Error if date is invalid
+ */
+export function formatDateTime(value: Date, format: string): string {
+  const fromJSDate = DateTime.fromJSDate(value);
+  if (fromJSDate.isValid) {
+    return fromJSDate.toFormat(format);
+  } else {
+    throw new Error("Invalid Date");
+  }
+}
+
+/**
  * Gets primary keys from the schema.
  * @template T - The type of the table schema
  * @param {T} table - The table schema

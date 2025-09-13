@@ -212,7 +212,7 @@ describe("ForgeSQLCrudOperations", () => {
         "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
     );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12 00:00:01.000');
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
@@ -229,7 +229,7 @@ describe("ForgeSQLCrudOperations", () => {
         "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
     );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12 00:00:01.000');
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
@@ -304,7 +304,7 @@ describe("ForgeSQLCrudOperations", () => {
         "update `test_entity_date_version` set `id` = ?, `version` = ? where (`test_entity_date_version`.`id` = ? and `test_entity_date_version`.`version` = ?)",
     );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "2023-04-12T00:00:01.000",1, "2010-01-01T00:00:00.000");
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "2023-04-12 00:00:01.000",1, "2010-01-01 00:00:00.000");
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
@@ -319,7 +319,7 @@ describe("ForgeSQLCrudOperations", () => {
         "update `test_entity_timestamp_version` set `id` = ?, `version` = ? where (`test_entity_timestamp_version`.`id` = ? and `test_entity_timestamp_version`.`version` = ?)",
     );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1,"2023-04-12T00:00:01.000",1, "2010-01-01T00:00:00.000");
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1,"2023-04-12 00:00:01.000",1, "2010-01-01 00:00:00.000");
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
@@ -516,7 +516,7 @@ describe("ForgeSQLCrudOperations", () => {
         expect(vi.mocked(clearCache)).not.toHaveBeenCalled(
         );
         const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12 00:00:01.000');
         expect(preparedStatement.execute).toHaveBeenCalled();
     });
 
@@ -543,7 +543,7 @@ describe("ForgeSQLCrudOperations", () => {
         );
 
         const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12 00:00:01.000');
         expect(preparedStatement.execute).toHaveBeenCalled();
     });
 
@@ -562,7 +562,7 @@ describe("ForgeSQLCrudOperations", () => {
         );
 
         const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12 00:00:01.000');
         expect(preparedStatement.execute).toHaveBeenCalled();
     });
 
@@ -589,7 +589,7 @@ describe("ForgeSQLCrudOperations", () => {
         );
 
         const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12T00:00:01.000');
+        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", '2023-04-12 00:00:01.000');
         expect(preparedStatement.execute).toHaveBeenCalled();
     });
 

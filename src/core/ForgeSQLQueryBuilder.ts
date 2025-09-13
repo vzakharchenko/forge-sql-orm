@@ -12,9 +12,8 @@ import {
   type SelectedFields,
 } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { InferInsertModel, Query, SQL } from "drizzle-orm";
-import { DateTime } from "luxon";
-import { parseDateTime } from "../utils/sqlUtils";
-import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy/index";
+import { parseDateTime, formatDateTime } from "../utils/sqlUtils";
+import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy";
 import { SqlHints } from "../utils/sqlHints";
 import {
   ClusterStatementRowCamelCase,
@@ -37,7 +36,6 @@ import {
   MySqlUpdateBuilder,
 } from "drizzle-orm/mysql-core/query-builders";
 import { MySqlRemoteQueryResultHKT } from "drizzle-orm/mysql-proxy";
-
 /**
  * Core interface for ForgeSQL operations.
  * Provides access to CRUD operations, schema-level SQL operations, and query analysis capabilities.
@@ -582,7 +580,7 @@ export const forgeDateTimeString = customType<{
     return "datetime";
   },
   toDriver(value: Date) {
-    return DateTime.fromJSDate(new Date(value)).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
+    return formatDateTime(value, "yyyy-LL-dd' 'HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
     const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
@@ -605,7 +603,7 @@ export const forgeTimestampString = customType<{
     return "timestamp";
   },
   toDriver(value: Date) {
-    return DateTime.fromJSDate(value).toFormat("yyyy-LL-dd'T'HH:mm:ss.SSS");
+    return formatDateTime(value, "yyyy-LL-dd' 'HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
     const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
@@ -628,7 +626,7 @@ export const forgeDateString = customType<{
     return "date";
   },
   toDriver(value: Date) {
-    return DateTime.fromJSDate(value).toFormat("yyyy-LL-dd");
+    return formatDateTime(value, "yyyy-LL-dd");
   },
   fromDriver(value: unknown) {
     const format = "yyyy-LL-dd";
@@ -651,7 +649,7 @@ export const forgeTimeString = customType<{
     return "time";
   },
   toDriver(value: Date) {
-    return DateTime.fromJSDate(value).toFormat("HH:mm:ss.SSS");
+    return formatDateTime(value, "HH:mm:ss.SSS");
   },
   fromDriver(value: unknown) {
     return parseDateTime(value as string, "HH:mm:ss.SSS");
