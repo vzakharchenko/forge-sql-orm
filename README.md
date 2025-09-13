@@ -94,14 +94,12 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 
 **Basic installation (without caching):**
 ```sh
-npm install forge-sql-orm @forge/sql drizzle-orm momment -S
-npm install forge-sql-orm-cli  -D
+npm install forge-sql-orm @forge/sql drizzle-orm -S
 ```
 
 **With caching support:**
 ```sh
-npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm momment -S
-npm install forge-sql-orm-cli  -D
+npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm -S
 ```
 
 This will:
@@ -362,14 +360,8 @@ const forgeSQL = new ForgeSQL(options);
 **Basic setup (without caching):**
 
 **package.json:**
-```json
-{
-  "dependencies": {
-    "forge-sql-orm": "latest",
-    "@forge/sql": "latest",
-    "drizzle-orm": "latest"
-  }
-}
+```shell
+npm install forge-sql-orm @forge/sql drizzle-orm -S
 ```
 
 **manifest.yml:**
@@ -380,33 +372,33 @@ modules:
       engine: mysql
 ```
 
-**app.js:**
+**index.ts:**
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 
 const forgeSQL = new ForgeSQL();
 
+// simple insert
+await forgeSQL.insert(Users, [userData]);
 // Use versioned operations without caching
-const users = await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
+const users = await forgeSQL.select({id: Users.id});
+
+
 ```
 
 **With caching support:**
-
-**package.json:**
-```json
-{
-  "dependencies": {
-    "forge-sql-orm": "latest",
-    "@forge/sql": "latest",
-    "@forge/kvs": "latest",
-    "drizzle-orm": "latest"
-  }
-}
+```shell
+npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm -S
 ```
 
 **manifest.yml:**
 ```yaml
 modules:
+  scheduledTrigger:
+    - key: clear-cache-trigger
+      function: clearCache
+      interval: fiveMinute
   storage:
     entities:
       - name: cache
@@ -423,18 +415,47 @@ modules:
   sql:
     - key: main
       engine: mysql
+  function:
+    - key: clearCache
+      handler: index.clearCache
 ```
 
-**app.js:**
+**index.ts:**
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 
 const forgeSQL = new ForgeSQL({
-  cacheEntityName: "cache"
+    cacheEntityName: "cache"
 });
 
+import {clearCacheSchedulerTrigger} from "forge-sql-orm";
+import {getTableColumns} from "drizzle-orm";
+
+export const clearCache = () => {
+    return clearCacheSchedulerTrigger({
+        cacheEntityName: "cache",
+    });
+};
+
+
 // Now you can use caching features
-const users = await forgeSQL.selectCacheable(getTableColumns(users)).from(Users).where(eq(Users.active, true))
+const usersData = await forgeSQL.selectCacheable(getTableColumns(users)).from(users).where(eq(users.active, true))
+
+// simple insert
+await forgeSQL.insertAndEvictCache(users, [userData]);
+// Use versioned operations with caching
+await forgeSQL.modifyWithVersioningAndEvictCache().insert(users, [userData]);
+
+// use Cache Context
+const data = await forgeSQL.executeWithCacheContextAndReturnValue(async () => {
+    await forgeSQL.insert(users, [userData]);
+    await forgeSQL.insertAndEvictCache(orders, [order1, order2]);
+    return await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
+        .from(users)
+        .innerJoin(users, eq(orders.userId, users.id)).where(eq(users.active, true))
+})
+
 ```
 
 ## Choosing the Right Method ForgeSqlOrm
