@@ -17,8 +17,8 @@
 
 ## Key Features
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
-- ✅ **Advanced Caching System** with automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
-- ✅ **Local Cache System** for in-memory query optimization within single resolver invocation scope
+- ✅ **Local Cache System (Level 1)** for in-memory query optimization within single resolver invocation scope
+- ✅ **Global Cache System (Level 2)** with cross-invocation caching, automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -50,9 +50,9 @@
 
 ### ⚡ Caching System
 - [Setting Up Caching with @forge/kvs](#setting-up-caching-with-forgekvs-optional)
-- [Advanced Caching System](#advanced-caching-system)
+- [Global Cache System (Level 2)](#global-cache-system-level-2)
 - [Cache Context Operations](#cache-context-operations)
-- [Local Cache Operations](#local-cache-operations)
+- [Local Cache Operations (Level 1)](#local-cache-operations-level-1)
 - [Cache-Aware Query Operations](#cache-aware-query-operations)
 - [Manual Cache Management](#manual-cache-management)
 
@@ -78,8 +78,8 @@
 
 ### 📚 Reference
 - [ForgeSqlOrmOptions](#forgesqlormoptions)
-- [Choosing the Right Method - ForgeSQL ORM](#choosingtherightmethod-forgesqlorm)
-- [Choosing the Right Method - Direct Drizzle](#choosingtherightmethod-directdrizzle)
+- [Choosing the Right Method - ForgeSQL ORM](#choosing-the-right-method-forgesql-orm)
+- [Choosing the Right Method - Direct Drizzle](#choosing-the-right-method-direct-drizzle)
 - [Migration Guide](#migration-guide)
 
 ## 🚀 Quick Navigation
@@ -90,14 +90,15 @@
 - [Basic Usage Examples](#fetch-data) - Simple query examples
 
 **Looking for specific features?**
-- [Advanced Caching System](#advanced-caching-system) - Global and local caching
+- [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation persistent caching
+- [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory invocation caching
 - [Optimistic Locking](#optimistic-locking) - Data consistency
 - [Migration Tools](#web-triggers-for-migrations) - Database migrations
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
 
 **Need help choosing the right approach?**
 - [Usage Approaches](#usage-approaches) - Different ways to use the ORM
-- [Method Selection Guide](#choosingtherightmethod-forgesqlorm) - Which method to use when
+- [Method Selection Guide](#choosing-the-right-method-forgesql-orm) - Which method to use when
 
 **Looking for practical examples?**
 - [Simple Example](examples/forge-sql-orm-example-simple) - Basic ORM usage
@@ -250,7 +251,8 @@ await forgeSQL.executeWithLocalContext(async () => {
 ### 4. Next Steps
 - [Full Installation Guide](#installation) - Complete setup instructions
 - [Core Features](#core-features) - Learn about key capabilities
-- [Advanced Caching System](#advanced-caching-system) - Advanced caching features
+- [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation caching features
+- [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory caching features
 - [API Reference](#reference) - Complete API documentation
 
 ## Drizzle Usage with forge-sql-orm
@@ -1130,11 +1132,20 @@ const result = await forgeSQL
 - This prevents SQL injection by ensuring only numeric values are inserted
 - Always use this function instead of string concatenation for LIMIT and OFFSET values
 
-## Advanced Caching System
+## Global Cache System (Level 2)
 
 [↑ Back to Top](#table-of-contents)
 
-Forge-SQL-ORM includes a sophisticated caching system that provides automatic cache invalidation and context-aware operations. The caching system is built on top of [@forge/kvs Custom entity store](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) and provides multiple levels of cache management with automatic serialization/deserialization of complex data structures.
+Forge-SQL-ORM includes a sophisticated global caching system that provides **cross-invocation caching** - the ability to share cached data between different resolver invocations. The global cache system is built on top of [@forge/kvs Custom entity store](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) and provides persistent cross-invocation caching with automatic serialization/deserialization of complex data structures.
+
+### Cache Levels Overview
+
+Forge-SQL-ORM implements a two-level caching architecture:
+
+- **Level 1 (Local Cache)**: In-memory caching within a single resolver invocation scope
+- **Level 2 (Global Cache)**: Cross-invocation persistent caching using KVS storage
+
+This multi-level approach provides optimal performance by checking the fastest cache first, then falling back to cross-invocation persistent storage.
 
 ### Cache Configuration
 
@@ -1205,9 +1216,9 @@ await forgeSQL.executeWithCacheContext(async () => {
 });
 ```
 
-### Local Cache Operations
+### Local Cache Operations (Level 1)
 
-Forge-SQL-ORM provides a local cache system that stores query results in memory for the duration of a single resolver invocation. This is particularly useful for optimizing repeated queries within the same execution context(resolver invocation).
+Forge-SQL-ORM provides a local cache system (Level 1 cache) that stores query results in memory for the duration of a single resolver invocation. This is particularly useful for optimizing repeated queries within the same execution context(resolver invocation).
 
 #### What is Local Cache?
 
@@ -1302,31 +1313,31 @@ const userResolver = async (req) => {
 ```
 
 
-#### Local Cache vs Global Cache
+#### Local Cache (Level 1) vs Global Cache (Level 2)
 
-| Feature | Local Cache | Global Cache (KVS) |
-|---------|-------------|-------------------|
+| Feature | Local Cache (Level 1) | Global Cache (Level 2) |
+|---------|----------------------|------------------------|
 | **Storage** | In-memory (Node.js process) | Persistent (KVS Custom Entities) |
-| **Scope** | Single forge invocation | Across all requests |
+| **Scope** | Single forge invocation | Cross-invocation (between calls) |
 | **Persistence** | No (cleared on invocation end) | Yes (survives app redeploy) |
 | **Performance** | Very fast (memory access) | Fast (KVS optimized storage) |
 | **Memory Usage** | Low (invocation-scoped) | Higher (persistent storage) |
-| **Use Case** | Invocation optimization | Cross-request caching |
+| **Use Case** | Invocation optimization | Cross-invocation data sharing |
 | **Configuration** | None required | Requires KVS setup |
 | **TTL Support** | No (invocation-scoped) | Yes (automatic expiration) |
 | **Cache Eviction** | Automatic on DML operations | Manual or scheduled cleanup |
-| **Best For** | Repeated queries in single invocation | Frequently accessed data across requests |
+| **Best For** | Repeated queries in single invocation | Frequently accessed data across invocations |
 
-#### Integration with Global Cache
+#### Integration with Global Cache (Level 2)
 
-Local cache works alongside the global KVS cache system:
+Local cache (Level 1) works alongside the global cache (Level 2) system:
 
 ```typescript
-// Local cache is checked first, then global cache, then database
+// Multi-level cache checking: Level 1 → Level 2 → Database
 await forgeSQL.executeWithLocalContext(async () => {
   // This will check:
-  // 1. Local cache (in-memory)
-  // 2. Global cache (KVS) 
+  // 1. Local cache (Level 1 - in-memory)
+  // 2. Global cache (Level 2 - KVS)
   // 3. Database query
   const users = await forgeSQL.selectCacheable({ id: users.id, name: users.name })
     .from(users).where(eq(users.active, true));
