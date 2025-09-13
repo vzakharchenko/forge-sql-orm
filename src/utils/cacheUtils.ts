@@ -377,21 +377,28 @@ export async function setCacheResult(
 
     const sqlQuery = query.toSQL();
 
-      // Skip cache if table is in cache context (will be cleared)
-      if (await isTableContainsTableInCacheContext(sqlQuery.sql, options)) {
-          if (options.logRawSqlQuery) {
-              console.warn(`Context contains value to clear. Skip setting from cache`);
-          }
-          return;
+    // Skip cache if table is in cache context (will be cleared)
+    if (await isTableContainsTableInCacheContext(sqlQuery.sql, options)) {
+      if (options.logRawSqlQuery) {
+        console.warn(`Context contains value to clear. Skip setting from cache`);
       }
+      return;
+    }
 
     const key = hashKey(sqlQuery);
 
-    await kvs.transact().set(key, {
-      [entityQueryName]: sqlQuery.sql.toLowerCase(),
-      [expirationName]: nowPlusSeconds(cacheTtl),
-      [dataName]: JSON.stringify(results),
-    },{entityName: options.cacheEntityName}).execute();
+    await kvs
+      .transact()
+      .set(
+        key,
+        {
+          [entityQueryName]: sqlQuery.sql.toLowerCase(),
+          [expirationName]: nowPlusSeconds(cacheTtl),
+          [dataName]: JSON.stringify(results),
+        },
+        { entityName: options.cacheEntityName },
+      )
+      .execute();
 
     if (options.logRawSqlQuery) {
       console.warn(`Store value to cache, cacheKey: ${key}`);
