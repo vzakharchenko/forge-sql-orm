@@ -1,0 +1,22 @@
+@startuml
+participant "Resolver" as R
+participant "forge-sql-orm" as FSO
+participant "@forge/kvs" as KVS
+participant "@forge/sql" as SQL
+
+R ->> FSO: cacheable request\n(sql + parameters)
+FSO -> FSO: generate cache key = hash(sql, params)
+FSO ->> KVS: get(cache key)
+
+alt cache hit (valid)
+  KVS ->> FSO: cached result
+  FSO ->> R: return cached result
+else cache miss or expired
+  KVS ->> FSO: no entry
+  FSO ->> SQL: execute query
+  SQL ->> FSO: result set
+  FSO ->> KVS: save(cache key, sql, result, expiration)
+  KVS ->> FSO: ack
+  FSO ->> R: return fresh result
+end
+@enduml

@@ -228,6 +228,53 @@ await forgeSQL.executeWithCacheContext(async () => {
 });
 ```
 
+
+The diagram below shows the lifecycle of a cacheable query in Forge-SQL-ORM:
+
+1. Resolver calls forge-sql-orm with a SQL query and parameters.
+2. forge-sql-orm generates a cache key = hash(sql, parameters).
+3. It asks @forge/kvs for an existing cached result.
+   - Cache hit → result is returned immediately.
+   - Cache miss / expired → query is executed against @forge/sql.
+4. Fresh result is stored in @forge/kvs with TTL and returned to the caller.
+
+![img.png](img/umlCache1.png)
+
+
+The diagram below shows how Evict Cache works in Forge-SQL-ORM:
+
+1. **Data modification** is executed through `@forge/sql` (e.g., `UPDATE users ...`).
+2. After a successful update, **forge-sql-orm** queries the `cache` entity by using the **`sql` field** with `filter.contains("users")` to find affected cached queries.
+3. The returned cache entries are deleted in **batches** (up to 25 per transaction).
+4. Once eviction is complete, the update result is returned to the resolver.
+5. **Note:** Expired entries are not processed here — they are cleaned up separately by the scheduled cache cleanup trigger using the `expiration` index.
+
+![img.png](img/umlCacheEvict1.png)
+
+The diagram below shows how Scheduled Expiration Cleanup works:
+
+1. A periodic scheduler (Forge trigger) runs cache cleanup independently of data modifications.
+2. forge-sql-orm queries the cache entity by the expiration index to find entries with expiration < now.
+3. Entries are deleted in batches (up to 25 per transaction) until the page is empty; pagination is done with a cursor (e.g., 100 per page).
+4. This keeps the cache footprint small and prevents stale data accumulation.
+
+![img.png](img/umlCacheEvictScheduler1.png)
+
+The diagram below shows how Cache Context works:
+
+`executeWithCacheContext(fn)` lets you group multiple data modifications and perform **one consolidated cache eviction** at the end:
+
+1. The context starts with an empty `affectedTables` set.
+2. Each successful `INSERT/UPDATE/DELETE` inside the context registers its table name in `affectedTables`.
+3. **Reads inside the same context** that target tables present in `affectedTables` will **bypass the cache** (read-through to SQL) to avoid serving stale data. These reads also **do not write** back to cache until eviction completes.
+4. On context completion, `affectedTables` is de-duplicated and used to build **one combined KVS query** over the `sql` field with
+   `filter.or(filter.contains("<t1>"), filter.contains("<t2>"), ...)`, returning all impacted cache entries in a single scan (paged by cursor, e.g., 100/page).
+5. Matching cache entries are deleted in **batches** (≤25 per transaction) until the page is exhausted; then the next page is fetched via the cursor.
+6. Expiration is handled separately by the scheduled cleanup and is **not part of** the context flow.
+
+![img.png](img/umlCacheEvictCacheContext1.png)
+
+
 ### Important Considerations
 
 **@forge/kvs Limits:**

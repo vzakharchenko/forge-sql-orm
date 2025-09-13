@@ -1,0 +1,21 @@
+@startuml
+participant "Resolver" as R
+participant "forge-sql-orm" as FSO
+participant "@forge/sql" as SQL
+participant "@forge/kvs (entity=cache)" as KVS
+
+R ->> FSO: updateAndEvictCache(Users, {...})
+FSO ->> SQL: UPDATE users SET ...
+SQL ->> FSO: OK
+
+== cache eviction ==
+FSO ->> KVS: query index(sql)\nfilter.contains(\"users\")\n+ expiration > now
+KVS ->> FSO: list of cache entries [sql, expiration, data]
+
+loop batched delete
+  FSO ->> KVS: delete entries (<=25 per tx)
+  KVS ->> FSO: OK
+end
+
+FSO ->> R: return update OK (cache evicted)
+@enduml

@@ -1,0 +1,57 @@
+@startuml
+participant "Resolver" as R
+participant "forge-sql-orm (Cache Context)" as Ctx
+participant "@forge/sql" as SQL
+participant "@forge/kvs (entity=cache)" as KVS
+
+R ->> Ctx: executeWithCacheContext { ... }
+activate Ctx
+Ctx -> Ctx: affectedTables = ∅
+
+== writes inside context ==
+Ctx ->> SQL: INSERT users ...
+SQL ->> Ctx: OK
+Ctx -> Ctx: affectedTables += {users}
+
+Ctx ->> SQL: UPDATE orders ...
+SQL ->> Ctx: OK
+Ctx -> Ctx: affectedTables += {orders}
+
+== read inside context (should bypass cache) ==
+R ->> Ctx: SELECT ... FROM users ...
+alt table in affectedTables
+  Ctx -> Ctx: bypass cache for this read
+  Ctx ->> SQL: execute query directly
+  SQL ->> Ctx: fresh result
+  Ctx ->> R: return fresh (no cache write)
+else table not affected
+  Ctx ->> KVS: get(cache key)
+  alt cache hit
+    KVS ->> Ctx: cached result
+    Ctx ->> R: return cached
+  else miss/expired
+    KVS ->> Ctx: no entry
+    Ctx ->> SQL: execute query
+    SQL ->> Ctx: result
+    Ctx ->> KVS: save(cache key, data, expiration)
+    KVS ->> Ctx: ack
+    Ctx ->> R: return fresh
+  end
+end
+
+== end of context ==
+Ctx -> Ctx: unique(affectedTables) = {users, orders}
+
+note over Ctx: Build single OR-filter over `sql`:filter.or(contains("users"), contains("orders"))
+
+Ctx ->> KVS: query index(sql) with OR-filter (cursor=100)
+KVS ->> Ctx: page of entries
+loop batched delete (<=25 per tx)
+  Ctx ->> KVS: delete batch
+  KVS ->> Ctx: OK
+end
+
+... fetch next page via cursor until empty ...
+
+Ctx ->> R: OK (one consolidated eviction)
+@enduml

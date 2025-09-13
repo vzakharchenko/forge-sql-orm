@@ -1,0 +1,21 @@
+@startuml
+participant "Scheduler" as S
+participant "forge-sql-orm" as FSO
+participant "@forge/kvs (entity=cache)" as KVS
+
+
+S ->> FSO: run cache cleanup
+FSO ->> KVS: query index(expiration) where expiration < now (cursor=100)
+KVS ->> FSO: page of entries [keys]
+loop while page not empty
+loop batched delete (<=25 per tx)
+FSO ->> KVS: delete batch
+KVS ->> FSO: OK
+end
+FSO ->> KVS: next page (cursor)
+KVS ->> FSO: next page of entries
+end
+
+
+FSO ->> S: cleanup done
+@enduml

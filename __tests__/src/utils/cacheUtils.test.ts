@@ -151,6 +151,9 @@ describe('cacheUtils', () => {
 
     it('should return cached data when valid and not expired', async () => {
       const { getFromCache } = await import('../../../src/utils/cacheUtils');
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
       const mockCacheData = {
         sql: 'select * from users where id = ?',
         expiration: Math.floor(DateTime.now().plus({ hours: 1 }).toSeconds()),
@@ -158,7 +161,9 @@ describe('cacheUtils', () => {
       };
 
       mockKvs.entity.mockReturnValue({
-        get: vi.fn().mockResolvedValue(mockCacheData)
+        get: vi.fn().mockResolvedValue(mockCacheData),
+        set: vi.fn(),
+        query: vi.fn()
       });
 
       const result = await getFromCache(mockQuery, defaultOptions);
@@ -168,6 +173,9 @@ describe('cacheUtils', () => {
 
     it('should return undefined when cache is expired', async () => {
       const { getFromCache } = await import('../../../src/utils/cacheUtils');
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
       const mockCacheData = {
         sql: 'select * from users where id = ?',
         expiration: Math.floor(DateTime.now().minus({ hours: 1 }).toSeconds()),
@@ -175,7 +183,9 @@ describe('cacheUtils', () => {
       };
 
       mockKvs.entity.mockReturnValue({
-        get: vi.fn().mockResolvedValue(mockCacheData)
+        get: vi.fn().mockResolvedValue(mockCacheData),
+        set: vi.fn(),
+        query: vi.fn()
       });
 
       const result = await getFromCache(mockQuery, defaultOptions);
@@ -185,8 +195,13 @@ describe('cacheUtils', () => {
 
     it('should return undefined when cache get fails', async () => {
       const { getFromCache } = await import('../../../src/utils/cacheUtils');
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
       mockKvs.entity.mockReturnValue({
-        get: vi.fn().mockRejectedValue(new Error('Cache error'))
+        get: vi.fn().mockRejectedValue(new Error('Cache error')),
+        set: vi.fn(),
+        query: vi.fn()
       });
 
       const result = await getFromCache(mockQuery, defaultOptions);
@@ -203,35 +218,57 @@ describe('cacheUtils', () => {
       await expect(setCacheResult(mockQuery, options, { id: 1 }, 300)).rejects.toThrow('cacheEntityName is not configured');
     });
 
-    it('should store data in cache successfully', async () => {
+    it('should skip cache when table is in cache context', async () => {
       const { setCacheResult } = await import('../../../src/utils/cacheUtils');
-      const mockEntity = {
-        set: vi.fn().mockResolvedValue(undefined)
-      };
-
-      mockKvs.entity.mockReturnValue(mockEntity);
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(true);
 
       const testData = { id: 1, name: 'John' };
       await setCacheResult(mockQuery, defaultOptions, testData, 300);
 
-      expect(mockKvs.entity).toHaveBeenCalledWith('cache');
-      expect(mockEntity.set).toHaveBeenCalledWith(
+      // Should not call kvs.transact when context contains table
+      expect(mockKvs.transact).not.toHaveBeenCalled();
+    });
+
+    it('should store data in cache successfully when not in context', async () => {
+      const { setCacheResult } = await import('../../../src/utils/cacheUtils');
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined)
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const testData = { id: 1, name: 'John' };
+      await setCacheResult(mockQuery, defaultOptions, testData, 300);
+
+      expect(mockKvs.transact).toHaveBeenCalled();
+      expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           sql: 'select * from users where id = ?',
           expiration: expect.any(Number),
           data: JSON.stringify(testData)
-        })
+        }),
+        { entityName: 'cache' }
       );
+      expect(mockTransact.execute).toHaveBeenCalled();
     });
 
     it('should handle cache set errors gracefully', async () => {
       const { setCacheResult } = await import('../../../src/utils/cacheUtils');
-      const mockEntity = {
-        set: vi.fn().mockRejectedValue(new Error('Cache set error'))
-      };
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
-      mockKvs.entity.mockReturnValue(mockEntity);
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockRejectedValue(new Error('Cache set error'))
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
 
       const testData = { id: 1, name: 'John' };
       
@@ -241,6 +278,9 @@ describe('cacheUtils', () => {
 
     it('should use custom entity field names', async () => {
       const { setCacheResult } = await import('../../../src/utils/cacheUtils');
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
       const options = {
         ...defaultOptions,
         cacheEntityQueryName: 'query',
@@ -248,22 +288,24 @@ describe('cacheUtils', () => {
         cacheEntityDataName: 'result'
       };
 
-      const mockEntity = {
-        set: vi.fn().mockResolvedValue(undefined)
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined)
       };
-
-      mockKvs.entity.mockReturnValue(mockEntity);
+      mockKvs.transact.mockReturnValue(mockTransact);
 
       const testData = { id: 1, name: 'John' };
       await setCacheResult(mockQuery, options, testData, 300);
 
-      expect(mockEntity.set).toHaveBeenCalledWith(
+      expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           query: 'select * from users where id = ?',
           exp: expect.any(Number),
           result: JSON.stringify(testData)
-        })
+        }),
+        { entityName: 'cache' }
       );
     });
   });
@@ -271,8 +313,13 @@ describe('cacheUtils', () => {
   describe('error handling', () => {
     it('should handle cache get errors gracefully', async () => {
       const { getFromCache } = await import('../../../src/utils/cacheUtils');
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
       mockKvs.entity.mockReturnValue({
-        get: vi.fn().mockRejectedValue(new Error('Cache error'))
+        get: vi.fn().mockRejectedValue(new Error('Cache error')),
+        set: vi.fn(),
+        query: vi.fn()
       });
 
       const result = await getFromCache(mockQuery, defaultOptions);
@@ -282,11 +329,15 @@ describe('cacheUtils', () => {
 
     it('should handle cache set errors gracefully', async () => {
       const { setCacheResult } = await import('../../../src/utils/cacheUtils');
-      const mockEntity = {
-        set: vi.fn().mockRejectedValue(new Error('Cache set error'))
-      };
+      const { isTableContainsTableInCacheContext } = await import('../../../src/utils/cacheContextUtils');
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
-      mockKvs.entity.mockReturnValue(mockEntity);
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockRejectedValue(new Error('Cache set error'))
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
 
       const testData = { id: 1, name: 'John' };
       
