@@ -309,7 +309,7 @@ export interface QueryBuilderForgeSql {
   /**
    * Executes operations within a local cache context that provides in-memory caching for select queries.
    * This is useful for optimizing queries within a single resolver or request scope.
-   * 
+   *
    * Local cache features:
    * - Caches select query results in memory for the duration of the context
    * - Automatically evicts cache when insert/update/delete operations are performed
@@ -318,18 +318,18 @@ export interface QueryBuilderForgeSql {
    *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
-   * 
+   *
    * @example
    * ```typescript
    * await forgeSQL.executeWithLocalContext(async () => {
    *   // First call - executes query and caches result
    *   const users = await forgeSQL.select({ id: users.id, name: users.name })
    *     .from(users).where(eq(users.active, true));
-   *   
+   *
    *   // Second call - gets result from local cache (no database query)
    *   const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
    *     .from(users).where(eq(users.active, true));
-   *   
+   *
    *   // Insert operation - evicts local cache
    *   await forgeSQL.insert(users).values({ name: 'New User', active: true });
    * });
@@ -340,7 +340,7 @@ export interface QueryBuilderForgeSql {
   /**
    * Executes operations within a local cache context and returns a value.
    * This is useful for optimizing queries within a single resolver or request scope.
-   * 
+   *
    * Local cache features:
    * - Caches select query results in memory for the duration of the context
    * - Automatically evicts cache when insert/update/delete operations are performed
@@ -349,18 +349,18 @@ export interface QueryBuilderForgeSql {
    *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
-   * 
+   *
    * @example
    * ```typescript
    * const result = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
    *   // First call - executes query and caches result
    *   const users = await forgeSQL.select({ id: users.id, name: users.name })
    *     .from(users).where(eq(users.active, true));
-   *   
+   *
    *   // Second call - gets result from local cache (no database query)
    * const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
    *     .from(users).where(eq(users.active, true));
-   *   
+   *
    *   return { users, cachedUsers };
    * });
    * ```

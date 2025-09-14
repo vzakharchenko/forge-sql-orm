@@ -728,41 +728,57 @@ describe("ForgeSQLCrudOperations", () => {
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
-    it("simple Insert in localCache", async () => {
-       await forgeSqlOperation.executeWithLocalContext(async ()=>{
-            // real call and put result in cache
-            await forgeSqlOperation.select({'id':testEntityDateVersion.id, 'version': testEntityDateVersion.version}).from(testEntityDateVersion).where(eq(testEntityDateVersion.id, 1))
-           // get from local cache
-           await forgeSqlOperation.select({'id':testEntityDateVersion.id, 'version': testEntityDateVersion.version}).from(testEntityDateVersion).where(eq(testEntityDateVersion.id, 1))
-           // get from local cache
-           await forgeSqlOperation.select({'id':testEntityDateVersion.id, 'version': testEntityDateVersion.version}).from(testEntityDateVersion).where(eq(testEntityDateVersion.id, 1))
-           // insert and evict cache
-           await forgeSqlOperation.insert(testEntityDateVersion).values([
-               {
+  it("simple Insert in localCache", async () => {
+    await forgeSqlOperation.executeWithLocalContext(async () => {
+      // real call and put result in cache
+      await forgeSqlOperation
+        .select({ id: testEntityDateVersion.id, version: testEntityDateVersion.version })
+        .from(testEntityDateVersion)
+        .where(eq(testEntityDateVersion.id, 1));
+      // get from local cache
+      await forgeSqlOperation
+        .select({ id: testEntityDateVersion.id, version: testEntityDateVersion.version })
+        .from(testEntityDateVersion)
+        .where(eq(testEntityDateVersion.id, 1));
+      // get from local cache
+      await forgeSqlOperation
+        .select({ id: testEntityDateVersion.id, version: testEntityDateVersion.version })
+        .from(testEntityDateVersion)
+        .where(eq(testEntityDateVersion.id, 1));
+      // insert and evict cache
+      await forgeSqlOperation.insert(testEntityDateVersion).values([
+        {
+          id: 1,
+          name: "Test",
+          version: new Date(),
+        } as { id: number; name: string; version: Date },
+      ]);
+      // real call and put result in cache
+      await forgeSqlOperation
+        .select({ id: testEntityDateVersion.id, version: testEntityDateVersion.version })
+        .from(testEntityDateVersion)
+        .where(eq(testEntityDateVersion.id, 1));
+      // get from local cache
+      await forgeSqlOperation
+        .select({ id: testEntityDateVersion.id, version: testEntityDateVersion.version })
+        .from(testEntityDateVersion)
+        .where(eq(testEntityDateVersion.id, 1));
 
-                   id: 1,
-                   name: "Test",
-                   version: new Date(),
-               } as { id: number; name: string; version: Date },
-           ]);
-            // real call and put result in cache
-            await forgeSqlOperation.select({'id':testEntityDateVersion.id, 'version': testEntityDateVersion.version}).from(testEntityDateVersion).where(eq(testEntityDateVersion.id, 1))
-           // get from local cache
-            await forgeSqlOperation.select({'id':testEntityDateVersion.id, 'version': testEntityDateVersion.version}).from(testEntityDateVersion).where(eq(testEntityDateVersion.id, 1))
-
-           // real call and put result in cache
-            await forgeSqlOperation.select({'id':testEntityDateVersion.id, 'version': testEntityDateVersion.version}).from(testEntityDateVersion).where(eq(testEntityDateVersion.id, 1))
-
-        })
-        expect(vi.mocked(sql.prepare)).toHaveBeenCalledTimes(3); // 1- before insert, 2 - insert, 3 - after insert
-
-        expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
-            "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
-        );
-        expect(vi.mocked(clearCache)).not.toHaveBeenCalled();
-
-        const preparedStatement = vi.mocked(sql.prepare).mock.results[1].value;
-        expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", "2023-04-12 00:00:01.000");
-        expect(preparedStatement.execute).toHaveBeenCalled();
+      // real call and put result in cache
+      await forgeSqlOperation
+        .select({ id: testEntityDateVersion.id, version: testEntityDateVersion.version })
+        .from(testEntityDateVersion)
+        .where(eq(testEntityDateVersion.id, 1));
     });
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledTimes(3); // 1- before insert, 2 - insert, 3 - after insert
+
+    expect(vi.mocked(sql.prepare)).toHaveBeenCalledWith(
+      "insert into `test_entity_date_version` (`id`, `name`, `version`) values (?, ?, ?)",
+    );
+    expect(vi.mocked(clearCache)).not.toHaveBeenCalled();
+
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[1].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", "2023-04-12 00:00:01.000");
+    expect(preparedStatement.execute).toHaveBeenCalled();
+  });
 });

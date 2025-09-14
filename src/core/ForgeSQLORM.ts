@@ -157,7 +157,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context and returns a value.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
    */
@@ -170,7 +170,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
    */
@@ -476,7 +476,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
    */
@@ -487,7 +487,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context and returns a value.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
    */

@@ -18,11 +18,11 @@ export interface CacheApplicationContext {
 /**
  * Interface representing the local cache application context.
  * Stores cached query results in memory for the duration of a local cache context.
- * 
+ *
  * @interface LocalCacheApplicationContext
  */
 export interface LocalCacheApplicationContext {
-  /** 
+  /**
    * Cache object mapping query hash keys to cached results
    * @property {Record<string, {sql: string, data: unknown[]}>} cache - Map of query keys to cached data
    */
@@ -75,11 +75,11 @@ export async function saveTableIfInsideCacheContext<T extends AnyMySqlTable>(
 /**
  * Saves a query result to the local cache context.
  * This function stores query results in memory for the duration of the local cache context.
- * 
+ *
  * @param query - The Drizzle query to cache
  * @param rows - The query result data to cache
  * @returns Promise that resolves when the data is saved to local cache
- * 
+ *
  * @example
  * ```typescript
  * const query = db.select({ id: users.id, name: users.name }).from(users);
@@ -107,10 +107,10 @@ export async function saveQueryLocalCacheQuery<
 /**
  * Retrieves a query result from the local cache context.
  * This function checks if a query result is already cached in memory.
- * 
+ *
  * @param query - The Drizzle query to check for cached results
  * @returns Promise that resolves to cached data if found, undefined otherwise
- * 
+ *
  * @example
  * ```typescript
  * const query = db.select({ id: users.id, name: users.name }).from(users);
@@ -141,11 +141,11 @@ export async function getQueryLocalCacheQuery<
 /**
  * Evicts cached queries from the local cache context that involve the specified table.
  * This function removes cached query results that contain the given table name.
- * 
+ *
  * @param table - The Drizzle table schema to evict cache for
  * @param options - ForgeSQL ORM options containing cache configuration
  * @returns Promise that resolves when cache eviction is complete
- * 
+ *
  * @example
  * ```typescript
  * // After inserting/updating/deleting from users table

@@ -44,13 +44,7 @@ function getCurrentTime(): number {
  */
 function nowPlusSeconds(secondsToAdd: number): number {
   const dt = DateTime.now().plus({ seconds: secondsToAdd });
-  const seconds = Math.floor(dt.toSeconds());
-
-  if (seconds < -2147483648 || seconds > 2147483647) {
-    throw new Error(`Value ${seconds} is out of 32-bit integer range`);
-  }
-
-  return seconds;
+  return Math.floor(dt.toSeconds());
 }
 
 /**
