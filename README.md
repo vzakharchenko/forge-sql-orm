@@ -36,6 +36,7 @@
 - [Key Features](#key-features)
 - [Usage Approaches](#usage-approaches)
 - [Installation](#installation)
+- [CLI Commands](#cli-commands) | [CLI Documentation](forge-sql-orm-cli/README.md)
 - [Quick Start](#quick-start)
 
 ### 📖 Core Features
@@ -62,7 +63,7 @@
 - [Date and Time Types](#date-and-time-types)
 
 ### 🛠️ Development Tools
-- [CLI Commands](#cli-commands)
+- [CLI Commands](#cli-commands) | [CLI Documentation](forge-sql-orm-cli/README.md)
 - [Web Triggers for Migrations](#web-triggers-for-migrations)
 - [Step-by-Step Migration Workflow](#step-by-step-migration-workflow)
 - [Drop Migrations](#drop-migrations)
@@ -78,8 +79,6 @@
 
 ### 📚 Reference
 - [ForgeSqlOrmOptions](#forgesqlormoptions)
-- [Choosing the Right Method - ForgeSQL ORM](#choosing-the-right-method-forgesql-orm)
-- [Choosing the Right Method - Direct Drizzle](#choosing-the-right-method-direct-drizzle)
 - [Migration Guide](#migration-guide)
 
 ## 🚀 Quick Navigation
@@ -95,10 +94,6 @@
 - [Optimistic Locking](#optimistic-locking) - Data consistency
 - [Migration Tools](#web-triggers-for-migrations) - Database migrations
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
-
-**Need help choosing the right approach?**
-- [Usage Approaches](#usage-approaches) - Different ways to use the ORM
-- [Method Selection Guide](#choosing-the-right-method-forgesql-orm) - Which method to use when
 
 **Looking for practical examples?**
 - [Simple Example](examples/forge-sql-orm-example-simple) - Basic ORM usage
@@ -876,6 +871,21 @@ const users = await db.select().from(users);
 ### Basic Fetch Operations
 
 ```js
+// Using forgeSQL.select()
+const user = await forgeSQL
+    .select({user: users})
+    .from(users);
+
+// Using forgeSQL.selectDistinct()
+const user = await forgeSQL
+    .selectDistinct({user: users})
+    .from(users);
+
+// Using forgeSQL.selectCacheable()
+const user = await forgeSQL
+    .selectCacheable({user: users})
+    .from(users);
+
 // Using forgeSQL.getDrizzleQueryBuilder()
 const user = await forgeSQL
   .getDrizzleQueryBuilder()
@@ -978,7 +988,43 @@ const users = await forgeSQL
 
 Forge-SQL-ORM provides multiple approaches for Modify operations, each with different characteristics:
 
-### 1. Versioned Operations with Cache Management (Recommended)
+### 1. Basic Drizzle Operations (Cache Context Aware)
+
+These operations work like standard Drizzle methods but participate in cache context when used within `executeWithCacheContext()`:
+
+```js
+// Basic insert (participates in cache context when used within executeWithCacheContext)
+await forgeSQL.insert(Users).values({ id: 1, name: "Smith" });
+
+// Basic update (participates in cache context when used within executeWithCacheContext)
+await forgeSQL.update(Users)
+  .set({ name: "Smith Updated" })
+  .where(eq(Users.id, 1));
+
+// Basic delete (participates in cache context when used within executeWithCacheContext)
+await forgeSQL.delete(Users)
+  .where(eq(Users.id, 1));
+```
+
+### 2. Non-Versioned Operations with Cache Management
+
+These operations don't use optimistic locking but provide cache invalidation:
+
+```js
+// Insert without versioning but with cache invalidation
+await forgeSQL.insertAndEvictCache(Users).values({ id: 1, name: "Smith" });
+
+// Update without versioning but with cache invalidation
+await forgeSQL.updateAndEvictCache(Users)
+  .set({ name: "Smith Updated" })
+  .where(eq(Users.id, 1));
+
+// Delete without versioning but with cache invalidation
+await forgeSQL.deleteAndEvictCache(Users)
+  .where(eq(Users.id, 1));
+```
+
+### 3. Versioned Operations with Cache Management (Recommended)
 
 These operations use optimistic locking and automatic cache invalidation:
 
@@ -999,7 +1045,7 @@ await forgeSQL.modifyWithVersioningAndEvictCache().updateById({ id: 1, name: "Sm
 await forgeSQL.modifyWithVersioningAndEvictCache().deleteById(1, Users);
 ```
 
-### 2. Versioned Operations without Cache Management
+### 4. Versioned Operations without Cache Management
 
 These operations use optimistic locking but don't manage cache:
 
@@ -1012,42 +1058,6 @@ await forgeSQL.modifyWithVersioning().updateById({ id: 1, name: "Smith Updated" 
 
 // Delete with versioning only
 await forgeSQL.modifyWithVersioning().deleteById(1, Users);
-```
-
-### 3. Non-Versioned Operations with Cache Management
-
-These operations don't use optimistic locking but provide cache invalidation:
-
-```js
-// Insert without versioning but with cache invalidation
-await forgeSQL.insertAndEvictCache(Users).values({ id: 1, name: "Smith" });
-
-// Update without versioning but with cache invalidation
-await forgeSQL.updateAndEvictCache(Users)
-  .set({ name: "Smith Updated" })
-  .where(eq(Users.id, 1));
-
-// Delete without versioning but with cache invalidation
-await forgeSQL.deleteAndEvictCache(Users)
-  .where(eq(Users.id, 1));
-```
-
-### 4. Basic Drizzle Operations (Cache Context Aware)
-
-These operations work like standard Drizzle methods but participate in cache context when used within `executeWithCacheContext()`:
-
-```js
-// Basic insert (participates in cache context when used within executeWithCacheContext)
-await forgeSQL.insert(Users).values({ id: 1, name: "Smith" });
-
-// Basic update (participates in cache context when used within executeWithCacheContext)
-await forgeSQL.update(Users)
-  .set({ name: "Smith Updated" })
-  .where(eq(Users.id, 1));
-
-// Basic delete (participates in cache context when used within executeWithCacheContext)
-await forgeSQL.delete(Users)
-  .where(eq(Users.id, 1));
 ```
 
 ### 5. Legacy Modify Operations (Removed in 2.1.x)
@@ -1182,8 +1192,8 @@ The caching system leverages Forge's Custom entity store to provide:
 ```typescript
 // Cache entries are stored as custom entities in Forge's KVS
 // Example cache key structure:
-// Key: "query:users:active:true:limit:10"
-// Value: { data: [...], timestamp: 1234567890, ttl: 300 }
+// Key: "CachedQuery_8d74bdd9d85064b72fb2ee072ca948e5"
+// Value: { data: [...], expiration: 1234567890, sql: "select * from 1" }
 ```
 
 
@@ -1355,7 +1365,7 @@ The diagram below shows how local cache works in Forge-SQL-ORM:
 5. **Query After Modification**: Cache miss (was evicted) → Database query → Save to local cache
 6. **Request End**: Local cache context is destroyed, all data cleared
 
-![umlLocalCache.png](img/umlLocalCache.png)![Local Cache Flow](img/localCacheFlow.txt)
+![Local Cache Flow](img/localCacheFlow.txt)
 
 ### Cache-Aware Query Operations
 
@@ -1461,7 +1471,39 @@ The `ForgeSqlOrmOptions` object allows customization of ORM behavior:
 
 ## CLI Commands
 
-Documentation [here](forge-sql-orm-cli/README.md)
+Forge-SQL-ORM provides a command-line interface for managing database migrations and model generation.
+
+**📖 [Full CLI Documentation](forge-sql-orm-cli/README.md)** - Complete CLI reference with all commands and options.
+
+### Quick CLI Reference
+
+The CLI tool provides the following main commands:
+
+- `generate:model` - Generate Drizzle ORM models from your database schema
+- `migrations:create` - Create new migration files
+- `migrations:update` - Update existing migrations with schema changes
+- `migrations:drop` - Create migration to drop tables
+
+### Installation
+
+```bash
+npm install -g forge-sql-orm-cli
+```
+
+### Basic Usage
+
+```bash
+# Generate models from database
+forge-sql-orm-cli generate:model --dbName myapp --output ./database/entities
+
+# Create migration
+forge-sql-orm-cli migrations:create --dbName myapp --entitiesPath ./database/entities
+
+# Update migration
+forge-sql-orm-cli migrations:update --dbName myapp --entitiesPath ./database/entities
+```
+
+For detailed information about all available options and advanced usage, see the [Full CLI Documentation](forge-sql-orm-cli/README.md).
 
 ## Web Triggers for Migrations
 
