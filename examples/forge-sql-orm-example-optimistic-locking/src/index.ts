@@ -46,7 +46,7 @@ const createIfNotExists = async <T extends AnyMySqlTable>(
   } else {
     let testDateColumn = new Date();
     let testNameColumn = "test " + tableName;
-    await forgeSQL.crud().insert<T>(schema, [
+    await forgeSQL.modifyWithVersioning().insert<T>(schema, [
       {
         id: 1,
         testDateColumn: testDateColumn,
@@ -92,16 +92,16 @@ resolver.define(
       testDataOptimisticTimeStampId,
     } = req.payload;
     if (testDataId) {
-      await forgeSQL.crud().deleteById(testDataId, testData);
+      await forgeSQL.modifyWithVersioning().deleteById(testDataId, testData);
     }
     if (testDataOptimisticNumberId) {
-      await forgeSQL.crud().deleteById(testDataOptimisticNumberId, testDataOptimisticNumber);
+      await forgeSQL.modifyWithVersioning().deleteById(testDataOptimisticNumberId, testDataOptimisticNumber);
     }
     if (testDataOptimisticTimeStampId) {
-      await forgeSQL.crud().deleteById(testDataOptimisticTimeStampId, testDataOptimisticTimestamp);
+      await forgeSQL.modifyWithVersioning().deleteById(testDataOptimisticTimeStampId, testDataOptimisticTimestamp);
     }
     if (testDataOptimisticDateId) {
-      await forgeSQL.crud().deleteById(testDataOptimisticDateId, testDataOptimisticDate);
+      await forgeSQL.modifyWithVersioning().deleteById(testDataOptimisticDateId, testDataOptimisticDate);
     }
   },
 );
@@ -122,12 +122,12 @@ resolver.define(
       const { objectName, data } = req.payload;
       switch (objectName) {
         case "WITHOUT_VERSIONING": {
-          await forgeSQL.crud().updateById(data as InferInsertModel<typeof testData>, testData);
+          await forgeSQL.modifyWithVersioning().updateById(data as InferInsertModel<typeof testData>, testData);
           return "SUCCESS";
         }
         case "OPTIMISTIC_NUMBER": {
           await forgeSQL
-            .crud()
+            .modifyWithVersioning()
             .updateById(
               data as InferInsertModel<typeof testDataOptimisticNumber>,
               testDataOptimisticNumber,
@@ -136,7 +136,7 @@ resolver.define(
         }
         case "OPTIMISTIC_DATE": {
           await forgeSQL
-            .crud()
+            .modifyWithVersioning()
             .updateById(
               data as InferInsertModel<typeof testDataOptimisticDate>,
               testDataOptimisticDate,
@@ -145,7 +145,7 @@ resolver.define(
         }
         case "OPTIMISTIC_TIMESTAMP": {
           await forgeSQL
-            .crud()
+            .modifyWithVersioning()
             .updateById(
               data as InferInsertModel<typeof testDataOptimisticTimestamp>,
               testDataOptimisticTimestamp,

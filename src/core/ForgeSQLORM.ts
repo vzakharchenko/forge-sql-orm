@@ -36,6 +36,8 @@ import {
 } from "drizzle-orm/mysql-core/query-builders";
 import { cacheApplicationContext, localCacheApplicationContext } from "../utils/cacheContextUtils";
 import { clearTablesCache } from "../utils/cacheUtils";
+import { SQLWrapper } from "drizzle-orm/sql/sql";
+import { WithSubquery } from "drizzle-orm/subquery";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -142,7 +144,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   async executeWithCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
     return await this.executeWithLocalCacheContextAndReturnValue(
       async () =>
-        await cacheApplicationContext.run({ tables: new Set<string>() }, async () => {
+        await cacheApplicationContext.run(cacheApplicationContext.getStore() ?? { tables: new Set<string>() }, async () => {
           try {
             return await cacheContext();
           } finally {
@@ -157,12 +159,12 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context and returns a value.
    * This provides in-memory caching for select queries within a single request scope.
-   *
+   * 
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
    */
   async executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
-    return await localCacheApplicationContext.run({ cache: {} }, async () => {
+    return await localCacheApplicationContext.run(localCacheApplicationContext.getStore() ?? { cache: {} }, async () => {
       return await cacheContext();
     });
   }
@@ -170,7 +172,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context.
    * This provides in-memory caching for select queries within a single request scope.
-   *
+   * 
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
    */
@@ -440,6 +442,155 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     }
     return this.drizzle.selectAliasedDistinctCacheable(fields, cacheTTL);
   }
+
+  /**
+   * Creates a select query builder for all columns from a table with field aliasing support.
+   * This is a convenience method that automatically selects all columns from the specified table.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @returns Select query builder with all table columns and field aliasing support
+   * @example
+   * ```typescript
+   * const users = await forgeSQL.selectFrom(userTable).where(eq(userTable.id, 1));
+   * ```
+   */
+  selectFrom<T extends MySqlTable>(table: T) {
+    return this.drizzle.selectFrom(table);
+  }
+
+  /**
+   * Creates a select distinct query builder for all columns from a table with field aliasing support.
+   * This is a convenience method that automatically selects all distinct columns from the specified table.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @returns Select distinct query builder with all table columns and field aliasing support
+   * @example
+   * ```typescript
+   * const uniqueUsers = await forgeSQL.selectDistinctFrom(userTable).where(eq(userTable.status, 'active'));
+   * ```
+   */
+  selectDistinctFrom<T extends MySqlTable>(table: T) {
+    return this.drizzle.selectDistinctFrom(table);
+  }
+
+  /**
+   * Creates a cacheable select query builder for all columns from a table with field aliasing and caching support.
+   * This is a convenience method that automatically selects all columns from the specified table with caching enabled.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @param cacheTTL - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Select query builder with all table columns, field aliasing, and caching support
+   * @example
+   * ```typescript
+   * const users = await forgeSQL.selectCacheableFrom(userTable, 300).where(eq(userTable.id, 1));
+   * ```
+   */
+  selectCacheableFrom<T extends MySqlTable>(table: T, cacheTTL?: number) {
+    return this.drizzle.selectFromCacheable(table, cacheTTL);
+  }
+
+  /**
+   * Creates a cacheable select distinct query builder for all columns from a table with field aliasing and caching support.
+   * This is a convenience method that automatically selects all distinct columns from the specified table with caching enabled.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @param cacheTTL - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Select distinct query builder with all table columns, field aliasing, and caching support
+   * @example
+   * ```typescript
+   * const uniqueUsers = await forgeSQL.selectDistinctCacheableFrom(userTable, 300).where(eq(userTable.status, 'active'));
+   * ```
+   */
+  selectDistinctCacheableFrom<T extends MySqlTable>(table: T, cacheTTL?: number) {
+    return this.drizzle.selectDistinctFromCacheable(table, cacheTTL);
+  }
+
+  /**
+   * Executes a raw SQL query with local cache support.
+   * This method provides local caching for raw SQL queries within the current invocation context.
+   * Results are cached locally and will be returned from cache on subsequent identical queries.
+   *
+   * @param query - The SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @example
+   * ```typescript
+   * // Using SQLWrapper
+   * const result = await forgeSQL.execute(sql`SELECT * FROM users WHERE id = ${userId}`);
+   * 
+   * // Using string
+   * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
+   * ```
+   */
+  execute(query: SQLWrapper | string) {
+    return this.drizzle.executeQuery(query);
+  }
+
+  /**
+   * Executes a raw SQL query with both local and global cache support.
+   * This method provides comprehensive caching for raw SQL queries:
+   * - Local cache: Within the current invocation context
+   * - Global cache: Cross-invocation caching using @forge/kvs
+   *
+   * @param query - The SQL query to execute (SQLWrapper or string)
+   * @param cacheTtl - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Promise with query results
+   * @example
+   * ```typescript
+   * // Using SQLWrapper with custom TTL
+   * const result = await forgeSQL.executeCacheable(sql`SELECT * FROM users WHERE id = ${userId}`, 300);
+   * 
+   * // Using string with default TTL
+   * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
+   * ```
+   */
+  executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
+    return this.drizzle.executeQueryCacheable(query, cacheTtl);
+  }
+
+  /**
+   * Creates a Common Table Expression (CTE) builder for complex queries.
+   * CTEs allow you to define temporary named result sets that exist within the scope of a single query.
+   *
+   * @returns WithBuilder for creating CTEs
+   * @example
+   * ```typescript
+   * const withQuery = forgeSQL.$with('userStats').as(
+   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *     .from(users)
+   *     .groupBy(users.id)
+   * );
+   * ```
+   */
+  get $with() {
+    return this.drizzle.$with;
+  }
+
+  /**
+   * Creates a query builder that uses Common Table Expressions (CTEs).
+   * CTEs allow you to define temporary named result sets that exist within the scope of a single query.
+   *
+   * @param queries - Array of CTE queries created with $with()
+   * @returns Query builder with CTE support
+   * @example
+   * ```typescript
+   * const withQuery = forgeSQL.$with('userStats').as(
+   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *     .from(users)
+   *     .groupBy(users.id)
+   * );
+   * 
+   * const result = await forgeSQL.with(withQuery)
+   *   .select({ userId: withQuery.userId, count: withQuery.count })
+   *   .from(withQuery);
+   * ```
+   */
+  with(...queries: WithSubquery[]) {
+    return this.drizzle.with(...queries);
+  }
 }
 
 /**
@@ -467,6 +618,72 @@ class ForgeSQLORM implements ForgeSqlOperation {
     return this.ormInstance.selectDistinctCacheable(fields, cacheTTL);
   }
 
+  /**
+   * Creates a select query builder for all columns from a table with field aliasing support.
+   * This is a convenience method that automatically selects all columns from the specified table.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @returns Select query builder with all table columns and field aliasing support
+   * @example
+   * ```typescript
+   * const users = await forgeSQL.selectFrom(userTable).where(eq(userTable.id, 1));
+   * ```
+   */
+  selectFrom<T extends MySqlTable>(table: T) {
+    return this.ormInstance.getDrizzleQueryBuilder().selectFrom(table);
+  }
+
+  /**
+   * Creates a select distinct query builder for all columns from a table with field aliasing support.
+   * This is a convenience method that automatically selects all distinct columns from the specified table.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @returns Select distinct query builder with all table columns and field aliasing support
+   * @example
+   * ```typescript
+   * const uniqueUsers = await forgeSQL.selectDistinctFrom(userTable).where(eq(userTable.status, 'active'));
+   * ```
+   */
+  selectDistinctFrom<T extends MySqlTable>(table: T) {
+    return this.ormInstance.getDrizzleQueryBuilder().selectDistinctFrom(table);
+  }
+
+  /**
+   * Creates a cacheable select query builder for all columns from a table with field aliasing and caching support.
+   * This is a convenience method that automatically selects all columns from the specified table with caching enabled.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @param cacheTTL - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Select query builder with all table columns, field aliasing, and caching support
+   * @example
+   * ```typescript
+   * const users = await forgeSQL.selectCacheableFrom(userTable, 300).where(eq(userTable.id, 1));
+   * ```
+   */
+  selectCacheableFrom<T extends MySqlTable>(table: T, cacheTTL?: number) {
+    return this.ormInstance.getDrizzleQueryBuilder().selectFromCacheable(table, cacheTTL);
+  }
+
+  /**
+   * Creates a cacheable select distinct query builder for all columns from a table with field aliasing and caching support.
+   * This is a convenience method that automatically selects all distinct columns from the specified table with caching enabled.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @param cacheTTL - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Select distinct query builder with all table columns, field aliasing, and caching support
+   * @example
+   * ```typescript
+   * const uniqueUsers = await forgeSQL.selectDistinctCacheableFrom(userTable, 300).where(eq(userTable.status, 'active'));
+   * ```
+   */
+  selectDistinctCacheableFrom<T extends MySqlTable>(table: T, cacheTTL?: number) {
+    return this.ormInstance.getDrizzleQueryBuilder().selectDistinctFromCacheable(table, cacheTTL);
+  }
+
   executeWithCacheContext(cacheContext: () => Promise<void>): Promise<void> {
     return this.ormInstance.executeWithCacheContext(cacheContext);
   }
@@ -476,7 +693,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context.
    * This provides in-memory caching for select queries within a single request scope.
-   *
+   * 
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
    */
@@ -487,7 +704,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context and returns a value.
    * This provides in-memory caching for select queries within a single request scope.
-   *
+   * 
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
    */
@@ -668,6 +885,89 @@ class ForgeSQLORM implements ForgeSqlOperation {
    */
   getDrizzleQueryBuilder() {
     return this.ormInstance.getDrizzleQueryBuilder();
+  }
+
+  /**
+   * Executes a raw SQL query with local cache support.
+   * This method provides local caching for raw SQL queries within the current invocation context.
+   * Results are cached locally and will be returned from cache on subsequent identical queries.
+   *
+   * @param query - The SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @example
+   * ```typescript
+   * // Using SQLWrapper
+   * const result = await forgeSQL.execute(sql`SELECT * FROM users WHERE id = ${userId}`);
+   * 
+   * // Using string
+   * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
+   * ```
+   */
+  execute(query: SQLWrapper | string) {
+    return this.ormInstance.getDrizzleQueryBuilder().executeQuery(query);
+  }
+
+  /**
+   * Executes a raw SQL query with both local and global cache support.
+   * This method provides comprehensive caching for raw SQL queries:
+   * - Local cache: Within the current invocation context
+   * - Global cache: Cross-invocation caching using @forge/kvs
+   *
+   * @param query - The SQL query to execute (SQLWrapper or string)
+   * @param cacheTtl - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Promise with query results
+   * @example
+   * ```typescript
+   * // Using SQLWrapper with custom TTL
+   * const result = await forgeSQL.executeCacheable(sql`SELECT * FROM users WHERE id = ${userId}`, 300);
+   * 
+   * // Using string with default TTL
+   * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
+   * ```
+   */
+  executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
+    return this.ormInstance.getDrizzleQueryBuilder().executeQueryCacheable(query, cacheTtl);
+  }
+
+  /**
+   * Creates a Common Table Expression (CTE) builder for complex queries.
+   * CTEs allow you to define temporary named result sets that exist within the scope of a single query.
+   *
+   * @returns WithBuilder for creating CTEs
+   * @example
+   * ```typescript
+   * const withQuery = forgeSQL.$with('userStats').as(
+   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *     .from(users)
+   *     .groupBy(users.id)
+   * );
+   * ```
+   */
+  get $with() {
+    return this.ormInstance.getDrizzleQueryBuilder().$with;
+  }
+
+  /**
+   * Creates a query builder that uses Common Table Expressions (CTEs).
+   * CTEs allow you to define temporary named result sets that exist within the scope of a single query.
+   *
+   * @param queries - Array of CTE queries created with $with()
+   * @returns Query builder with CTE support
+   * @example
+   * ```typescript
+   * const withQuery = forgeSQL.$with('userStats').as(
+   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *     .from(users)
+   *     .groupBy(users.id)
+   * );
+   * 
+   * const result = await forgeSQL.with(withQuery)
+   *   .select({ userId: withQuery.userId, count: withQuery.count })
+   *   .from(withQuery);
+   * ```
+   */
+  with(...queries: WithSubquery[]) {
+    return this.ormInstance.getDrizzleQueryBuilder().with(...queries);
   }
 }
 

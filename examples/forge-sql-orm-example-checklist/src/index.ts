@@ -75,7 +75,7 @@ async function createCheckList(issueId: string): Promise<CheckListData> {
   };
 
   try {
-    await forgeSQL.crud().insert(issueCheckList, [newCheckList]);
+    await forgeSQL.insert(issueCheckList).values([newCheckList]);
   } catch (e: any) {
     console.warn("Cannot insert checklist:", e.message, e);
     throw new Error("Cannot create issueCheckList");
@@ -124,7 +124,7 @@ resolver.define(
       const userInfo = await getCurrentUserInfo();
       payload.updateId = userInfo.accountId;
       payload.updateDisplayName = userInfo.displayName;
-      await forgeSQL.crud().updateById(payload, issueCheckList);
+      await forgeSQL.update(issueCheckList).set(payload).where(eq(issueCheckList.issueId, payload.issueId));
 
       const updatedCheckList = await fetchCheckList(payload.issueId);
       if (!updatedCheckList) {
