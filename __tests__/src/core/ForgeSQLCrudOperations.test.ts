@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 const OriginalDate = global.Date;
-import { clearCache, clearTablesCache } from "../../../src/utils/cacheUtils";
+import { clearCache, clearTablesCache,clearTablesCache } from "../../../src/utils/cacheUtils";
 vi.mock("../../../src/utils/cacheUtils");
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
@@ -781,4 +781,12 @@ describe("ForgeSQLCrudOperations", () => {
     expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", "2023-04-12 00:00:01.000");
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
+
+
+    it("evict cache", async () => {
+        await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCache(['test']);
+        await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCacheEntities([testEntity]);
+
+
+    });
 });
