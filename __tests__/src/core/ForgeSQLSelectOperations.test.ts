@@ -11,7 +11,7 @@ import { testEntityJoin1 } from "../../entities/TestEntityJoin1";
 import { testEntityJoin2 } from "../../entities/TestEntityJoin2";
 import { testEntityVersionDifferentDateField } from "../../entities/TestEntityVersionDifferentFieldDate";
 import { DateTime } from "luxon";
-import { alias } from "drizzle-orm/mysql-core";
+
 vi.mock("../../../src/utils/cacheUtils", () => ({
   getFromCache: async () => {
     return undefined;

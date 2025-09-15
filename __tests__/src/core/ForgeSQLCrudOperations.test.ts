@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 const OriginalDate = global.Date;
-import { clearCache, clearTablesCache,clearTablesCache } from "../../../src/utils/cacheUtils";
+import { clearCache, clearTablesCache } from "../../../src/utils/cacheUtils";
 vi.mock("../../../src/utils/cacheUtils");
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
