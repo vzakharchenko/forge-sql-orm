@@ -21,6 +21,9 @@
 - ✅ **Global Cache System (Level 2)** with cross-invocation caching, automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
+- ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
+- ✅ **Raw SQL Execution**: `execute()` and `executeCacheable()` methods for direct SQL queries with local and global caching
+- ✅ **Common Table Expressions (CTEs)**: `with()` method for complex queries with subqueries
 - ✅ **Schema migration support**, allowing automatic schema evolution
 - ✅ **Automatic entity generation** from MySQL/tidb databases
 - ✅ **Automatic migration generation** from MySQL/tidb databases
@@ -134,6 +137,20 @@ await forgeSQL.executeWithLocalContext(async () => {
   // This query will use local cache (no database call)
   const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
     .from(users).where(eq(users.active, true));
+  
+  // Using new methods for better performance
+  const usersFrom = await forgeSQL.selectFrom(users)
+    .where(eq(users.active, true));
+  
+  // This will use local cache (no database call)
+  const cachedUsersFrom = await forgeSQL.selectFrom(users)
+    .where(eq(users.active, true));
+  
+  // Raw SQL with local caching
+  const rawUsers = await forgeSQL.execute(
+    "SELECT id, name FROM users WHERE active = ?", 
+    [true]
+  );
 });
 ```
 Best for: Performance optimization of repeated queries within resolvers or single invocation contexts.
@@ -240,6 +257,16 @@ await forgeSQL.executeWithLocalContext(async () => {
   // This query will use local cache (no database call)
   const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
     .from(users).where(eq(users.active, true));
+  
+  // Using new methods for better performance
+  const usersFrom = await forgeSQL.selectFrom(users)
+    .where(eq(users.active, true));
+  
+  // Raw SQL with local caching
+  const rawUsers = await forgeSQL.execute(
+    "SELECT id, name FROM users WHERE active = ?", 
+    [true]
+  );
 });
 ```
 
@@ -277,6 +304,42 @@ await forgeSQL.update(Users).set(updateData).where(eq(Users.id, 1));
 // Direct Drizzle access
 const db = forgeSQL.getDrizzleQueryBuilder();
 const users = await db.select().from(users);
+
+// Using new methods for enhanced functionality
+const usersFrom = await forgeSQL.selectFrom(users)
+  .where(eq(users.active, true));
+
+const usersDistinct = await forgeSQL.selectDistinctFrom(users)
+  .where(eq(users.active, true));
+
+const usersCacheable = await forgeSQL.selectCacheableFrom(users)
+  .where(eq(users.active, true));
+
+// Raw SQL execution
+const rawUsers = await forgeSQL.execute(
+  "SELECT * FROM users WHERE active = ?", 
+  [true]
+);
+
+// Raw SQL with caching
+const cachedRawUsers = await forgeSQL.executeCacheable(
+  "SELECT * FROM users WHERE active = ?", 
+  [true], 
+  300
+);
+
+// Common Table Expressions (CTEs)
+const userStats = await forgeSQL
+  .with(
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+  )
+  .select({
+    totalActiveUsers: sql`COUNT(au.id)`,
+    totalCompletedOrders: sql`COUNT(co.id)`
+  })
+  .from(sql`activeUsers au`)
+  .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
 ```
 
 This approach gives you direct access to all Drizzle ORM features while still using the @forge/sql backend with enhanced caching and versioning capabilities.
@@ -315,6 +378,29 @@ await forgeSQL.executeWithCacheContext(async () => {
    const users = await db.selectAliasedCacheable(getTableColumns(users)).from(users);  
   // Cache is cleared only once at the end for all affected tables
 });
+
+// Using new methods with direct drizzle
+const usersFrom = await forgeSQL.selectFrom(users)
+  .where(eq(users.active, true));
+
+const usersDistinct = await forgeSQL.selectDistinctFrom(users)
+  .where(eq(users.active, true));
+
+const usersCacheable = await forgeSQL.selectCacheableFrom(users)
+  .where(eq(users.active, true));
+
+// Raw SQL execution
+const rawUsers = await forgeSQL.execute(
+  "SELECT * FROM users WHERE active = ?", 
+  [true]
+);
+
+// Raw SQL with caching
+const cachedRawUsers = await forgeSQL.executeCacheable(
+  "SELECT * FROM users WHERE active = ?", 
+  [true], 
+  300
+);
 ```
 
 ## Setting Up Caching with @forge/kvs (Optional)
@@ -622,6 +708,20 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
     const cachedUsers = await forgeSQL.select({id: users.id, name: users.name})
         .from(users).where(eq(users.active, true));
     
+    // Using new methods for better performance
+    const usersFrom = await forgeSQL.selectFrom(users)
+        .where(eq(users.active, true));
+    
+    // This will use local cache (no database call)
+    const cachedUsersFrom = await forgeSQL.selectFrom(users)
+        .where(eq(users.active, true));
+    
+    // Raw SQL with local caching
+    const rawUsers = await forgeSQL.execute(
+        "SELECT id, name FROM users WHERE active = ?", 
+        [true]
+    );
+    
     // Insert operation - evicts local cache
     await forgeSQL.insert(users).values({name: 'New User', active: true});
     
@@ -629,7 +729,7 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
     const updatedUsers = await forgeSQL.select({id: users.id, name: users.name})
         .from(users).where(eq(users.active, true));
     
-    return { users, cachedUsers, updatedUsers };
+    return { users, cachedUsers, updatedUsers, usersFrom, cachedUsersFrom, rawUsers };
 });
 
 ```
@@ -646,6 +746,13 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `updateAndEvictCache()` | Simple updates | ❌ No | ✅ Yes |
 | `deleteAndEvictCache()` | Simple deletes | ❌ No | ✅ Yes |
 | `insert/update/delete` | Basic Drizzle operations | ❌ No | Cache Context |
+| `selectFrom()` | All-column queries with field aliasing | ❌ No | Local Cache |
+| `selectDistinctFrom()` | Distinct all-column queries with field aliasing | ❌ No | Local Cache |
+| `selectCacheableFrom()` | All-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
+| `selectDistinctCacheableFrom()` | Distinct all-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
+| `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
+| `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
+| `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 
 
 ## Choosing the Right Method - Direct Drizzle
@@ -659,6 +766,13 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `updateAndEvictCache()` | Simple updates without conflicts | ❌ No | ✅ Yes |
 | `deleteAndEvictCache()` | Simple deletes without conflicts | ❌ No | ✅ Yes |
 | `insert/update/delete` | Basic Drizzle operations | ❌ No | ❌ No |
+| `selectFrom()` | All-column queries with field aliasing | ❌ No | Local Cache |
+| `selectDistinctFrom()` | Distinct all-column queries with field aliasing | ❌ No | Local Cache |
+| `selectCacheableFrom()` | All-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
+| `selectDistinctCacheableFrom()` | Distinct all-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
+| `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
+| `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
+| `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
 
@@ -886,6 +1000,34 @@ const user = await forgeSQL
     .selectCacheable({user: users})
     .from(users);
 
+// Using forgeSQL.selectFrom() - Select all columns with field aliasing
+const user = await forgeSQL
+    .selectFrom(users)
+    .where(eq(users.id, 1));
+
+// Using forgeSQL.selectDistinctFrom() - Select distinct all columns with field aliasing
+const user = await forgeSQL
+    .selectDistinctFrom(users)
+    .where(eq(users.id, 1));
+
+// Using forgeSQL.selectCacheableFrom() - Select all columns with field aliasing and caching
+const user = await forgeSQL
+    .selectCacheableFrom(users)
+    .where(eq(users.id, 1));
+
+// Using forgeSQL.selectDistinctCacheableFrom() - Select distinct all columns with field aliasing and caching
+const user = await forgeSQL
+    .selectDistinctCacheableFrom(users)
+    .where(eq(users.id, 1));
+
+// Using forgeSQL.execute() - Execute raw SQL with local caching
+const user = await forgeSQL
+    .execute("SELECT * FROM users WHERE id = ?", [1]);
+
+// Using forgeSQL.executeCacheable() - Execute raw SQL with local and global caching
+const user = await forgeSQL
+    .executeCacheable("SELECT * FROM users WHERE id = ?", [1], 300);
+
 // Using forgeSQL.getDrizzleQueryBuilder()
 const user = await forgeSQL
   .getDrizzleQueryBuilder()
@@ -941,6 +1083,31 @@ const orderWithUser = await forgeSQL
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
 
+// Using new selectFrom methods with joins
+const orderWithUser = await forgeSQL
+  .selectFrom(orders)
+  .innerJoin(users, eq(orders.userId, users.id))
+  .where(eq(orders.id, 1));
+
+// Using selectCacheableFrom with joins and caching
+const orderWithUser = await forgeSQL
+  .selectCacheableFrom(orders)
+  .innerJoin(users, eq(orders.userId, users.id))
+  .where(eq(orders.id, 1));
+
+// Using with() for Common Table Expressions (CTEs)
+const userStats = await forgeSQL
+  .with(
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+  )
+  .select({
+    totalActiveUsers: sql`COUNT(au.id)`,
+    totalCompletedOrders: sql`COUNT(co.id)`
+  })
+  .from(sql`activeUsers au`)
+  .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
+
 // OR with direct drizzle
 const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 const orderWithUser = await db
@@ -982,6 +1149,28 @@ const userStats = await forgeSQL
 const users = await forgeSQL
   .fetch()
   .executeRawSQL<Users>("SELECT * FROM users");
+
+// Using execute() for raw SQL with local caching
+const users = await forgeSQL
+  .execute("SELECT * FROM users WHERE active = ?", [true]);
+
+// Using executeCacheable() for raw SQL with local and global caching
+const users = await forgeSQL
+  .executeCacheable("SELECT * FROM users WHERE active = ?", [true], 300);
+
+// Using execute() with complex queries
+const userStats = await forgeSQL
+  .execute(`
+    SELECT 
+      u.id,
+      u.name,
+      COUNT(o.id) as order_count,
+      SUM(o.amount) as total_amount
+    FROM users u
+    LEFT JOIN orders o ON u.id = o.user_id
+    WHERE u.active = ?
+    GROUP BY u.id, u.name
+  `, [true]);
 ```
 
 ## Modify Operations
@@ -1264,6 +1453,26 @@ await forgeSQL.executeWithLocalContext(async () => {
   const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
     .from(users).where(eq(users.active, true));
   
+  // Using new selectFrom methods with local caching
+  const usersFrom = await forgeSQL.selectFrom(users)
+    .where(eq(users.active, true));
+  
+  // This will use local cache (no database call)
+  const cachedUsersFrom = await forgeSQL.selectFrom(users)
+    .where(eq(users.active, true));
+  
+  // Using execute() with local caching
+  const rawUsers = await forgeSQL.execute(
+    "SELECT id, name FROM users WHERE active = ?", 
+    [true]
+  );
+  
+  // This will use local cache (no database call)
+  const cachedRawUsers = await forgeSQL.execute(
+    "SELECT id, name FROM users WHERE active = ?", 
+    [true]
+  );
+  
   // Insert operation - evicts local cache for users table
   await forgeSQL.insert(users).values({ name: 'New User', active: true });
   
@@ -1292,23 +1501,29 @@ const result = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async (
 // Atlassian forge resolver with local cache optimization
 const userResolver = async (req) => {
   return await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
-    // Get user details
-    const user = await forgeSQL.select({ id: users.id, name: users.name, email: users.email })
-      .from(users).where(eq(users.id, args.userId));
+    // Get user details using selectFrom (all columns with field aliasing)
+    const user = await forgeSQL.selectFrom(users)
+      .where(eq(users.id, args.userId));
     
-    // Get user's orders (this query will be cached if called again)
-    const orders = await forgeSQL.select({ 
-      id: orders.id, 
-      product: orders.product, 
-      amount: orders.amount 
-    }).from(orders).where(eq(orders.userId, args.userId));
+    // Get user's orders using selectCacheableFrom (with caching)
+    const orders = await forgeSQL.selectCacheableFrom(orders)
+      .where(eq(orders.userId, args.userId));
     
-    // Get user's profile (this query will be cached if called again)
-    const profile = await forgeSQL.select({ 
-      id: profiles.id, 
-      bio: profiles.bio, 
-      avatar: profiles.avatar 
-    }).from(profiles).where(eq(profiles.userId, args.userId));
+    // Get user's profile using raw SQL with execute()
+    const profile = await forgeSQL.execute(
+      "SELECT id, bio, avatar FROM profiles WHERE user_id = ?", 
+      [args.userId]
+    );
+    
+    // Get user statistics using complex raw SQL
+    const stats = await forgeSQL.execute(`
+      SELECT 
+        COUNT(o.id) as total_orders,
+        SUM(o.amount) as total_spent,
+        AVG(o.amount) as avg_order_value
+      FROM orders o 
+      WHERE o.user_id = ? AND o.status = 'completed'
+    `, [args.userId]);
     
     // If any of these queries are repeated within the same resolver,
     // they will use the local cache instead of hitting the database
@@ -1316,7 +1531,8 @@ const userResolver = async (req) => {
     return {
       ...user[0],
       orders,
-      profile: profile[0]
+      profile: profile[0],
+      stats: stats[0]
     };
   });
 };
@@ -1351,6 +1567,17 @@ await forgeSQL.executeWithLocalContext(async () => {
   // 3. Database query
   const users = await forgeSQL.selectCacheable({ id: users.id, name: users.name })
     .from(users).where(eq(users.active, true));
+  
+  // Using new methods with multi-level caching
+  const usersFrom = await forgeSQL.selectCacheableFrom(users)
+    .where(eq(users.active, true));
+  
+  // Raw SQL with multi-level caching
+  const rawUsers = await forgeSQL.executeCacheable(
+    "SELECT id, name FROM users WHERE active = ?", 
+    [true], 
+    300 // TTL in seconds
+  );
 });
 ```
 
@@ -1387,6 +1614,33 @@ const results = await forgeSQL.modifyWithVersioningAndEvictCache().executeRawSQL
   [true],
   300 // TTL in seconds
 );
+
+// Using new methods for cache-aware operations
+const usersFrom = await forgeSQL.selectCacheableFrom(Users)
+  .where(eq(Users.active, true));
+
+const usersDistinct = await forgeSQL.selectDistinctCacheableFrom(Users)
+  .where(eq(Users.active, true));
+
+// Raw SQL with local and global caching
+const rawUsers = await forgeSQL.executeCacheable(
+  "SELECT * FROM users WHERE active = ?",
+  [true],
+  300 // TTL in seconds
+);
+
+// Using with() for Common Table Expressions with caching
+const userStats = await forgeSQL
+  .with(
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+  )
+  .select({
+    totalActiveUsers: sql`COUNT(au.id)`,
+    totalCompletedOrders: sql`COUNT(co.id)`
+  })
+  .from(sql`activeUsers au`)
+  .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
 ```
 
 ### Manual Cache Management
@@ -1728,6 +1982,30 @@ const rawPlan = await analyzeForgeSql.explainRaw(
   "SELECT * FROM users WHERE id = ?",
   [1]
 );
+
+// Analyze new methods
+const usersFromPlan = await analyzeForgeSql.explain(
+  forgeSQL.selectFrom(users).where(eq(users.active, true))
+);
+
+const usersCacheablePlan = await analyzeForgeSql.explain(
+  forgeSQL.selectCacheableFrom(users).where(eq(users.active, true))
+);
+
+// Analyze Common Table Expressions (CTEs)
+const ctePlan = await analyzeForgeSql.explain(
+  forgeSQL
+    .with(
+      forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
+      forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+    )
+    .select({
+      totalActiveUsers: sql`COUNT(au.id)`,
+      totalCompletedOrders: sql`COUNT(co.id)`
+    })
+    .from(sql`activeUsers au`)
+    .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`))
+);
 ```
 
 This analysis provides insights into:
@@ -1787,6 +2065,13 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
 - `forgeSQL.insertAndEvictCache()` - Basic Drizzle operations with evict cache after execution
 - `forgeSQL.updateAndEvictCache()` - Basic Drizzle operations with evict cache after execution
 - `forgeSQL.deleteAndEvictCache()` - Basic Drizzle operations with evict cache after execution
+- `forgeSQL.selectFrom()` - All-column queries with field aliasing
+- `forgeSQL.selectDistinctFrom()` - Distinct all-column queries with field aliasing
+- `forgeSQL.selectCacheableFrom()` - All-column queries with field aliasing and caching
+- `forgeSQL.selectDistinctCacheableFrom()` - Distinct all-column queries with field aliasing and caching
+- `forgeSQL.execute()` - Raw SQL queries with local caching
+- `forgeSQL.executeCacheable()` - Raw SQL queries with local and global caching
+- `forgeSQL.with()` - Common Table Expressions (CTEs)
 
 **Optional Migration:**
 You can optionally migrate to the new API methods for better performance and cache management:
@@ -1799,6 +2084,41 @@ await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
 await forgeSQL.insert(Users).values(userData);
 // or for versioned operations with cache management
 await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [userData]);
+
+// ✅ New query methods for better performance
+const users = await forgeSQL.selectFrom(Users)
+  .where(eq(Users.active, true));
+
+const usersDistinct = await forgeSQL.selectDistinctFrom(Users)
+  .where(eq(Users.active, true));
+
+const usersCacheable = await forgeSQL.selectCacheableFrom(Users)
+  .where(eq(Users.active, true));
+
+// ✅ Raw SQL execution with caching
+const rawUsers = await forgeSQL.execute(
+  "SELECT * FROM users WHERE active = ?", 
+  [true]
+);
+
+const cachedRawUsers = await forgeSQL.executeCacheable(
+  "SELECT * FROM users WHERE active = ?", 
+  [true], 
+  300
+);
+
+// ✅ Common Table Expressions (CTEs)
+const userStats = await forgeSQL
+  .with(
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+  )
+  .select({
+    totalActiveUsers: sql`COUNT(au.id)`,
+    totalCompletedOrders: sql`COUNT(co.id)`
+  })
+  .from(sql`activeUsers au`)
+  .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
 ```
 
 #### 3. Automatic Migration Script
