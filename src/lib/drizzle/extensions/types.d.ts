@@ -1,12 +1,17 @@
 import {
-    DeleteAndEvictCacheType, ExecuteQuery, ExecuteQueryCacheable,
-    InsertAndEvictCacheType,
-    SelectAliasedCacheableType,
-    SelectAliasedDistinctCacheableType,
-    SelectAliasedDistinctType,
-    SelectAliasedType, SelectAllDistinctFromAliasedType,
-    SelectAllDistinctFromCacheableAliasedType, SelectAllFromAliasedType, SelectAllFromCacheableAliasedType,
-    UpdateAndEvictCacheType,
+  DeleteAndEvictCacheType,
+  ExecuteQuery,
+  ExecuteQueryCacheable,
+  InsertAndEvictCacheType,
+  SelectAliasedCacheableType,
+  SelectAliasedDistinctCacheableType,
+  SelectAliasedDistinctType,
+  SelectAliasedType,
+  SelectAllDistinctFromAliasedType,
+  SelectAllDistinctFromCacheableAliasedType,
+  SelectAllFromAliasedType,
+  SelectAllFromCacheableAliasedType,
+  UpdateAndEvictCacheType,
 } from "./additionalActions";
 
 declare module "drizzle-orm/mysql-proxy" {
@@ -25,7 +30,7 @@ declare module "drizzle-orm/mysql-proxy" {
      * Select with field aliasing support for all table columns
      */
     selectFrom: SelectAllFromAliasedType;
-    
+
     /**
      * Select distinct with field aliasing support for all table columns
      */
@@ -50,12 +55,12 @@ declare module "drizzle-orm/mysql-proxy" {
      * Select with field aliasing and caching support for all table columns
      */
     selectFromCacheable: SelectAllFromCacheableAliasedType;
-    
+
     /**
      * Select distinct with field aliasing and caching support for all table columns
      */
     selectDistinctFromCacheable: SelectAllDistinctFromCacheableAliasedType;
-    
+
     /**
      * Execute raw SQL query with both local and global cache support
      */

@@ -138,8 +138,6 @@ export async function getQueryLocalCacheQuery<
   return undefined;
 }
 
-
-
 /**
  * Evicts cached queries from the local cache context that involve the specified table.
  * This function removes cached query results that contain the given table name.

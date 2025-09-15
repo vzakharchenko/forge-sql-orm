@@ -124,7 +124,10 @@ resolver.define(
       const userInfo = await getCurrentUserInfo();
       payload.updateId = userInfo.accountId;
       payload.updateDisplayName = userInfo.displayName;
-      await forgeSQL.update(issueCheckList).set(payload).where(eq(issueCheckList.issueId, payload.issueId));
+      await forgeSQL
+        .update(issueCheckList)
+        .set(payload)
+        .where(eq(issueCheckList.issueId, payload.issueId));
 
       const updatedCheckList = await fetchCheckList(payload.issueId);
       if (!updatedCheckList) {

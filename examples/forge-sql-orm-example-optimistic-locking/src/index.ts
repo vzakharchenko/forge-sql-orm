@@ -95,13 +95,19 @@ resolver.define(
       await forgeSQL.modifyWithVersioning().deleteById(testDataId, testData);
     }
     if (testDataOptimisticNumberId) {
-      await forgeSQL.modifyWithVersioning().deleteById(testDataOptimisticNumberId, testDataOptimisticNumber);
+      await forgeSQL
+        .modifyWithVersioning()
+        .deleteById(testDataOptimisticNumberId, testDataOptimisticNumber);
     }
     if (testDataOptimisticTimeStampId) {
-      await forgeSQL.modifyWithVersioning().deleteById(testDataOptimisticTimeStampId, testDataOptimisticTimestamp);
+      await forgeSQL
+        .modifyWithVersioning()
+        .deleteById(testDataOptimisticTimeStampId, testDataOptimisticTimestamp);
     }
     if (testDataOptimisticDateId) {
-      await forgeSQL.modifyWithVersioning().deleteById(testDataOptimisticDateId, testDataOptimisticDate);
+      await forgeSQL
+        .modifyWithVersioning()
+        .deleteById(testDataOptimisticDateId, testDataOptimisticDate);
     }
   },
 );
@@ -122,7 +128,9 @@ resolver.define(
       const { objectName, data } = req.payload;
       switch (objectName) {
         case "WITHOUT_VERSIONING": {
-          await forgeSQL.modifyWithVersioning().updateById(data as InferInsertModel<typeof testData>, testData);
+          await forgeSQL
+            .modifyWithVersioning()
+            .updateById(data as InferInsertModel<typeof testData>, testData);
           return "SUCCESS";
         }
         case "OPTIMISTIC_NUMBER": {

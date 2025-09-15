@@ -1,28 +1,35 @@
 import {
-    MySqlRawQueryResult,
-    MySqlRemoteDatabase,
-    MySqlRemotePreparedQueryHKT,
-    MySqlRemoteQueryResultHKT,
+  MySqlRawQueryResult,
+  MySqlRemoteDatabase,
+  MySqlRemotePreparedQueryHKT,
+  MySqlRemoteQueryResultHKT,
 } from "drizzle-orm/mysql-proxy";
 
-import {SelectedFields} from "drizzle-orm/mysql-core/query-builders/select.types";
-import {applyFromDriverTransform, ForgeSqlOrmOptions, mapSelectFieldsWithAlias} from "../../..";
-import {MySqlSelectBase, MySqlSelectBuilder} from "drizzle-orm/mysql-core";
-import type {MySqlTable} from "drizzle-orm/mysql-core/table";
-import {MySqlDeleteBase, MySqlInsertBuilder, MySqlUpdateBuilder,} from "drizzle-orm/mysql-core/query-builders";
-import {clearCache, getFromCache, setCacheResult} from "../../../utils/cacheUtils";
+import { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
+import { applyFromDriverTransform, ForgeSqlOrmOptions, mapSelectFieldsWithAlias } from "../../..";
+import { MySqlSelectBase, MySqlSelectBuilder } from "drizzle-orm/mysql-core";
+import type { MySqlTable } from "drizzle-orm/mysql-core/table";
 import {
-    cacheApplicationContext,
-    evictLocalCacheQuery,
-    getQueryLocalCacheQuery,
-    saveQueryLocalCacheQuery,
-    saveTableIfInsideCacheContext,
+  MySqlDeleteBase,
+  MySqlInsertBuilder,
+  MySqlUpdateBuilder,
+} from "drizzle-orm/mysql-core/query-builders";
+import { clearCache, getFromCache, setCacheResult } from "../../../utils/cacheUtils";
+import {
+  cacheApplicationContext,
+  evictLocalCacheQuery,
+  getQueryLocalCacheQuery,
+  saveQueryLocalCacheQuery,
+  saveTableIfInsideCacheContext,
 } from "../../../utils/cacheContextUtils";
-import {BuildQueryConfig, isSQLWrapper, SQLWrapper} from "drizzle-orm/sql/sql";
-import type {MySqlQueryResultKind} from "drizzle-orm/mysql-core/session";
-import {getTableColumns, Query} from "drizzle-orm";
-import {MySqlDialect} from "drizzle-orm/mysql-core/dialect";
-import type {GetSelectTableName, GetSelectTableSelection} from "drizzle-orm/query-builders/select.types";
+import { BuildQueryConfig, isSQLWrapper, SQLWrapper } from "drizzle-orm/sql/sql";
+import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
+import { getTableColumns, Query } from "drizzle-orm";
+import { MySqlDialect } from "drizzle-orm/mysql-core/dialect";
+import type {
+  GetSelectTableName,
+  GetSelectTableSelection,
+} from "drizzle-orm/query-builders/select.types";
 
 // ============================================================================
 // TYPES AND INTERFACES
@@ -40,35 +47,22 @@ interface QueryBuilder {
 /**
  * Error codes that should not trigger cache clearing
  */
-const NON_CACHE_CLEARING_ERROR_CODES = [
-  "VALIDATION_ERROR",
-  "CONSTRAINT_ERROR"
-] as const;
+const NON_CACHE_CLEARING_ERROR_CODES = ["VALIDATION_ERROR", "CONSTRAINT_ERROR"] as const;
 
 /**
  * Error codes that should trigger cache clearing
  */
-const CACHE_CLEARING_ERROR_CODES = [
-  "DEADLOCK",
-  "LOCK_WAIT_TIMEOUT", 
-  "CONNECTION_ERROR"
-] as const;
+const CACHE_CLEARING_ERROR_CODES = ["DEADLOCK", "LOCK_WAIT_TIMEOUT", "CONNECTION_ERROR"] as const;
 
 /**
  * Error message patterns that should not trigger cache clearing
  */
-const NON_CACHE_CLEARING_PATTERNS = [
-  /validation/i,
-  /constraint/i
-] as const;
+const NON_CACHE_CLEARING_PATTERNS = [/validation/i, /constraint/i] as const;
 
 /**
  * Error message patterns that should trigger cache clearing
  */
-const CACHE_CLEARING_PATTERNS = [
-  /timeout/i,
-  /connection/i
-] as const;
+const CACHE_CLEARING_PATTERNS = [/timeout/i, /connection/i] as const;
 
 // ============================================================================
 // CACHE MANAGEMENT UTILITIES
@@ -87,7 +81,10 @@ function shouldClearCacheOnError(error: any): boolean {
     return false;
   }
 
-  if (error?.message && NON_CACHE_CLEARING_PATTERNS.some(pattern => pattern.test(error.message))) {
+  if (
+    error?.message &&
+    NON_CACHE_CLEARING_PATTERNS.some((pattern) => pattern.test(error.message))
+  ) {
     return false;
   }
 
@@ -96,7 +93,7 @@ function shouldClearCacheOnError(error: any): boolean {
     return true;
   }
 
-  if (error?.message && CACHE_CLEARING_PATTERNS.some(pattern => pattern.test(error.message))) {
+  if (error?.message && CACHE_CLEARING_PATTERNS.some((pattern) => pattern.test(error.message))) {
     return true;
   }
 
@@ -142,41 +139,82 @@ export type SelectAliasedDistinctCacheableType = <TSelection extends SelectedFie
  * Type for select queries from table with field aliasing
  */
 export type SelectAllFromAliasedType = <T extends MySqlTable>(
-    table: T,
-) =>  MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+  table: T,
+) => MySqlSelectBase<
+  GetSelectTableName<T>,
+  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
+  T["_"]["columns"] extends undefined ? "single" : "partial",
+  MySqlRemotePreparedQueryHKT,
+  GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+  false,
+  never,
+  any
+>;
 
 /**
  * Type for select distinct queries from table with field aliasing
  */
 export type SelectAllDistinctFromAliasedType = <T extends MySqlTable>(
-    table: T,
-) => MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+  table: T,
+) => MySqlSelectBase<
+  GetSelectTableName<T>,
+  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
+  T["_"]["columns"] extends undefined ? "single" : "partial",
+  MySqlRemotePreparedQueryHKT,
+  GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+  false,
+  never,
+  any
+>;
 
 /**
  * Type for select queries from table with field aliasing and caching
  */
 export type SelectAllFromCacheableAliasedType = <T extends MySqlTable>(
-    table: T,
-    cacheTtl?: number,
-) => MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+  table: T,
+  cacheTtl?: number,
+) => MySqlSelectBase<
+  GetSelectTableName<T>,
+  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
+  T["_"]["columns"] extends undefined ? "single" : "partial",
+  MySqlRemotePreparedQueryHKT,
+  GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+  false,
+  never,
+  any
+>;
 
 /**
  * Type for select distinct queries from table with field aliasing and caching
  */
 export type SelectAllDistinctFromCacheableAliasedType = <T extends MySqlTable>(
-    table: T,
-    cacheTtl?: number,
-) => MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+  table: T,
+  cacheTtl?: number,
+) => MySqlSelectBase<
+  GetSelectTableName<T>,
+  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
+  T["_"]["columns"] extends undefined ? "single" : "partial",
+  MySqlRemotePreparedQueryHKT,
+  GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+  false,
+  never,
+  any
+>;
 
 /**
  * Type for executing raw SQL queries with local cache
  */
-export type ExecuteQuery = (query: SQLWrapper | string) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+export type ExecuteQuery = (
+  query: SQLWrapper | string,
+) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
 
 /**
  * Type for executing raw SQL queries with local and global cache
  */
-export type ExecuteQueryCacheable = (query: SQLWrapper | string, cacheTtl?: number) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+export type ExecuteQueryCacheable = (
+  query: SQLWrapper | string,
+  cacheTtl?: number,
+) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
 
 /**
  * Type for insert operations with cache eviction
@@ -553,29 +591,31 @@ const DEFAULT_OPTIONS: ForgeSqlOrmOptions = {
 // QUERY BUILDER FACTORIES
 // ============================================================================
 
-
 /**
  * Creates a raw SQL query executor with caching support
  */
 function createRawQueryExecutor(
   db: MySqlRemoteDatabase<any>,
   options: ForgeSqlOrmOptions,
-  useGlobalCache: boolean = false
+  useGlobalCache: boolean = false,
 ) {
   return async function <T extends { [column: string]: any }>(
     query: SQLWrapper | string,
-    cacheTtl?: number
+    cacheTtl?: number,
   ): Promise<MySqlRawQueryResult> {
     let sql: Query;
-    
+
     if (isSQLWrapper(query)) {
       const sqlWrapper = query as SQLWrapper;
-      sql = sqlWrapper.getSQL()
-        .toQuery(((db as unknown as { dialect: MySqlDialect }).dialect) as unknown as BuildQueryConfig);
+      sql = sqlWrapper
+        .getSQL()
+        .toQuery(
+          (db as unknown as { dialect: MySqlDialect }).dialect as unknown as BuildQueryConfig,
+        );
     } else {
       sql = {
         sql: query,
-        params: []
+        params: [],
       };
     }
 
@@ -595,20 +635,20 @@ function createRawQueryExecutor(
 
     // Execute query
     const results = await db.execute<T>(query);
-    
+
     // Save to local cache
     await saveQueryLocalCacheQuery(sql, results);
-    
+
     // Save to global cache if enabled
     if (useGlobalCache) {
       await setCacheResult(
-        { toSQL: () => sql }, 
-        options, 
-        results, 
-        cacheTtl ?? options.cacheTTL ?? 120
+        { toSQL: () => sql },
+        options,
+        results,
+        cacheTtl ?? options.cacheTTL ?? 120,
       );
     }
-    
+
     return results;
   };
 }
@@ -821,7 +861,7 @@ export function patchDbWithSelectAliased(
    * ```typescript
    * // Using SQLWrapper
    * const result = await db.executeQuery(sql`SELECT * FROM users WHERE id = ${userId}`);
-   * 
+   *
    * // Using string
    * const result = await db.executeQuery("SELECT * FROM users WHERE status = 'active'");
    * ```
@@ -841,7 +881,7 @@ export function patchDbWithSelectAliased(
    * ```typescript
    * // Using SQLWrapper with custom TTL
    * const result = await db.executeQueryCacheable(sql`SELECT * FROM users WHERE id = ${userId}`, 300);
-   * 
+   *
    * // Using string with default TTL
    * const result = await db.executeQueryCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```

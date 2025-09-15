@@ -144,35 +144,41 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   async executeWithCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
     return await this.executeWithLocalCacheContextAndReturnValue(
       async () =>
-        await cacheApplicationContext.run(cacheApplicationContext.getStore() ?? { tables: new Set<string>() }, async () => {
-          try {
-            return await cacheContext();
-          } finally {
-            await clearTablesCache(
-              Array.from(cacheApplicationContext.getStore()?.tables ?? []),
-              this.options,
-            );
-          }
-        }),
+        await cacheApplicationContext.run(
+          cacheApplicationContext.getStore() ?? { tables: new Set<string>() },
+          async () => {
+            try {
+              return await cacheContext();
+            } finally {
+              await clearTablesCache(
+                Array.from(cacheApplicationContext.getStore()?.tables ?? []),
+                this.options,
+              );
+            }
+          },
+        ),
     );
   }
   /**
    * Executes operations within a local cache context and returns a value.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
    */
   async executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T> {
-    return await localCacheApplicationContext.run(localCacheApplicationContext.getStore() ?? { cache: {} }, async () => {
-      return await cacheContext();
-    });
+    return await localCacheApplicationContext.run(
+      localCacheApplicationContext.getStore() ?? { cache: {} },
+      async () => {
+        return await cacheContext();
+      },
+    );
   }
 
   /**
    * Executes operations within a local cache context.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
    */
@@ -520,7 +526,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * ```typescript
    * // Using SQLWrapper
    * const result = await forgeSQL.execute(sql`SELECT * FROM users WHERE id = ${userId}`);
-   * 
+   *
    * // Using string
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
@@ -542,7 +548,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * ```typescript
    * // Using SQLWrapper with custom TTL
    * const result = await forgeSQL.executeCacheable(sql`SELECT * FROM users WHERE id = ${userId}`, 300);
-   * 
+   *
    * // Using string with default TTL
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
@@ -582,7 +588,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *     .from(users)
    *     .groupBy(users.id)
    * );
-   * 
+   *
    * const result = await forgeSQL.with(withQuery)
    *   .select({ userId: withQuery.userId, count: withQuery.count })
    *   .from(withQuery);
@@ -693,7 +699,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves when all operations are complete
    */
@@ -704,7 +710,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
   /**
    * Executes operations within a local cache context and returns a value.
    * This provides in-memory caching for select queries within a single request scope.
-   * 
+   *
    * @param cacheContext - Function containing operations that will benefit from local caching
    * @returns Promise that resolves to the return value of the cacheContext function
    */
@@ -898,7 +904,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * ```typescript
    * // Using SQLWrapper
    * const result = await forgeSQL.execute(sql`SELECT * FROM users WHERE id = ${userId}`);
-   * 
+   *
    * // Using string
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
@@ -920,7 +926,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * ```typescript
    * // Using SQLWrapper with custom TTL
    * const result = await forgeSQL.executeCacheable(sql`SELECT * FROM users WHERE id = ${userId}`, 300);
-   * 
+   *
    * // Using string with default TTL
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
@@ -960,7 +966,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    *     .from(users)
    *     .groupBy(users.id)
    * );
-   * 
+   *
    * const result = await forgeSQL.with(withQuery)
    *   .select({ userId: withQuery.userId, count: withQuery.count })
    *   .from(withQuery);

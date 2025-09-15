@@ -6,7 +6,7 @@
     "@atlaskit/css-reset": "^7.3.6",
     "@atlaskit/dynamic-table": "^18.2.15",
     "@forge/bridge": "^5.5.0",
-    "forge-sql-orm": "^2.1.0",
+    "forge-sql-orm": "^2.1.1",
     "mobx": "6.13.7",
     "mobx-react": "9.2.0",
     "react": "^18.3.1",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.3.3",
+    "@types/node": "^24.4.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^5.0.2",

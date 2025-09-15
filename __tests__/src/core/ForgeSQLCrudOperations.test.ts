@@ -782,11 +782,8 @@ describe("ForgeSQLCrudOperations", () => {
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
 
-
-    it("evict cache", async () => {
-        await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCache(['test']);
-        await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCacheEntities([testEntity]);
-
-
-    });
+  it("evict cache", async () => {
+    await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCache(["test"]);
+    await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCacheEntities([testEntity]);
+  });
 });

@@ -14,14 +14,14 @@ resolver.define(
   "create",
   async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
     const payload = req.payload.data;
-     const res = await forgeSQL.insert(users).values([payload]);
-     return res[0].insertId
+    const res = await forgeSQL.insert(users).values([payload]);
+    return res[0].insertId;
   },
 );
 
 resolver.define("delete", async (req: Request<{ id: number }>): Promise<void> => {
   const id = req.payload.id;
-  await forgeSQL.delete(users).where( eq(users.id, id));
+  await forgeSQL.delete(users).where(eq(users.id, id));
 });
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {

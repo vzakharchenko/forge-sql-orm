@@ -69,7 +69,7 @@ resolver.define(
     const user = req.payload;
     const result = await forgeSQL.insert(appUser).values([user]);
     return {
-      id:result[0].insertId,
+      id: result[0].insertId,
       name: user.name ?? "",
       organizationId: user.organizationId ?? 0,
     };

@@ -89,7 +89,9 @@ describe("ForgeSQLSelectOperations", () => {
     const result = await forgeSqlOperation.selectFrom(testEntity);
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
 
-    expect(sql.prepare).toHaveBeenCalledWith("select `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`");
+    expect(sql.prepare).toHaveBeenCalledWith(
+      "select `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`",
+    );
     expect(preparedStatement.execute).toHaveBeenCalled();
     expect(result).toEqual([{ id: 1, name: "t" }]);
   });
@@ -98,7 +100,9 @@ describe("ForgeSQLSelectOperations", () => {
     const result = await forgeSqlOperation.selectCacheableFrom(testEntity);
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
 
-    expect(sql.prepare).toHaveBeenCalledWith("select `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`");
+    expect(sql.prepare).toHaveBeenCalledWith(
+      "select `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`",
+    );
     expect(preparedStatement.execute).toHaveBeenCalled();
     expect(result).toEqual([{ id: 1, name: "t" }]);
   });
@@ -107,7 +111,9 @@ describe("ForgeSQLSelectOperations", () => {
     const result = await forgeSqlOperation.selectDistinctFrom(testEntity);
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
 
-    expect(sql.prepare).toHaveBeenCalledWith("select distinct `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`");
+    expect(sql.prepare).toHaveBeenCalledWith(
+      "select distinct `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`",
+    );
     expect(preparedStatement.execute).toHaveBeenCalled();
     expect(result).toEqual([{ id: 1, name: "t" }]);
   });
@@ -116,28 +122,31 @@ describe("ForgeSQLSelectOperations", () => {
     const result = await forgeSqlOperation.selectDistinctCacheableFrom(testEntity);
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
 
-    expect(sql.prepare).toHaveBeenCalledWith("select distinct `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`");
+    expect(sql.prepare).toHaveBeenCalledWith(
+      "select distinct `id` as `a_id_id`, `name` as `a_name_name` from `test_entity`",
+    );
     expect(preparedStatement.execute).toHaveBeenCalled();
     expect(result).toEqual([{ id: 1, name: "t" }]);
   });
 
   it("test drizzle $with Query", async () => {
-      const withQuery = forgeSqlOperation.$with('withQuery').as(
-          forgeSqlOperation.select({
-              id: rawSql<number>`${testEntity.id}`.as('id')
-          }).from(testEntity)
-      );
-      const with1 = forgeSqlOperation.with(withQuery);
-      const result =  await with1
-          .select(
-              {id: withQuery.id}
-      ).from(withQuery);
+    const withQuery = forgeSqlOperation.$with("withQuery").as(
+      forgeSqlOperation
+        .select({
+          id: rawSql<number>`${testEntity.id}`.as("id"),
+        })
+        .from(testEntity),
+    );
+    const with1 = forgeSqlOperation.with(withQuery);
+    const result = await with1.select({ id: withQuery.id }).from(withQuery);
 
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
 
-    expect(sql.prepare).toHaveBeenCalledWith("with `withQuery` as (select `id` as `id` from `test_entity`) select `id` from `withQuery`");
+    expect(sql.prepare).toHaveBeenCalledWith(
+      "with `withQuery` as (select `id` as `id` from `test_entity`) select `id` from `withQuery`",
+    );
     expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([{ id: 1}]);
+    expect(result).toEqual([{ id: 1 }]);
   });
 
   it("should call SQL for complex query SQL using Drizzle Query Builder", async () => {

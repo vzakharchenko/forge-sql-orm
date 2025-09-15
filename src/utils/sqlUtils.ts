@@ -75,19 +75,44 @@ export const parseDateTime = (value: string | Date, format: string): Date => {
 };
 
 /**
- * Helper function to validate and format Date objects using DateTime
- * @param value - Date object to validate and format
- * @param format - DateTime format string
- * @returns Formatted date string
- * @throws Error if date is invalid
+ * Helper function to validate and format a date-like value using Luxon DateTime.
+ * @param value - Date object, ISO/RFC2822/SQL/HTTP string, or timestamp (number|string).
+ * @param format - DateTime format string (Luxon format tokens).
+ * @returns Formatted date string.
+ * @throws Error if value cannot be parsed as a valid date.
  */
-export function formatDateTime(value: Date, format: string): string {
-  const fromJSDate = DateTime.fromJSDate(value);
-  if (fromJSDate.isValid) {
-    return fromJSDate.toFormat(format);
+export function formatDateTime(value: Date | string | number, format: string): string {
+  let dt: DateTime | null = null;
+
+  if (value instanceof Date) {
+    dt = DateTime.fromJSDate(value);
+  } else if (typeof value === "string") {
+    for (const parser of [
+      DateTime.fromISO,
+      DateTime.fromRFC2822,
+      DateTime.fromSQL,
+      DateTime.fromHTTP,
+    ]) {
+      dt = parser(value);
+      if (dt.isValid) break;
+    }
+    if (!dt?.isValid) {
+      const parsed = Number(value);
+      if (!isNaN(parsed)) {
+        dt = DateTime.fromMillis(parsed);
+      }
+    }
+  } else if (typeof value === "number") {
+    dt = DateTime.fromMillis(value);
   } else {
+    throw new Error("Unsupported type");
+  }
+
+  if (!dt?.isValid) {
     throw new Error("Invalid Date");
   }
+
+  return dt.toFormat(format);
 }
 
 /**
