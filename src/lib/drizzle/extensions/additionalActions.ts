@@ -444,7 +444,7 @@ async function handleCachedQuery(
   onrejected?: any,
 ): Promise<any> {
   try {
-    const localCached = await getQueryLocalCacheQuery(target);
+    const localCached = await getQueryLocalCacheQuery(target, options);
     if (localCached) {
       return onfulfilled?.(localCached);
     }
@@ -454,7 +454,7 @@ async function handleCachedQuery(
     }
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
-    await saveQueryLocalCacheQuery(target, transformed);
+    await saveQueryLocalCacheQuery(target, transformed, options);
     await setCacheResult(target, options, transformed, cacheTtl).catch((cacheError) => {
       // Log cache error but don't fail the query
       console.warn("Cache set error:", cacheError);
@@ -470,6 +470,7 @@ async function handleCachedQuery(
  * Handles non-cached query execution.
  *
  * @param target - The query target
+ * @param options - ForgeSQL ORM options
  * @param selections - Field selections
  * @param aliasMap - Field alias mapping
  * @param onfulfilled - Success callback
@@ -478,19 +479,20 @@ async function handleCachedQuery(
  */
 async function handleNonCachedQuery(
   target: any,
+  options: any,
   selections: any,
   aliasMap: any,
   onfulfilled?: any,
   onrejected?: any,
 ): Promise<any> {
   try {
-    const localCached = await getQueryLocalCacheQuery(target);
+    const localCached = await getQueryLocalCacheQuery(target, options);
     if (localCached) {
       return onfulfilled?.(localCached);
     }
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
-    await saveQueryLocalCacheQuery(target, transformed);
+    await saveQueryLocalCacheQuery(target, transformed, options);
     return onfulfilled?.(transformed);
   } catch (error) {
     return onrejected?.(error);
@@ -543,7 +545,14 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
                 onrejected,
               );
             } else {
-              return handleNonCachedQuery(target, selections, aliasMap, onfulfilled, onrejected);
+              return handleNonCachedQuery(
+                target,
+                options,
+                selections,
+                aliasMap,
+                onfulfilled,
+                onrejected,
+              );
             }
           };
         }
@@ -620,7 +629,7 @@ function createRawQueryExecutor(
     }
 
     // Check local cache first
-    const localCacheResult = await getQueryLocalCacheQuery(sql);
+    const localCacheResult = await getQueryLocalCacheQuery(sql, options);
     if (localCacheResult) {
       return localCacheResult as MySqlRawQueryResult;
     }
@@ -637,7 +646,7 @@ function createRawQueryExecutor(
     const results = await db.execute<T>(query);
 
     // Save to local cache
-    await saveQueryLocalCacheQuery(sql, results);
+    await saveQueryLocalCacheQuery(sql, results, options);
 
     // Save to global cache if enabled
     if (useGlobalCache) {

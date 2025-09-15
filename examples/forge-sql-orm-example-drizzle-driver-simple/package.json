@@ -7,7 +7,7 @@
     "@forge/resolver": "1.7.0",
     "@forge/sql": "^3.0.5",
     "drizzle-orm": "^0.44.5",
-    "forge-sql-orm": "2.1.1"
+    "forge-sql-orm": "2.1.2"
   },
   "devDependencies": {
     "@types/node": "^24.4.0",

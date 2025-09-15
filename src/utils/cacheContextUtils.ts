@@ -78,6 +78,7 @@ export async function saveTableIfInsideCacheContext<T extends AnyMySqlTable>(
  *
  * @param query - The Drizzle query to cache
  * @param rows - The query result data to cache
+ * @param options - ForgeSqlOrm options
  * @returns Promise that resolves when the data is saved to local cache
  *
  * @example
@@ -89,7 +90,7 @@ export async function saveTableIfInsideCacheContext<T extends AnyMySqlTable>(
  */
 export async function saveQueryLocalCacheQuery<
   T extends MySqlSelectDynamic<AnyMySqlSelectQueryBuilder>,
->(query: T, rows: unknown[]): Promise<void> {
+>(query: T, rows: unknown[], options: ForgeSqlOrmOptions): Promise<void> {
   const context = localCacheApplicationContext.getStore();
   if (context) {
     if (!context.cache) {
@@ -101,6 +102,12 @@ export async function saveQueryLocalCacheQuery<
       sql: sql.toSQL().sql.toLowerCase(),
       data: rows,
     };
+    if (options.logRawSqlQuery) {
+      const q = sql.toSQL();
+      console.log(
+        `[forge-sql-orm][local-cache][SAVE] Stored result in cache. sql="${q.sql}", params=${JSON.stringify(q.params)}`,
+      );
+    }
   }
 }
 
@@ -109,6 +116,7 @@ export async function saveQueryLocalCacheQuery<
  * This function checks if a query result is already cached in memory.
  *
  * @param query - The Drizzle query to check for cached results
+ * @param options - Option Property
  * @returns Promise that resolves to cached data if found, undefined otherwise
  *
  * @example
@@ -123,7 +131,7 @@ export async function saveQueryLocalCacheQuery<
  */
 export async function getQueryLocalCacheQuery<
   T extends MySqlSelectDynamic<AnyMySqlSelectQueryBuilder>,
->(query: T): Promise<unknown[] | undefined> {
+>(query: T, options: ForgeSqlOrmOptions): Promise<unknown[] | undefined> {
   const context = localCacheApplicationContext.getStore();
   if (context) {
     if (!context.cache) {
@@ -132,6 +140,12 @@ export async function getQueryLocalCacheQuery<
     const sql = query as { toSQL: () => Query };
     const key = hashKey(sql.toSQL());
     if (context.cache[key] && context.cache[key].sql === sql.toSQL().sql.toLowerCase()) {
+      if (options.logRawSqlQuery) {
+        const q = sql.toSQL();
+        console.log(
+          `[forge-sql-orm][local-cache][HIT] Returned cached result. sql="${q.sql}", params=${JSON.stringify(q.params)}`,
+        );
+      }
       return context.cache[key].data;
     }
   }
