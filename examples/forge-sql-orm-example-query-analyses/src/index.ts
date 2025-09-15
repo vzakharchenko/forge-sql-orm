@@ -345,7 +345,7 @@ export const insertFunction = async () => {
   let i = 0;
   for (const chunk of categoriesInChunks) {
     i = i + 1;
-    await forgeSQL.crud().insert(category, chunk);
+    await forgeSQL.insert(category).values(chunk);
     console.log("category batch " + i + " from " + categoriesInChunks.length + ": DONE");
   }
   await delay(5000);
@@ -354,7 +354,7 @@ export const insertFunction = async () => {
   const productsInChunks = chunkIntoN(products, BATCH_COUNT + 20);
   for (const chunk of productsInChunks) {
     i = i + 1;
-    await forgeSQL.crud().insert(product, chunk);
+    await forgeSQL.insert(product).values(chunk);
     console.log("product batch " + i + " from " + productsInChunks.length + ": DONE");
   }
   await delay(5000);
@@ -363,7 +363,7 @@ export const insertFunction = async () => {
   const orderItemsInChunks = chunkIntoN(orderItems, BATCH_COUNT + BATCH_COUNT);
   for (const chunk of orderItemsInChunks) {
     i = i + 1;
-    await forgeSQL.crud().insert(orderItem, chunk);
+    await forgeSQL.insert(orderItem).values(chunk);
     console.log("order batch " + i + " from " + orderItemsInChunks.length + ": DONE");
   }
   console.log(

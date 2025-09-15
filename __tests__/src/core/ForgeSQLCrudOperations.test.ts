@@ -781,4 +781,12 @@ describe("ForgeSQLCrudOperations", () => {
     expect(preparedStatement.bindParams).toHaveBeenCalledWith(1, "Test", "2023-04-12 00:00:01.000");
     expect(preparedStatement.execute).toHaveBeenCalled();
   });
+
+
+    it("evict cache", async () => {
+        await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCache(['test']);
+        await forgeSqlOperation.modifyWithVersioningAndEvictCache().evictCacheEntities([testEntity]);
+
+
+    });
 });

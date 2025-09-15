@@ -3,7 +3,7 @@ import ForgeSQL from "forge-sql-orm";
 import { dropSchemaMigrations, applySchemaMigrations, fetchSchemaWebTrigger } from "forge-sql-orm";
 import migration from "./migration";
 import { DuplicateResponse, SortType, UserResponse } from "./utils/Constants";
-import { asc, desc, InferInsertModel, sql as rawSql } from "drizzle-orm";
+import { asc, desc, eq, InferInsertModel, sql as rawSql } from "drizzle-orm";
 import { users } from "./entities";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
 
@@ -14,13 +14,14 @@ resolver.define(
   "create",
   async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
     const payload = req.payload.data;
-    return await forgeSQL.crud().insert(users, [payload]);
+     const res = await forgeSQL.insert(users).values([payload]);
+     return res[0].insertId
   },
 );
 
-resolver.define("delete", async (req: Request<{ id: number }>): Promise<number> => {
+resolver.define("delete", async (req: Request<{ id: number }>): Promise<void> => {
   const id = req.payload.id;
-  return await forgeSQL.crud().deleteById(id, users);
+  await forgeSQL.delete(users).where( eq(users.id, id));
 });
 
 resolver.define("duplicate", async (req): Promise<DuplicateResponse[]> => {

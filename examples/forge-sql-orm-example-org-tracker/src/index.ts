@@ -67,9 +67,9 @@ resolver.define(
     organizationId: number;
   }> => {
     const user = req.payload;
-    const id = await forgeSQL.modify().insert(appUser, [user]);
+    const result = await forgeSQL.insert(appUser).values([user]);
     return {
-      id,
+      id:result[0].insertId,
       name: user.name ?? "",
       organizationId: user.organizationId ?? 0,
     };
@@ -106,7 +106,7 @@ resolver.define(
 resolver.define("deleteUser", async (req: Request<{ id: number }>): Promise<void> => {
   const id = req.payload.id;
   if (id) {
-    await forgeSQL.modify().deleteById(id, appUser);
+    await forgeSQL.delete(appUser).where(eq(appUser.id, id));
   }
   throw new Error("Id is empty");
 });

@@ -9,7 +9,7 @@ import {
   SortType,
 } from "./utils/Constants";
 import { additionalMetadata, users } from "./entities";
-import { InferInsertModel, sql as rawSql, desc, asc } from "drizzle-orm";
+import { InferInsertModel, sql as rawSql, desc, asc, eq } from "drizzle-orm";
 import { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { MySqlColumn } from "drizzle-orm/mysql-core/columns";
@@ -40,7 +40,7 @@ resolver.define(
   "create",
   async (req: Request<{ data: Partial<InferInsertModel<typeof users>> }>): Promise<number> => {
     const payload = req.payload.data;
-    return await forgeSQL.crud().insert(users, [payload]);
+    return (await forgeSQL.insert(users).values(payload))[0].insertId;
   },
 );
 
@@ -49,9 +49,9 @@ resolver.define(
  * @param req - Request containing user ID
  * @returns Promise with the number of affected rows
  */
-resolver.define("delete", async (req: Request<{ id: number }>): Promise<number> => {
+resolver.define("delete", async (req: Request<{ id: number }>): Promise<void> => {
   const id = req.payload.id;
-  return await forgeSQL.crud().deleteById(id, users);
+  await forgeSQL.delete(users).where(eq(users.id, id));
 });
 
 // ============= Metadata Operations =============

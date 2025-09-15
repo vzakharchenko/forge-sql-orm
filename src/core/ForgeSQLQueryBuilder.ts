@@ -22,20 +22,27 @@ import {
 } from "./SystemTables";
 import { ForgeSQLCacheOperations } from "./ForgeSQLCacheOperations";
 import {
-  DeleteAndEvictCacheType,
-  InsertAndEvictCacheType,
-  SelectAliasedCacheableType,
-  SelectAliasedDistinctCacheableType,
-  SelectAliasedDistinctType,
-  SelectAliasedType,
-  UpdateAndEvictCacheType,
+    DeleteAndEvictCacheType, ExecuteQuery, ExecuteQueryCacheable,
+    InsertAndEvictCacheType,
+    SelectAliasedCacheableType,
+    SelectAliasedDistinctCacheableType,
+    SelectAliasedDistinctType,
+    SelectAliasedType, SelectAllDistinctFromAliasedType,
+    SelectAllDistinctFromCacheableAliasedType, SelectAllFromAliasedType, SelectAllFromCacheableAliasedType,
+    UpdateAndEvictCacheType,
 } from "..";
 import {
   MySqlDeleteBase,
   MySqlInsertBuilder,
+    MySqlSelectBase,
   MySqlUpdateBuilder,
 } from "drizzle-orm/mysql-core/query-builders";
 import { MySqlRemoteQueryResultHKT } from "drizzle-orm/mysql-proxy";
+import {GetSelectTableName, GetSelectTableSelection} from "drizzle-orm/query-builders/select.types";
+import {SQLWrapper} from "drizzle-orm/sql/sql";
+import type {MySqlQueryResultKind} from "drizzle-orm/mysql-core/session";
+import type {WithBuilder} from "drizzle-orm/mysql-core/subquery";
+import {WithSubquery} from "drizzle-orm/subquery";
 
 /**
  * Core interface for ForgeSQL operations.
@@ -55,14 +62,20 @@ export interface ForgeSqlOperation extends QueryBuilderForgeSql {
   getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> & {
     selectAliased: SelectAliasedType;
     selectAliasedDistinct: SelectAliasedDistinctType;
-    selectAliasedCacheable: SelectAliasedCacheableType;
-    selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
-    insertWithCacheContext: InsertAndEvictCacheType;
-    insertAndEvictCache: InsertAndEvictCacheType;
-    updateAndEvictCache: UpdateAndEvictCacheType;
-    updateWithCacheContext: UpdateAndEvictCacheType;
-    deleteAndEvictCache: DeleteAndEvictCacheType;
-    deleteWithCacheContext: DeleteAndEvictCacheType;
+      executeQuery: ExecuteQuery;
+      selectAliasedCacheable: SelectAliasedCacheableType;
+      selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+      executeQueryCacheable: ExecuteQueryCacheable;
+      insertWithCacheContext: InsertAndEvictCacheType;
+      insertAndEvictCache: InsertAndEvictCacheType;
+      updateAndEvictCache: UpdateAndEvictCacheType;
+      updateWithCacheContext: UpdateAndEvictCacheType;
+      deleteAndEvictCache: DeleteAndEvictCacheType;
+      deleteWithCacheContext: DeleteAndEvictCacheType;
+      selectFrom: SelectAllFromAliasedType;
+      selectDistinctFrom: SelectAllDistinctFromAliasedType;
+      selectFromCacheable: SelectAllFromCacheableAliasedType;
+      selectDistinctFromCacheable: SelectAllDistinctFromCacheableAliasedType;
   };
 
   /**
@@ -115,8 +128,10 @@ export interface QueryBuilderForgeSql {
   getDrizzleQueryBuilder(): MySqlRemoteDatabase<Record<string, unknown>> & {
     selectAliased: SelectAliasedType;
     selectAliasedDistinct: SelectAliasedDistinctType;
+      executeQuery: ExecuteQuery;
     selectAliasedCacheable: SelectAliasedCacheableType;
     selectAliasedDistinctCacheable: SelectAliasedDistinctCacheableType;
+      executeQueryCacheable: ExecuteQueryCacheable;
     insertWithCacheContext: InsertAndEvictCacheType;
     insertAndEvictCache: InsertAndEvictCacheType;
     updateAndEvictCache: UpdateAndEvictCacheType;
@@ -146,6 +161,22 @@ export interface QueryBuilderForgeSql {
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 
   /**
+   * Creates a select query builder for all columns from a table with field aliasing support.
+   * This is a convenience method that automatically selects all columns from the specified table.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @returns Select query builder with all table columns and field aliasing support
+   * @example
+   * ```typescript
+   * const users = await forgeSQL.selectFrom(userTable).where(eq(userTable.id, 1));
+   * ```
+   */
+  selectFrom<T extends MySqlTable>(
+      table: T,
+  ):  MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+
+    /**
    * Creates a distinct select query with unique field aliases to prevent field name collisions in joins.
    * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
    *
@@ -164,6 +195,21 @@ export interface QueryBuilderForgeSql {
   selectDistinct<TSelection extends SelectedFields>(
     fields: TSelection,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+    /**
+     * Creates a select distinct query builder for all columns from a table with field aliasing support.
+     * This is a convenience method that automatically selects all distinct columns from the specified table.
+     *
+     * @template T - The type of the table
+     * @param table - The table to select from
+     * @returns Select distinct query builder with all table columns and field aliasing support
+     * @example
+     * ```typescript
+     * const uniqueUsers = await forgeSQL.selectDistinctFrom(userTable).where(eq(userTable.status, 'active'));
+     * ```
+     */
+    selectDistinctFrom<T extends MySqlTable>(
+        table: T,
+    ):  MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
 
   /**
    * Creates a cacheable select query with unique field aliases to prevent field name collisions in joins.
@@ -188,6 +234,24 @@ export interface QueryBuilderForgeSql {
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 
   /**
+   * Creates a cacheable select query builder for all columns from a table with field aliasing and caching support.
+   * This is a convenience method that automatically selects all columns from the specified table with caching enabled.
+   *
+   * @template T - The type of the table
+   * @param table - The table to select from
+   * @param cacheTTL - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Select query builder with all table columns, field aliasing, and caching support
+   * @example
+   * ```typescript
+   * const users = await forgeSQL.selectCacheableFrom(userTable, 300).where(eq(userTable.id, 1));
+   * ```
+   */
+  selectCacheableFrom<T extends MySqlTable>(
+        table: T,
+        cacheTTL?: number,
+    ):  MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+
+  /**
    * Creates a cacheable distinct select query with unique field aliases to prevent field name collisions in joins.
    * This is particularly useful when working with Atlassian Forge SQL, which collapses fields with the same name in joined tables.
    *
@@ -209,7 +273,25 @@ export interface QueryBuilderForgeSql {
     cacheTTL?: number,
   ): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
 
-  /**
+    /**
+     * Creates a cacheable select distinct query builder for all columns from a table with field aliasing and caching support.
+     * This is a convenience method that automatically selects all distinct columns from the specified table with caching enabled.
+     *
+     * @template T - The type of the table
+     * @param table - The table to select from
+     * @param cacheTTL - Optional cache TTL override (defaults to global cache TTL)
+     * @returns Select distinct query builder with all table columns, field aliasing, and caching support
+     * @example
+     * ```typescript
+     * const uniqueUsers = await forgeSQL.selectDistinctCacheableFrom(userTable, 300).where(eq(userTable.status, 'active'));
+     * ```
+     */
+    selectDistinctCacheableFrom<T extends MySqlTable>(
+        table: T,
+        cacheTTL?: number,
+    ):  MySqlSelectBase<GetSelectTableName<T>, T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"], T["_"]["columns"] extends undefined ? "single" : "partial", MySqlRemotePreparedQueryHKT, GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {}, false, never, any>;
+
+    /**
    * Creates an insert query builder.
    *
    * ⚠️ **IMPORTANT**: This method does NOT support optimistic locking/versioning.
@@ -366,6 +448,89 @@ export interface QueryBuilderForgeSql {
    * ```
    */
   executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T>;
+
+  /**
+   * Executes a raw SQL query with local cache support.
+   * This method provides local caching for raw SQL queries within the current invocation context.
+   * Results are cached locally and will be returned from cache on subsequent identical queries.
+   *
+   * @param query - The SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @example
+   * ```typescript
+   * // Using SQLWrapper
+   * const result = await forgeSQL.execute(sql`SELECT * FROM users WHERE id = ${userId}`);
+   * 
+   * // Using string
+   * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
+   * ```
+   */
+  execute(query: SQLWrapper | string): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+
+  /**
+   * Executes a raw SQL query with both local and global cache support.
+   * This method provides comprehensive caching for raw SQL queries:
+   * - Local cache: Within the current invocation context
+   * - Global cache: Cross-invocation caching using @forge/kvs
+   *
+   * @param query - The SQL query to execute (SQLWrapper or string)
+   * @param cacheTtl - Optional cache TTL override (defaults to global cache TTL)
+   * @returns Promise with query results
+   * @example
+   * ```typescript
+   * // Using SQLWrapper with custom TTL
+   * const result = await forgeSQL.executeCacheable(sql`SELECT * FROM users WHERE id = ${userId}`, 300);
+   * 
+   * // Using string with default TTL
+   * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
+   * ```
+   */
+  executeCacheable(query: SQLWrapper | string, cacheTtl?: number): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+    /**
+     * Creates a Common Table Expression (CTE) builder for complex queries.
+     * CTEs allow you to define temporary named result sets that exist within the scope of a single query.
+     *
+     * @returns WithBuilder for creating CTEs
+     * @example
+     * ```typescript
+     * const withQuery = forgeSQL.$with('userStats').as(
+     *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+     *     .from(users)
+     *     .groupBy(users.id)
+     * );
+     * ```
+     */
+    $with: WithBuilder;
+
+    /**
+     * Creates a query builder that uses Common Table Expressions (CTEs).
+     * CTEs allow you to define temporary named result sets that exist within the scope of a single query.
+     *
+     * @param queries - Array of CTE queries created with $with()
+     * @returns Query builder with CTE support
+     * @example
+     * ```typescript
+     * const withQuery = forgeSQL.$with('userStats').as(
+     *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+     *     .from(users)
+     *     .groupBy(users.id)
+     * );
+     * 
+     * const result = await forgeSQL.with(withQuery)
+     *   .select({ userId: withQuery.userId, count: withQuery.count })
+     *   .from(withQuery);
+     * ```
+     */
+    with(...queries: WithSubquery[]): {
+        select: {
+            (): MySqlSelectBuilder<undefined, MySqlRemotePreparedQueryHKT>;
+            <TSelection extends SelectedFields>(fields: TSelection): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+        };
+        selectDistinct: {
+            (): MySqlSelectBuilder<undefined, MySqlRemotePreparedQueryHKT>;
+            <TSelection extends SelectedFields>(fields: TSelection): MySqlSelectBuilder<TSelection, MySqlRemotePreparedQueryHKT>;
+        };
+    }
 }
 
 /**
