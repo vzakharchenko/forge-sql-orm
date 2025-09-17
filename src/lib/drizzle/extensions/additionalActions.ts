@@ -267,8 +267,8 @@ async function handleSuccessfulExecution(
     if (shouldClearCacheOnError(error)) {
       await evictLocalCacheQuery(table, options);
       if (isCached) {
-        await clearCache(table, options).catch(() => {
-          console.warn("Ignore cache clear errors");
+        await clearCache(table, options).catch((e) => {
+          console.warn("Ignore cache clear errors", e);
         });
       } else {
         await saveTableIfInsideCacheContext(table);

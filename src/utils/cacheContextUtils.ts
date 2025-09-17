@@ -104,7 +104,7 @@ export async function saveQueryLocalCacheQuery<
     };
     if (options.logRawSqlQuery) {
       const q = sql.toSQL();
-      console.log(
+      console.debug(
         `[forge-sql-orm][local-cache][SAVE] Stored result in cache. sql="${q.sql}", params=${JSON.stringify(q.params)}`,
       );
     }
@@ -142,7 +142,7 @@ export async function getQueryLocalCacheQuery<
     if (context.cache[key] && context.cache[key].sql === sql.toSQL().sql.toLowerCase()) {
       if (options.logRawSqlQuery) {
         const q = sql.toSQL();
-        console.log(
+        console.debug(
           `[forge-sql-orm][local-cache][HIT] Returned cached result. sql="${q.sql}", params=${JSON.stringify(q.params)}`,
         );
       }

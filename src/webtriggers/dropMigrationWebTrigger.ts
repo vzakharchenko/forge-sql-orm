@@ -34,7 +34,7 @@ export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
 
     // Execute each statement
     for (const statement of dropStatements) {
-      console.warn(statement);
+      console.debug(`execute DDL: ${statement}`);
       await sql.executeDDL(statement);
     }
 
@@ -42,9 +42,13 @@ export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
       200,
       "⚠️ All data in these tables has been permanently deleted. This operation cannot be undone.",
     );
-  } catch (error: unknown) {
-    console.error(error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+  } catch (error: any) {
+    const errorMessage =
+      error?.debug?.sqlMessage ??
+      error?.debug?.message ??
+      error.message ??
+      "Unknown error occurred";
+    console.error(errorMessage);
     return getHttpResponse<string>(500, errorMessage);
   }
 }

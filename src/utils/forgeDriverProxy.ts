@@ -19,9 +19,16 @@ export function createForgeDriverProxy(options?: SqlHints, logRawSqlQuery?: bool
     const modifiedQuery = injectSqlHints(query, options);
 
     if (options && logRawSqlQuery && modifiedQuery !== query) {
-      console.warn("modified query: " + modifiedQuery);
+      console.debug("injected Hints: " + modifiedQuery);
     }
-    // Call the original forgeDriver with the modified query
-    return forgeDriver(modifiedQuery, params, method);
+    try {
+      // Call the original forgeDriver with the modified query
+      return forgeDriver(modifiedQuery, params, method);
+    } catch (error) {
+      if (logRawSqlQuery) {
+        console.debug("SQL Error:", JSON.stringify(error));
+      }
+      throw error;
+    }
   };
 }

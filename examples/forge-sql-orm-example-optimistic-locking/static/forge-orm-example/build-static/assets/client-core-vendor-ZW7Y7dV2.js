@@ -15,28 +15,28 @@ function Cn(e) {
   if (Object.prototype.hasOwnProperty.call(e, "__esModule")) return e;
   var m = e.default;
   if (typeof m == "function") {
-    var c = function h() {
-      var g = !1;
+    var c = function y() {
+      var f = !1;
       try {
-        g = this instanceof h;
+        f = this instanceof y;
       } catch {}
-      return g ? Reflect.construct(m, arguments, this.constructor) : m.apply(this, arguments);
+      return f ? Reflect.construct(m, arguments, this.constructor) : m.apply(this, arguments);
     };
     c.prototype = m.prototype;
   } else c = {};
   return (
     Object.defineProperty(c, "__esModule", { value: !0 }),
-    Object.keys(e).forEach(function (h) {
-      var g = Object.getOwnPropertyDescriptor(e, h);
+    Object.keys(e).forEach(function (y) {
+      var f = Object.getOwnPropertyDescriptor(e, y);
       Object.defineProperty(
         c,
-        h,
-        g.get
-          ? g
+        y,
+        f.get
+          ? f
           : {
               enumerable: !0,
               get: function () {
-                return e[h];
+                return e[y];
               },
             },
       );
@@ -56,24 +56,24 @@ function j() {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e.Log = e.LogLevel = void 0));
         const m = " DEBUG ",
           c = "  INFO ",
-          h = "  WARN ",
-          g = " ERROR ";
-        function f(b) {
+          y = "  WARN ",
+          f = " ERROR ";
+        function g(b) {
           return (b.unshift("[Statsig]"), b);
         }
         e.LogLevel = { None: 0, Error: 1, Warn: 2, Info: 3, Debug: 4 };
         class S {
           static info(...v) {
-            S.level >= e.LogLevel.Info && console.info(c, ...f(v));
+            S.level >= e.LogLevel.Info && console.info(c, ...g(v));
           }
           static debug(...v) {
-            S.level >= e.LogLevel.Debug && console.debug(m, ...f(v));
+            S.level >= e.LogLevel.Debug && console.debug(m, ...g(v));
           }
           static warn(...v) {
-            S.level >= e.LogLevel.Warn && console.warn(h, ...f(v));
+            S.level >= e.LogLevel.Warn && console.warn(y, ...g(v));
           }
           static error(...v) {
-            S.level >= e.LogLevel.Error && console.error(g, ...f(v));
+            S.level >= e.LogLevel.Error && console.error(f, ...g(v));
           }
         }
         ((e.Log = S), (S.level = e.LogLevel.Warn));
@@ -87,18 +87,18 @@ function H() {
     lt ||
       ((lt = 1),
       (function (e) {
-        var m, c, h;
+        var m, c, y;
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._getInstance = e._getStatsigGlobalFlag = e._getStatsigGlobal = void 0));
-        const g = j(),
-          f = () => {
+        const f = j(),
+          g = () => {
             try {
               return typeof __STATSIG__ < "u" ? __STATSIG__ : o;
             } catch {
               return o;
             }
           };
-        e._getStatsigGlobal = f;
+        e._getStatsigGlobal = g;
         const S = (i) => (0, e._getStatsigGlobal)()[i];
         e._getStatsigGlobalFlag = S;
         const b = (i) => {
@@ -107,7 +107,7 @@ function H() {
             ? n.instances && n.instances[i]
             : (n.instances &&
                 Object.keys(n.instances).length > 1 &&
-                g.Log.warn(
+                f.Log.warn(
                   "Call made to Statsig global instance without an SDK key but there is more than one client instance. If you are using mulitple clients, please specify the SDK key.",
                 ),
               n.firstInstance);
@@ -118,11 +118,11 @@ function H() {
           u = typeof st < "u" ? st : {},
           r = typeof globalThis < "u" ? globalThis : {},
           o =
-            (h =
+            (y =
               (c = (m = l[v]) !== null && m !== void 0 ? m : u[v]) !== null && c !== void 0
                 ? c
-                : r[v]) !== null && h !== void 0
-              ? h
+                : r[v]) !== null && y !== void 0
+              ? y
               : { instance: e._getInstance };
         ((l[v] = o), (u[v] = o), (r[v] = o));
       })(Me)),
@@ -139,38 +139,38 @@ function Ye() {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e.Diagnostics = void 0));
         const m = new Map(),
           c = "start",
-          h = "end",
-          g = "statsig::diagnostics";
+          y = "end",
+          f = "statsig::diagnostics";
         e.Diagnostics = {
           _getMarkers: (l) => m.get(l),
           _markInitOverallStart: (l) => {
-            b(l, f({}, c, "overall"));
+            b(l, g({}, c, "overall"));
           },
           _markInitOverallEnd: (l, u, r) => {
             b(
               l,
-              f(
+              g(
                 {
                   success: u,
                   error: u ? void 0 : { name: "InitializeError", message: "Failed to initialize" },
                   evaluationDetails: r,
                 },
-                h,
+                y,
                 "overall",
               ),
             );
           },
           _markInitNetworkReqStart: (l, u) => {
-            b(l, f(u, c, "initialize", "network_request"));
+            b(l, g(u, c, "initialize", "network_request"));
           },
           _markInitNetworkReqEnd: (l, u) => {
-            b(l, f(u, h, "initialize", "network_request"));
+            b(l, g(u, y, "initialize", "network_request"));
           },
           _markInitProcessStart: (l) => {
-            b(l, f({}, c, "initialize", "process"));
+            b(l, g({}, c, "initialize", "process"));
           },
           _markInitProcessEnd: (l, u) => {
-            b(l, f(u, h, "initialize", "process"));
+            b(l, g(u, y, "initialize", "process"));
           },
           _clearMarkers: (l) => {
             m.delete(l);
@@ -200,11 +200,11 @@ function Ye() {
             return (u.enqueue(t), n);
           },
         };
-        function f(l, u, r, o) {
+        function g(l, u, r, o) {
           return Object.assign({ key: r, action: u, step: o, timestamp: Date.now() }, l);
         }
         function S(l, u) {
-          return { eventName: g, user: l, value: null, metadata: u, time: Date.now() };
+          return { eventName: f, user: l, value: null, metadata: u, time: Date.now() };
         }
         function b(l, u) {
           var r;
@@ -232,14 +232,14 @@ function Ze() {
     return Array.isArray(c) ? "array" : typeof c;
   }
   ee._typeOf = e;
-  function m(c, h) {
-    const g = (f) => (Array.isArray(f) ? "array" : f === null ? "null" : typeof f);
-    return g(c) === g(h);
+  function m(c, y) {
+    const f = (g) => (Array.isArray(g) ? "array" : g === null ? "null" : typeof g);
+    return f(c) === f(y);
   }
   return ((ee._isTypeMatch = m), ee);
 }
 var dt;
-function ge() {
+function fe() {
   return (
     dt ||
       ((dt = 1),
@@ -247,24 +247,24 @@ function ge() {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._getSortedObject = e._DJB2Object = e._DJB2 = void 0));
         const m = Ze(),
-          c = (f) => {
+          c = (g) => {
             let S = 0;
-            for (let b = 0; b < f.length; b++) {
-              const v = f.charCodeAt(b);
+            for (let b = 0; b < g.length; b++) {
+              const v = g.charCodeAt(b);
               ((S = (S << 5) - S + v), (S = S & S));
             }
             return String(S >>> 0);
           };
         e._DJB2 = c;
-        const h = (f, S) => (0, e._DJB2)(JSON.stringify((0, e._getSortedObject)(f, S)));
-        e._DJB2Object = h;
-        const g = (f, S) => {
-          if (f == null) return null;
-          const b = Object.keys(f).sort(),
+        const y = (g, S) => (0, e._DJB2)(JSON.stringify((0, e._getSortedObject)(g, S)));
+        e._DJB2Object = y;
+        const f = (g, S) => {
+          if (g == null) return null;
+          const b = Object.keys(g).sort(),
             v = {};
           return (
             b.forEach((l) => {
-              const u = f[l];
+              const u = g[l];
               if (S === 0 || (0, m._typeOf)(u) !== "object") {
                 v[l] = u;
                 return;
@@ -274,7 +274,7 @@ function ge() {
             v
           );
         };
-        e._getSortedObject = g;
+        e._getSortedObject = f;
       })(Pe)),
     Pe
   );
@@ -285,33 +285,33 @@ function Ie() {
   ((_t = 1),
     Object.defineProperty(Z, "__esModule", { value: !0 }),
     (Z._getStorageKey = Z._getUserStorageKey = void 0));
-  const e = ge();
-  function m(h, g, f) {
+  const e = fe();
+  function m(y, f, g) {
     var S;
-    if (f) return f(h, g);
-    const b = g && g.customIDs ? g.customIDs : {},
+    if (g) return g(y, f);
+    const b = f && f.customIDs ? f.customIDs : {},
       v = [
-        `uid:${(S = g?.userID) !== null && S !== void 0 ? S : ""}`,
+        `uid:${(S = f?.userID) !== null && S !== void 0 ? S : ""}`,
         `cids:${Object.keys(b)
           .sort((l, u) => l.localeCompare(u))
           .map((l) => `${l}-${b[l]}`)
           .join(",")}`,
-        `k:${h}`,
+        `k:${y}`,
       ];
     return (0, e._DJB2)(v.join("|"));
   }
   Z._getUserStorageKey = m;
-  function c(h, g, f) {
-    return g ? m(h, g, f) : (0, e._DJB2)(`k:${h}`);
+  function c(y, f, g) {
+    return f ? m(y, f, g) : (0, e._DJB2)(`k:${y}`);
   }
   return ((Z._getStorageKey = c), Z);
 }
 var je = {},
-  ft;
+  gt;
 function Ce() {
   return (
-    ft ||
-      ((ft = 1),
+    gt ||
+      ((gt = 1),
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.NetworkParam = e.NetworkDefault = e.Endpoint = void 0),
@@ -340,11 +340,11 @@ function Ce() {
   );
 }
 var Ne = {},
-  gt;
+  ft;
 function ue() {
   return (
-    gt ||
-      ((gt = 1),
+    ft ||
+      ((ft = 1),
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e._getUnloadEvent =
@@ -363,23 +363,23 @@ function ue() {
           return (v = l?.document) !== null && v !== void 0 ? v : null;
         };
         e._getDocumentSafe = c;
-        const h = () => {
+        const y = () => {
           if ((0, e._getDocumentSafe)() !== null) return !1;
           const v =
             typeof process < "u" && process.versions != null && process.versions.node != null;
           return typeof EdgeRuntime == "string" || v;
         };
-        e._isServerEnv = h;
-        const g = (v, l) => {
+        e._isServerEnv = y;
+        const f = (v, l) => {
           const u = (0, e._getWindowSafe)();
           typeof u?.addEventListener == "function" && u.addEventListener(v, l);
         };
-        e._addWindowEventListenerSafe = g;
-        const f = (v, l) => {
+        e._addWindowEventListenerSafe = f;
+        const g = (v, l) => {
           const u = (0, e._getDocumentSafe)();
           typeof u?.addEventListener == "function" && u.addEventListener(v, l);
         };
-        e._addDocumentEventListenerSafe = f;
+        e._addDocumentEventListenerSafe = g;
         const S = () => {
           var v;
           try {
@@ -415,7 +415,7 @@ function Xt() {
   const e = "statsig::config_exposure",
     m = "statsig::gate_exposure",
     c = "statsig::layer_exposure",
-    h = (u, r, o, i, n) => (
+    y = (u, r, o, i, n) => (
       o.bootstrapMetadata && (i.bootstrapMetadata = o.bootstrapMetadata),
       {
         eventName: u,
@@ -426,15 +426,15 @@ function Xt() {
         time: Date.now(),
       }
     ),
-    g = ({ eventName: u }) => u === m || u === e || u === c;
-  q._isExposureEvent = g;
-  const f = (u, r, o) => {
+    f = ({ eventName: u }) => u === m || u === e || u === c;
+  q._isExposureEvent = f;
+  const g = (u, r, o) => {
     var i, n, t;
     const a = { gate: r.name, gateValue: String(r.value), ruleID: r.ruleID };
     return (
       ((i = r.__evaluation) === null || i === void 0 ? void 0 : i.version) != null &&
         (a.configVersion = r.__evaluation.version),
-      h(
+      y(
         m,
         u,
         r.details,
@@ -449,7 +449,7 @@ function Xt() {
       )
     );
   };
-  q._createGateExposure = f;
+  q._createGateExposure = g;
   function S(u, r) {
     return u.map((o) => (typeof o == "string" ? (r ?? {})[o] : o)).filter((o) => o != null);
   }
@@ -462,7 +462,7 @@ function Xt() {
         (d.configVersion = r.__evaluation.version),
       ((n = r.__evaluation) === null || n === void 0 ? void 0 : n.passed) != null &&
         (d.rulePassed = String(r.__evaluation.passed)),
-      h(
+      y(
         e,
         u,
         r.details,
@@ -479,26 +479,26 @@ function Xt() {
   };
   q._createConfigExposure = b;
   const v = (u, r, o, i) => {
-    var n, t, a, d, s, E, w;
+    var n, t, a, d, s, E, k;
     const _ = r.__evaluation,
-      y = ((n = _?.explicit_parameters) === null || n === void 0 ? void 0 : n.includes(o)) === !0;
-    let k = "",
+      h = ((n = _?.explicit_parameters) === null || n === void 0 ? void 0 : n.includes(o)) === !0;
+    let w = "",
       D = (t = _?.undelegated_secondary_exposures) !== null && t !== void 0 ? t : [];
-    y &&
-      ((k = (a = _.allocated_experiment_name) !== null && a !== void 0 ? a : ""),
+    h &&
+      ((w = (a = _.allocated_experiment_name) !== null && a !== void 0 ? a : ""),
       (D = (d = _.secondary_exposures) !== null && d !== void 0 ? d : []));
     const C = (s = r.__evaluation) === null || s === void 0 ? void 0 : s.parameter_rule_ids,
       M = {
         config: r.name,
         parameterName: o,
         ruleID: (E = C?.[o]) !== null && E !== void 0 ? E : r.ruleID,
-        allocatedExperiment: k,
-        isExplicitParameter: String(y),
+        allocatedExperiment: w,
+        isExplicitParameter: String(h),
       };
     return (
-      ((w = r.__evaluation) === null || w === void 0 ? void 0 : w.version) != null &&
+      ((k = r.__evaluation) === null || k === void 0 ? void 0 : k.version) != null &&
         (M.configVersion = r.__evaluation.version),
-      h(c, u, r.details, M, S(D, i))
+      y(c, u, r.details, M, S(D, i))
     );
   };
   q._createLayerParameterExposure = v;
@@ -538,27 +538,27 @@ function Q() {
           (e._setObjectInStorage = e._getObjectFromStorage = e.Storage = void 0));
         const m = j(),
           c = ue(),
-          h = {},
-          g = {
+          y = {},
+          f = {
             isReady: () => !0,
             isReadyResolver: () => null,
             getProviderName: () => "InMemory",
-            getItem: (r) => (h[r] ? h[r] : null),
+            getItem: (r) => (y[r] ? y[r] : null),
             setItem: (r, o) => {
-              h[r] = o;
+              y[r] = o;
             },
             removeItem: (r) => {
-              delete h[r];
+              delete y[r];
             },
-            getAllKeys: () => Object.keys(h),
+            getAllKeys: () => Object.keys(y),
           };
-        let f = null;
+        let g = null;
         try {
           const r = (0, c._getWindowSafe)();
           r &&
             r.localStorage &&
             typeof r.localStorage.getItem == "function" &&
-            (f = {
+            (g = {
               isReady: () => !0,
               isReadyResolver: () => null,
               getProviderName: () => "LocalStorage",
@@ -570,14 +570,14 @@ function Q() {
         } catch {
           m.Log.warn("Failed to setup localStorageProvider.");
         }
-        let S = f ?? g,
+        let S = g ?? f,
           b = S;
         function v(r) {
           try {
             return r();
           } catch (o) {
             if (o instanceof Error && o.name === "SecurityError")
-              return (e.Storage._setProvider(g), null);
+              return (e.Storage._setProvider(f), null);
             if (o instanceof Error && o.name === "QuotaExceededError") {
               const n = e.Storage.getAllKeys().filter((t) => t.startsWith("statsig."));
               o.message = `${o.message}. Statsig Keys: ${n.length}`;
@@ -597,7 +597,7 @@ function Q() {
             ((S = r), (b = r));
           },
           _setDisabled: (r) => {
-            r ? (b = g) : (b = S);
+            r ? (b = f) : (b = S);
           },
         };
         function l(r) {
@@ -620,36 +620,36 @@ function Yt() {
   ((mt = 1),
     Object.defineProperty(ye, "__esModule", { value: !0 }),
     (ye.UrlConfiguration = void 0));
-  const e = ge(),
+  const e = fe(),
     m = Ce(),
     c = {
       [m.Endpoint._initialize]: "i",
       [m.Endpoint._rgstr]: "e",
       [m.Endpoint._download_config_specs]: "d",
     };
-  let h = class {
-    constructor(f, S, b, v) {
+  let y = class {
+    constructor(g, S, b, v) {
       ((this.customUrl = null),
         (this.fallbackUrls = null),
-        (this.endpoint = f),
-        (this.endpointDnsKey = c[f]),
+        (this.endpoint = g),
+        (this.endpointDnsKey = c[g]),
         S && (this.customUrl = S),
-        !S && b && (this.customUrl = b.endsWith("/") ? `${b}${f}` : `${b}/${f}`),
+        !S && b && (this.customUrl = b.endsWith("/") ? `${b}${g}` : `${b}/${g}`),
         v && (this.fallbackUrls = v));
-      const l = m.NetworkDefault[f];
-      this.defaultUrl = `${l}/${f}`;
+      const l = m.NetworkDefault[g];
+      this.defaultUrl = `${l}/${g}`;
     }
     getUrl() {
-      var f;
-      return (f = this.customUrl) !== null && f !== void 0 ? f : this.defaultUrl;
+      var g;
+      return (g = this.customUrl) !== null && g !== void 0 ? g : this.defaultUrl;
     }
     getChecksum() {
-      var f;
-      const S = ((f = this.fallbackUrls) !== null && f !== void 0 ? f : []).sort().join(",");
+      var g;
+      const S = ((g = this.fallbackUrls) !== null && g !== void 0 ? g : []).sort().join(",");
       return (0, e._DJB2)(this.customUrl + S);
     }
   };
-  return ((ye.UrlConfiguration = h), ye);
+  return ((ye.UrlConfiguration = y), ye);
 }
 var qe = {},
   St;
@@ -666,31 +666,31 @@ function et() {
               void 0));
         const m = ue(),
           c = "foreground",
-          h = "background",
-          g = [];
-        let f = c,
+          y = "background",
+          f = [];
+        let g = c,
           S = !1;
-        const b = () => f === c;
+        const b = () => g === c;
         e._isCurrentlyVisible = b;
         const v = () => S;
         e._isUnloading = v;
         const l = (r) => {
-          g.unshift(r);
+          f.unshift(r);
         };
         e._subscribeToVisiblityChanged = l;
         const u = (r) => {
-          r !== f && ((f = r), g.forEach((o) => o(r)));
+          r !== g && ((g = r), f.forEach((o) => o(r)));
         };
         ((e._notifyVisibilityChanged = u),
           (0, m._addWindowEventListenerSafe)("focus", () => {
             ((S = !1), (0, e._notifyVisibilityChanged)(c));
           }),
-          (0, m._addWindowEventListenerSafe)("blur", () => (0, e._notifyVisibilityChanged)(h)),
+          (0, m._addWindowEventListenerSafe)("blur", () => (0, e._notifyVisibilityChanged)(y)),
           (0, m._addDocumentEventListenerSafe)("visibilitychange", () => {
-            (0, e._notifyVisibilityChanged)(document.visibilityState === "visible" ? c : h);
+            (0, e._notifyVisibilityChanged)(document.visibilityState === "visible" ? c : y);
           }),
           (0, m._addWindowEventListenerSafe)((0, m._getUnloadEvent)(), () => {
-            ((S = !0), (0, e._notifyVisibilityChanged)(h));
+            ((S = !0), (0, e._notifyVisibilityChanged)(y));
           }));
       })(qe)),
     qe
@@ -702,25 +702,25 @@ function Zt() {
   bt = 1;
   var e =
     (Y && Y.__awaiter) ||
-    function (w, _, y, k) {
+    function (k, _, h, w) {
       function D(C) {
-        return C instanceof y
+        return C instanceof h
           ? C
-          : new y(function (M) {
+          : new h(function (M) {
               M(C);
             });
       }
-      return new (y || (y = Promise))(function (C, M) {
+      return new (h || (h = Promise))(function (C, M) {
         function U(B) {
           try {
-            x(k.next(B));
+            x(w.next(B));
           } catch (I) {
             M(I);
           }
         }
         function W(B) {
           try {
-            x(k.throw(B));
+            x(w.throw(B));
           } catch (I) {
             M(I);
           }
@@ -728,15 +728,15 @@ function Zt() {
         function x(B) {
           B.done ? C(B.value) : D(B.value).then(U, W);
         }
-        x((k = k.apply(w, _ || [])).next());
+        x((w = w.apply(k, _ || [])).next());
       });
     };
   (Object.defineProperty(Y, "__esModule", { value: !0 }), (Y.EventLogger = void 0));
   const m = Ie(),
-    c = ge(),
-    h = j(),
-    g = Ce(),
-    f = ue(),
+    c = fe(),
+    y = j(),
+    f = Ce(),
+    g = ue(),
     S = Xt(),
     b = Te(),
     v = Q(),
@@ -750,20 +750,20 @@ function Zt() {
     a = 200,
     d = {},
     s = { Startup: "startup", GainedFocus: "gained_focus" };
-  let E = class fe {
+  let E = class ge {
     static _safeFlushAndForget(_) {
-      var y;
-      (y = d[_]) === null || y === void 0 || y.flush().catch(() => {});
+      var h;
+      (h = d[_]) === null || h === void 0 || h.flush().catch(() => {});
     }
     static _safeRetryFailedLogs(_) {
-      var y;
-      (y = d[_]) === null || y === void 0 || y._retryFailedLogs(s.GainedFocus);
+      var h;
+      (h = d[_]) === null || h === void 0 || h._retryFailedLogs(s.GainedFocus);
     }
-    constructor(_, y, k, D) {
+    constructor(_, h, w, D) {
       var C, M;
       ((this._sdkKey = _),
-        (this._emitter = y),
-        (this._network = k),
+        (this._emitter = h),
+        (this._network = w),
         (this._options = D),
         (this._queue = []),
         (this._lastExposureTimeMap = {}),
@@ -778,13 +778,13 @@ function Zt() {
               : b.LoggingEnabledOption.browserOnly),
         D?.loggingEnabled &&
           D.disableLogging !== void 0 &&
-          h.Log.warn(
+          y.Log.warn(
             "Detected both loggingEnabled and disableLogging options. loggingEnabled takes precedence - please remove disableLogging.",
           ),
         (this._maxQueueSize = (M = D?.loggingBufferMaxSize) !== null && M !== void 0 ? M : r));
       const U = D?.networkConfig;
       this._logEventUrlConfig = new l.UrlConfiguration(
-        g.Endpoint._rgstr,
+        f.Endpoint._rgstr,
         U?.logEventUrl,
         U?.api,
         U?.logEventFallbackUrls,
@@ -795,9 +795,9 @@ function Zt() {
     }
     setLoggingEnabled(_) {
       if (this._loggingEnabled === "disabled" && _ !== "disabled") {
-        const y = this._getStorageKey(),
-          k = (0, v._getObjectFromStorage)(y);
-        (k && this._queue.push(...k), v.Storage.removeItem(y));
+        const h = this._getStorageKey(),
+          w = (0, v._getObjectFromStorage)(h);
+        (w && this._queue.push(...w), v.Storage.removeItem(h));
       }
       this._loggingEnabled = _;
     }
@@ -805,27 +805,27 @@ function Zt() {
       this._shouldLogEvent(_) &&
         (this._normalizeAndAppendEvent(_),
         this._quickFlushIfNeeded(),
-        this._queue.length > this._maxQueueSize && fe._safeFlushAndForget(this._sdkKey));
+        this._queue.length > this._maxQueueSize && ge._safeFlushAndForget(this._sdkKey));
     }
     incrementNonExposureCount(_) {
-      var y;
-      const k = (y = this._nonExposedChecks[_]) !== null && y !== void 0 ? y : 0;
-      this._nonExposedChecks[_] = k + 1;
+      var h;
+      const w = (h = this._nonExposedChecks[_]) !== null && h !== void 0 ? h : 0;
+      this._nonExposedChecks[_] = w + 1;
     }
     reset() {
       (this.flush().catch(() => {}), (this._lastExposureTimeMap = {}));
     }
     start() {
       var _;
-      const y = (0, f._isServerEnv)();
-      (y &&
+      const h = (0, g._isServerEnv)();
+      (h &&
         ((_ = this._options) === null || _ === void 0 ? void 0 : _.loggingEnabled) !== "always") ||
         ((d[this._sdkKey] = this),
-        y ||
-          (0, u._subscribeToVisiblityChanged)((k) => {
-            k === "background"
-              ? fe._safeFlushAndForget(this._sdkKey)
-              : k === "foreground" && fe._safeRetryFailedLogs(this._sdkKey);
+        h ||
+          (0, u._subscribeToVisiblityChanged)((w) => {
+            w === "background"
+              ? ge._safeFlushAndForget(this._sdkKey)
+              : w === "foreground" && ge._safeRetryFailedLogs(this._sdkKey);
           }),
         this._retryFailedLogs(s.Startup),
         this._startBackgroundFlushInterval());
@@ -849,18 +849,18 @@ function Zt() {
       this._hasRunQuickFlush ||
         ((this._hasRunQuickFlush = !0),
         !(Date.now() - this._creationTime > a) &&
-          setTimeout(() => fe._safeFlushAndForget(this._sdkKey), a));
+          setTimeout(() => ge._safeFlushAndForget(this._sdkKey), a));
     }
     _shouldLogEvent(_) {
-      var y;
+      var h;
       if (
-        ((y = this._options) === null || y === void 0 ? void 0 : y.loggingEnabled) !== "always" &&
-        (0, f._isServerEnv)()
+        ((h = this._options) === null || h === void 0 ? void 0 : h.loggingEnabled) !== "always" &&
+        (0, g._isServerEnv)()
       )
         return !1;
       if (!(0, S._isExposureEvent)(_)) return !0;
-      const k = _.user ? _.user : { statsigEnvironment: void 0 },
-        D = (0, m._getUserStorageKey)(this._sdkKey, k),
+      const w = _.user ? _.user : { statsigEnvironment: void 0 },
+        D = (0, m._getUserStorageKey)(this._sdkKey, w),
         C = _.metadata ? _.metadata : {},
         M = [
           _.eventName,
@@ -883,32 +883,32 @@ function Zt() {
     }
     _sendEvents(_) {
       return e(this, void 0, void 0, function* () {
-        var y, k;
+        var h, w;
         if (this._loggingEnabled === "disabled") return (this._saveFailedLogsToStorage(_), !1);
         try {
           const C =
             (0, u._isUnloading)() &&
             this._network.isBeaconSupported() &&
-            ((k = (y = this._options) === null || y === void 0 ? void 0 : y.networkConfig) ===
-              null || k === void 0
+            ((w = (h = this._options) === null || h === void 0 ? void 0 : h.networkConfig) ===
+              null || w === void 0
               ? void 0
-              : k.networkOverrideFunc) == null;
+              : w.networkOverrideFunc) == null;
           return (
             this._emitter({ name: "pre_logs_flushed", events: _ }),
             (C ? this._sendEventsViaBeacon(_) : yield this._sendEventsViaPost(_)).success
               ? (this._emitter({ name: "logs_flushed", events: _ }), !0)
-              : (h.Log.warn("Failed to flush events."), this._saveFailedLogsToStorage(_), !1)
+              : (y.Log.warn("Failed to flush events."), this._saveFailedLogsToStorage(_), !1)
           );
         } catch {
-          return (h.Log.warn("Failed to flush events."), !1);
+          return (y.Log.warn("Failed to flush events."), !1);
         }
       });
     }
     _sendEventsViaPost(_) {
       return e(this, void 0, void 0, function* () {
-        var y;
-        const k = yield this._network.post(this._getRequestData(_)),
-          D = (y = k?.code) !== null && y !== void 0 ? y : -1;
+        var h;
+        const w = yield this._network.post(this._getRequestData(_)),
+          D = (h = w?.code) !== null && h !== void 0 ? h : -1;
         return { success: D >= 200 && D < 300 };
       });
     }
@@ -922,29 +922,39 @@ function Zt() {
         urlConfig: this._logEventUrlConfig,
         retries: 3,
         isCompressable: !0,
-        params: { [g.NetworkParam.EventCount]: String(_.length) },
+        params: { [f.NetworkParam.EventCount]: String(_.length) },
         credentials: "same-origin",
       };
     }
     _saveFailedLogsToStorage(_) {
       for (; _.length > t; ) _.shift();
-      const y = this._getStorageKey();
+      const h = this._getStorageKey();
       try {
-        (0, v._setObjectInStorage)(y, _);
+        const w = this._getFailedLogsFromStorage(h);
+        (0, v._setObjectInStorage)(h, [...w, ..._]);
       } catch {
-        h.Log.warn("Unable to save failed logs to storage");
+        y.Log.warn("Unable to save failed logs to storage");
+      }
+    }
+    _getFailedLogsFromStorage(_) {
+      let h = [];
+      try {
+        const w = (0, v._getObjectFromStorage)(_);
+        return (Array.isArray(w) && (h = w), h);
+      } catch {
+        return [];
       }
     }
     _retryFailedLogs(_) {
-      const y = this._getStorageKey();
+      const h = this._getStorageKey();
       e(this, void 0, void 0, function* () {
         v.Storage.isReady() || (yield v.Storage.isReadyResolver());
-        const k = (0, v._getObjectFromStorage)(y);
-        if (!k) return;
-        (_ === s.Startup && v.Storage.removeItem(y),
-          (yield this._sendEvents(k)) && _ === s.GainedFocus && v.Storage.removeItem(y));
+        const w = (0, v._getObjectFromStorage)(h);
+        if (!w) return;
+        (_ === s.Startup && v.Storage.removeItem(h),
+          (yield this._sendEvents(w)) && _ === s.GainedFocus && v.Storage.removeItem(h));
       }).catch(() => {
-        h.Log.warn("Failed to flush stored logs");
+        y.Log.warn("Failed to flush stored logs");
       });
     }
     _getStorageKey() {
@@ -952,11 +962,11 @@ function Zt() {
     }
     _normalizeAndAppendEvent(_) {
       _.user && ((_.user = Object.assign({}, _.user)), delete _.user.privateAttributes);
-      const y = {},
-        k = this._getCurrentPageUrl();
-      k && (y.statsigMetadata = { currentPage: k });
-      const D = Object.assign(Object.assign({}, _), y);
-      (h.Log.debug("Enqueued Event:", D), this._queue.push(D));
+      const h = {},
+        w = this._getCurrentPageUrl();
+      w && (h.statsigMetadata = { currentPage: w });
+      const D = Object.assign(Object.assign({}, _), h);
+      (y.Log.debug("Enqueued Event:", D), this._queue.push(D));
     }
     _appendAndResetNonExposedChecks() {
       Object.keys(this._nonExposedChecks).length !== 0 &&
@@ -975,19 +985,19 @@ function Zt() {
           ? void 0
           : _.includeCurrentPageUrlWithEvents) !== !1
       )
-        return (0, f._getCurrentPageUrlSafe)();
+        return (0, g._getCurrentPageUrlSafe)();
     }
     _startBackgroundFlushInterval() {
-      var _, y;
-      const k =
-          (y = (_ = this._options) === null || _ === void 0 ? void 0 : _.loggingIntervalMs) !==
-            null && y !== void 0
-            ? y
+      var _, h;
+      const w =
+          (h = (_ = this._options) === null || _ === void 0 ? void 0 : _.loggingIntervalMs) !==
+            null && h !== void 0
+            ? h
             : o,
         D = setInterval(() => {
           const C = d[this._sdkKey];
-          !C || C._flushIntervalId !== D ? clearInterval(D) : fe._safeFlushAndForget(this._sdkKey);
-        }, k);
+          !C || C._flushIntervalId !== D ? clearInterval(D) : ge._safeFlushAndForget(this._sdkKey);
+        }, w);
       this._flushIntervalId = D;
     }
   };
@@ -1002,7 +1012,7 @@ function Oe() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigMetadataProvider = e.SDK_VERSION = void 0),
-          (e.SDK_VERSION = "3.25.2"));
+          (e.SDK_VERSION = "3.25.3"));
         let m = { sdkVersion: e.SDK_VERSION, sdkType: "js-mono" };
         e.StatsigMetadataProvider = {
           get: () => m,
@@ -1032,13 +1042,13 @@ function tt() {
       c = (typeof performance < "u" && performance.now && performance.now() * 1e3) || 0;
     return `xxxxxxxx-xxxx-4xxx-${"89ab"[Math.floor(Math.random() * 4)]}xxx-xxxxxxxxxxxx`.replace(
       /[xy]/g,
-      (g) => {
-        let f = Math.random() * 16;
+      (f) => {
+        let g = Math.random() * 16;
         return (
           m > 0
-            ? ((f = (m + f) % 16 | 0), (m = Math.floor(m / 16)))
-            : ((f = (c + f) % 16 | 0), (c = Math.floor(c / 16))),
-          (g === "x" ? f : (f & 7) | 8).toString(16)
+            ? ((g = (m + g) % 16 | 0), (m = Math.floor(m / 16)))
+            : ((g = (c + g) % 16 | 0), (c = Math.floor(c / 16))),
+          (f === "x" ? g : (g & 7) | 8).toString(16)
         );
       },
     );
@@ -1054,9 +1064,9 @@ function Re() {
   const e = Ie(),
     m = j(),
     c = ue(),
-    h = Q(),
-    g = tt(),
-    f = {},
+    y = Q(),
+    f = tt(),
+    g = {},
     S = {},
     b = {};
   ne.StableID = {
@@ -1064,17 +1074,17 @@ function Re() {
     randomID: Math.random().toString(36),
     get: (n) => {
       if (b[n]) return null;
-      if (f[n] != null) return f[n];
+      if (g[n] != null) return g[n];
       let t = null;
       return (
         (t = r(n)),
         t != null
-          ? ((f[n] = t), l(t, n), t)
-          : ((t = u(n)), t == null && (t = (0, g.getUUID)()), l(t, n), o(t, n), (f[n] = t), t)
+          ? ((g[n] = t), l(t, n), t)
+          : ((t = u(n)), t == null && (t = (0, f.getUUID)()), l(t, n), o(t, n), (g[n] = t), t)
       );
     },
     setOverride: (n, t) => {
-      ((f[t] = n), l(n, t), o(n, t));
+      ((g[t] = n), l(n, t), o(n, t));
     },
     _setCookiesEnabled: (n, t) => {
       S[n] = t;
@@ -1089,14 +1099,14 @@ function Re() {
   function l(n, t) {
     const a = v(t);
     try {
-      (0, h._setObjectInStorage)(a, n);
+      (0, y._setObjectInStorage)(a, n);
     } catch {
       m.Log.warn("Failed to save StableID to storage");
     }
   }
   function u(n) {
     const t = v(n);
-    return (0, h._getObjectFromStorage)(t);
+    return (0, y._getObjectFromStorage)(t);
   }
   function r(n) {
     if (!S[n] || (0, c._getDocumentSafe)() == null) return null;
@@ -1125,14 +1135,14 @@ function en() {
   ((Dt = 1),
     Object.defineProperty(re, "__esModule", { value: !0 }),
     (re._getFullUserHash = re._normalizeUser = void 0));
-  const e = ge(),
+  const e = fe(),
     m = j();
-  function c(g, f, S) {
+  function c(f, g, S) {
     try {
-      const b = JSON.parse(JSON.stringify(g));
+      const b = JSON.parse(JSON.stringify(f));
       return (
-        f != null && f.environment != null
-          ? (b.statsigEnvironment = f.environment)
+        g != null && g.environment != null
+          ? (b.statsigEnvironment = g.environment)
           : S != null && (b.statsigEnvironment = { tier: S }),
         b
       );
@@ -1141,10 +1151,10 @@ function en() {
     }
   }
   re._normalizeUser = c;
-  function h(g) {
-    return g ? (0, e._DJB2Object)(g) : null;
+  function y(f) {
+    return f ? (0, e._DJB2Object)(f) : null;
   }
-  return ((re._getFullUserHash = h), re);
+  return ((re._getFullUserHash = y), re);
 }
 var Se = {},
   Ot;
@@ -1152,12 +1162,12 @@ function tn() {
   if (Ot) return Se;
   ((Ot = 1), Object.defineProperty(Se, "__esModule", { value: !0 }), (Se._typedJsonParse = void 0));
   const e = j();
-  function m(c, h, g) {
+  function m(c, y, f) {
     try {
-      const f = JSON.parse(c);
-      if (f && typeof f == "object" && h in f) return f;
+      const g = JSON.parse(c);
+      if (g && typeof g == "object" && y in g) return g;
     } catch {}
-    return (e.Log.error(`Failed to parse ${g}`), null);
+    return (e.Log.error(`Failed to parse ${f}`), null);
   }
   return ((Se._typedJsonParse = m), Se);
 }
@@ -1176,22 +1186,22 @@ function un() {
             });
       }
       return new (n || (n = Promise))(function (d, s) {
-        function E(y) {
+        function E(h) {
           try {
-            _(t.next(y));
-          } catch (k) {
-            s(k);
+            _(t.next(h));
+          } catch (w) {
+            s(w);
           }
         }
-        function w(y) {
+        function k(h) {
           try {
-            _(t.throw(y));
-          } catch (k) {
-            s(k);
+            _(t.throw(h));
+          } catch (w) {
+            s(w);
           }
         }
-        function _(y) {
-          y.done ? d(y.value) : a(y.value).then(E, w);
+        function _(h) {
+          h.done ? d(h.value) : a(h.value).then(E, k);
         }
         _((t = t.apply(o, i || [])).next());
       });
@@ -1200,9 +1210,9 @@ function un() {
     (z._makeDataAdapterResult = z.DataAdapterCore = void 0));
   const m = j(),
     c = Re(),
-    h = en(),
-    g = Q(),
-    f = tn(),
+    y = en(),
+    f = Q(),
+    g = tn(),
     S = 10,
     b = 8;
   let v = class {
@@ -1219,7 +1229,7 @@ function un() {
       ((this._sdkKey = i), (this._options = n));
     }
     getDataSync(i) {
-      const n = i && (0, h._normalizeUser)(i, this._options),
+      const n = i && (0, y._normalizeUser)(i, this._options),
         t = this._getCacheKey(n),
         a = this._inMemoryCache.get(t, n);
       if (a && this._getIsCacheValueValid(a)) return a;
@@ -1229,7 +1239,7 @@ function un() {
         : null;
     }
     setData(i, n) {
-      const t = n && (0, h._normalizeUser)(n, this._options),
+      const t = n && (0, y._normalizeUser)(n, this._options),
         a = this._getCacheKey(t);
       this._inMemoryCache.add(a, l("Bootstrap", i, null, t), this._cacheLimit);
     }
@@ -1238,7 +1248,7 @@ function un() {
     }
     _getDataAsyncImpl(i, n, t) {
       return e(this, void 0, void 0, function* () {
-        g.Storage.isReady() || (yield g.Storage.isReadyResolver());
+        f.Storage.isReady() || (yield f.Storage.isReadyResolver());
         const a = i ?? this.getDataSync(n),
           d = [this._fetchAndPrepFromNetwork(a, n, t)];
         return (
@@ -1254,7 +1264,7 @@ function un() {
     }
     _prefetchDataImpl(i, n) {
       return e(this, void 0, void 0, function* () {
-        const t = i && (0, h._normalizeUser)(i, this._options),
+        const t = i && (0, y._normalizeUser)(i, this._options),
           a = this._getCacheKey(t),
           d = yield this._getDataAsyncImpl(null, t, n);
         d &&
@@ -1272,15 +1282,15 @@ function un() {
           s = i != null && this._isCachedResultValidFor204(i, n),
           E = yield this._fetchFromNetwork(d, n, t, s);
         if (!E) return (m.Log.debug("No response returned for latest value"), null);
-        const w = (0, f._typedJsonParse)(E, "has_updates", "Response"),
+        const k = (0, g._typedJsonParse)(E, "has_updates", "Response"),
           _ = this._getSdkKey(),
-          y = c.StableID.get(_);
-        let k = null;
-        if (w?.has_updates === !0) k = l("Network", E, y, n);
-        else if (d && w?.has_updates === !1) k = l("NetworkNotModified", d, y, n);
+          h = c.StableID.get(_);
+        let w = null;
+        if (k?.has_updates === !0) w = l("Network", E, h, n);
+        else if (d && k?.has_updates === !1) w = l("NetworkNotModified", d, h, n);
         else return null;
         const D = this._getCacheKey(n);
-        return (this._inMemoryCache.add(D, k, this._cacheLimit), this._writeToCache(D, k), k);
+        return (this._inMemoryCache.add(D, w, this._cacheLimit), this._writeToCache(D, w), w);
       });
     }
     _getSdkKey() {
@@ -1290,16 +1300,16 @@ function un() {
     }
     _loadFromCache(i) {
       var n;
-      const t = (n = g.Storage.getItem) === null || n === void 0 ? void 0 : n.call(g.Storage, i);
+      const t = (n = f.Storage.getItem) === null || n === void 0 ? void 0 : n.call(f.Storage, i);
       if (t == null) return null;
-      const a = (0, f._typedJsonParse)(t, "source", "Cached Result");
+      const a = (0, g._typedJsonParse)(t, "source", "Cached Result");
       return a ? Object.assign(Object.assign({}, a), { source: "Cache" }) : null;
     }
     _writeToCache(i, n) {
       const t = JSON.stringify(n);
       for (let a = 0; a < b; a++)
         try {
-          g.Storage.setItem(i, t);
+          f.Storage.setItem(i, t);
           break;
         } catch (d) {
           if (!(d instanceof Error) || d.name !== "QuotaExceededError" || this._cacheLimit <= 1)
@@ -1312,13 +1322,13 @@ function un() {
     _runLocalStorageCacheEviction(i, n = this._cacheLimit) {
       var t;
       const a =
-        (t = (0, g._getObjectFromStorage)(this._lastModifiedStoreKey)) !== null && t !== void 0
+        (t = (0, f._getObjectFromStorage)(this._lastModifiedStoreKey)) !== null && t !== void 0
           ? t
           : {};
       a[i] = Date.now();
       const d = r(a, n);
-      for (const s of d) (delete a[s], g.Storage.removeItem(s));
-      (0, g._setObjectInStorage)(this._lastModifiedStoreKey, a);
+      for (const s of d) (delete a[s], f.Storage.removeItem(s));
+      (0, f._setObjectInStorage)(this._lastModifiedStoreKey, a);
     }
   };
   z.DataAdapterCore = v;
@@ -1328,7 +1338,7 @@ function un() {
       data: i,
       receivedAt: Date.now(),
       stableID: n,
-      fullUserHash: (0, h._getFullUserHash)(t),
+      fullUserHash: (0, y._getFullUserHash)(t),
     };
   }
   z._makeDataAdapterResult = l;
@@ -1388,11 +1398,11 @@ function nt() {
   return (
     (pe.SDKType = {
       _get: (c) => {
-        var h;
-        return ((h = e[c]) !== null && h !== void 0 ? h : "js-mono") + (m ?? "");
+        var y;
+        return ((y = e[c]) !== null && y !== void 0 ? y : "js-mono") + (m ?? "");
       },
-      _setClientType(c, h) {
-        e[c] = h;
+      _setClientType(c, y) {
+        e[c] = y;
       },
       _setBindingType(c) {
         (!m || m === "-react") && (m = "-" + c);
@@ -1420,31 +1430,31 @@ function nn() {
             return new (i || (i = Promise))(function (a, d) {
               function s(_) {
                 try {
-                  w(n.next(_));
-                } catch (y) {
-                  d(y);
+                  k(n.next(_));
+                } catch (h) {
+                  d(h);
                 }
               }
               function E(_) {
                 try {
-                  w(n.throw(_));
-                } catch (y) {
-                  d(y);
+                  k(n.throw(_));
+                } catch (h) {
+                  d(h);
                 }
               }
-              function w(_) {
+              function k(_) {
                 _.done ? a(_.value) : t(_.value).then(s, E);
               }
-              w((n = n.apply(r, o || [])).next());
+              k((n = n.apply(r, o || [])).next());
             });
           };
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.ErrorBoundary = e.EXCEPTION_ENDPOINT = void 0));
         const c = j(),
-          h = nt(),
-          g = Oe();
+          y = nt(),
+          f = Oe();
         e.EXCEPTION_ENDPOINT = "https://statsigapi.net/v1/sdk_exception";
-        const f = "[Statsig] UnknownError";
+        const g = "[Statsig] UnknownError";
         let S = class {
           constructor(o, i, n, t) {
             ((this._sdkKey = o),
@@ -1488,11 +1498,11 @@ function nn() {
             try {
               (c.Log.warn(`Caught error in ${o}`, { error: i }),
                 m(this, void 0, void 0, function* () {
-                  var t, a, d, s, E, w, _;
-                  const y = i || Error(f),
-                    k = y instanceof Error,
-                    D = k ? y.name : "No Name",
-                    C = b(y);
+                  var t, a, d, s, E, k, _;
+                  const h = i || Error(g),
+                    w = h instanceof Error,
+                    D = w ? h.name : "No Name",
+                    C = b(h);
                   if (((this._lastSeenError = C), this._seen.has(D))) return;
                   if (
                     (this._seen.add(D),
@@ -1507,21 +1517,21 @@ function nn() {
                       d.call(this, { name: "error", error: i, tag: o });
                     return;
                   }
-                  const M = h.SDKType._get(this._sdkKey),
-                    U = g.StatsigMetadataProvider.get(),
-                    W = k ? y.stack : v(y),
+                  const M = y.SDKType._get(this._sdkKey),
+                    U = f.StatsigMetadataProvider.get(),
+                    W = w ? h.stack : v(h),
                     x = Object.assign(
                       { tag: o, exception: D, info: W, statsigOptions: u(this._options) },
                       Object.assign(Object.assign({}, U), { sdkType: M }),
                     );
                   (yield (
-                    (w =
+                    (k =
                       (E =
                         (s = this._options) === null || s === void 0 ? void 0 : s.networkConfig) ===
                         null || E === void 0
                         ? void 0
-                        : E.networkOverrideFunc) !== null && w !== void 0
-                      ? w
+                        : E.networkOverrideFunc) !== null && k !== void 0
+                      ? k
                       : fetch
                   )(e.EXCEPTION_ENDPOINT, {
                     method: "POST",
@@ -1554,7 +1564,7 @@ function nn() {
           try {
             return JSON.stringify(r);
           } catch {
-            return f;
+            return g;
           }
         }
         function l(r) {
@@ -1611,7 +1621,7 @@ function _n() {
 }
 var ze = {},
   Ut;
-function fn() {
+function gn() {
   return (Ut || ((Ut = 1), Object.defineProperty(ze, "__esModule", { value: !0 })), ze);
 }
 var ie = {},
@@ -1631,12 +1641,12 @@ function rn() {
     }));
   const e = new Set([]),
     m = new Set(["userPersistedValues"]);
-  function c(h, g, f) {
-    let S = `${h}|${g}`;
-    if (!f) return S;
-    for (const b of Object.keys(f)) {
+  function c(y, f, g) {
+    let S = `${y}|${f}`;
+    if (!g) return S;
+    for (const b of Object.keys(g)) {
       if (m.has(b)) return;
-      e.has(b) ? (S += `|${b}=true`) : (S += `|${b}=${f[b]}`);
+      e.has(b) ? (S += `|${b}=true`) : (S += `|${b}=${g[b]}`);
     }
     return S;
   }
@@ -1646,7 +1656,7 @@ var oe = {},
   J = {},
   se = {},
   Pt;
-function gn() {
+function fn() {
   if (Pt) return se;
   Pt = 1;
   var e =
@@ -1686,9 +1696,9 @@ function gn() {
       116, 115, 3, 111, 114, 103, 0, 0, 16, 0, 1,
     ]),
     c = "https://cloudflare-dns.com/dns-query",
-    h = ["i", "e", "d"],
-    g = 200;
-  function f(b) {
+    y = ["i", "e", "d"],
+    f = 200;
+  function g(b) {
     return e(this, void 0, void 0, function* () {
       const v = yield b(c, {
         method: "POST",
@@ -1704,11 +1714,11 @@ function gn() {
       return S(u);
     });
   }
-  se._fetchTxtRecords = f;
+  se._fetchTxtRecords = g;
   function S(b) {
     const v = b.findIndex(
       (u, r) =>
-        r < g && String.fromCharCode(u) === "=" && h.includes(String.fromCharCode(b[r - 1])),
+        r < f && String.fromCharCode(u) === "=" && y.includes(String.fromCharCode(b[r - 1])),
     );
     if (v === -1) {
       const u = new Error("Failed to parse TXT records from DNS");
@@ -1735,33 +1745,33 @@ function vn() {
             });
       }
       return new (t || (t = Promise))(function (s, E) {
-        function w(k) {
+        function k(w) {
           try {
-            y(a.next(k));
+            h(a.next(w));
           } catch (D) {
             E(D);
           }
         }
-        function _(k) {
+        function _(w) {
           try {
-            y(a.throw(k));
+            h(a.throw(w));
           } catch (D) {
             E(D);
           }
         }
-        function y(k) {
-          k.done ? s(k.value) : d(k.value).then(w, _);
+        function h(w) {
+          w.done ? s(w.value) : d(w.value).then(k, _);
         }
-        y((a = a.apply(i, n || [])).next());
+        h((a = a.apply(i, n || [])).next());
       });
     };
   (Object.defineProperty(J, "__esModule", { value: !0 }),
     (J._isDomainFailure = J.NetworkFallbackResolver = void 0));
-  const m = gn(),
-    c = ge(),
-    h = j(),
-    g = Q(),
-    f = 10080 * 60 * 1e3,
+  const m = fn(),
+    c = fe(),
+    y = j(),
+    f = Q(),
+    g = 10080 * 60 * 1e3,
     S = 14400 * 1e3;
   let b = class {
     constructor(n) {
@@ -1779,7 +1789,7 @@ function vn() {
       var a;
       const d = (a = this._fallbackInfo) === null || a === void 0 ? void 0 : a[t.endpoint];
       d &&
-        ((d.expiryTime = Date.now() + f),
+        ((d.expiryTime = Date.now() + g),
         u(n, Object.assign(Object.assign({}, this._fallbackInfo), { [t.endpoint]: d })));
     }
     getActiveFallbackUrl(n, t) {
@@ -1805,16 +1815,16 @@ function vn() {
               t.customUrl == null && t.fallbackUrls == null
                 ? yield this._tryFetchFallbackUrlsFromNetwork(t)
                 : t.fallbackUrls,
-            y = this._pickNewFallbackUrl(
+            h = this._pickNewFallbackUrl(
               (s = this._fallbackInfo) === null || s === void 0 ? void 0 : s[t.endpoint],
               _,
             );
-          return y ? (this._updateFallbackInfoWithNewUrl(n, t, y), !0) : !1;
-        } catch (w) {
+          return h ? (this._updateFallbackInfoWithNewUrl(n, t, h), !0) : !1;
+        } catch (k) {
           return (
             (E = this._errorBoundary) === null ||
               E === void 0 ||
-              E.logError("tryFetchUpdatedFallbackInfo", w),
+              E.logError("tryFetchUpdatedFallbackInfo", k),
             !1
           );
         }
@@ -1822,22 +1832,22 @@ function vn() {
     }
     _updateFallbackInfoWithNewUrl(n, t, a) {
       var d, s, E;
-      const w = {
+      const k = {
           urlConfigChecksum: t.getChecksum(),
           url: a,
-          expiryTime: Date.now() + f,
+          expiryTime: Date.now() + g,
           previous: [],
         },
         _ = t.endpoint,
-        y = (d = this._fallbackInfo) === null || d === void 0 ? void 0 : d[_];
-      (y && w.previous.push(...y.previous), w.previous.length > 10 && (w.previous = []));
-      const k =
+        h = (d = this._fallbackInfo) === null || d === void 0 ? void 0 : d[_];
+      (h && k.previous.push(...h.previous), k.previous.length > 10 && (k.previous = []));
+      const w =
         (E = (s = this._fallbackInfo) === null || s === void 0 ? void 0 : s[_]) === null ||
         E === void 0
           ? void 0
           : E.url;
-      (k != null && w.previous.push(k),
-        (this._fallbackInfo = Object.assign(Object.assign({}, this._fallbackInfo), { [_]: w })),
+      (w != null && k.previous.push(w),
+        (this._fallbackInfo = Object.assign(Object.assign({}, this._fallbackInfo), { [_]: k })),
         u(n, this._fallbackInfo));
     }
     _tryFetchFallbackUrlsFromNetwork(n) {
@@ -1851,12 +1861,12 @@ function vn() {
             (t = this._networkOverrideFunc) !== null && t !== void 0 ? t : fetch,
           ),
           E = o(n.defaultUrl);
-        for (const w of s) {
-          if (!w.startsWith(n.endpointDnsKey + "=")) continue;
-          const _ = w.split("=");
+        for (const k of s) {
+          if (!k.startsWith(n.endpointDnsKey + "=")) continue;
+          const _ = k.split("=");
           if (_.length > 1) {
-            let y = _[1];
-            (y.endsWith("/") && (y = y.slice(0, -1)), d.push(`https://${y}${E}`));
+            let h = _[1];
+            (h.endsWith("/") && (h = h.slice(0, -1)), d.push(`https://${h}${E}`));
           }
         }
         return d;
@@ -1868,9 +1878,9 @@ function vn() {
       const d = new Set((a = n?.previous) !== null && a !== void 0 ? a : []),
         s = n?.url;
       let E = null;
-      for (const w of t) {
-        const _ = w.endsWith("/") ? w.slice(0, -1) : w;
-        if (!d.has(w) && _ !== s) {
+      for (const k of t) {
+        const _ = k.endsWith("/") ? k.slice(0, -1) : k;
+        if (!d.has(k) && _ !== s) {
           E = _;
           break;
         }
@@ -1896,19 +1906,19 @@ function vn() {
   function u(i, n) {
     const t = l(i);
     if (!n || Object.keys(n).length === 0) {
-      g.Storage.removeItem(t);
+      f.Storage.removeItem(t);
       return;
     }
-    g.Storage.setItem(t, JSON.stringify(n));
+    f.Storage.setItem(t, JSON.stringify(n));
   }
   function r(i) {
     const n = l(i),
-      t = g.Storage.getItem(n);
+      t = f.Storage.getItem(n);
     if (!t) return null;
     try {
       return JSON.parse(t);
     } catch {
-      return (h.Log.error("Failed to parse FallbackInfo"), null);
+      return (y.Log.error("Failed to parse FallbackInfo"), null);
     }
   }
   function o(i) {
@@ -1932,9 +1942,9 @@ function on() {
         e[m] = c;
       },
       get: (m, c) => {
-        var h, g;
-        return (g = (h = e[m]) === null || h === void 0 ? void 0 : h[c]) !== null && g !== void 0
-          ? g
+        var y, f;
+        return (f = (y = e[m]) === null || y === void 0 ? void 0 : y[c]) !== null && f !== void 0
+          ? f
           : !1;
       },
     }),
@@ -1952,9 +1962,9 @@ function rt() {
           (e.StatsigSession = e.SessionID = void 0));
         const m = H(),
           c = Ie(),
-          h = j(),
-          g = Q(),
-          f = tt(),
+          y = j(),
+          f = Q(),
+          g = tt(),
           S = 1800 * 1e3,
           b = 14400 * 1e3,
           v = {};
@@ -1971,37 +1981,37 @@ function rt() {
           }));
         function l(s) {
           let E = d(s);
-          const w = Date.now();
+          const k = Date.now();
           return (
-            E || (E = { sessionID: (0, f.getUUID)(), startTime: w, lastUpdate: w }),
+            E || (E = { sessionID: (0, g.getUUID)(), startTime: k, lastUpdate: k }),
             { data: E, sdkKey: s }
           );
         }
         function u(s, E) {
-          const w = Date.now();
-          return { data: { sessionID: s, startTime: w, lastUpdate: w }, sdkKey: E };
+          const k = Date.now();
+          return { data: { sessionID: s, startTime: k, lastUpdate: k }, sdkKey: E };
         }
         function r(s) {
           const E = Date.now(),
-            w = s.data,
+            k = s.data,
             _ = s.sdkKey;
-          if (i(w) || n(w)) {
-            ((w.sessionID = (0, f.getUUID)()), (w.startTime = E));
-            const k = __STATSIG__ == null ? void 0 : __STATSIG__.instance(_);
-            k && k.$emt({ name: "session_expired" });
+          if (i(k) || n(k)) {
+            ((k.sessionID = (0, g.getUUID)()), (k.startTime = E));
+            const w = __STATSIG__ == null ? void 0 : __STATSIG__.instance(_);
+            w && w.$emt({ name: "session_expired" });
           }
-          ((w.lastUpdate = E),
-            a(w, s.sdkKey),
+          ((k.lastUpdate = E),
+            a(k, s.sdkKey),
             clearTimeout(s.idleTimeoutID),
             clearTimeout(s.ageTimeoutID));
-          const y = E - w.startTime;
-          return ((s.idleTimeoutID = o(_, S)), (s.ageTimeoutID = o(_, b - y)), s);
+          const h = E - k.startTime;
+          return ((s.idleTimeoutID = o(_, S)), (s.ageTimeoutID = o(_, b - h)), s);
         }
         function o(s, E) {
           return setTimeout(() => {
-            var w;
+            var k;
             const _ =
-              (w = (0, m._getStatsigGlobal)()) === null || w === void 0 ? void 0 : w.instance(s);
+              (k = (0, m._getStatsigGlobal)()) === null || k === void 0 ? void 0 : k.instance(s);
             _ && _.$emt({ name: "session_expired" });
           }, E);
         }
@@ -2015,16 +2025,16 @@ function rt() {
           return `statsig.session_id.${(0, c._getStorageKey)(s)}`;
         }
         function a(s, E) {
-          const w = t(E);
+          const k = t(E);
           try {
-            (0, g._setObjectInStorage)(w, s);
+            (0, f._setObjectInStorage)(k, s);
           } catch {
-            h.Log.warn("Failed to save SessionID");
+            y.Log.warn("Failed to save SessionID");
           }
         }
         function d(s) {
           const E = t(s);
-          return (0, g._getObjectFromStorage)(E);
+          return (0, f._getObjectFromStorage)(E);
         }
       })(Je)),
     Je
@@ -2080,9 +2090,9 @@ function hn() {
   (Object.defineProperty(oe, "__esModule", { value: !0 }), (oe.NetworkCore = void 0), H());
   const m = H(),
     c = Ye(),
-    h = j(),
-    g = Ce(),
-    f = vn(),
+    y = j(),
+    f = Ce(),
+    g = vn(),
     S = on(),
     b = nt(),
     v = ue(),
@@ -2097,9 +2107,9 @@ function hn() {
     d = 3e4,
     s = 1e3,
     E = 50,
-    w = E / s,
+    k = E / s,
     _ = new Set([408, 500, 502, 503, 504, 522, 524, 599]);
-  let y = class {
+  let h = class {
     constructor(p, O) {
       ((this._emitter = O),
         (this._errorBoundary = null),
@@ -2111,7 +2121,7 @@ function hn() {
         p && (this._options = p),
         this._options.networkConfig && (this._netConfig = this._options.networkConfig),
         this._netConfig.networkTimeoutMs && (this._timeout = this._netConfig.networkTimeoutMs),
-        (this._fallbackResolver = new f.NetworkFallbackResolver(this._options)),
+        (this._fallbackResolver = new g.NetworkFallbackResolver(this._options)),
         this.setLogEventCompressionMode(this._getLogEventCompressionMode(p)));
     }
     setLogEventCompressionMode(p) {
@@ -2131,7 +2141,7 @@ function hn() {
       return ((this._lastUsedInitUrl = null), p);
     }
     beacon(p) {
-      if (!k(p)) return !1;
+      if (!w(p)) return !1;
       const O = this._getInternalRequestArgs("POST", p),
         T = this._getPopulatedURL(O),
         R = navigator;
@@ -2150,12 +2160,12 @@ function hn() {
     _sendRequest(p) {
       return e(this, void 0, void 0, function* () {
         var O, T, R, L;
-        if (!k(p) || this._netConfig.preventAllNetworkTraffic) return null;
+        if (!w(p) || this._netConfig.preventAllNetworkTraffic) return null;
         const { method: A, body: ve, retries: V, attempt: $ } = p,
           N = p.urlConfig.endpoint;
         if (this._isRateLimited(N))
           return (
-            h.Log.warn(
+            y.Log.warn(
               `Request to ${N} was blocked because you are making requests too frequently.`,
             ),
             null
@@ -2221,7 +2231,7 @@ function hn() {
               });
             const De = `A networking error occurred during ${A} request to ${he}.`;
             return (
-              h.Log.error(De, _e, de),
+              y.Log.error(De, _e, de),
               (L = this._errorBoundary) === null || L === void 0 || L.attachErrorIfNoneExists(De),
               null
             );
@@ -2249,7 +2259,7 @@ function hn() {
             ? O
             : { count: 0, lastRequestTime: T },
         L = T - R.lastRequestTime,
-        A = Math.floor(L * w);
+        A = Math.floor(L * k);
       return (
         (R.count = Math.max(0, R.count - A)),
         R.count >= E
@@ -2260,16 +2270,16 @@ function hn() {
     _getPopulatedURL(p) {
       var O;
       const T = (O = p.fallbackUrl) !== null && O !== void 0 ? O : p.urlConfig.getUrl();
-      (p.urlConfig.endpoint === g.Endpoint._initialize ||
-        p.urlConfig.endpoint === g.Endpoint._download_config_specs) &&
+      (p.urlConfig.endpoint === f.Endpoint._initialize ||
+        p.urlConfig.endpoint === f.Endpoint._download_config_specs) &&
         (this._lastUsedInitUrl = T);
       const R = Object.assign(
           {
-            [g.NetworkParam.SdkKey]: p.sdkKey,
-            [g.NetworkParam.SdkType]: b.SDKType._get(p.sdkKey),
-            [g.NetworkParam.SdkVersion]: o.SDK_VERSION,
-            [g.NetworkParam.Time]: String(Date.now()),
-            [g.NetworkParam.SessionID]: l.SessionID.get(p.sdkKey),
+            [f.NetworkParam.SdkKey]: p.sdkKey,
+            [f.NetworkParam.SdkType]: b.SDKType._get(p.sdkKey),
+            [f.NetworkParam.SdkVersion]: o.SDK_VERSION,
+            [f.NetworkParam.Time]: String(Date.now()),
+            [f.NetworkParam.SessionID]: l.SessionID.get(p.sdkKey),
           },
           p.params,
         ),
@@ -2295,10 +2305,10 @@ function hn() {
           ((p.body = T.btoa(R).split("").reverse().join("")),
             (p.params = Object.assign(
               Object.assign({}, (O = p.params) !== null && O !== void 0 ? O : {}),
-              { [g.NetworkParam.StatsigEncoded]: "1" },
+              { [f.NetworkParam.StatsigEncoded]: "1" },
             )));
         } catch (L) {
-          h.Log.warn(`Request encoding failed for ${p.urlConfig.getUrl()}`, L);
+          y.Log.warn(`Request encoding failed for ${p.urlConfig.getUrl()}`, L);
         }
     }
     _tryToCompressBody(p) {
@@ -2310,7 +2320,7 @@ function hn() {
             const R = new TextEncoder().encode(T),
               L = new CompressionStream("gzip"),
               A = L.writable.getWriter();
-            (A.write(R).catch(h.Log.error), A.close().catch(h.Log.error));
+            (A.write(R).catch(y.Log.error), A.close().catch(y.Log.error));
             const ve = L.readable.getReader(),
               V = [];
             let $;
@@ -2322,10 +2332,10 @@ function hn() {
             ((p.body = F),
               (p.params = Object.assign(
                 Object.assign({}, (O = p.params) !== null && O !== void 0 ? O : {}),
-                { [g.NetworkParam.IsGzipped]: "1" },
+                { [f.NetworkParam.IsGzipped]: "1" },
               )));
           } catch (R) {
-            h.Log.warn(`Request compression failed for ${p.urlConfig.getUrl()}`, R);
+            y.Log.warn(`Request compression failed for ${p.urlConfig.getUrl()}`, R);
           }
       });
     }
@@ -2335,8 +2345,8 @@ function hn() {
       return ("data" in O && D(R, O.data), R);
     }
   };
-  oe.NetworkCore = y;
-  const k = (I) => (I.sdkKey ? !0 : (h.Log.warn("Unable to make request without an SDK key"), !1)),
+  oe.NetworkCore = h;
+  const w = (I) => (I.sdkKey ? !0 : (y.Log.warn("Unable to make request without an SDK key"), !1)),
     D = (I, p) => {
       const { sdkKey: O, fallbackUrl: T } = I,
         R = u.StableID.get(O),
@@ -2392,11 +2402,11 @@ function hn() {
     );
   }
   function W(I, p) {
-    I.urlConfig.endpoint === g.Endpoint._initialize &&
+    I.urlConfig.endpoint === f.Endpoint._initialize &&
       c.Diagnostics._markInitNetworkReqStart(I.sdkKey, { attempt: p });
   }
   function x(I, p, O, T, R) {
-    I.urlConfig.endpoint === g.Endpoint._initialize &&
+    I.urlConfig.endpoint === f.Endpoint._initialize &&
       c.Diagnostics._markInitNetworkReqEnd(I.sdkKey, c.Diagnostics._getDiagnosticsData(p, O, T, R));
   }
   function B(I) {
@@ -2426,24 +2436,24 @@ function Sn() {
         (Object.defineProperty(e, "__esModule", { value: !0 }), (e._fastApproxSizeOf = void 0));
         const m = 2,
           c = 1,
-          h = (g, f) => {
+          y = (f, g) => {
             let S = 0;
-            const b = Object.keys(g);
+            const b = Object.keys(f);
             for (let v = 0; v < b.length; v++) {
               const l = b[v],
-                u = g[l];
+                u = f[l];
               if (
                 ((S += l.length),
                 typeof u == "object" && u !== null
-                  ? (S += (0, e._fastApproxSizeOf)(u, f) + m)
+                  ? (S += (0, e._fastApproxSizeOf)(u, g) + m)
                   : (S += String(u).length + c),
-                S >= f)
+                S >= g)
               )
                 return S;
             }
             return S;
           };
-        e._fastApproxSizeOf = h;
+        e._fastApproxSizeOf = y;
       })(He)),
     He
   );
@@ -2459,37 +2469,37 @@ function bn() {
       function s(E) {
         return E instanceof a
           ? E
-          : new a(function (w) {
-              w(E);
+          : new a(function (k) {
+              k(E);
             });
       }
-      return new (a || (a = Promise))(function (E, w) {
+      return new (a || (a = Promise))(function (E, k) {
         function _(D) {
           try {
-            k(d.next(D));
+            w(d.next(D));
           } catch (C) {
-            w(C);
+            k(C);
           }
         }
-        function y(D) {
+        function h(D) {
           try {
-            k(d.throw(D));
+            w(d.throw(D));
           } catch (C) {
-            w(C);
+            k(C);
           }
         }
-        function k(D) {
-          D.done ? E(D.value) : s(D.value).then(_, y);
+        function w(D) {
+          D.done ? E(D.value) : s(D.value).then(_, h);
         }
-        k((d = d.apply(n, t || [])).next());
+        w((d = d.apply(n, t || [])).next());
       });
     };
   (Object.defineProperty(ae, "__esModule", { value: !0 }), (ae.StatsigClientBase = void 0), H());
   const m = H(),
     c = nn(),
-    h = Zt(),
-    g = j(),
-    f = rn(),
+    y = Zt(),
+    f = j(),
+    g = rn(),
     S = ue(),
     b = rt(),
     v = Re(),
@@ -2498,12 +2508,12 @@ function bn() {
     r = 3e3;
   let o = class {
     constructor(t, a, d, s) {
-      var E, w, _, y;
+      var E, k, _, h;
       ((this.loadingStatus = "Uninitialized"),
         (this._initializePromise = null),
         (this._listeners = {}));
-      const k = this.$emt.bind(this);
-      (s?.logLevel != null && (g.Log.level = s.logLevel),
+      const w = this.$emt.bind(this);
+      (s?.logLevel != null && (f.Log.level = s.logLevel),
         s?.disableStorage && u.Storage._setDisabled(!0),
         s?.initialSessionID && b.StatsigSession.overrideInitialSessionID(s.initialSessionID, t),
         s?.storageProvider && u.Storage._setProvider(s.storageProvider),
@@ -2513,8 +2523,8 @@ function bn() {
         (this._options = s ?? {}),
         (this._memoCache = {}),
         (this.overrideAdapter = (E = s?.overrideAdapter) !== null && E !== void 0 ? E : null),
-        (this._logger = new h.EventLogger(t, k, d, s)),
-        (this._errorBoundary = new c.ErrorBoundary(t, s, k)),
+        (this._logger = new y.EventLogger(t, w, d, s)),
+        (this._errorBoundary = new c.ErrorBoundary(t, s, w)),
         this._errorBoundary.wrap(this),
         this._errorBoundary.wrap(a),
         this._errorBoundary.wrap(this._logger),
@@ -2522,13 +2532,13 @@ function bn() {
         (this.dataAdapter = a),
         this.dataAdapter.attach(t, s, d),
         (this.storageProvider = u.Storage),
-        (y =
-          (_ = (w = this.overrideAdapter) === null || w === void 0 ? void 0 : w.loadFromStorage) ===
+        (h =
+          (_ = (k = this.overrideAdapter) === null || k === void 0 ? void 0 : k.loadFromStorage) ===
             null || _ === void 0
             ? void 0
-            : _.call(w)) === null ||
-          y === void 0 ||
-          y.catch((D) => this._errorBoundary.logError("OA::loadFromStorage", D)),
+            : _.call(k)) === null ||
+          h === void 0 ||
+          h.catch((D) => this._errorBoundary.logError("OA::loadFromStorage", D)),
         this._primeReadyRipcord(),
         i(t, this));
     }
@@ -2583,7 +2593,7 @@ function bn() {
             this._errorBoundary.logError(`__emit:${t.name}`, E);
             return;
           }
-          g.Log.error(
+          f.Log.error(
             "An error occurred in a StatsigClientEvent listener. This is not an issue with Statsig.",
             t,
           );
@@ -2607,7 +2617,7 @@ function bn() {
     _memoize(t, a) {
       return (d, s) => {
         if (this._options.disableEvaluationMemoization) return a(d, s);
-        const E = (0, f.createMemoKey)(t, d, s);
+        const E = (0, g.createMemoKey)(t, d, s);
         return E
           ? (E in this._memoCache ||
               (Object.keys(this._memoCache).length >= r && (this._memoCache = {}),
@@ -2625,7 +2635,7 @@ function bn() {
       s = (a = d.instances) !== null && a !== void 0 ? a : {},
       E = t;
     (s[n] != null &&
-      g.Log.warn(
+      f.Log.warn(
         "Creating multiple Statsig clients with the same SDK key can lead to unexpected behavior. Multi-instance support requires different SDK keys.",
       ),
       (s[n] = E),
@@ -2677,27 +2687,27 @@ function wn() {
       value: o,
     };
   }
-  function h(l, u, r) {
+  function y(l, u, r) {
     var o;
     return Object.assign(Object.assign({}, c(l, u, r, r?.value === !0)), {
       idType: (o = r?.id_type) !== null && o !== void 0 ? o : null,
     });
   }
-  P._makeFeatureGate = h;
-  function g(l, u, r) {
+  P._makeFeatureGate = y;
+  function f(l, u, r) {
     var o;
     const i = (o = r?.value) !== null && o !== void 0 ? o : {};
     return Object.assign(Object.assign({}, c(l, u, r, i)), { get: v(l, r?.value) });
   }
-  P._makeDynamicConfig = g;
-  function f(l, u, r) {
+  P._makeDynamicConfig = f;
+  function g(l, u, r) {
     var o;
-    const i = g(l, u, r);
+    const i = f(l, u, r);
     return Object.assign(Object.assign({}, i), {
       groupName: (o = r?.group_name) !== null && o !== void 0 ? o : null,
     });
   }
-  P._makeExperiment = f;
+  P._makeExperiment = g;
   function S(l, u, r, o) {
     var i, n;
     return Object.assign(Object.assign({}, c(l, u, r, void 0)), {
@@ -2739,12 +2749,12 @@ function Dn() {
   ((Ht = 1),
     Object.defineProperty(le, "__esModule", { value: !0 }),
     (le.UPDATE_DETAIL_ERROR_MESSAGES = le.createUpdateDetails = void 0));
-  const e = (m, c, h, g, f, S) => ({
-    duration: h,
+  const e = (m, c, y, f, g, S) => ({
+    duration: y,
     source: c,
     success: m,
-    error: g,
-    sourceUrl: f,
+    error: f,
+    sourceUrl: g,
     warnings: S,
   });
   return (
@@ -2789,19 +2799,19 @@ function On() {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.Storage = e.Log = e.EventLogger = e.Diagnostics = void 0),
           H());
-        const h = H(),
-          g = Ye();
+        const y = H(),
+          f = Ye();
         Object.defineProperty(e, "Diagnostics", {
           enumerable: !0,
           get: function () {
-            return g.Diagnostics;
+            return f.Diagnostics;
           },
         });
-        const f = Zt();
+        const g = Zt();
         Object.defineProperty(e, "EventLogger", {
           enumerable: !0,
           get: function () {
-            return f.EventLogger;
+            return g.EventLogger;
           },
         });
         const S = j();
@@ -2828,8 +2838,8 @@ function On() {
           c(nn(), e),
           c(dn(), e),
           c(_n(), e),
-          c(ge(), e),
-          c(fn(), e),
+          c(fe(), e),
+          c(gn(), e),
           c(j(), e),
           c(rn(), e),
           c(Ce(), e),
@@ -2859,7 +2869,7 @@ function On() {
           c(et(), e),
           c(Dn(), e),
           c(on(), e),
-          Object.assign((0, h._getStatsigGlobal)(), { Log: S.Log, SDK_VERSION: b.SDK_VERSION }));
+          Object.assign((0, y._getStatsigGlobal)(), { Log: S.Log, SDK_VERSION: b.SDK_VERSION }));
       })(X)),
     X
   );

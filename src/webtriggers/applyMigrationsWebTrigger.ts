@@ -56,13 +56,13 @@ export const applySchemaMigrations = async (
       statusText: "OK",
       body: "Migrations successfully executed",
     };
-  } catch (error) {
-    try {
-      console.error("Error during migration:", JSON.stringify(error));
-    } catch (e) {
-      console.trace("Error stringify:", e);
-      console.error("Error during migration:", error);
-    }
+  } catch (error: any) {
+    const errorMessage =
+      error?.debug?.sqlMessage ??
+      error?.debug?.message ??
+      error.message ??
+      "Unknown error occurred";
+    console.error("Error during migration:", errorMessage);
     return {
       headers: { "Content-Type": ["application/json"] },
       statusCode: 500,

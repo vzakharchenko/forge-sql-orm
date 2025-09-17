@@ -87,7 +87,7 @@ describe("cacheUtils", () => {
     cacheEntityName: "cache",
     cacheTTL: 120,
     cacheWrapTable: true,
-    logRawSqlQuery: false,
+    logRawSqlQuery: true,
     disableOptimisticLocking: false,
   };
 
@@ -608,7 +608,7 @@ describe("cacheUtils", () => {
 
     it("should log performance metrics", async () => {
       const { clearExpiredCache } = await import("../../../src/utils/cacheUtils");
-      const consoleSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
 
       const mockQueryBuilder = {
         index: vi.fn().mockReturnThis(),

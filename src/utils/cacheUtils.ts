@@ -287,7 +287,9 @@ export async function clearExpiredCache(options: ForgeSqlOrmOptions): Promise<vo
     );
   } finally {
     const duration = DateTime.now().toSeconds() - startTime.toSeconds();
-    console.info(`Cleared ${totalRecords} expired cache records in ${duration} seconds`);
+    if (options?.logRawSqlQuery) {
+      console.debug(`Cleared ${totalRecords} expired cache records in ${duration} seconds`);
+    }
   }
 }
 
