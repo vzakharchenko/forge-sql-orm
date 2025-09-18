@@ -57,13 +57,19 @@ export const parseDateTime = (value: string | Date, format: string): Date => {
     if (dt.isValid) {
       result = dt.toJSDate();
     } else {
-      // 2. Try to parse as ISO string
-      const isoDt = DateTime.fromISO(value);
-      if (isoDt.isValid) {
-        result = isoDt.toJSDate();
+      // 2. Try to parse as SQL string
+      const sqlDt = DateTime.fromSQL(value);
+      if (sqlDt.isValid) {
+        result = sqlDt.toJSDate();
       } else {
-        // 3. Fallback: use native Date constructor
-        result = new Date(value);
+        // 3. Try to parse as RFC2822 string
+        const isoDt = DateTime.fromRFC2822(value);
+        if (isoDt.isValid) {
+          result = isoDt.toJSDate();
+        } else {
+          // 4. Fallback: use native Date constructor
+          result = new Date(value);
+        }
       }
     }
   }
@@ -81,7 +87,11 @@ export const parseDateTime = (value: string | Date, format: string): Date => {
  * @returns Formatted date string.
  * @throws Error if value cannot be parsed as a valid date.
  */
-export function formatDateTime(value: Date | string | number, format: string): string {
+export function formatDateTime(
+  value: Date | string | number,
+  format: string,
+  isTimeStamp: boolean,
+): string {
   let dt: DateTime | null = null;
 
   if (value instanceof Date) {
@@ -110,6 +120,21 @@ export function formatDateTime(value: Date | string | number, format: string): s
 
   if (!dt?.isValid) {
     throw new Error("Invalid Date");
+  }
+  const minDate = DateTime.fromSeconds(1);
+  const maxDate = DateTime.fromMillis(2147483647 * 1000); // 2038-01-19 03:14:07.999 UTC
+
+  if (isTimeStamp) {
+    if (dt < minDate) {
+      throw new Error(
+        "Atlassian Forge does not support zero or negative timestamps. Allowed range: from '1970-01-01 00:00:01.000000' to '2038-01-19 03:14:07.999999'.",
+      );
+    }
+    if (dt > maxDate) {
+      throw new Error(
+        "Atlassian Forge does not support timestamps beyond 2038-01-19 03:14:07.999999. Please use a smaller date within the supported range.",
+      );
+    }
   }
 
   return dt.toFormat(format);

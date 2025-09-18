@@ -11,7 +11,7 @@ import {
   MySqlSelectDynamic,
   type SelectedFields,
 } from "drizzle-orm/mysql-core/query-builders/select.types";
-import { InferInsertModel, Query, SQL } from "drizzle-orm";
+import { InferInsertModel, Query, sql, SQL } from "drizzle-orm";
 import { parseDateTime, formatDateTime } from "../utils/sqlUtils";
 import {
   MySqlRemoteDatabase,
@@ -864,10 +864,10 @@ export const forgeDateTimeString = customType<{
     return "datetime";
   },
   toDriver(value: Date) {
-    return formatDateTime(value, "yyyy-LL-dd' 'HH:mm:ss.SSS");
+    return formatDateTime(value, "yyyy-MM-dd' 'HH:mm:ss.SSS", false);
   },
   fromDriver(value: unknown) {
-    const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
+    const format = "yyyy-MM-dd' 'HH:mm:ss.SSS";
     return parseDateTime(value as string, format);
   },
 });
@@ -887,10 +887,10 @@ export const forgeTimestampString = customType<{
     return "timestamp";
   },
   toDriver(value: Date) {
-    return formatDateTime(value, "yyyy-LL-dd' 'HH:mm:ss.SSS");
+    return formatDateTime(value, "yyyy-MM-dd' 'HH:mm:ss.SSS", true);
   },
   fromDriver(value: unknown) {
-    const format = "yyyy-LL-dd'T'HH:mm:ss.SSS";
+    const format = "yyyy-MM-dd' 'HH:mm:ss.SSS";
     return parseDateTime(value as string, format);
   },
 });
@@ -910,10 +910,10 @@ export const forgeDateString = customType<{
     return "date";
   },
   toDriver(value: Date) {
-    return formatDateTime(value, "yyyy-LL-dd");
+    return formatDateTime(value, "yyyy-MM-dd", false);
   },
   fromDriver(value: unknown) {
-    const format = "yyyy-LL-dd";
+    const format = "yyyy-MM-dd";
     return parseDateTime(value as string, format);
   },
 });
@@ -933,7 +933,7 @@ export const forgeTimeString = customType<{
     return "time";
   },
   toDriver(value: Date) {
-    return formatDateTime(value, "HH:mm:ss.SSS");
+    return formatDateTime(value, "HH:mm:ss.SSS", false);
   },
   fromDriver(value: unknown) {
     return parseDateTime(value as string, "HH:mm:ss.SSS");
