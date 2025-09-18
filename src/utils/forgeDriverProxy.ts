@@ -23,7 +23,7 @@ export function createForgeDriverProxy(options?: SqlHints, logRawSqlQuery?: bool
     }
     try {
       // Call the original forgeDriver with the modified query
-      return forgeDriver(modifiedQuery, params, method);
+      return await forgeDriver(modifiedQuery, params, method);
     } catch (error) {
       if (logRawSqlQuery) {
         console.debug("SQL Error:", JSON.stringify(error));

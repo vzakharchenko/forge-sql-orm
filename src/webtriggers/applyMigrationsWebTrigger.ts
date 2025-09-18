@@ -40,13 +40,17 @@ export const applySchemaMigrations = async (
     console.info("Migrations applied:", successfulMigrations);
 
     const migrationList = await migrationRunner.list();
-    const migrationHistory =
-      Array.isArray(migrationList) && migrationList.length > 0
-        ? migrationList
-            .sort((a, b) => a.migratedAt.getTime() - b.migratedAt.getTime())
-            .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
-            .join("\n")
-        : "No migrations found";
+    let migrationHistory = "No migrations found";
+
+    if (Array.isArray(migrationList) && migrationList.length > 0) {
+      const sortedMigrations = migrationList.toSorted(
+        (a, b) => a.migratedAt.getTime() - b.migratedAt.getTime(),
+      );
+
+      migrationHistory = sortedMigrations
+        .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
+        .join("\n");
+    }
 
     console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
 

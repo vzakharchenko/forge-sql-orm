@@ -13,7 +13,11 @@ import {
 } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { InferInsertModel, Query, SQL } from "drizzle-orm";
 import { parseDateTime, formatDateTime } from "../utils/sqlUtils";
-import { MySqlRemoteDatabase, MySqlRemotePreparedQueryHKT } from "drizzle-orm/mysql-proxy";
+import {
+  MySqlRemoteDatabase,
+  MySqlRemotePreparedQueryHKT,
+  MySqlRemoteQueryResultHKT,
+} from "drizzle-orm/mysql-proxy";
 import { SqlHints } from "../utils/sqlHints";
 import {
   ClusterStatementRowCamelCase,
@@ -42,7 +46,7 @@ import {
   MySqlSelectBase,
   MySqlUpdateBuilder,
 } from "drizzle-orm/mysql-core/query-builders";
-import { MySqlRemoteQueryResultHKT } from "drizzle-orm/mysql-proxy";
+
 import {
   GetSelectTableName,
   GetSelectTableSelection,
