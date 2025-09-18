@@ -11,7 +11,7 @@ import {
   MySqlSelectDynamic,
   type SelectedFields,
 } from "drizzle-orm/mysql-core/query-builders/select.types";
-import { InferInsertModel, Query, sql, SQL } from "drizzle-orm";
+import { InferInsertModel, Query, SQL } from "drizzle-orm";
 import { parseDateTime, formatDateTime } from "../utils/sqlUtils";
 import {
   MySqlRemoteDatabase,
