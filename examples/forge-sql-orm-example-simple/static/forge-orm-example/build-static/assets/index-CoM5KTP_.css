@@ -1835,11 +1835,20 @@ button {
   -webkit-appearance: none;
   appearance: none;
 }
+._ymio1r31:focus:not(:focus-visible) {
+  outline-color: currentColor;
+}
+._ypr0glyw:focus:not(:focus-visible) {
+  outline-style: none;
+}
+._zcxs1o36:focus:not(:focus-visible) {
+  outline-width: medium;
+}
 ._128mdkaa:focus-visible {
   outline-width: var(--ds-border-width-focused, 2px);
 }
-._1ah31gt5:focus-visible {
-  outline-offset: var(--_12dc40g);
+._1ah31gjf:focus-visible {
+  outline-offset: calc(0px - var(--ds-border-width-focused, 2px));
 }
 ._1ah3dkaa:focus-visible {
   outline-offset: var(--ds-border-width-focused, 2px);
@@ -1857,8 +1866,8 @@ button {
   ._4davt94y:focus-visible {
     outline-width: 1px;
   }
-  ._2mwq1gt5:focus-visible {
-    outline-offset: var(--_12dc40g);
+  ._2mwq1gjf:focus-visible {
+    outline-offset: calc(0px - var(--ds-border-width-focused, 2px));
   }
 }
 ._19itidpf {
