@@ -131,7 +131,7 @@ export const slowQuery = informationSchema.table("SLOW_QUERY", {
 export type SlowQuery = typeof slowQuery.$inferSelect;
 
 // Common schema for cluster statements summary tables
-const createClusterStatementsSummarySchema = (tableName: string) => ({
+const createClusterStatementsSummarySchema = () => ({
   instance: varchar("INSTANCE", { length: 64 }), // TiDB/TiKV instance address
 
   summaryBeginTime: timestamp("SUMMARY_BEGIN_TIME", { mode: "string" }).notNull(), // Begin time of this summary window
@@ -306,7 +306,7 @@ const createClusterStatementsSummarySchema = (tableName: string) => ({
 
 export const clusterStatementsSummaryHistory = informationSchema.table(
   "CLUSTER_STATEMENTS_SUMMARY_HISTORY",
-  createClusterStatementsSummarySchema("CLUSTER_STATEMENTS_SUMMARY_HISTORY"),
+  createClusterStatementsSummarySchema(),
 );
 
 // Types
@@ -314,7 +314,7 @@ export type ClusterStatementsSummaryHistory = typeof clusterStatementsSummaryHis
 
 export const clusterStatementsSummary = informationSchema.table(
   "CLUSTER_STATEMENTS_SUMMARY",
-  createClusterStatementsSummarySchema("CLUSTER_STATEMENTS_SUMMARY"),
+  createClusterStatementsSummarySchema(),
 );
 
 // Types
