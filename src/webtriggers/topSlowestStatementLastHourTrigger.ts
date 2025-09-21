@@ -5,22 +5,26 @@ import { unionAll } from "drizzle-orm/mysql-core";
 import { formatLimitOffset } from "../utils/sqlUtils";
 
 /**
- * Scheduler trigger: log and return the single slowest statement from the last hour, filtered by latency.
+ * Scheduler trigger: log and return the single slowest statement from the last hour, filtered by latency OR memory usage.
  *
  * When scheduled (e.g. hourly), this trigger queries
  * INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY for the last hour
- * and prints the TOP 1 entry (by AVG_LATENCY) if and only if
- * its average latency (ns → ms) exceeds `warnThresholdMs`.
+ * and prints the TOP 1 entry (by AVG_LATENCY) if it exceeds either threshold.
  *
- * Both logging and returned rows only include statements slower than `warnThresholdMs`.
+ * **OR Logic**: Statements are included if they exceed EITHER threshold:
+ * - avgLatencyMs > warnThresholdMs OR
+ * - avgMemBytes > memoryThresholdBytes
+ *
+ * **Pro Tips:**
+ * - Memory-only monitoring: Set warnThresholdMs to 10000ms (effectively disabled)
+ * - Latency-only monitoring: Set memoryThresholdBytes to 16MB (16 * 1024 * 1024) (effectively disabled)
+ * - Combined monitoring: Use both thresholds for comprehensive monitoring
  *
  * Excludes statements with empty `digestText`, empty `digest`, or service statements (`Use`, `Set`, `Show`).
  *
  * Logging rule:
- *  - avgLatencyMs > warnThresholdMs → console.warn (logged)
+ *  - Query exceeds warnThresholdMs OR memoryThresholdBytes → console.warn (logged)
  *  - otherwise → not logged
- *
- * Additionally, statements are included if their average memory usage exceeds `memoryThresholdBytes` (default: 8MB).
  *
  * @param orm             ForgeSQL ORM instance (required)
  * @param warnThresholdMs Milliseconds threshold for logging and filtering (default: 300ms)
@@ -33,16 +37,20 @@ import { formatLimitOffset } from "../utils/sqlUtils";
  *
  * const FORGE_SQL_ORM = new ForgeSQL();
  *
- * // Default threshold: 300ms
+ * // Default thresholds: 300ms latency OR 8MB memory
  * export const topSlowQueryTrigger = () =>
  *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM);
  *
- * // Custom threshold: log only entries slower than 500ms
- * export const topSlowQueryTrigger500 = () =>
- *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500);
+ * // Only latency monitoring: 500ms threshold (memory effectively disabled)
+ * export const latencyOnlyTrigger = () =>
+ *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 16 * 1024 * 1024);
  *
- * // Custom thresholds: 500ms latency OR 8MB memory
- * export const topSlowQueryTriggerMem = () =>
+ * // Only memory monitoring: 4MB threshold (latency effectively disabled)
+ * export const memoryOnlyTrigger = () =>
+ *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 10000, 4 * 1024 * 1024);
+ *
+ * // Both thresholds: 500ms latency OR 8MB memory
+ * export const bothThresholdsTrigger = () =>
  *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 8 * 1024 * 1024);
  * ```
  *

@@ -2082,6 +2082,14 @@ export const conservativeMemoryTrigger = () =>
 export const aggressiveMemoryTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL, 300, 12 * 1024 * 1024);
 
+// Memory-only monitoring: Only trigger on memory usage (latency effectively disabled)
+export const memoryOnlyTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, 10000, 4 * 1024 * 1024);
+
+// Latency-only monitoring: Only trigger on slow queries (memory effectively disabled)
+export const latencyOnlyTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, 500, 16 * 1024 * 1024);
+
 
 #### 3. Configure in manifest.yml
 
@@ -2189,6 +2197,17 @@ When used as a **web trigger**, the system:
 | `warnThresholdMs` | `number` | `300` | Latency threshold in milliseconds (secondary) |
 | `memoryThresholdBytes` | `number` | `8 * 1024 * 1024` | **Memory usage threshold in bytes (primary focus)** |
 | `options` | `ForgeSqlOrmOptions` | `undefined` | Optional ORM configuration |
+
+**⚠️ Important: OR Logic**
+The monitoring uses **OR logic** - if **either** threshold is exceeded, the query will be logged/returned:
+- Query exceeds `warnThresholdMs` **OR** `memoryThresholdBytes` → Included in results
+- This means you can set different thresholds for different monitoring priorities
+- No need to exceed both thresholds simultaneously
+
+**💡 Pro Tips:**
+- **Memory-only monitoring**: Set `warnThresholdMs` to a very high value (e.g., 10000ms) to trigger only on memory usage
+- **Latency-only monitoring**: Set `memoryThresholdBytes` to 16MB (16 * 1024 * 1024) to trigger only on latency
+- **Combined monitoring**: Use both thresholds for comprehensive monitoring
 
 **Memory Threshold Guidelines:**
 - **Conservative**: 4MB (25% of 16MB limit)

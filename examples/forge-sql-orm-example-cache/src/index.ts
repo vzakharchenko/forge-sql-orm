@@ -61,36 +61,36 @@ resolver.define(
 );
 
 resolver.define("clearCache", async (): Promise<void> => {
-    FORGE_SQL_ORM.modifyWithVersioningAndEvictCache().evictCacheEntities([demoUsers, demoOrders])
+  FORGE_SQL_ORM.modifyWithVersioningAndEvictCache().evictCacheEntities([demoUsers, demoOrders]);
 });
 resolver.define("runPerformanceAnalyze", async () => {
-    const response = await topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 4 * 1024 * 1024);
-    return JSON.parse(response.body);
+  const response = await topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 4 * 1024 * 1024);
+  return JSON.parse(response.body);
 });
 
 resolver.define("insertUserOrOrder", async (req: Request<NewUserOrder>): Promise<void> => {
   await FORGE_SQL_ORM.executeWithCacheContext(async () => {
     let userId = req.payload.userId;
-    
+
     // Search for existing user by ID (if provided) or by name
     let demoUserList;
     if (req.payload.userId) {
       demoUserList = await FORGE_SQL_ORM.selectCacheableFrom(demoUsers).where(
-        or(eq(demoUsers.id, req.payload.userId), eq(demoUsers.name, req.payload.userName))
+        or(eq(demoUsers.id, req.payload.userId), eq(demoUsers.name, req.payload.userName)),
       );
     } else {
       demoUserList = await FORGE_SQL_ORM.selectCacheableFrom(demoUsers).where(
-        eq(demoUsers.name, req.payload.userName)
+        eq(demoUsers.name, req.payload.userName),
       );
     }
-    
+
     if (!demoUserList.length) {
       // Create new user - let database auto-generate ID if not provided
       const userData: any = { name: req.payload.userName };
       if (req.payload.userId) {
         userData.id = req.payload.userId;
       }
-      
+
       const result = await FORGE_SQL_ORM.insertAndEvictCache(demoUsers).values(userData);
       userId = result[0].insertId;
     } else if (userId && demoUserList.length && demoUserList[0].name !== req.payload.userName) {
@@ -102,23 +102,23 @@ resolver.define("insertUserOrOrder", async (req: Request<NewUserOrder>): Promise
       // Use existing user ID if no ID was provided
       userId = demoUserList[0].id;
     }
-    
+
     if (!userId) {
       throw new Error("User Id is null");
     }
-    
+
     // Search for existing order by ID (if provided) or by product name and user
     let demoOrderList;
     if (req.payload.productId) {
       demoOrderList = await FORGE_SQL_ORM.selectCacheableFrom(demoOrders).where(
-        eq(demoOrders.id, req.payload.productId)
+        eq(demoOrders.id, req.payload.productId),
       );
     } else {
       demoOrderList = await FORGE_SQL_ORM.selectCacheableFrom(demoOrders).where(
-        and(eq(demoOrders.userId, userId), eq(demoOrders.product, req.payload.product))
+        and(eq(demoOrders.userId, userId), eq(demoOrders.product, req.payload.product)),
       );
     }
-    
+
     if (!demoOrderList.length) {
       // Create new order - let database auto-generate ID if not provided
       const orderData: any = {
@@ -129,7 +129,7 @@ resolver.define("insertUserOrOrder", async (req: Request<NewUserOrder>): Promise
       if (req.payload.productId) {
         orderData.id = req.payload.productId;
       }
-      
+
       await FORGE_SQL_ORM.insert(demoOrders).values(orderData);
     } else {
       // Update existing order
