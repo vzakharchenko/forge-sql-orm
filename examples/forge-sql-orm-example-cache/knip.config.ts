@@ -3,6 +3,7 @@ import { defaultConfig } from "../../knip.config";
 const config: KnipConfig = {
   ...defaultConfig,
   project: ["src/**/*.ts"],
+  ignoreDependencies: ["drizzle-kit", "@forge/kvs"],
 };
 
 export default config;

@@ -11,7 +11,6 @@ import { FORGE_SQL_ORM } from "./utils/forgeSqlOrmUtils";
 import { demoOrders, demoUsers } from "./entities";
 import { eq, or, and, sql } from "drizzle-orm";
 import { NewUserOrder, UserOrderRow } from "./utils/Constants";
-import forgeSQLORM from "../../../src/core/ForgeSQLORM";
 
 const SQL_CACHE_QUERY = FORGE_SQL_ORM.selectCacheable({
   userId: demoUsers.id,
@@ -154,7 +153,7 @@ export const fetchMigrations = () => {
   return fetchSchemaWebTrigger();
 };
 export const runPerformanceAnalyze = () => {
-  return topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 4 * 1024 * 1024);
+  return topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 300, 4 * 1024 * 1024);
 };
 
 export const clearCache = () => {
