@@ -62,8 +62,10 @@ export const applySchemaMigrations = async (
     };
   } catch (error: any) {
     const errorMessage =
-      error?.debug?.sqlMessage ??
-      error?.debug?.message ??
+      error?.cause?.context?.debug?.sqlMessage ??
+      error?.cause?.context?.debug?.message ??
+      error?.debug?.context?.sqlMessage ??
+      error?.debug?.context?.message ??
       error.message ??
       "Unknown error occurred";
     console.error("Error during migration:", errorMessage);
@@ -71,7 +73,7 @@ export const applySchemaMigrations = async (
       headers: { "Content-Type": ["application/json"] },
       statusCode: 500,
       statusText: "Internal Server Error",
-      body: error instanceof Error ? error.message : "Unknown error during migration",
+      body: error instanceof Error ? errorMessage : "Unknown error during migration",
     };
   }
 };

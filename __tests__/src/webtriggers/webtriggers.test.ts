@@ -5,12 +5,14 @@ import {
   applySchemaMigrations,
   dropTableSchemaMigrations,
   clearCacheSchedulerTrigger,
+  topSlowestStatementLastHourTrigger,
 } from "../../../src/webtriggers";
 import { getTables } from "../../../src/core/SystemTables";
 import { generateDropTableStatements } from "../../../src/utils/sqlUtils";
 import { clearExpiredCache } from "../../../src/utils/cacheUtils";
 import { sql } from "@forge/sql";
 import { MigrationRunner } from "@forge/sql/out/migration";
+import ForgeSQLORM from "../../../src/core/ForgeSQLORM";
 
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
@@ -65,17 +67,105 @@ vi.mock("@forge/sql", () => {
 vi.mock("../../../src/core/SystemTables", () => ({
   getTables: vi.fn().mockResolvedValue([]),
   forgeSystemTables: [],
+  clusterStatementsSummary: {
+    digest: "digest",
+    stmtType: "stmtType",
+    schemaName: "schemaName",
+    execCount: "execCount",
+    avgLatency: "avgLatency",
+    maxLatency: "maxLatency",
+    minLatency: "minLatency",
+    avgProcessTime: "avgProcessTime",
+    avgWaitTime: "avgWaitTime",
+    avgBackoffTime: "avgBackoffTime",
+    avgTotalKeys: "avgTotalKeys",
+    firstSeen: "firstSeen",
+    lastSeen: "lastSeen",
+    planInCache: "planInCache",
+    planCacheHits: "planCacheHits",
+    digestText: "digestText",
+    plan: "plan",
+    summaryEndTime: "summaryEndTime",
+  },
+  clusterStatementsSummaryHistory: {
+    digest: "digest",
+    stmtType: "stmtType",
+    schemaName: "schemaName",
+    execCount: "execCount",
+    avgLatency: "avgLatency",
+    maxLatency: "maxLatency",
+    minLatency: "minLatency",
+    avgProcessTime: "avgProcessTime",
+    avgWaitTime: "avgWaitTime",
+    avgBackoffTime: "avgBackoffTime",
+    avgTotalKeys: "avgTotalKeys",
+    firstSeen: "firstSeen",
+    lastSeen: "lastSeen",
+    planInCache: "planInCache",
+    planCacheHits: "planCacheHits",
+    digestText: "digestText",
+    plan: "plan",
+    summaryEndTime: "summaryEndTime",
+  },
 }));
 
 // Mock sqlUtils
 vi.mock("../../../src/utils/sqlUtils", () => ({
   generateDropTableStatements: vi.fn().mockReturnValue([]),
+  formatLimitOffset: vi.fn().mockReturnValue(1),
 }));
 
 // Mock cacheUtils
 vi.mock("../../../src/utils/cacheUtils", () => ({
   clearExpiredCache: vi.fn().mockResolvedValue(undefined),
 }));
+
+// Mock drizzle-orm/mysql-core
+vi.mock("drizzle-orm/mysql-core", () => ({
+  unionAll: vi.fn().mockImplementation(() => ({
+    as: vi.fn().mockReturnValue({
+      digest: "digest",
+      stmtType: "stmtType",
+      schemaName: "schemaName",
+      execCount: "execCount",
+      avgLatencyNs: "avgLatencyNs",
+      maxLatencyNs: "maxLatencyNs",
+      minLatencyNs: "minLatencyNs",
+      avgProcessTimeNs: "avgProcessTimeNs",
+      avgWaitTimeNs: "avgWaitTimeNs",
+      avgBackoffTimeNs: "avgBackoffTimeNs",
+      avgMemBytes: "avgMemBytes",
+      maxMemBytes: "maxMemBytes",
+      avgTotalKeys: "avgTotalKeys",
+      firstSeen: "firstSeen",
+      lastSeen: "lastSeen",
+      planInCache: "planInCache",
+      planCacheHits: "planCacheHits",
+      digestText: "digestText",
+      plan: "plan",
+    }),
+  })),
+}));
+
+// Mock ForgeSQLORM
+vi.mock("../../../src/core/ForgeSQLORM", () => {
+  const mockQueryBuilder = {
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    groupBy: vi.fn().mockReturnThis(),
+    getSelectedFields: vi.fn().mockReturnValue({}),
+    addSetOperators: vi.fn().mockReturnThis(),
+  };
+
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      getDrizzleQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+    })),
+  };
+});
 
 describe("WebTriggers", () => {
   let mockMigrationRunner: MockMigrationRunner;
@@ -354,6 +444,87 @@ describe("WebTriggers", () => {
       expect(clearExpiredCache).toHaveBeenCalledWith(partialOptions);
 
       expect(result.statusCode).toBe(200);
+    });
+  });
+
+  describe("topSlowestStatementLastHourTrigger", () => {
+    it("should handle errors gracefully when ORM is invalid", async () => {
+      const invalidORM = null as any;
+
+      const result = await topSlowestStatementLastHourTrigger(invalidORM);
+
+      expect(result.statusCode).toBe(500);
+      expect(result.headers).toEqual({ "Content-Type": ["application/json"] });
+
+      const body = JSON.parse(result.body);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe("Failed to fetch or log slow queries");
+      expect(body.timestamp).toBeDefined();
+    });
+
+    it("should handle errors gracefully when ORM methods are missing", async () => {
+      const incompleteORM = {
+        getDrizzleQueryBuilder: vi.fn().mockReturnValue({}),
+      };
+
+      const result = await topSlowestStatementLastHourTrigger(incompleteORM);
+
+      expect(result.statusCode).toBe(500);
+      expect(result.headers).toEqual({ "Content-Type": ["application/json"] });
+
+      const body = JSON.parse(result.body);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe("Failed to fetch or log slow queries");
+      expect(body.timestamp).toBeDefined();
+    });
+
+    it("should use default parameters when not provided", async () => {
+      const mockORM = {
+        getDrizzleQueryBuilder: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          from: vi.fn().mockReturnThis(),
+          where: vi.fn().mockReturnThis(),
+          orderBy: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockRejectedValue(new Error("Database error")),
+          groupBy: vi.fn().mockReturnThis(),
+        }),
+      };
+
+      const result = await topSlowestStatementLastHourTrigger(mockORM);
+
+      expect(result.statusCode).toBe(500);
+
+      const body = JSON.parse(result.body);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe("Failed to fetch or log slow queries");
+    });
+
+    it("should accept custom parameters", async () => {
+      const mockORM = {
+        getDrizzleQueryBuilder: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          from: vi.fn().mockReturnThis(),
+          where: vi.fn().mockReturnThis(),
+          orderBy: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockRejectedValue(new Error("Database error")),
+          groupBy: vi.fn().mockReturnThis(),
+        }),
+      };
+
+      const customThresholdMs = 500;
+      const customMemoryBytes = 4 * 1024 * 1024; // 4MB
+
+      const result = await topSlowestStatementLastHourTrigger(
+        mockORM,
+        customThresholdMs,
+        customMemoryBytes,
+      );
+
+      expect(result.statusCode).toBe(500);
+
+      const body = JSON.parse(result.body);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe("Failed to fetch or log slow queries");
     });
   });
 });

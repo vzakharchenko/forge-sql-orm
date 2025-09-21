@@ -3,7 +3,7 @@ import { defaultConfig } from "../../../../knip.config";
 const config: KnipConfig = {
   ...defaultConfig,
   project: ["src/*.{ts,tsx}"],
-  ignoreDependencies: ["prettier-plugin-pkg", "@atlaskit/dynamic-table"],
+  ignoreDependencies: ["prettier-plugin-pkg"],
 };
 
 export default config;

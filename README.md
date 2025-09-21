@@ -19,6 +19,7 @@
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
 - ✅ **Local Cache System (Level 1)** for in-memory query optimization within single resolver invocation scope
 - ✅ **Global Cache System (Level 2)** with cross-invocation caching, automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
+- ✅ **Memory Usage Monitoring**: Automated detection of memory-intensive queries with configurable thresholds (essential for Atlassian's 16 MiB per query limit)
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
@@ -63,6 +64,7 @@
 ### 🔒 Advanced Features
 - [Optimistic Locking](#optimistic-locking)
 - [Query Analysis and Performance Optimization](#query-analysis-and-performance-optimization)
+- [Memory Usage Monitoring](#memory-usage-monitoring)
 - [Date and Time Types](#date-and-time-types)
 
 ### 🛠️ Development Tools
@@ -79,6 +81,7 @@
 - [Query Analysis Example](examples/forge-sql-orm-example-query-analyses)
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker)
 - [Checklist Example](examples/forge-sql-orm-example-checklist)
+- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching capabilities with `topSlowestStatementLastHourTrigger` memory monitoring
 
 ### 📚 Reference
 - [ForgeSqlOrmOptions](#forgesqlormoptions)
@@ -95,6 +98,7 @@
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation persistent caching
 - [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory invocation caching
 - [Optimistic Locking](#optimistic-locking) - Data consistency
+- [Memory Usage Monitoring](#memory-usage-monitoring) - Memory-intensive query detection
 - [Migration Tools](#web-triggers-for-migrations) - Database migrations
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
 
@@ -103,6 +107,7 @@
 - [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking) - Real-world conflict handling
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker) - Complex relationships
 - [Checklist Example](examples/forge-sql-orm-example-checklist) - Jira integration
+- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching with memory monitoring
 
 ## Usage Approaches
 
@@ -2015,6 +2020,187 @@ This analysis provides insights into:
 - Resource usage at each step
 - Performance optimization opportunities
 
+## Memory Usage Monitoring
+
+[↑ Back to Top](#table-of-contents)
+
+Forge-SQL-ORM provides automated memory usage monitoring capabilities to help you identify and track memory-intensive queries in your Forge SQL instance. This feature is **essential for Atlassian Forge applications** as it helps you stay within the **16 MiB per query memory limit** and provides detailed insights for optimization.
+
+### Why Memory Monitoring is Critical
+
+Atlassian Forge SQL has a strict **16 MiB memory limit per query**. Unlike slow query detection (which is available in the Forge Developer Console), there's **no built-in way to monitor memory usage** of your queries. This monitoring system fills that gap by:
+
+- **Detecting memory-intensive queries** before they hit the 16 MiB limit
+- **Providing detailed memory metrics** including average and maximum memory usage
+- **Showing execution plans** to help optimize memory consumption
+- **Configurable thresholds** to match your application's memory requirements
+- **Scheduled monitoring** via Forge scheduler triggers
+
+### Overview
+
+The memory monitoring system:
+- **Automatically detects memory-intensive queries** based on configurable memory thresholds
+- **Provides detailed memory metrics** including execution time, memory usage, and execution plans
+- **Logs memory issues** to the Forge Developer Console for easy debugging
+- **Supports scheduled monitoring** via Forge scheduler triggers
+- **Filters out system queries** to focus on your application's performance
+
+### Key Features
+
+- **Memory-Focused Monitoring**: Primary focus on memory usage with configurable thresholds
+- **Atlassian 16 MiB Limit Awareness**: Designed specifically for Forge SQL's memory constraints
+- **Execution Plan Analysis**: Shows detailed query plans to help optimize memory consumption
+- **Configurable Thresholds**: Set custom memory usage thresholds (default: 4MB warning)
+- **Automatic Filtering**: Excludes system queries (`Use`, `Set`, `Show`) and empty queries
+- **Scheduled Monitoring**: Run automatically on configurable intervals
+
+### Basic Usage
+
+#### 1. Import the Trigger
+
+```typescript
+import ForgeSQL, { topSlowestStatementLastHourTrigger } from "forge-sql-orm";
+```
+
+#### 2. Create a Scheduler Function
+
+```typescript
+import ForgeSQL, { topSlowestStatementLastHourTrigger } from 'forge-sql-orm';
+
+// Initialize ForgeSQL ORM instance
+const forgeSQL = new ForgeSQL();
+
+// Basic usage with default thresholds (300ms latency, 8MB memory warning)
+export const memoryUsageTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL);
+
+// Conservative memory monitoring: 4MB warning (well below 16MB limit)
+export const conservativeMemoryTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, 300, 4 * 1024 * 1024);
+
+// Aggressive memory monitoring: 12MB warning (75% of 16MB limit)
+export const aggressiveMemoryTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, 300, 12 * 1024 * 1024);
+
+
+#### 3. Configure in manifest.yml
+
+**As Scheduler Trigger (Recommended for Production):**
+```yaml
+scheduledTrigger:
+  - key: memory-usage-trigger
+    function: memoryUsageTrigger
+    interval: hour  # Required: only hour interval is supported
+
+function:
+  - key: memoryUsageTrigger
+    handler: index.memoryUsageTrigger
+```
+
+**As Web Trigger (Development Only):**
+```yaml
+webtrigger:
+  - key: print-slowest-queries
+    function: memoryUsageTrigger
+
+function:
+  - key: memoryUsageTrigger
+    handler: index.memoryUsageTrigger
+```
+
+> **⚠️ Important**: Web triggers are not recommended for production as they violate the "run-on-atlassian" principle. Use scheduler triggers for production monitoring.
+
+### How It Works
+
+The memory monitoring trigger works differently depending on how it's configured:
+
+#### Scheduler Trigger Mode (Production)
+
+When used as a **scheduler trigger**, the system:
+- **Runs automatically** on the configured interval (hour only)
+- **Logs to Forge Developer Console** only when thresholds are exceeded
+- **No HTTP response** - operates silently in the background
+- **Perfect for production** monitoring without violating "run-on-atlassian"
+
+**Example Console Log Output:**
+```
+1. Select  avg=3006.03ms  max=3006.03ms  mem≈0.08MB(max 0.08MB)  exec=1 
+   digest=28344800f90f6c929484e83337404df7e55a660c5f4ce922c4b298ab5e90c425
+   sql=select `demo_users` . `id` as `a_userid_id` , `demo_users` . `name` as `a_username_name` , `demo_orders` . `product` as `a_product_product` , `demo_orders` . `id` as `a_productid_id` , `sleep` ( ? ) from `demo_users` inner join `demo_orders` on `demo_orders` . `user_id` = `demo_users` . `id`
+
+full plan:
+id task estRows operator info actRows execution info memory disk
+Projection_7 root 2.50 forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_users.id, forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_users.name, forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_orders.product, forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_orders.id, sleep(?)->Column#7 3 time:3s, loops:2, Concurrency:OFF 1.98 KB N/A
+└─IndexHashJoin_14 root 2.50 inner join, inner:IndexLookUp_11, outer key:forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_users.id, inner key:forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_orders.user_id, equal cond:eq(forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_users.id, forge_38dd1c6156b94bb59c2c9a45582bbfc7.demo_orders.user_id) 3 time:2.11ms, loops:2, inner:{total:1.31ms, concurrency:5, task:1, construct:6.62µs, fetch:1.3ms, build:4.68µs, join:6.14µs} 57.9 KB N/A
+```
+
+#### Web Trigger Mode (Development)
+
+When used as a **web trigger**, the system:
+- **Runs on-demand** when the web endpoint is called
+- **Returns JSON response** with detailed metrics
+- **Logs to console** AND provides structured data
+- **Useful for development** and debugging
+
+**Example JSON Response:**
+```json
+{
+  "success": true,
+  "window": "last_1h",
+  "top": 1,
+  "warnThresholdMs": 300,
+  "memoryThresholdBytes": 8388608,
+  "rows": [
+    {
+      "rank": 1,
+      "digest": "abc123...",
+      "stmtType": "Select",
+      "schemaName": "myapp",
+      "execCount": 150,
+      "avgLatencyMs": 450.25,
+      "maxLatencyMs": 1200.50,
+      "minLatencyMs": 200.10,
+      "avgProcessTimeMs": 400.20,
+      "avgWaitTimeMs": 50.05,
+      "avgBackoffTimeMs": 0.00,
+      "avgMemMB": 2.5,
+      "maxMemMB": 8.2,
+      "avgMemBytes": 2621440,
+      "maxMemBytes": 8598323,
+      "avgTotalKeys": 1000,
+      "firstSeen": "2024-01-15 10:30:00",
+      "lastSeen": "2024-01-15 11:30:00",
+      "planInCache": true,
+      "planCacheHits": 120,
+      "digestText": "SELECT * FROM users WHERE active = ?",
+      "plan": "IndexScan(users, idx_active)..."
+    }
+  ],
+  "generatedAt": "2024-01-15T11:30:00.000Z"
+}
+```
+
+### Configuration Options
+
+#### Threshold Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `warnThresholdMs` | `number` | `300` | Latency threshold in milliseconds (secondary) |
+| `memoryThresholdBytes` | `number` | `8 * 1024 * 1024` | **Memory usage threshold in bytes (primary focus)** |
+| `options` | `ForgeSqlOrmOptions` | `undefined` | Optional ORM configuration |
+
+**Memory Threshold Guidelines:**
+- **Conservative**: 4MB (25% of 16MB limit)
+- **Default**: 8MB (50% of 16MB limit) 
+- **Aggressive**: 12MB (75% of 16MB limit)
+- **Critical**: 14MB (87.5% of 16MB limit)
+
+#### Available Intervals
+
+- `hour` - **Every hour (Required)** - Statistics are available for approximately 12 hours
+
+> **⚠️ Important**: Due to Forge SQL's statistics retention policy (approximately 12 hours), **only `hour` interval is supported**. Using `day` or `week` intervals will result in incomplete or missing data.
 
 ## Migration Guide
 

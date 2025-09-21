@@ -1,8 +1,15 @@
-# Forge SQL ORM Basic Example
+# Forge SQL ORM Cache Example
 
-This application demonstrates basic CRUD operations using Forge SQL ORM. Unlike the [dynamic example](../forge-sql-orm-example), this version works with a predefined database schema and does not automatically reflect changes in the UI when the database schema is modified.
+This application demonstrates advanced caching capabilities using Forge SQL ORM. It showcases both local and global caching, performance analysis, and automatic cache management.
 
 See the [Forge documentation](https://developer.atlassian.com/platform/forge/) for more details.
+
+## Features
+
+- **Query Performance Testing**: Compare cached vs non-cached queries
+- **User & Order Management**: CRUD operations with automatic cache clearing
+- **Performance Analysis**: Detailed monitoring of slow queries and memory usage
+- **Cache Management**: Manual cache control and automatic invalidation
 
 ## Requirements
 
@@ -10,59 +17,62 @@ Before starting, ensure that your Forge environment is set up. Follow the [Forge
 
 ## Quick Start
 
-### Install dependencies
+### Backend Setup
 
 ```sh
+# Install dependencies
 npm install
-```
 
-### Install frontend dependencies (inside `static/forge-orm-basic[forge-orm-basic](static/forge-orm-basic)` directory)
-
-```sh
-npm install
-```
-
-### Build the frontend (inside `static/forge-orm-basic[forge-orm-basic](static/forge-orm-basic)` directory)
-
-```sh
-npm run build
-```
-
-### Register your application on the Atlassian platform (only once)
-
-```sh
+# Register your application on the Atlassian platform (only once)
 forge register
-```
 
-### Deploy your app
-
-```sh
+# Deploy your app
 forge deploy
+
+# Install the app on an Atlassian site (only once)
+forge install
+# Follow the prompts to select your environment (Jira/Confluence)
 ```
 
-### Install the app on an Atlassian site (only once)
+### Frontend Build
 
 ```sh
-forge install -s <environment>.atlassian.net
+# Navigate to frontend directory
+cd static/forge-orm-example/
+
+# Install frontend dependencies
+npm install
+
+# Build for production
+npm run build
 ```
 
 ### Using the Application
 
 This example allows you to:
 
-- Create user entities with `name` and `email` fields.
-- Retrieve all users from the database.
-- Update user details.
-- Delete users.
-- Find duplicate users based on the `name` or `email` fields.
+1. **Test Cache Performance**:
+   - Execute non-cached queries (~1000ms each time)
+   - Execute cached queries (instant after first run)
+   - Compare performance metrics
 
-1. You can add users with `name` and `email` fields.
-2. You can retrieve all users from the database.
-3. You can update user details.
-4. You can delete a user.
+2. **Manage Users & Orders**:
+   - Add users and orders with optional ID fields
+   - Automatic user matching by name
+   - Automatic cache clearing after modifications
+
+3. **Monitor Performance**:
+   - Run detailed performance analysis
+   - View slow queries with execution plans
+   - Monitor memory usage and latency
+
+4. **Control Cache**:
+   - Clear cache manually
+   - View cache statistics
 
 ### Notes
 
-- Use `forge deploy` to persist code changes.
-- Use `forge install` only when installing the app on a new site.
-- Once the app is installed, any new deployments will be automatically reflected without needing to reinstall.
+- Use `forge deploy` to persist code changes
+- Use `forge install` only when installing the app on a new site
+- Once the app is installed, any new deployments will be automatically reflected without needing to reinstall
+- The frontend must be built before deployment for the UI to work properly

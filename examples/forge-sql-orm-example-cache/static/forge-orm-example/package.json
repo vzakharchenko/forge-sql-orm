@@ -4,10 +4,7 @@
   "description": "",
   "dependencies": {
     "@atlaskit/css-reset": "^7.3.5",
-    "@atlaskit/dynamic-table": "^18.2.11",
     "@forge/bridge": "^5.4.0",
-    "mobx": "6.13.7",
-    "mobx-react": "9.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -15,6 +12,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.3.0",
     "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^5.0.2",
     "dotenv": "17.2.2",
     "knip": "^5.63.0",

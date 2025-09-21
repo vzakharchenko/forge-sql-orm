@@ -32,7 +32,7 @@ for i in {1..60}; do
   if docker exec "${CONTAINER_NAME}" mysqladmin ping -proot -p"${MYSQL_ROOT_PASSWORD}" --silent >/dev/null 2>&1; then
     break
   fi
-  sleep 1
+  sleep 20
 done
 
 # extra sanity check
@@ -52,12 +52,18 @@ echo "==> Creating table 'users' in database '${MYSQL_DATABASE}'"
 docker exec -i "${CONTAINER_NAME}" \
   mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" "${MYSQL_DATABASE}" <<'SQL'
 SET foreign_key_checks = 0;
-CREATE TABLE IF NOT EXISTS users (
-  id int NOT NULL AUTO_INCREMENT,
-  name varchar(200) DEFAULT NULL,
-  email varchar(200) DEFAULT NULL,
-  PRIMARY KEY (id) /*T![clustered_index] CLUSTERED */
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=30001;
+CREATE TABLE demo_users (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE demo_orders (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id INTEGER NOT NULL,
+    product VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES demo_users(id)
+);
 SET foreign_key_checks = 1
 SQL
 

@@ -73,4 +73,17 @@ A practical example demonstrating optimistic locking implementation in a real-wo
 - Default checklist initialization
 - Two update modes comparison (with/without locking)
 
+### [forge-sql-orm-example-cache](forge-sql-orm-example-cache)
+
+Advanced example demonstrating comprehensive caching capabilities and performance monitoring. This example showcases both local and global caching, automatic cache management, and detailed performance analysis.
+
+- Query performance testing (cached vs non-cached)
+- User & order management with automatic cache clearing
+- Performance analysis with detailed monitoring
+- Memory usage tracking and slow query detection
+- Cache management and automatic invalidation
+- Real-time performance metrics and execution plans
+- Optional ID fields with auto-generation
+- Modern React UI with detailed analytics
+
 Each example includes its own README with detailed setup instructions and usage examples.

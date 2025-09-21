@@ -9,6 +9,9 @@ modules:
     - key: scheduled-schema-migration
       function: runSchemaMigration
       interval: hour
+    - key: print-10slowest-queries
+      function: runPerformanceAnalyze
+      interval: hour
     - key: clear-cache-trigger
       function: clearCache
       interval: fiveMinute
@@ -30,6 +33,8 @@ modules:
       function: dropMigrations
     - key: fetch-schema
       function: fetchSchema
+    - key: print-slowest-queries
+      function: runPerformanceAnalyze
     - key: clearCacheWeb
       function: clearCache
   sql:
@@ -44,6 +49,8 @@ modules:
       handler: index.dropMigrations
     - key: fetchSchema
       handler: index.fetchMigrations
+    - key: runPerformanceAnalyze
+      handler: index.runPerformanceAnalyze
     - key: clearCache
       handler: index.clearCache
 resources:

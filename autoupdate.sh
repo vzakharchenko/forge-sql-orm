@@ -177,5 +177,25 @@ git add package-lock.json
 git add -f build-static/*
 cd ../../..
 
+cd forge-sql-orm-example-cache
+rm -rf node_modules package-lock.json
+ncu -u --dep prod,dev,peer
+npm i
+npm run knip
+git add package.json
+git add package-lock.json
+cd static/forge-orm-example
+rm -rf node_modules package-lock.json
+ncu -u --dep prod,dev,peer
+rm -rf package-lock.json
+npm i
+npm run knip
+npm run build
+sleep 2
+git add package.json
+git add package-lock.json
+git add -f build-static/*
+cd ../../..
+
 cd ..
 npm run format
