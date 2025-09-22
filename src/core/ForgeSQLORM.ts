@@ -38,6 +38,8 @@ import { cacheApplicationContext, localCacheApplicationContext } from "../utils/
 import { clearTablesCache } from "../utils/cacheUtils";
 import { SQLWrapper } from "drizzle-orm/sql/sql";
 import { WithSubquery } from "drizzle-orm/subquery";
+import { ForgeSQLMetadata } from "../utils/forgeDriver";
+import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -72,6 +74,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     try {
       const newOptions: ForgeSqlOrmOptions = options ?? {
         logRawSqlQuery: false,
+        logCache: false,
         disableOptimisticLocking: false,
         cacheWrapTable: true,
         cacheTTL: 120,
@@ -81,6 +84,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       };
       this.options = newOptions;
       if (newOptions.logRawSqlQuery) {
+        // eslint-disable-next-line no-console
         console.debug("Initializing ForgeSQLORM...");
       }
       // Initialize Drizzle instance with our custom driver
@@ -94,9 +98,61 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       this.analyzeOperations = new ForgeSQLAnalyseOperation(this);
       this.cacheOperations = new ForgeSQLCacheOperations(newOptions, this);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("ForgeSQLORM initialization failed:", error);
       throw error;
     }
+  }
+
+  /**
+   * Executes a query and provides access to execution metadata.
+   * This method allows you to capture detailed information about query execution
+   * including database execution time, response size, and Forge SQL metadata.
+   *
+   * @template T - The return type of the query
+   * @param query - A function that returns a Promise with the query result
+   * @param onMetadata - Callback function that receives execution metadata
+   * @returns Promise with the query result
+   * @example
+   * ```typescript
+   * const result = await forgeSQL.executeWithMetadata(
+   *   async () => await forgeSQL.select().from(users).where(eq(users.id, 1)),
+   *   (dbTime, responseSize, metadata) => {
+   *     console.log(`DB execution time: ${dbTime}ms`);
+   *     console.log(`Response size: ${responseSize} bytes`);
+   *     console.log('Forge metadata:', metadata);
+   *   }
+   * );
+   * ```
+   */
+  async executeWithMetadata<T>(
+    query: () => Promise<T>,
+    onMetadata: (
+      totalDbExecutionTime: number,
+      totalResponseSize: number,
+      forgeMetadata: ForgeSQLMetadata,
+    ) => Promise<void> | void,
+  ): Promise<T> {
+    return metadataQueryContext.run(
+      {
+        totalDbExecutionTime: 0,
+        totalResponseSize: 0,
+      },
+      async () => {
+        try {
+          return await query();
+        } finally {
+          const metadata = await getLastestMetadata();
+          if (metadata && metadata.lastMetadata) {
+            await onMetadata(
+              metadata.totalDbExecutionTime,
+              metadata.totalResponseSize,
+              metadata.lastMetadata,
+            );
+          }
+        }
+      },
+    );
   }
 
   /**
@@ -608,6 +664,38 @@ class ForgeSQLORM implements ForgeSqlOperation {
 
   constructor(options?: ForgeSqlOrmOptions) {
     this.ormInstance = ForgeSQLORMImpl.getInstance(options);
+  }
+
+  /**
+   * Executes a query and provides access to execution metadata.
+   * This method allows you to capture detailed information about query execution
+   * including database execution time, response size, and Forge SQL metadata.
+   *
+   * @template T - The return type of the query
+   * @param query - A function that returns a Promise with the query result
+   * @param onMetadata - Callback function that receives execution metadata
+   * @returns Promise with the query result
+   * @example
+   * ```typescript
+   * const result = await forgeSQL.executeWithMetadata(
+   *   async () => await forgeSQL.select().from(users).where(eq(users.id, 1)),
+   *   (dbTime, responseSize, metadata) => {
+   *     console.log(`DB execution time: ${dbTime}ms`);
+   *     console.log(`Response size: ${responseSize} bytes`);
+   *     console.log('Forge metadata:', metadata);
+   *   }
+   * );
+   * ```
+   */
+  async executeWithMetadata<T>(
+    query: () => Promise<T>,
+    onMetadata: (
+      totalDbExecutionTime: number,
+      totalResponseSize: number,
+      forgeMetadata: ForgeSQLMetadata,
+    ) => Promise<void> | void,
+  ): Promise<T> {
+    return this.ormInstance.executeWithMetadata(query, onMetadata);
   }
 
   selectCacheable<TSelection extends SelectedFields>(

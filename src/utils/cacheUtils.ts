@@ -123,7 +123,8 @@ async function clearCursorCache(
 
   const listResult = await entityQueryBuilder.limit(100).getMany();
 
-  if (options.logRawSqlQuery) {
+  if (options.logCache) {
+    // eslint-disable-next-line no-console
     console.warn(`clear cache Records: ${JSON.stringify(listResult.results.map((r) => r.key))}`);
   }
 
@@ -170,7 +171,8 @@ async function clearExpirationCursorCache(
 
   const listResult = await entityQueryBuilder.limit(100).getMany();
 
-  if (options.logRawSqlQuery) {
+  if (options.logCache) {
+    // eslint-disable-next-line no-console
     console.warn(`clear expired Records: ${JSON.stringify(listResult.results.map((r) => r.key))}`);
   }
 
@@ -201,10 +203,12 @@ async function executeWithRetry<T>(operation: () => Promise<T>, operationName: s
     try {
       return await operation();
     } catch (err: any) {
+      // eslint-disable-next-line no-console
       console.warn(`Error during ${operationName}: ${err.message}, retry ${attempt}`, err);
       attempt++;
 
       if (attempt >= CACHE_CONSTANTS.MAX_RETRY_ATTEMPTS) {
+        // eslint-disable-next-line no-console
         console.error(`Error during ${operationName}: ${err.message}`, err);
         throw err;
       }
@@ -260,8 +264,9 @@ export async function clearTablesCache(
       "clearing cache",
     );
   } finally {
-    if (options.logRawSqlQuery) {
+    if (options.logCache) {
       const duration = DateTime.now().toSeconds() - startTime.toSeconds();
+      // eslint-disable-next-line no-console
       console.info(`Cleared ${totalRecords} cache records in ${duration} seconds`);
     }
   }
@@ -287,7 +292,8 @@ export async function clearExpiredCache(options: ForgeSqlOrmOptions): Promise<vo
     );
   } finally {
     const duration = DateTime.now().toSeconds() - startTime.toSeconds();
-    if (options?.logRawSqlQuery) {
+    if (options?.logCache) {
+      // eslint-disable-next-line no-console
       console.debug(`Cleared ${totalRecords} expired cache records in ${duration} seconds`);
     }
   }
@@ -318,7 +324,8 @@ export async function getFromCache<T>(
 
   // Skip cache if table is in cache context (will be cleared)
   if (await isTableContainsTableInCacheContext(sqlQuery.sql, options)) {
-    if (options.logRawSqlQuery) {
+    if (options.logCache) {
+      // eslint-disable-next-line no-console
       console.warn(`Context contains value to clear. Skip getting from cache`);
     }
     return undefined;
@@ -332,13 +339,15 @@ export async function getFromCache<T>(
       (cacheResult[expirationName] as number) >= getCurrentTime() &&
       sqlQuery.sql.toLowerCase() === cacheResult[entityQueryName]
     ) {
-      if (options.logRawSqlQuery) {
+      if (options.logCache) {
+        // eslint-disable-next-line no-console
         console.warn(`Get value from cache, cacheKey: ${key}`);
       }
       const results = cacheResult[dataName];
       return JSON.parse(results as string);
     }
   } catch (error: any) {
+    // eslint-disable-next-line no-console
     console.error(`Error getting from cache: ${error.message}`, error);
   }
 
@@ -375,7 +384,8 @@ export async function setCacheResult(
 
     // Skip cache if table is in cache context (will be cleared)
     if (await isTableContainsTableInCacheContext(sqlQuery.sql, options)) {
-      if (options.logRawSqlQuery) {
+      if (options.logCache) {
+        // eslint-disable-next-line no-console
         console.warn(`Context contains value to clear. Skip setting from cache`);
       }
       return;
@@ -396,10 +406,12 @@ export async function setCacheResult(
       )
       .execute();
 
-    if (options.logRawSqlQuery) {
+    if (options.logCache) {
+      // eslint-disable-next-line no-console
       console.warn(`Store value to cache, cacheKey: ${key}`);
     }
   } catch (error: any) {
+    // eslint-disable-next-line no-console
     console.error(`Error setting cache: ${error.message}`, error);
   }
 }

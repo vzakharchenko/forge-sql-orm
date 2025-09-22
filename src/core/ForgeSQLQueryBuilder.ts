@@ -29,6 +29,7 @@ import {
   DeleteAndEvictCacheType,
   ExecuteQuery,
   ExecuteQueryCacheable,
+  ForgeSQLMetadata,
   InsertAndEvictCacheType,
   SelectAliasedCacheableType,
   SelectAliasedDistinctCacheableType,
@@ -498,6 +499,35 @@ export interface QueryBuilderForgeSql {
   executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T>;
 
   /**
+   * Executes a query and provides access to execution metadata.
+   * This method allows you to capture detailed information about query execution
+   * including database execution time, response size, and Forge SQL metadata.
+   *
+   * @template T - The return type of the query
+   * @param query - A function that returns a Promise with the query result
+   * @param onMetadata - Callback function that receives execution metadata
+   * @returns Promise with the query result
+   * @example
+   * ```typescript
+   * const result = await forgeSQL.executeWithMetadata(
+   *   async () => await forgeSQL.select().from(users).where(eq(users.id, 1)),
+   *   (dbTime, responseSize, metadata) => {
+   *     console.log(`DB execution time: ${dbTime}ms`);
+   *     console.log(`Response size: ${responseSize} bytes`);
+   *     console.log('Forge metadata:', metadata);
+   *   }
+   * );
+   * ```
+   */
+  executeWithMetadata<T>(
+    query: () => Promise<T>,
+    onMetadata: (
+      totalDbExecutionTime: number,
+      totalResponseSize: number,
+      forgeMetadata: ForgeSQLMetadata,
+    ) => Promise<void> | void,
+  ): Promise<T>;
+  /**
    * Executes a raw SQL query with local cache support.
    * This method provides local caching for raw SQL queries within the current invocation context.
    * Results are cached locally and will be returned from cache on subsequent identical queries.
@@ -816,22 +846,31 @@ export type AdditionalMetadata = Record<string, TableMetadata>;
  * @interface ForgeSqlOrmOptions
  */
 export interface ForgeSqlOrmOptions {
-  /** Whether to log raw SQL queries */
+  /** Whether to log raw SQL queries to the console */
   logRawSqlQuery?: boolean;
-  /** Whether to disable optimistic locking */
+  /** Whether to log cache operations (hits, misses, evictions) */
+  logCache?: boolean;
+  /** Whether to disable optimistic locking for update operations */
   disableOptimisticLocking?: boolean;
-  /** SQL hints to be applied to queries */
+  /** SQL hints to be applied to queries for optimization */
   hints?: SqlHints;
+  /** Default Cache TTL (Time To Live) in seconds */
   cacheTTL?: number;
+  /** Name of the KVS entity used for cache storage */
   cacheEntityName?: string;
+  /** Name of the field in cache entity that stores SQL query */
   cacheEntityQueryName?: string;
+  /** Whether to wrap table names with backticks in cache keys */
   cacheWrapTable?: boolean;
+  /** Name of the field in cache entity that stores expiration timestamp */
   cacheEntityExpirationName?: string;
+  /** Name of the field in cache entity that stores cached data */
   cacheEntityDataName?: string;
 
   /**
    * Additional metadata for table configuration.
-   * Allows specifying table-specific settings and behaviors.
+   * Allows specifying table-specific settings and behaviors such as version fields for optimistic locking.
+   *
    * @example
    * ```typescript
    * {

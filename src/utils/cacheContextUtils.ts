@@ -102,8 +102,9 @@ export async function saveQueryLocalCacheQuery<
       sql: sql.toSQL().sql.toLowerCase(),
       data: rows,
     };
-    if (options.logRawSqlQuery) {
+    if (options.logCache) {
       const q = sql.toSQL();
+      // eslint-disable-next-line no-console
       console.debug(
         `[forge-sql-orm][local-cache][SAVE] Stored result in cache. sql="${q.sql}", params=${JSON.stringify(q.params)}`,
       );
@@ -140,8 +141,9 @@ export async function getQueryLocalCacheQuery<
     const sql = query as { toSQL: () => Query };
     const key = hashKey(sql.toSQL());
     if (context.cache[key] && context.cache[key].sql === sql.toSQL().sql.toLowerCase()) {
-      if (options.logRawSqlQuery) {
+      if (options.logCache) {
         const q = sql.toSQL();
+        // eslint-disable-next-line no-console
         console.debug(
           `[forge-sql-orm][local-cache][HIT] Returned cached result. sql="${q.sql}", params=${JSON.stringify(q.params)}`,
         );

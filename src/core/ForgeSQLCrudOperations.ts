@@ -278,6 +278,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
       }
     }
     if (!versionField) {
+      // eslint-disable-next-line no-console
       console.warn(
         `Version field "${versionMetadata.fieldName}" not found in table ${tableName}. Versioning will be skipped.`,
       );
@@ -285,6 +286,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
     }
 
     if (!versionField.notNull) {
+      // eslint-disable-next-line no-console
       console.warn(
         `Version field "${versionMetadata.fieldName}" in table ${tableName} is nullable. Versioning may not work correctly.`,
       );
@@ -300,6 +302,7 @@ export class ForgeSQLCrudOperations implements VerioningModificationForgeSQL {
       fieldType === "decimal";
 
     if (!isSupportedType) {
+      // eslint-disable-next-line no-console
       console.warn(
         `Version field "${versionMetadata.fieldName}" in table ${tableName} has unsupported type "${fieldType}". ` +
           `Only datetime, timestamp, int, and decimal types are supported for versioning. Versioning will be skipped.`,

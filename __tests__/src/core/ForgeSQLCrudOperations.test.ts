@@ -89,7 +89,6 @@ import { testEntityDateVersion, TestEntityDateVersion } from "../../entities/Tes
 import { eq } from "drizzle-orm";
 import { testEntityTimeStampVersion } from "../../entities/TestEntityTimeStampVersion";
 import { TestEntityVersionDifferentField } from "../../entities/TestEntityVersionDifferentField";
-import { cacheApplicationContext } from "../../../src/utils/cacheContextUtils";
 
 describe("ForgeSQLCrudOperations", () => {
   let forgeSqlOperation: ForgeSqlOperation;

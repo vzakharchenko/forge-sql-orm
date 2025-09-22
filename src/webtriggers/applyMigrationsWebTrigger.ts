@@ -31,12 +31,14 @@ export const applySchemaMigrations = async (
     if (typeof migration !== "function") {
       throw new Error("migration is not a function");
     }
-
+    // eslint-disable-next-line no-console
     console.log("Provisioning the database");
     await sql._provision();
+    // eslint-disable-next-line no-console
     console.info("Running schema migrations");
     const migrations = await migration(migrationRunner);
     const successfulMigrations = await migrations.run();
+    // eslint-disable-next-line no-console
     console.info("Migrations applied:", successfulMigrations);
 
     const migrationList = await migrationRunner.list();
@@ -51,7 +53,7 @@ export const applySchemaMigrations = async (
         .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
         .join("\n");
     }
-
+    // eslint-disable-next-line no-console
     console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
 
     return {
@@ -68,6 +70,7 @@ export const applySchemaMigrations = async (
       error?.debug?.context?.message ??
       error.message ??
       "Unknown error occurred";
+    // eslint-disable-next-line no-console
     console.error("Error during migration:", errorMessage);
     return {
       headers: { "Content-Type": ["application/json"] },

@@ -12,7 +12,6 @@ import { generateDropTableStatements } from "../../../src/utils/sqlUtils";
 import { clearExpiredCache } from "../../../src/utils/cacheUtils";
 import { sql } from "@forge/sql";
 import { MigrationRunner } from "@forge/sql/out/migration";
-import ForgeSQLORM from "../../../src/core/ForgeSQLORM";
 
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
@@ -458,14 +457,14 @@ describe("WebTriggers", () => {
 
       const body = JSON.parse(result.body);
       expect(body.success).toBe(false);
-      expect(body.message).toBe("Failed to fetch or log slow queries");
+      expect(body.message).toBe("ORM instance is required");
       expect(body.timestamp).toBeDefined();
     });
 
     it("should handle errors gracefully when ORM methods are missing", async () => {
       const incompleteORM = {
         getDrizzleQueryBuilder: vi.fn().mockReturnValue({}),
-      };
+      } as any;
 
       const result = await topSlowestStatementLastHourTrigger(incompleteORM);
 
@@ -488,7 +487,7 @@ describe("WebTriggers", () => {
           limit: vi.fn().mockRejectedValue(new Error("Database error")),
           groupBy: vi.fn().mockReturnThis(),
         }),
-      };
+      } as any;
 
       const result = await topSlowestStatementLastHourTrigger(mockORM);
 
@@ -509,22 +508,46 @@ describe("WebTriggers", () => {
           limit: vi.fn().mockRejectedValue(new Error("Database error")),
           groupBy: vi.fn().mockReturnThis(),
         }),
+      } as any;
+
+      const customOptions = {
+        warnThresholdMs: 500,
+        memoryThresholdBytes: 4 * 1024 * 1024, // 4MB
+        showPlan: true,
       };
 
-      const customThresholdMs = 500;
-      const customMemoryBytes = 4 * 1024 * 1024; // 4MB
-
-      const result = await topSlowestStatementLastHourTrigger(
-        mockORM,
-        customThresholdMs,
-        customMemoryBytes,
-      );
+      const result = await topSlowestStatementLastHourTrigger(mockORM, customOptions);
 
       expect(result.statusCode).toBe(500);
 
       const body = JSON.parse(result.body);
       expect(body.success).toBe(false);
       expect(body.message).toBe("Failed to fetch or log slow queries");
+    });
+
+    it("should handle showPlan parameter correctly", async () => {
+      const mockORM = {
+        getDrizzleQueryBuilder: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          from: vi.fn().mockReturnThis(),
+          where: vi.fn().mockReturnThis(),
+          orderBy: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockRejectedValue(new Error("Database error")),
+          groupBy: vi.fn().mockReturnThis(),
+        }),
+      } as any;
+
+      // Test with showPlan: true
+      const resultWithPlan = await topSlowestStatementLastHourTrigger(mockORM, { showPlan: true });
+
+      expect(resultWithPlan.statusCode).toBe(500);
+
+      // Test with showPlan: false (default)
+      const resultWithoutPlan = await topSlowestStatementLastHourTrigger(mockORM, {
+        showPlan: false,
+      });
+
+      expect(resultWithoutPlan.statusCode).toBe(500);
     });
   });
 });

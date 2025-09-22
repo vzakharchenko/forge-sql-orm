@@ -4,6 +4,8 @@ import { desc, gte, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/mysql-core";
 import { formatLimitOffset } from "../utils/sqlUtils";
 
+const DEFAULT_MEMORY_THRESHOLD = 8 * 1024 * 1024;
+const DEFAULT_TIMEOUT = 300;
 /**
  * Scheduler trigger: log and return the single slowest statement from the last hour, filtered by latency OR memory usage.
  *
@@ -27,8 +29,10 @@ import { formatLimitOffset } from "../utils/sqlUtils";
  *  - otherwise → not logged
  *
  * @param orm             ForgeSQL ORM instance (required)
- * @param warnThresholdMs Milliseconds threshold for logging and filtering (default: 300ms)
- * @param memoryThresholdBytes Bytes threshold for average memory usage (default: 8MB)
+ * @param options         Configuration options object
+ * @param options.warnThresholdMs Milliseconds threshold for logging and filtering (default: 300ms)
+ * @param options.memoryThresholdBytes Bytes threshold for average memory usage (default: 8MB)
+ * @param options.showPlan Whether to include execution plan in logs (default: false)
  * @returns HTTP response with a JSON payload containing the filtered rows
  *
  * @example
@@ -43,16 +47,20 @@ import { formatLimitOffset } from "../utils/sqlUtils";
  *
  * // Only latency monitoring: 500ms threshold (memory effectively disabled)
  * export const latencyOnlyTrigger = () =>
- *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 16 * 1024 * 1024);
+ *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, { warnThresholdMs: 500, memoryThresholdBytes: 16 * 1024 * 1024 });
  *
  * // Only memory monitoring: 4MB threshold (latency effectively disabled)
  * export const memoryOnlyTrigger = () =>
- *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 10000, 4 * 1024 * 1024);
+ *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, { warnThresholdMs: 10000, memoryThresholdBytes: 4 * 1024 * 1024 });
  *
  * // Both thresholds: 500ms latency OR 8MB memory
  * export const bothThresholdsTrigger = () =>
- *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 8 * 1024 * 1024);
- * ```
+ *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, { warnThresholdMs: 500, memoryThresholdBytes: 8 * 1024 * 1024 });
+ *
+ * // With execution plan in logs
+ * export const withPlanTrigger = () =>
+ *   topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, { showPlan: true });
+ *
  *
  * @example
  * ```yaml
@@ -69,11 +77,30 @@ import { formatLimitOffset } from "../utils/sqlUtils";
 // Main scheduler trigger function to log the single slowest SQL statement from the last hour.
 export const topSlowestStatementLastHourTrigger = async (
   orm: ForgeSqlOperation,
-  // warnThresholdMs: Only log queries whose average latency (ms) exceeds this threshold (default: 300ms)
-  warnThresholdMs: number = 300,
-  // memoryThresholdBytes: Also include queries whose avg memory usage exceeds this threshold (default: 8MB)
-  memoryThresholdBytes: number = 8 * 1024 * 1024,
+  options?: {
+    warnThresholdMs?: number;
+    memoryThresholdBytes?: number;
+    showPlan?: boolean;
+  },
 ) => {
+  // Validate required parameters
+  if (!orm) {
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": ["application/json"] },
+      body: JSON.stringify({
+        success: false,
+        message: "ORM instance is required",
+        timestamp: new Date().toISOString(),
+      }),
+    };
+  }
+  let newOptions = options ?? {
+    warnThresholdMs: DEFAULT_TIMEOUT,
+    memoryThresholdBytes: DEFAULT_MEMORY_THRESHOLD,
+    showPlan: false,
+  };
+
   // Helper: Convert nanoseconds to milliseconds (for latency fields)
   const nsToMs = (v: unknown) => {
     const n = Number(v);
@@ -89,6 +116,32 @@ export const topSlowestStatementLastHourTrigger = async (
   // Helper: JSON.stringify replacer to handle BigInt values (so BigInt serializes as string)
   const jsonSafeStringify = (value: unknown) =>
     JSON.stringify(value, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
+
+  /**
+   * Simple SQL sanitizer for safe logging.
+   * - removes comments
+   * - replaces string and numeric literals with '?'
+   * - normalizes whitespace
+   * - truncates long queries
+   */
+  function sanitizeSQL(sql: string, maxLen = 1000): string {
+    let s = sql;
+
+    // 1. Remove comments (-- ... and /* ... */)
+    s = s.replace(/--[^\n\r]*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+
+    // 2. Replace string literals with '?'
+    s = s.replace(/'(?:\\'|[^'])*'/g, "?");
+    // 3. Replace numbers with '?'
+    s = s.replace(/\b-?\d+(?:\.\d+)?\b/g, "?");
+    // 4. Normalize whitespace
+    s = s.replace(/\s+/g, " ").trim();
+    // 5. Truncate long queries
+    if (s.length > maxLen) {
+      s = s.slice(0, maxLen) + " …[truncated]";
+    }
+    return s;
+  }
 
   // Number of top slow queries to fetch
   const TOP_N = 1;
@@ -152,8 +205,9 @@ export const topSlowestStatementLastHourTrigger = async (
     const combined = unionAll(qHistory, qSummary).as("combined");
 
     // Threshold in nanoseconds (warnThresholdMs → ns)
-    const thresholdNs = Math.floor(warnThresholdMs * 1e6);
+    const thresholdNs = Math.floor((newOptions.warnThresholdMs ?? DEFAULT_TIMEOUT) * 1e6);
     // memoryThresholdBytes is already provided in bytes (default 8MB)
+    const memoryThresholdBytes = newOptions.memoryThresholdBytes ?? DEFAULT_MEMORY_THRESHOLD;
 
     // Group duplicates by digest+stmtType+schemaName and aggregate metrics
     const grouped = orm
@@ -248,8 +302,8 @@ export const topSlowestStatementLastHourTrigger = async (
       lastSeen: r.lastSeen,
       planInCache: r.planInCache,
       planCacheHits: r.planCacheHits,
-      digestText: r.digestText,
-      plan: r.plan,
+      digestText: sanitizeSQL(r.digestText),
+      plan: newOptions.showPlan ? r.plan : undefined,
     }));
 
     // Log each entry (SQL already filtered by threshold)
@@ -260,7 +314,7 @@ export const topSlowestStatementLastHourTrigger = async (
           `   digest=${f.digest}\n` +
           `   sql=${(f.digestText || "").slice(0, 300)}${f.digestText && f.digestText.length > 300 ? "…" : ""}`,
       );
-      if (f.plan) {
+      if (newOptions.showPlan && f.plan) {
         // print full plan separately (not truncated)
         // eslint-disable-next-line no-console
         console.warn(`   full plan:\n${f.plan}`);
@@ -276,8 +330,9 @@ export const topSlowestStatementLastHourTrigger = async (
         success: true,
         window: "last_1h",
         top: TOP_N,
-        warnThresholdMs,
-        memoryThresholdBytes,
+        warnThresholdMs: newOptions.warnThresholdMs,
+        memoryThresholdBytes: newOptions.memoryThresholdBytes,
+        showPlan: newOptions.showPlan,
         rows: formatted,
         generatedAt: new Date().toISOString(),
       }),

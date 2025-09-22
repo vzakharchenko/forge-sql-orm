@@ -64,6 +64,7 @@ export const clearCacheSchedulerTrigger = async (options?: ForgeSqlOrmOptions) =
       }),
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error during cache cleanup: ", JSON.stringify(error));
     return {
       headers: { "Content-Type": ["application/json"] },

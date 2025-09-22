@@ -24,6 +24,7 @@
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
 - ✅ **Raw SQL Execution**: `execute()` and `executeCacheable()` methods for direct SQL queries with local and global caching
+- ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and Forge SQL metadata
 - ✅ **Common Table Expressions (CTEs)**: `with()` method for complex queries with subqueries
 - ✅ **Schema migration support**, allowing automatic schema evolution
 - ✅ **Automatic entity generation** from MySQL/tidb databases
@@ -333,6 +334,16 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
   300
 );
 
+// Raw SQL with execution metadata
+const usersWithMetadata = await forgeSQL.executeWithMetadata(
+  async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
+  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+    console.log(`Response size: ${totalResponseSize} bytes`);
+    console.log('Forge metadata:', forgeMetadata);
+  }
+);
+
 // Common Table Expressions (CTEs)
 const userStats = await forgeSQL
   .with(
@@ -405,6 +416,16 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
   "SELECT * FROM users WHERE active = ?", 
   [true], 
   300
+);
+
+// Raw SQL with execution metadata
+const usersWithMetadata = await forgeSQL.executeWithMetadata(
+  async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
+  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+    console.log(`Response size: ${totalResponseSize} bytes`);
+    console.log('Forge metadata:', forgeMetadata);
+  }
 );
 ```
 
@@ -777,6 +798,7 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `selectDistinctCacheableFrom()` | Distinct all-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
 | `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
 | `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
+| `executeWithMetadata()` | Raw SQL queries with execution metrics capture | ❌ No | Local Cache |
 | `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
@@ -1163,6 +1185,17 @@ const users = await forgeSQL
 const users = await forgeSQL
   .executeCacheable("SELECT * FROM users WHERE active = ?", [true], 300);
 
+// Using executeWithMetadata() for capturing execution metrics
+const usersWithMetadata = await forgeSQL
+  .executeWithMetadata(
+    async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
+    (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+      console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+      console.log(`Response size: ${totalResponseSize} bytes`);
+      console.log('Forge metadata:', forgeMetadata);
+    }
+  );
+
 // Using execute() with complex queries
 const userStats = await forgeSQL
   .execute(`
@@ -1478,6 +1511,16 @@ await forgeSQL.executeWithLocalContext(async () => {
     [true]
   );
   
+  // Raw SQL with execution metadata and local caching
+  const usersWithMetadata = await forgeSQL.executeWithMetadata(
+    async () => await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [true]),
+    (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+      console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+      console.log(`Response size: ${totalResponseSize} bytes`);
+      console.log('Forge metadata:', forgeMetadata);
+    }
+  );
+  
   // Insert operation - evicts local cache for users table
   await forgeSQL.insert(users).values({ name: 'New User', active: true });
   
@@ -1646,6 +1689,16 @@ const userStats = await forgeSQL
   })
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
+
+// Using executeWithMetadata() for capturing execution metrics with caching
+const usersWithMetadata = await forgeSQL.executeWithMetadata(
+  async () => await forgeSQL.executeCacheable("SELECT * FROM users WHERE active = ?", [true], 300),
+  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+    console.log(`Response size: ${totalResponseSize} bytes`);
+    console.log('Forge metadata:', forgeMetadata);
+  }
+);
 ```
 
 ### Manual Cache Management
@@ -1721,6 +1774,7 @@ The `ForgeSqlOrmOptions` object allows customization of ORM behavior:
 | Option                     | Type      | Description                                                                                                                                                                                                                     |
 | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `logRawSqlQuery`           | `boolean` | Enables logging of raw SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`.                                                                                         |
+| `logCache`                 | `boolean` | Enables logging of cache operations (hits, misses, evictions) in the Atlassian Forge Developer Console. Useful for debugging caching issues. Defaults to `false`.                                                               |
 | `disableOptimisticLocking` | `boolean` | Disables optimistic locking. When set to `true`, no additional condition (e.g., a version check) is added during record updates, which can improve performance. However, this may lead to conflicts when multiple transactions attempt to update the same record concurrently. |
 | `additionalMetadata`       | `object`  | Allows adding custom metadata to all entities. This is useful for tracking common fields across all tables (e.g., `createdAt`, `updatedAt`, `createdBy`, etc.). The metadata will be automatically added to all generated entities. |
 | `cacheEntityName`          | `string`  | KVS Custom entity name for cache storage. Must match the `name` in your `manifest.yml` storage entities configuration. Required for caching functionality. Defaults to `"cache"`.                                                                                                                         |
@@ -2076,19 +2130,38 @@ export const memoryUsageTrigger = () =>
 
 // Conservative memory monitoring: 4MB warning (well below 16MB limit)
 export const conservativeMemoryTrigger = () =>
-  topSlowestStatementLastHourTrigger(forgeSQL, 300, 4 * 1024 * 1024);
+  topSlowestStatementLastHourTrigger(forgeSQL, { memoryThresholdBytes: 4 * 1024 * 1024 });
 
 // Aggressive memory monitoring: 12MB warning (75% of 16MB limit)
 export const aggressiveMemoryTrigger = () =>
-  topSlowestStatementLastHourTrigger(forgeSQL, 300, 12 * 1024 * 1024);
+  topSlowestStatementLastHourTrigger(forgeSQL, { memoryThresholdBytes: 12 * 1024 * 1024 });
 
 // Memory-only monitoring: Only trigger on memory usage (latency effectively disabled)
 export const memoryOnlyTrigger = () =>
-  topSlowestStatementLastHourTrigger(forgeSQL, 10000, 4 * 1024 * 1024);
+  topSlowestStatementLastHourTrigger(forgeSQL, { warnThresholdMs: 10000, memoryThresholdBytes: 4 * 1024 * 1024 });
 
 // Latency-only monitoring: Only trigger on slow queries (memory effectively disabled)
 export const latencyOnlyTrigger = () =>
-  topSlowestStatementLastHourTrigger(forgeSQL, 500, 16 * 1024 * 1024);
+  topSlowestStatementLastHourTrigger(forgeSQL, { warnThresholdMs: 500, memoryThresholdBytes: 16 * 1024 * 1024 });
+
+// With execution plan in logs
+export const withPlanTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, { showPlan: true });
+
+// With cache logging enabled
+export const withCacheLoggingTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, { logCache: true });
+
+// With both execution plan and cache logging
+export const withFullLoggingTrigger = () =>
+  topSlowestStatementLastHourTrigger(forgeSQL, { showPlan: true, logCache: true });
+
+// With custom ORM options for debugging
+const forgeSQL = new ForgeSQL({
+  logRawSqlQuery: true,
+  logCache: true,
+  cacheEntityName: "cache"
+});
 
 
 #### 3. Configure in manifest.yml
@@ -2196,7 +2269,8 @@ When used as a **web trigger**, the system:
 |-----------|------|---------|-------------|
 | `warnThresholdMs` | `number` | `300` | Latency threshold in milliseconds (secondary) |
 | `memoryThresholdBytes` | `number` | `8 * 1024 * 1024` | **Memory usage threshold in bytes (primary focus)** |
-| `options` | `ForgeSqlOrmOptions` | `undefined` | Optional ORM configuration |
+| `showPlan` | `boolean` | `false` | Whether to include execution plan in logs |
+| `logCache` | `boolean` | `false` | Whether to log cache operations |
 
 **⚠️ Important: OR Logic**
 The monitoring uses **OR logic** - if **either** threshold is exceeded, the query will be logged/returned:
@@ -2208,6 +2282,8 @@ The monitoring uses **OR logic** - if **either** threshold is exceeded, the quer
 - **Memory-only monitoring**: Set `warnThresholdMs` to a very high value (e.g., 10000ms) to trigger only on memory usage
 - **Latency-only monitoring**: Set `memoryThresholdBytes` to 16MB (16 * 1024 * 1024) to trigger only on latency
 - **Combined monitoring**: Use both thresholds for comprehensive monitoring
+- **Execution plan analysis**: Set `showPlan: true` to include detailed execution plans in logs (useful for debugging)
+- **Cache debugging**: Set `logCache: true` to log cache operations and debug caching issues
 
 **Memory Threshold Guidelines:**
 - **Conservative**: 4MB (25% of 16MB limit)
@@ -2310,6 +2386,16 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
   "SELECT * FROM users WHERE active = ?", 
   [true], 
   300
+);
+
+// ✅ Raw SQL execution with metadata capture
+const usersWithMetadata = await forgeSQL.executeWithMetadata(
+  async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
+  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+    console.log(`Response size: ${totalResponseSize} bytes`);
+    console.log('Forge metadata:', forgeMetadata);
+  }
 );
 
 // ✅ Common Table Expressions (CTEs)

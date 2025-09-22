@@ -17,7 +17,7 @@ const SQL_CACHE_QUERY = FORGE_SQL_ORM.selectCacheable({
   userName: demoUsers.name,
   product: demoOrders.product,
   productId: demoOrders.id,
-  sleep: sql<number>`SLEEP(1)`,
+  sleep: sql<number>`SLEEP(0.5)`,
 })
   .from(demoUsers)
   .leftJoin(demoOrders, eq(demoOrders.userId, demoUsers.id));
@@ -27,7 +27,7 @@ const SQL_QUERY = FORGE_SQL_ORM.select({
   userName: demoUsers.name,
   product: demoOrders.product,
   productId: demoOrders.id,
-  sleep: sql<number>`SLEEP(1)`,
+  sleep: sql<number>`SLEEP(0.5)`,
 })
   .from(demoUsers)
   .innerJoin(demoOrders, eq(demoOrders.userId, demoUsers.id));
@@ -41,20 +41,26 @@ resolver.define(
   async (
     req: Request<{ cacheable: boolean }>,
   ): Promise<{ rows: UserOrderRow[]; times: number }> => {
-    const label = "fetch " + req.payload.cacheable ? "cacheable" : "non-cacheable";
-    console.time(label);
+    const label = "fetch " + (req.payload.cacheable ? "cacheable" : "non-cacheable");
+    console.log(label);
     const beginTime = new Date().getTime();
     try {
-      const result = await (req.payload.cacheable ? SQL_CACHE_QUERY : SQL_QUERY);
-      const diff = new Date().getTime() - beginTime;
+      let diff = 0;
+      const result = await FORGE_SQL_ORM.executeWithMetadata(
+        async () => await (req.payload.cacheable ? SQL_CACHE_QUERY : SQL_QUERY),
+        (totalDbExecutionTime, totalResponseSize) => {
+          diff = totalDbExecutionTime;
+          console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+          console.log(`DB Response size: ${totalResponseSize} bytes`);
+        },
+      );
+      diff = diff || new Date().getTime() - beginTime;
       console.log(`${diff} msecs`);
       return { rows: result, times: diff };
     } catch (e) {
       const error = e?.cause?.debug?.sqlMessage ?? e?.cause;
       console.error(error, e);
       throw error;
-    } finally {
-      console.timeEnd(label);
     }
   },
 );
@@ -63,7 +69,7 @@ resolver.define("clearCache", async (): Promise<void> => {
   FORGE_SQL_ORM.modifyWithVersioningAndEvictCache().evictCacheEntities([demoUsers, demoOrders]);
 });
 resolver.define("runPerformanceAnalyze", async () => {
-  const response = await topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 500, 4 * 1024 * 1024);
+  const response = await runPerformanceAnalyze();
   return JSON.parse(response.body);
 });
 
@@ -153,7 +159,11 @@ export const fetchMigrations = () => {
   return fetchSchemaWebTrigger();
 };
 export const runPerformanceAnalyze = () => {
-  return topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, 300, 4 * 1024 * 1024);
+  return topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, {
+    warnThresholdMs: 300,
+    memoryThresholdBytes: 4 * 1024 * 1024,
+    showPlan: true,
+  });
 };
 
 export const clearCache = () => {

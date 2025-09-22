@@ -19,6 +19,7 @@ export function createForgeDriverProxy(options?: SqlHints, logRawSqlQuery?: bool
     const modifiedQuery = injectSqlHints(query, options);
 
     if (options && logRawSqlQuery && modifiedQuery !== query) {
+      // eslint-disable-next-line no-console
       console.debug("injected Hints: " + modifiedQuery);
     }
     try {
@@ -26,6 +27,7 @@ export function createForgeDriverProxy(options?: SqlHints, logRawSqlQuery?: bool
       return await forgeDriver(modifiedQuery, params, method);
     } catch (error) {
       if (logRawSqlQuery) {
+        // eslint-disable-next-line no-console
         console.debug("SQL Error:", JSON.stringify(error));
       }
       throw error;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { invoke } from "@forge/bridge";
 
 interface UserOrderRow {
@@ -60,7 +60,10 @@ const App: React.FC = () => {
     null,
   );
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [queryError, setQueryError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [cacheError, setCacheError] = useState<string | null>(null);
+  const [performanceError, setPerformanceError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NewUserOrder>({
     userName: "",
     product: "",
@@ -68,13 +71,13 @@ const App: React.FC = () => {
 
   const executeQuery = async (cacheable: boolean) => {
     setLoading(true);
-    setError(null);
+    setQueryError(null);
 
     try {
       const result = await invoke<QueryResult>("fetch", { cacheable });
       setQueryResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setQueryError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -82,23 +85,23 @@ const App: React.FC = () => {
 
   const insertUserOrder = async () => {
     if (!formData.userName.trim() || !formData.product.trim()) {
-      setError("Please fill in all fields");
+      setFormError("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-    setError(null);
+    setFormError(null);
 
     try {
       await invoke("insertUserOrOrder", formData);
-      setError(null);
+      setFormError(null);
       // Clear form after successful insert
       setFormData({
         userName: "",
         product: "",
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to insert user/order");
+      setFormError(err instanceof Error ? err.message : "Failed to insert user/order");
     } finally {
       setLoading(false);
     }
@@ -106,13 +109,13 @@ const App: React.FC = () => {
 
   const clearCache = async () => {
     setLoading(true);
-    setError(null);
+    setCacheError(null);
 
     try {
       await invoke("clearCache");
-      setError(null);
+      setCacheError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to clear cache");
+      setCacheError(err instanceof Error ? err.message : "Failed to clear cache");
     } finally {
       setLoading(false);
     }
@@ -120,14 +123,16 @@ const App: React.FC = () => {
 
   const runPerformanceAnalysis = async () => {
     setLoading(true);
-    setError(null);
+    setPerformanceError(null);
 
     try {
       const result = await invoke<PerformanceAnalysisResult>("runPerformanceAnalyze");
       setPerformanceResult(result);
-      setError(null);
+      setPerformanceError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to run performance analysis");
+      setPerformanceError(
+        err instanceof Error ? err.message : "Failed to run performance analysis",
+      );
     } finally {
       setLoading(false);
     }
@@ -143,6 +148,34 @@ const App: React.FC = () => {
       }}
     >
       <h1 style={{ color: "#0052CC", marginBottom: "30px" }}>🚀 Forge SQL ORM Cache Demo</h1>
+
+      {/* Info Section */}
+      <div
+        style={{
+          padding: "20px",
+          backgroundColor: "#F4F5F7",
+          borderRadius: "8px",
+          marginBottom: "30px",
+        }}
+      >
+        <h3 style={{ color: "#172B4D", marginBottom: "15px" }}>How it works:</h3>
+        <ul style={{ color: "#6B778C", lineHeight: "1.6" }}>
+          <li>
+            <strong>Non-Cached Query:</strong> Executes a fresh query with 1-second sleep every time
+          </li>
+          <li>
+            <strong>Cached Query:</strong> Uses global cache - first execution takes time,
+            subsequent calls are instant
+          </li>
+          <li>
+            <strong>Add User & Order:</strong> Uses <code>executeWithCacheContext</code> to
+            automatically clear cache after operations
+          </li>
+          <li>
+            <strong>Cache Management:</strong> Clear cache manually or run performance analysis
+          </li>
+        </ul>
+      </div>
 
       {/* Query Performance Section */}
       <div
@@ -193,7 +226,22 @@ const App: React.FC = () => {
           </button>
         </div>
 
-        {queryResult && (
+        {queryError && (
+          <div
+            style={{
+              padding: "15px",
+              backgroundColor: "#FFEBEE",
+              border: "1px solid #FFCDD2",
+              borderRadius: "4px",
+              color: "#C62828",
+              marginBottom: "20px",
+            }}
+          >
+            <strong>Error:</strong> {queryError}
+          </div>
+        )}
+
+        {queryResult && !queryError && (
           <div
             style={{
               padding: "15px",
@@ -402,6 +450,21 @@ const App: React.FC = () => {
         >
           {loading ? "Processing..." : "➕ Add User & Order"}
         </button>
+
+        {formError && (
+          <div
+            style={{
+              padding: "15px",
+              backgroundColor: "#FFEBEE",
+              border: "1px solid #FFCDD2",
+              borderRadius: "4px",
+              color: "#C62828",
+              marginTop: "15px",
+            }}
+          >
+            <strong>Error:</strong> {formError}
+          </div>
+        )}
       </div>
 
       {/* Cache Management Section */}
@@ -418,7 +481,7 @@ const App: React.FC = () => {
           Manage the cache and run performance analysis.
         </p>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
           <button
             onClick={clearCache}
             disabled={loading}
@@ -451,10 +514,40 @@ const App: React.FC = () => {
             {loading ? "Loading..." : "📊 Run Performance Analysis"}
           </button>
         </div>
+
+        {cacheError && (
+          <div
+            style={{
+              padding: "15px",
+              backgroundColor: "#FFEBEE",
+              border: "1px solid #FFCDD2",
+              borderRadius: "4px",
+              color: "#C62828",
+              marginBottom: "15px",
+            }}
+          >
+            <strong>Error:</strong> {cacheError}
+          </div>
+        )}
+
+        {performanceError && (
+          <div
+            style={{
+              padding: "15px",
+              backgroundColor: "#FFEBEE",
+              border: "1px solid #FFCDD2",
+              borderRadius: "4px",
+              color: "#C62828",
+              marginBottom: "15px",
+            }}
+          >
+            <strong>Error:</strong> {performanceError}
+          </div>
+        )}
       </div>
 
       {/* Performance Analysis Results */}
-      {performanceResult && (
+      {performanceResult && !performanceError && (
         <div
           style={{
             marginBottom: "40px",
@@ -604,43 +697,6 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Error Display */}
-      {error && (
-        <div
-          style={{
-            padding: "15px",
-            backgroundColor: "#FFEBEE",
-            border: "1px solid #FFCDD2",
-            borderRadius: "4px",
-            color: "#C62828",
-            marginBottom: "20px",
-          }}
-        >
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {/* Info Section */}
-      <div style={{ padding: "20px", backgroundColor: "#F4F5F7", borderRadius: "8px" }}>
-        <h3 style={{ color: "#172B4D", marginBottom: "15px" }}>How it works:</h3>
-        <ul style={{ color: "#6B778C", lineHeight: "1.6" }}>
-          <li>
-            <strong>Non-Cached Query:</strong> Executes a fresh query with 1-second sleep every time
-          </li>
-          <li>
-            <strong>Cached Query:</strong> Uses global cache - first execution takes time,
-            subsequent calls are instant
-          </li>
-          <li>
-            <strong>Add User & Order:</strong> Uses <code>executeWithCacheContext</code> to
-            automatically clear cache after operations
-          </li>
-          <li>
-            <strong>Cache Management:</strong> Clear cache manually or run performance analysis
-          </li>
-        </ul>
-      </div>
     </div>
   );
 };

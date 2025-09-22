@@ -268,6 +268,7 @@ async function handleSuccessfulExecution(
       await evictLocalCacheQuery(table, options);
       if (isCached) {
         await clearCache(table, options).catch((e) => {
+          // eslint-disable-next-line no-console
           console.warn("Ignore cache clear errors", e);
         });
       } else {
@@ -457,6 +458,7 @@ async function handleCachedQuery(
     await saveQueryLocalCacheQuery(target, transformed, options);
     await setCacheResult(target, options, transformed, cacheTtl).catch((cacheError) => {
       // Log cache error but don't fail the query
+      // eslint-disable-next-line no-console
       console.warn("Cache set error:", cacheError);
     });
 

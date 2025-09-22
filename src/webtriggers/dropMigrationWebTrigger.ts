@@ -34,6 +34,7 @@ export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
 
     // Execute each statement
     for (const statement of dropStatements) {
+      // eslint-disable-next-line no-console
       console.debug(`execute DDL: ${statement}`);
       await sql.executeDDL(statement);
     }
@@ -48,6 +49,7 @@ export async function dropSchemaMigrations(): Promise<TriggerResponse<string>> {
       error?.debug?.message ??
       error.message ??
       "Unknown error occurred";
+    // eslint-disable-next-line no-console
     console.error(errorMessage);
     return getHttpResponse<string>(500, errorMessage);
   }

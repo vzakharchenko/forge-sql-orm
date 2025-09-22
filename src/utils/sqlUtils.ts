@@ -329,6 +329,7 @@ export function generateDropTableStatements(
   const dropStatements: string[] = [];
   const validOptions = options ?? { sequence: true, table: true };
   if (!validOptions.sequence && !validOptions.table) {
+    // eslint-disable-next-line no-console
     console.warn('No drop operations requested: both "table" and "sequence" options are false');
     return [];
   }

@@ -2,7 +2,12 @@ import { sql } from "@forge/sql";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { eq, sql as rawSql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql-proxy";
-import { forgeDriver, ForgeSqlOperation, patchDbWithSelectAliased } from "../../../src";
+import {
+  forgeDriver,
+  ForgeSQLMetadata,
+  ForgeSqlOperation,
+  patchDbWithSelectAliased,
+} from "../../../src";
 import ForgeSQLORM from "../../../src/core/ForgeSQLORM";
 import { testEntity } from "../../entities/TestEntity";
 import { testDataEntity } from "../../entities/TestDataEntity";
@@ -25,14 +30,24 @@ vi.setSystemTime(new Date("2023-04-12 00:00:01"));
 vi.mock("@forge/sql", () => ({
   sql: {
     prepare: vi.fn((query: string) => {
-      let procedureMock = vi.fn().mockResolvedValue({ rows: [{ id: 1, data: "t", name: "Test" }] });
+      let procedureMock = vi.fn().mockResolvedValue({
+        rows: [{ id: 1, data: "t", name: "Test" }],
+        metadata: {
+          dbExecutionTime: 1234,
+          responseSize: 525,
+        },
+      });
       if (
         query ===
         "select `test_data_entity`.`id` as `ID1`, `test_entity`.`id` as ID2, `test_data_entity`.`data`, `test_entity`.`name` from `test_data_entity` inner join `test_entity` on `test_data_entity`.`id` = `test_entity`.`id`"
       ) {
-        procedureMock = vi
-          .fn()
-          .mockResolvedValue({ rows: [{ ID1: 1, ID2: 2, data: "t", name: "Test" }] });
+        procedureMock = vi.fn().mockResolvedValue({
+          rows: [{ ID1: 1, ID2: 2, data: "t", name: "Test" }],
+          metadata: {
+            dbExecutionTime: 1234,
+            responseSize: 525,
+          },
+        });
       }
       const executeMock = procedureMock;
       return {
@@ -94,6 +109,28 @@ describe("ForgeSQLSelectOperations", () => {
     );
     expect(preparedStatement.execute).toHaveBeenCalled();
     expect(result).toEqual([{ id: 1, name: "t" }]);
+  });
+  it("test drizzle selectAndTakeMetadata", async () => {
+    const result = await forgeSqlOperation.executeWithMetadata(
+      async () => await forgeSqlOperation.select({ id: testEntity.id }).from(testEntity),
+      (
+        totalDbExecutionTime: number,
+        totalResponseSize: number,
+        forgeMetadata: ForgeSQLMetadata,
+      ) => {
+        expect(totalDbExecutionTime).toEqual(1234);
+        expect(totalResponseSize).toEqual(525);
+        expect(forgeMetadata).toEqual({
+          dbExecutionTime: 1234,
+          responseSize: 525,
+        });
+      },
+    );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+
+    expect(sql.prepare).toHaveBeenCalledWith("select `id` as `a_id_id` from `test_entity`");
+    expect(preparedStatement.execute).toHaveBeenCalled();
+    expect(result).toEqual([{ id: 1 }]);
   });
 
   it("test drizzle selectFromCacheable", async () => {

@@ -58,6 +58,7 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
   async executeRawSQL<T extends object | unknown>(query: string, params?: unknown[]): Promise<T[]> {
     if (this.options.logRawSqlQuery) {
       const paramsStr = params ? `, with params: ${JSON.stringify(params)}` : "";
+      // eslint-disable-next-line no-console
       console.debug(`Executing with SQL ${query}${paramsStr}`);
     }
     const sqlStatement = sql.prepare<T>(query);
@@ -80,6 +81,7 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
       sqlStatement.bindParams(...params);
     }
     if (this.options.logRawSqlQuery) {
+      // eslint-disable-next-line no-console
       console.debug(
         `Executing Update with SQL ${query}` +
           (params ? `, with params: ${JSON.stringify(params)}` : ""),

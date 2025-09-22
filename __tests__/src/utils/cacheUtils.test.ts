@@ -86,6 +86,7 @@ describe("cacheUtils", () => {
   const defaultOptions: ForgeSqlOrmOptions = {
     cacheEntityName: "cache",
     cacheTTL: 120,
+    logCache: true,
     cacheWrapTable: true,
     logRawSqlQuery: true,
     disableOptimisticLocking: false,
