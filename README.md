@@ -19,7 +19,7 @@
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
 - ✅ **Local Cache System (Level 1)** for in-memory query optimization within single resolver invocation scope
 - ✅ **Global Cache System (Level 2)** with cross-invocation caching, automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
-- ✅ **Memory Usage Monitoring**: Automated detection of memory-intensive queries with configurable thresholds (essential for Atlassian's 16 MiB per query limit)
+- ✅ **Performance Monitoring**: Automated detection of memory-intensive queries with configurable thresholds (essential for Atlassian's 16 MiB per query limit)
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
@@ -65,7 +65,7 @@
 ### 🔒 Advanced Features
 - [Optimistic Locking](#optimistic-locking)
 - [Query Analysis and Performance Optimization](#query-analysis-and-performance-optimization)
-- [Memory Usage Monitoring](#memory-usage-monitoring)
+- [Performance Monitoring](#performance-monitoring)
 - [Date and Time Types](#date-and-time-types)
 
 ### 🛠️ Development Tools
@@ -82,7 +82,7 @@
 - [Query Analysis Example](examples/forge-sql-orm-example-query-analyses)
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker)
 - [Checklist Example](examples/forge-sql-orm-example-checklist)
-- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching capabilities with `topSlowestStatementLastHourTrigger` memory monitoring
+- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching capabilities with `topSlowestStatementLastHourTrigger` performance monitoring
 
 ### 📚 Reference
 - [ForgeSqlOrmOptions](#forgesqlormoptions)
@@ -99,7 +99,7 @@
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation persistent caching
 - [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory invocation caching
 - [Optimistic Locking](#optimistic-locking) - Data consistency
-- [Memory Usage Monitoring](#memory-usage-monitoring) - Memory-intensive query detection
+- [Performance Monitoring](#performance-monitoring) - Memory-intensive query detection
 - [Migration Tools](#web-triggers-for-migrations) - Database migrations
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
 
@@ -108,7 +108,7 @@
 - [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking) - Real-world conflict handling
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker) - Complex relationships
 - [Checklist Example](examples/forge-sql-orm-example-checklist) - Jira integration
-- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching with memory monitoring
+- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching with performance monitoring
 
 ## Usage Approaches
 
@@ -2074,13 +2074,13 @@ This analysis provides insights into:
 - Resource usage at each step
 - Performance optimization opportunities
 
-## Memory Usage Monitoring
+## Performance Monitoring
 
 [↑ Back to Top](#table-of-contents)
 
-Forge-SQL-ORM provides automated memory usage monitoring capabilities to help you identify and track memory-intensive queries in your Forge SQL instance. This feature is **essential for Atlassian Forge applications** as it helps you stay within the **16 MiB per query memory limit** and provides detailed insights for optimization.
+Forge-SQL-ORM provides automated performance monitoring capabilities to help you identify and track memory-intensive queries in your Forge SQL instance. This feature is **essential for Atlassian Forge applications** as it helps you stay within the **16 MiB per query memory limit** and provides detailed insights for optimization.
 
-### Why Memory Monitoring is Critical
+### Why Performance Monitoring is Critical
 
 Atlassian Forge SQL has a strict **16 MiB memory limit per query**. Unlike slow query detection (which is available in the Forge Developer Console), there's **no built-in way to monitor memory usage** of your queries. This monitoring system fills that gap by:
 
@@ -2092,7 +2092,7 @@ Atlassian Forge SQL has a strict **16 MiB memory limit per query**. Unlike slow 
 
 ### Overview
 
-The memory monitoring system:
+The performance monitoring system:
 - **Automatically detects memory-intensive queries** based on configurable memory thresholds
 - **Provides detailed memory metrics** including execution time, memory usage, and execution plans
 - **Logs memory issues** to the Forge Developer Console for easy debugging
@@ -2101,7 +2101,7 @@ The memory monitoring system:
 
 ### Key Features
 
-- **Memory-Focused Monitoring**: Primary focus on memory usage with configurable thresholds
+- **Memory-Focused Performance Monitoring**: Primary focus on memory usage with configurable thresholds
 - **Atlassian 16 MiB Limit Awareness**: Designed specifically for Forge SQL's memory constraints
 - **Execution Plan Analysis**: Shows detailed query plans to help optimize memory consumption
 - **Configurable Thresholds**: Set custom memory usage thresholds (default: 4MB warning)
@@ -2125,18 +2125,18 @@ import ForgeSQL, { topSlowestStatementLastHourTrigger } from 'forge-sql-orm';
 const forgeSQL = new ForgeSQL();
 
 // Basic usage with default thresholds (300ms latency, 8MB memory warning)
-export const memoryUsageTrigger = () =>
+export const performanceTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL);
 
-// Conservative memory monitoring: 4MB warning (well below 16MB limit)
+// Conservative performance monitoring: 4MB warning (well below 16MB limit)
 export const conservativeMemoryTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL, { memoryThresholdBytes: 4 * 1024 * 1024 });
 
-// Aggressive memory monitoring: 12MB warning (75% of 16MB limit)
+// Aggressive performance monitoring: 12MB warning (75% of 16MB limit)
 export const aggressiveMemoryTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL, { memoryThresholdBytes: 12 * 1024 * 1024 });
 
-// Memory-only monitoring: Only trigger on memory usage (latency effectively disabled)
+// Memory-only performance monitoring: Only trigger on memory usage (latency effectively disabled)
 export const memoryOnlyTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL, { warnThresholdMs: 10000, memoryThresholdBytes: 4 * 1024 * 1024 });
 
@@ -2145,55 +2145,40 @@ export const latencyOnlyTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL, { warnThresholdMs: 500, memoryThresholdBytes: 16 * 1024 * 1024 });
 
 // With execution plan in logs
-export const withPlanTrigger = () =>
+export const performanceWithPlanTrigger = () =>
   topSlowestStatementLastHourTrigger(forgeSQL, { showPlan: true });
-
-// With cache logging enabled
-export const withCacheLoggingTrigger = () =>
-  topSlowestStatementLastHourTrigger(forgeSQL, { logCache: true });
-
-// With both execution plan and cache logging
-export const withFullLoggingTrigger = () =>
-  topSlowestStatementLastHourTrigger(forgeSQL, { showPlan: true, logCache: true });
-
-// With custom ORM options for debugging
-const forgeSQL = new ForgeSQL({
-  logRawSqlQuery: true,
-  logCache: true,
-  cacheEntityName: "cache"
-});
-
+```
 
 #### 3. Configure in manifest.yml
 
 **As Scheduler Trigger (Recommended for Production):**
 ```yaml
 scheduledTrigger:
-  - key: memory-usage-trigger
-    function: memoryUsageTrigger
+  - key: performance-trigger
+    function: perfTrigger
     interval: hour  # Required: only hour interval is supported
 
 function:
-  - key: memoryUsageTrigger
-    handler: index.memoryUsageTrigger
+  - key: perfTrigger
+    handler: index.performanceTrigger
 ```
 
 **As Web Trigger (Development Only):**
 ```yaml
 webtrigger:
   - key: print-slowest-queries
-    function: memoryUsageTrigger
+    function: perfTrigger
 
 function:
-  - key: memoryUsageTrigger
-    handler: index.memoryUsageTrigger
+  - key: perfTrigger
+    handler: index.performanceTrigger
 ```
 
 > **⚠️ Important**: Web triggers are not recommended for production as they violate the "run-on-atlassian" principle. Use scheduler triggers for production monitoring.
 
 ### How It Works
 
-The memory monitoring trigger works differently depending on how it's configured:
+The performance monitoring trigger works differently depending on how it's configured:
 
 #### Scheduler Trigger Mode (Production)
 
@@ -2279,7 +2264,7 @@ The monitoring uses **OR logic** - if **either** threshold is exceeded, the quer
 - No need to exceed both thresholds simultaneously
 
 **💡 Pro Tips:**
-- **Memory-only monitoring**: Set `warnThresholdMs` to a very high value (e.g., 10000ms) to trigger only on memory usage
+- **Memory-only performance monitoring**: Set `warnThresholdMs` to a very high value (e.g., 10000ms) to trigger only on memory usage
 - **Latency-only monitoring**: Set `memoryThresholdBytes` to 16MB (16 * 1024 * 1024) to trigger only on latency
 - **Combined monitoring**: Use both thresholds for comprehensive monitoring
 - **Execution plan analysis**: Set `showPlan: true` to include detailed execution plans in logs (useful for debugging)
