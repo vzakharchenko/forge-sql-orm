@@ -7,7 +7,7 @@
     "@atlaskit/css-reset": "^7.3.7",
     "@atlaskit/dynamic-table": "^18.2.16",
     "@atlaskit/tabs": "^18.1.11",
-    "@atlaskit/tokens": "^6.3.2",
+    "@atlaskit/tokens": "^6.3.3",
     "@forge/bridge": "^5.5.0",
     "mobx": "6.13.7",
     "mobx-react": "9.2.0",

@@ -3,16 +3,16 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-quYSF4tB.js",
+      "./body-Bl-ie6rp.js",
       "./react-dom-vendor-DTSHKYJW.js",
-      "./client-core-vendor-ZW7Y7dV2.js",
-      "./lodash-vendor-BHjWkIo4.js",
+      "./client-core-vendor-Bz5kMKC-.js",
+      "./lodash-vendor-Ce0R6Syi.js",
       "./body-zWXS9WXn.css",
     ]),
 ) => i.map((i) => d[i]);
 import { r as wt, a as To, c as Vh } from "./react-dom-vendor-DTSHKYJW.js";
-import { g as ur, a as Us, r as cr, s as nt } from "./client-core-vendor-ZW7Y7dV2.js";
-import { r as Gh } from "./lodash-vendor-BHjWkIo4.js";
+import { g as ur, a as Us, r as cr, s as nt } from "./client-core-vendor-Bz5kMKC-.js";
+import { r as Gh } from "./lodash-vendor-Ce0R6Syi.js";
 function Hh(e, t) {
   for (var r = 0; r < t.length; r++) {
     const n = t[r];
@@ -7451,17 +7451,28 @@ function Ay() {
         (this._user = this._configureUser(c, this._options)));
     }
     _configureUser(c, l) {
-      var u;
-      const d = (0, t._normalizeUser)(c, l),
-        f = (u = d.customIDs) === null || u === void 0 ? void 0 : u.stableID;
+      var u, d, f;
+      const p = (0, t._normalizeUser)(c, l),
+        h = (u = p.customIDs) === null || u === void 0 ? void 0 : u.stableID;
+      if (h) {
+        const v =
+          (f = (d = this.storageProvider).isReadyResolver) === null || f === void 0
+            ? void 0
+            : f.call(d);
+        v
+          ? v.then(
+              () => t.StableID.setOverride(h, this._sdkKey),
+              () => t.StableID.setOverride(h, this._sdkKey),
+            )
+          : t.StableID.setOverride(h, this._sdkKey);
+      }
       return (
-        f && t.StableID.setOverride(f, this._sdkKey),
         Object.keys(this._possibleFirstTouchMetadata).length > 0 &&
-          (d.analyticsOnlyMetadata = Object.assign(
-            Object.assign({}, d.analyticsOnlyMetadata),
+          (p.analyticsOnlyMetadata = Object.assign(
+            Object.assign({}, p.analyticsOnlyMetadata),
             this._possibleFirstTouchMetadata,
           )),
-        d
+        p
       );
     }
     _getFeatureGateImpl(c, l) {
@@ -12761,7 +12772,7 @@ var dw = ["as", "children", "isInset", "testId", "style", "xcss"],
         action: "clicked",
         componentName: l || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "14.15.0",
+        packageVersion: "0.0.0-development",
         analyticsData: u,
         actionSubject: "button",
       });
@@ -19585,7 +19596,7 @@ var nx = function (t) {
   },
   ax = b.lazy(function () {
     return uy(
-      () => import("./body-quYSF4tB.js"),
+      () => import("./body-Bl-ie6rp.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
