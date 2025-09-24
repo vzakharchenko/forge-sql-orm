@@ -1,5 +1,4 @@
 import { mysqlTable, primaryKey, int, varchar } from "drizzle-orm/mysql-core";
-import { sql } from "drizzle-orm";
 
 export const testExampleTable = mysqlTable(
   "test_example_table",
