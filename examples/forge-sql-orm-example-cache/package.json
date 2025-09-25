@@ -5,9 +5,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/kvs": "^1.0.5",
+    "@forge/kvs": "^1.0.6",
     "@forge/resolver": "1.7.0",
-    "@forge/sql": "^3.0.5",
+    "@forge/sql": "^3.0.6",
     "forge-sql-orm": "2.1.5",
     "drizzle-orm": "^0.44.5"
   },
