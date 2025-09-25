@@ -1885,9 +1885,6 @@ button {
 ._n56nidpf > button:before {
   width: 0;
 }
-._1q511b66 {
-  padding-block-start: var(--ds-space-050, 4px);
-}
 ._1s37ze3t:first-of-type {
   padding-inline-start: var(--ds-space-0, 0);
 }
@@ -1900,9 +1897,6 @@ button {
 }
 ._58ej1kw7 > button {
   color: inherit;
-}
-._85i51b66 {
-  padding-block-end: var(--ds-space-050, 4px);
 }
 ._8607ze3t > button {
   padding-inline-end: var(--ds-space-0, 0);
@@ -2503,14 +2497,11 @@ button {
 ._1i4q1hna {
   overflow-wrap: break-word;
 }
-._1q51v77o {
-  padding-block-start: var(--ds-space-025, 2px);
+._85i51b66 {
+  padding-block-end: var(--ds-space-050, 4px);
 }
-._85i5v77o {
-  padding-block-end: var(--ds-space-025, 2px);
-}
-._bfhkpioe {
-  background-color: var(--_yr7xfv);
+._bfhkgkf6 {
+  background-color: var(--ds-background-neutral-bold, #172b4d);
 }
 ._p12f1pna {
   max-width: 420px;
@@ -2521,11 +2512,42 @@ button {
 ._slp31hna {
   word-wrap: break-word;
 }
-._syaz1i9p {
-  color: var(--_ywovvi);
-}
 ._80om73ad {
   cursor: default;
+}
+._11c81u0j {
+  font: var(
+    --ds-font-code,
+    normal 400 0.875em/1 ui-monospace,
+    Menlo,
+    "Segoe UI Mono",
+    "Ubuntu Mono",
+    monospace
+  );
+}
+._2rkolb4i {
+  border-radius: var(--ds-radius-xsmall, 2px);
+}
+._zulpv77o {
+  gap: var(--ds-space-025, 2px);
+}
+._189ee4h9 {
+  border-width: var(--ds-border-width, 1px);
+}
+._1dqonqa1 {
+  border-style: solid;
+}
+._1h6d7jlr {
+  border-color: var(--ds-border-bold, #758195);
+}
+._1q511b66 {
+  padding-block-start: var(--ds-space-050, 4px);
+}
+._1q51v77o {
+  padding-block-start: var(--ds-space-025, 2px);
+}
+._85i5v77o {
+  padding-block-end: var(--ds-space-025, 2px);
 }
 ._11c82smr {
   font: var(

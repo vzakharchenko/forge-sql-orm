@@ -27,7 +27,7 @@ import {
   w as lr,
   u as dr,
   v as fn,
-} from "./index-CYRebyZ_.js";
+} from "./index-Bc085Tnp.js";
 import { a as fe } from "./react-dom-vendor-DTSHKYJW.js";
 import "./client-core-vendor-Bz5kMKC-.js";
 import "./lodash-vendor-Ce0R6Syi.js";
