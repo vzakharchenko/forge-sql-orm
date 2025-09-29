@@ -16,7 +16,7 @@
     "@types/node": "^24.5.2",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^5.0.3",
+    "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "17.2.2",
     "knip": "^5.64.1",
     "prettier": "^3.6.2",
