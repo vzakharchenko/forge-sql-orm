@@ -27,7 +27,7 @@ import {
   w as lr,
   u as dr,
   v as fn,
-} from "./index-DBn8dCSC.js";
+} from "./index-M8Jdvh1R.js";
 import { a as fe } from "./react-dom-vendor-DTSHKYJW.js";
 import "./client-core-vendor-Bz5kMKC-.js";
 import "./lodash-vendor-Ce0R6Syi.js";
@@ -4457,7 +4457,8 @@ var pi = function (t, r) {
                         rowIndex: f,
                         row: g,
                         isRankingDisabled: u,
-                        isHighlighted: !!a && (typeof a == "number" ? a === f : a.indexOf(f) > -1),
+                        isHighlighted:
+                          a !== void 0 && (typeof a == "number" ? a === f : a.indexOf(f) > -1),
                         testId: c && "".concat(c, "--").concat(g.key, "--rankable--table--row"),
                       });
                     }),

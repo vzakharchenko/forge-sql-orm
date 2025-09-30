@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-DCKMAVTd.js",
+      "./body-BAqY2zb8.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-Bz5kMKC-.js",
       "./lodash-vendor-Ce0R6Syi.js",
@@ -8889,7 +8889,7 @@ var d_ = ["as", "children", "isInset", "testId", "style", "xcss"],
         action: "clicked",
         componentName: c || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "14.15.2",
+        packageVersion: "0.0.0-development",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -11179,7 +11179,7 @@ var Xm = {
         action: "clicked",
         componentName: "button",
         packageName: "@atlaskit/button",
-        packageVersion: "23.4.9",
+        packageVersion: "0.0.0-development",
         analyticsData: n,
       }),
       ge = b.useCallback(
@@ -15095,14 +15095,14 @@ var iO = function (t) {
         action: "sorted",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.2.16",
+        packageVersion: "0.0.0-development",
       }),
       qe = ca({
         fn: q,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.2.16",
+        packageVersion: "0.0.0-development",
       });
     b.useEffect(
       function () {
@@ -15220,7 +15220,7 @@ var iO = function (t) {
   },
   oO = b.lazy(function () {
     return ug(
-      () => import("./body-DCKMAVTd.js"),
+      () => import("./body-BAqY2zb8.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

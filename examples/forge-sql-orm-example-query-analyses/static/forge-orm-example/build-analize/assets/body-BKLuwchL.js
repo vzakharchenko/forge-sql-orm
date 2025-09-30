@@ -27,10 +27,10 @@ import {
   w as lr,
   u as dr,
   v as fn,
-} from "./index-CE8FiDNK.js";
+} from "./index-CIRBReIx.js";
 import { a as fe } from "./react-dom-vendor-DTSHKYJW.js";
-import "./client-core-vendor-Bz5kMKC-.js";
-import "./lodash-vendor-Ce0R6Syi.js";
+import "./client-core-vendor-Cqv-4Eca.js";
+import "./lodash-vendor-BJpaz59Q.js";
 function vn(e, t, r) {
   return ((t = re(t)), Ce(e, ur() ? Reflect.construct(t, [], re(e).constructor) : t.apply(e, r)));
 }
@@ -4457,7 +4457,8 @@ var pi = function (t, r) {
                         rowIndex: f,
                         row: g,
                         isRankingDisabled: u,
-                        isHighlighted: !!a && (typeof a == "number" ? a === f : a.indexOf(f) > -1),
+                        isHighlighted:
+                          a !== void 0 && (typeof a == "number" ? a === f : a.indexOf(f) > -1),
                         testId: c && "".concat(c, "--").concat(g.key, "--rankable--table--row"),
                       });
                     }),

@@ -5,12 +5,12 @@
   "private": true,
   "dependencies": {
     "@forge/resolver": "1.7.0",
-    "@forge/sql": "^3.0.6",
+    "@forge/sql": "^3.0.7",
     "drizzle-orm": "^0.44.5",
     "forge-sql-orm": "2.1.5"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
+    "@types/node": "^24.6.0",
     "drizzle-kit": "^0.31.5",
     "forge-sql-orm-cli": "file:../../forge-sql-orm-cli",
     "knip": "^5.64.1",
