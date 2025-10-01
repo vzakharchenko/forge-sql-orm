@@ -23,7 +23,7 @@
     "@types/node": "^24.6.0",
     "forge-sql-orm-cli": "^2.1.5",
     "knip": "^5.64.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "esbuild": "npm:esbuild@latest",
