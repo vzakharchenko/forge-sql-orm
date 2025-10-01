@@ -33,6 +33,10 @@ const DEFAULT_TIMEOUT = 300;
  * @param options.warnThresholdMs Milliseconds threshold for logging and filtering (default: 300ms)
  * @param options.memoryThresholdBytes Bytes threshold for average memory usage (default: 8MB)
  * @param options.showPlan Whether to include execution plan in logs (default: false)
+ * @param options.maxQueryMs Maximum query execution time in milliseconds (default: 10,000)
+ * @param options.retries Number of retry attempts on failure (default: 2)
+ * @param options.retryBaseDelayMs Initial delay before retry in milliseconds (default: 2,000)
+ * @param options.retryBackoffFactor Factor by which the retry delay increases after each attempt (default: 2)
  * @returns HTTP response with a JSON payload containing the filtered rows
  *
  * @example
@@ -99,6 +103,10 @@ export const topSlowestStatementLastHourTrigger = async (
     warnThresholdMs: DEFAULT_TIMEOUT,
     memoryThresholdBytes: DEFAULT_MEMORY_THRESHOLD,
     showPlan: false,
+    maxQueryMs: 10_000,
+    retries: 2, // total attempts = 1 + retries
+    retryBaseDelayMs: 2_000,
+    retryBackoffFactor: 2,
   };
 
   // Helper: Convert nanoseconds to milliseconds (for latency fields)
@@ -141,6 +149,47 @@ export const topSlowestStatementLastHourTrigger = async (
       s = s.slice(0, maxLen) + " …[truncated]";
     }
     return s;
+  }
+
+  /**
+   * Promise timeout helper: rejects if the promise doesn't settle within `ms`.
+   * Logs a warning on timeout and lets the caller decide how to proceed.
+   */
+  async function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race<T>([
+        p,
+        new Promise<T>((_resolve, reject) => {
+          timer = setTimeout(() => reject(new Error(`TIMEOUT:${ms}`)), ms);
+        }),
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  async function executeWithRetries<T>(task: () => Promise<T>, label: string): Promise<T> {
+    let attempt = 0;
+    let delay = 1_000;
+    // attempts = 1 (initial) + retries
+    while (true) {
+      try {
+        attempt++;
+        return await task();
+      } catch (e: any) {
+        const msg = String(e?.message ?? e);
+        const isTimeout = msg.startsWith("TIMEOUT:");
+        if (attempt > 3) throw e;
+        // eslint-disable-next-line no-console
+        console.error(
+          `${label}: attempt ${attempt} failed${isTimeout ? " (timeout)" : e}; retrying in ${delay}ms...`,
+        );
+        await sleep(delay);
+      }
+    }
   }
 
   // Number of top slow queries to fetch
@@ -245,40 +294,46 @@ export const topSlowestStatementLastHourTrigger = async (
       .groupBy(combined.digest, combined.stmtType, combined.schemaName)
       .as("grouped");
 
-    // Final selection: filter by threshold, sort by avg latency desc, limit TOP_N
-    const rows = await orm
-      .getDrizzleQueryBuilder()
-      .select({
-        digest: grouped.digest,
-        stmtType: grouped.stmtType,
-        schemaName: grouped.schemaName,
-        execCount: grouped.execCount,
+    // Build the SELECT each time (Drizzle query builders are single-use once awaited)
+    const buildQuery = () =>
+      orm
+        .getDrizzleQueryBuilder()
+        .select({
+          digest: grouped.digest,
+          stmtType: grouped.stmtType,
+          schemaName: grouped.schemaName,
+          execCount: grouped.execCount,
 
-        avgLatencyNs: grouped.avgLatencyNs,
-        maxLatencyNs: grouped.maxLatencyNs,
-        minLatencyNs: grouped.minLatencyNs,
+          avgLatencyNs: grouped.avgLatencyNs,
+          maxLatencyNs: grouped.maxLatencyNs,
+          minLatencyNs: grouped.minLatencyNs,
 
-        avgProcessTimeNs: grouped.avgProcessTimeNs,
-        avgWaitTimeNs: grouped.avgWaitTimeNs,
-        avgBackoffTimeNs: grouped.avgBackoffTimeNs,
+          avgProcessTimeNs: grouped.avgProcessTimeNs,
+          avgWaitTimeNs: grouped.avgWaitTimeNs,
+          avgBackoffTimeNs: grouped.avgBackoffTimeNs,
 
-        avgMemBytes: grouped.avgMemBytes,
-        maxMemBytes: grouped.maxMemBytes,
+          avgMemBytes: grouped.avgMemBytes,
+          maxMemBytes: grouped.maxMemBytes,
 
-        avgTotalKeys: grouped.avgTotalKeys,
-        firstSeen: grouped.firstSeen,
-        lastSeen: grouped.lastSeen,
-        planInCache: grouped.planInCache,
-        planCacheHits: grouped.planCacheHits,
-        digestText: grouped.digestText,
-        plan: grouped.plan,
-      })
-      .from(grouped)
-      .where(
-        sql`${grouped.avgLatencyNs} > ${thresholdNs} OR ${grouped.avgMemBytes} > ${memoryThresholdBytes}`,
-      )
-      .orderBy(desc(grouped.avgLatencyNs))
-      .limit(formatLimitOffset(TOP_N));
+          avgTotalKeys: grouped.avgTotalKeys,
+          firstSeen: grouped.firstSeen,
+          lastSeen: grouped.lastSeen,
+          planInCache: grouped.planInCache,
+          planCacheHits: grouped.planCacheHits,
+          digestText: grouped.digestText,
+          plan: grouped.plan,
+        })
+        .from(grouped)
+        .where(
+          sql`${grouped.avgLatencyNs} > ${thresholdNs} OR ${grouped.avgMemBytes} > ${memoryThresholdBytes}`,
+        )
+        .orderBy(desc(grouped.avgLatencyNs))
+        .limit(formatLimitOffset(TOP_N));
+
+    const rows = await executeWithRetries(
+      () => withTimeout(buildQuery(), 5_000),
+      "topSlowestStatementLastHourTrigger",
+    );
 
     // Map each row into a formatted object with ms and rank, for easier consumption/logging
     const formatted = rows.map((r, i) => ({
@@ -341,8 +396,8 @@ export const topSlowestStatementLastHourTrigger = async (
     // Catch any error (DB, logic, etc) and log with details for debugging
     // This ensures the scheduler never crashes and always returns a response.
     // eslint-disable-next-line no-console
-    console.error(
-      "Error in topSlowestStatementLastHourTrigger:",
+    console.warn(
+      "Error in topSlowestStatementLastHourTrigger (one-off errors can be ignored; if it recurs, investigate):",
       error?.cause?.context?.debug?.sqlMessage ?? error?.cause ?? error,
     );
     return {

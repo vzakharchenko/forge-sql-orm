@@ -40,6 +40,7 @@ import { SQLWrapper } from "drizzle-orm/sql/sql";
 import { WithSubquery } from "drizzle-orm/subquery";
 import { ForgeSQLMetadata } from "../utils/forgeDriver";
 import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
+import { operationTypeQueryContext } from "../utils/requestTypeContextUtils";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -587,8 +588,49 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute(query: SQLWrapper | string) {
-    return this.drizzle.executeQuery(query);
+  execute<T>(query: SQLWrapper | string) {
+    return this.drizzle.executeQuery<T>(query);
+  }
+
+  /**
+   * Executes a Data Definition Language (DDL) SQL query.
+   * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
+   * 
+   * This method is specifically designed for DDL operations and provides:
+   * - Proper operation type context for DDL queries
+   * - No caching (DDL operations should not be cached)
+   * - Direct execution without query optimization
+   * 
+   * @template T - The expected return type of the query result
+   * @param query - The DDL SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @throws {Error} If the DDL operation fails
+   * 
+   * @example
+   * ```typescript
+   * // Create a new table
+   * await forgeSQL.executeDDL(`
+   *   CREATE TABLE users (
+   *     id INT PRIMARY KEY AUTO_INCREMENT,
+   *     name VARCHAR(255) NOT NULL,
+   *     email VARCHAR(255) UNIQUE
+   *   )
+   * `);
+   * 
+   * // Alter table structure
+   * await forgeSQL.executeDDL(sql`
+   *   ALTER TABLE users 
+   *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   * `);
+   * 
+   * // Drop a table
+   * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+   * ```
+   */
+  async executeDDL<T>(query: SQLWrapper | string) {
+    return operationTypeQueryContext.run({ operationType: "DDL" }, async () =>
+      this.drizzle.executeQuery<T>(query),
+    );
   }
 
   /**
@@ -609,8 +651,8 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
-    return this.drizzle.executeQueryCacheable(query, cacheTtl);
+  executeCacheable<T>(query: SQLWrapper | string, cacheTtl?: number) {
+    return this.drizzle.executeQueryCacheable<T>(query, cacheTtl);
   }
 
   /**
@@ -998,7 +1040,46 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * ```
    */
   execute(query: SQLWrapper | string) {
-    return this.ormInstance.getDrizzleQueryBuilder().executeQuery(query);
+    return this.ormInstance.execute(query);
+  }
+
+  /**
+   * Executes a Data Definition Language (DDL) SQL query.
+   * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
+   * 
+   * This method is specifically designed for DDL operations and provides:
+   * - Proper operation type context for DDL queries
+   * - No caching (DDL operations should not be cached)
+   * - Direct execution without query optimization
+   * 
+   * @template T - The expected return type of the query result
+   * @param query - The DDL SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @throws {Error} If the DDL operation fails
+   * 
+   * @example
+   * ```typescript
+   * // Create a new table
+   * await forgeSQL.executeDDL(`
+   *   CREATE TABLE users (
+   *     id INT PRIMARY KEY AUTO_INCREMENT,
+   *     name VARCHAR(255) NOT NULL,
+   *     email VARCHAR(255) UNIQUE
+   *   )
+   * `);
+   * 
+   * // Alter table structure
+   * await forgeSQL.executeDDL(sql`
+   *   ALTER TABLE users 
+   *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   * `);
+   * 
+   * // Drop a table
+   * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+   * ```
+   */
+  executeDDL(query: SQLWrapper | string) {
+    return this.ormInstance.executeDDL(query);
   }
 
   /**
@@ -1020,7 +1101,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * ```
    */
   executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
-    return this.ormInstance.getDrizzleQueryBuilder().executeQueryCacheable(query, cacheTtl);
+    return this.ormInstance.executeCacheable(query, cacheTtl);
   }
 
   /**
@@ -1031,7 +1112,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @example
    * ```typescript
    * const withQuery = forgeSQL.$with('userStats').as(
-   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *   forgeSQL.getDrizzleQueryBuilder().select({ userId: users.id, count: sql<number>`count(*)` })
    *     .from(users)
    *     .groupBy(users.id)
    * );
@@ -1050,7 +1131,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @example
    * ```typescript
    * const withQuery = forgeSQL.$with('userStats').as(
-   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *   forgeSQL.getDrizzleQueryBuilder().select({ userId: users.id, count: sql<number>`count(*)` })
    *     .from(users)
    *     .groupBy(users.id)
    * );

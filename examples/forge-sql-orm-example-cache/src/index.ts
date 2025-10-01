@@ -11,6 +11,7 @@ import { FORGE_SQL_ORM } from "./utils/forgeSqlOrmUtils";
 import { demoOrders, demoUsers } from "./entities";
 import { eq, or, and, sql } from "drizzle-orm";
 import { NewUserOrder, UserOrderRow } from "./utils/Constants";
+import { MySqlDialect } from "drizzle-orm/mysql-core";
 
 const SQL_CACHE_QUERY = FORGE_SQL_ORM.selectCacheable({
   userId: demoUsers.id,

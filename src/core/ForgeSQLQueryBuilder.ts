@@ -548,6 +548,45 @@ export interface QueryBuilderForgeSql {
   ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
 
   /**
+   * Executes a Data Definition Language (DDL) SQL query.
+   * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
+   * 
+   * This method is specifically designed for DDL operations and provides:
+   * - Proper operation type context for DDL queries
+   * - No caching (DDL operations should not be cached)
+   * - Direct execution without query optimization
+   * 
+   * @template T - The expected return type of the query result
+   * @param query - The DDL SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @throws {Error} If the DDL operation fails
+   * 
+   * @example
+   * ```typescript
+   * // Create a new table
+   * await forgeSQL.executeDDL(`
+   *   CREATE TABLE users (
+   *     id INT PRIMARY KEY AUTO_INCREMENT,
+   *     name VARCHAR(255) NOT NULL,
+   *     email VARCHAR(255) UNIQUE
+   *   )
+   * `);
+   * 
+   * // Alter table structure
+   * await forgeSQL.executeDDL(sql`
+   *   ALTER TABLE users 
+   *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   * `);
+   * 
+   * // Drop a table
+   * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+   * ```
+   */
+  executeDDL<T>(
+    query: SQLWrapper | string,
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+
+  /**
    * Executes a raw SQL query with both local and global cache support.
    * This method provides comprehensive caching for raw SQL queries:
    * - Local cache: Within the current invocation context

@@ -23,8 +23,8 @@
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
-- ✅ **Raw SQL Execution**: `execute()` and `executeCacheable()` methods for direct SQL queries with local and global caching
 - ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and Forge SQL metadata
+- ✅ **Raw SQL Execution**: `execute()`, `executeCacheable()`, and `executeDDL()` methods for direct SQL queries with local and global caching
 - ✅ **Common Table Expressions (CTEs)**: `with()` method for complex queries with subqueries
 - ✅ **Schema migration support**, allowing automatic schema evolution
 - ✅ **Automatic entity generation** from MySQL/tidb databases
@@ -99,7 +99,7 @@
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation persistent caching
 - [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory invocation caching
 - [Optimistic Locking](#optimistic-locking) - Data consistency
-- [Performance Monitoring](#performance-monitoring) - Memory-intensive query detection
+- [Memory Usage Monitoring](#memory-usage-monitoring) - Memory-intensive query detection
 - [Migration Tools](#web-triggers-for-migrations) - Database migrations
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
 
@@ -108,7 +108,7 @@
 - [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking) - Real-world conflict handling
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker) - Complex relationships
 - [Checklist Example](examples/forge-sql-orm-example-checklist) - Jira integration
-- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching with performance monitoring
+- [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching with memory monitoring
 
 ## Usage Approaches
 
@@ -778,6 +778,7 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `selectDistinctCacheableFrom()` | Distinct all-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
 | `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
 | `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
+| `executeDDL()` | DDL operations (CREATE, ALTER, DROP, etc.) | ❌ No | No Caching |
 | `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 
 
@@ -799,6 +800,7 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
 | `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
 | `executeWithMetadata()` | Raw SQL queries with execution metrics capture | ❌ No | Local Cache |
+| `executeDDL()` | DDL operations (CREATE, ALTER, DROP, etc.) | ❌ No | No Caching |
 | `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
@@ -1187,14 +1189,30 @@ const users = await forgeSQL
 
 // Using executeWithMetadata() for capturing execution metrics
 const usersWithMetadata = await forgeSQL
-  .executeWithMetadata(
-    async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
-    (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-      console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-      console.log(`Response size: ${totalResponseSize} bytes`);
-      console.log('Forge metadata:', forgeMetadata);
-    }
-  );
+    .executeWithMetadata(
+        async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
+        (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+            console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+            console.log(`Response size: ${totalResponseSize} bytes`);
+            console.log('Forge metadata:', forgeMetadata);
+        }
+    );
+
+// Using executeDDL() for DDL operations (CREATE, ALTER, DROP, etc.)
+await forgeSQL.executeDDL(`
+  CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE
+  )
+`);
+
+await forgeSQL.executeDDL(sql`
+  ALTER TABLE users 
+  ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+`);
+
+await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
 
 // Using execute() with complex queries
 const userStats = await forgeSQL
@@ -2337,6 +2355,7 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
 - `forgeSQL.selectDistinctCacheableFrom()` - Distinct all-column queries with field aliasing and caching
 - `forgeSQL.execute()` - Raw SQL queries with local caching
 - `forgeSQL.executeCacheable()` - Raw SQL queries with local and global caching
+- `forgeSQL.executeDDL()` - DDL operations (CREATE, ALTER, DROP, etc.)
 - `forgeSQL.with()` - Common Table Expressions (CTEs)
 
 **Optional Migration:**
@@ -2375,13 +2394,27 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
 
 // ✅ Raw SQL execution with metadata capture
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
-  async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
-  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-    console.log(`Response size: ${totalResponseSize} bytes`);
-    console.log('Forge metadata:', forgeMetadata);
-  }
+    async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
+    (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
+        console.log(`DB execution time: ${totalDbExecutionTime}ms`);
+        console.log(`Response size: ${totalResponseSize} bytes`);
+        console.log('Forge metadata:', forgeMetadata);
+    }
 );
+
+// ✅ DDL operations for schema modifications
+await forgeSQL.executeDDL(`
+  CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE
+  )
+`);
+
+await forgeSQL.executeDDL(sql`
+  ALTER TABLE users 
+  ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+`);
 
 // ✅ Common Table Expressions (CTEs)
 const userStats = await forgeSQL
