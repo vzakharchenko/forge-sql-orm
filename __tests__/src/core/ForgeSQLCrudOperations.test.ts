@@ -61,7 +61,33 @@ vi.mock("@forge/sql", () => ({
             mockResult.params = params;
             return mockResult;
           }),
-          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1 } }),
+          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId:0} }),
+        } as any;
+        return mockResult;
+      } else if (query.startsWith("insert")) {
+        const mockResult = {
+          query: "MOCK_QUERY",
+          _params: [],
+          remoteSqlApi: "",
+          params: [],
+          bindParams: vi.fn().mockImplementation((params) => {
+            mockResult.params = params;
+            return mockResult;
+          }),
+          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId:1 } }),
+        } as any;
+        return mockResult;
+      }else if (query.startsWith("delete")) {
+        const mockResult = {
+          query: "MOCK_QUERY",
+          _params: [],
+          remoteSqlApi: "",
+          params: [],
+          bindParams: vi.fn().mockImplementation((params) => {
+            mockResult.params = params;
+            return mockResult;
+          }),
+          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId:0 } }),
         } as any;
         return mockResult;
       }
@@ -466,7 +492,7 @@ describe("ForgeSQLCrudOperations", () => {
             query: "MOCK_QUERY",
             params: [],
             bindParams: vi.fn(),
-            execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 0 } }),
+            execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 0, insertId: 0 } }),
           }) as any,
       );
 

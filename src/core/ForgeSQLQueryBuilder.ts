@@ -543,9 +543,9 @@ export interface QueryBuilderForgeSql {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute(
+  execute<T>(
     query: SQLWrapper | string,
-  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
 
   /**
    * Executes a Data Definition Language (DDL) SQL query.
@@ -584,7 +584,7 @@ export interface QueryBuilderForgeSql {
    */
   executeDDL<T>(
     query: SQLWrapper | string,
-  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
 
   /**
    * Executes a raw SQL query with both local and global cache support.
@@ -604,10 +604,10 @@ export interface QueryBuilderForgeSql {
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  executeCacheable(
+  executeCacheable<T>(
     query: SQLWrapper | string,
     cacheTtl?: number,
-  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
   /**
    * Creates a Common Table Expression (CTE) builder for complex queries.
    * CTEs allow you to define temporary named result sets that exist within the scope of a single query.

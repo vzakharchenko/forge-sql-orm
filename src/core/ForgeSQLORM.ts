@@ -41,6 +41,7 @@ import { WithSubquery } from "drizzle-orm/subquery";
 import { ForgeSQLMetadata } from "../utils/forgeDriver";
 import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
 import { operationTypeQueryContext } from "../utils/requestTypeContextUtils";
+import type {MySqlQueryResultKind} from "drizzle-orm/mysql-core/session";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -1039,7 +1040,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute(query: SQLWrapper | string) {
+  execute<T>(query: SQLWrapper | string): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>> {
     return this.ormInstance.execute(query);
   }
 

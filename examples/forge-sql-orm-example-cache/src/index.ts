@@ -47,6 +47,8 @@ resolver.define(
     const beginTime = new Date().getTime();
     try {
       let diff = 0;
+      const newVar = await FORGE_SQL_ORM.getDrizzleQueryBuilder().execute<{a_userid_id: number}>(SQL_CACHE_QUERY.toSQL().sql);
+     console.log(JSON.stringify(newVar));
       const result = await FORGE_SQL_ORM.executeWithMetadata(
         async () => await (req.payload.cacheable ? SQL_CACHE_QUERY : SQL_QUERY),
         (totalDbExecutionTime, totalResponseSize) => {

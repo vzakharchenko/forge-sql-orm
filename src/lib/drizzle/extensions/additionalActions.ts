@@ -206,7 +206,7 @@ export type SelectAllDistinctFromCacheableAliasedType = <T extends MySqlTable>(
  */
 export type ExecuteQuery = <T>(
   query: SQLWrapper | string,
-) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
 
 /**
  * Type for executing raw SQL queries with local and global cache
@@ -214,7 +214,7 @@ export type ExecuteQuery = <T>(
 export type ExecuteQueryCacheable = <T>(
   query: SQLWrapper | string,
   cacheTtl?: number,
-) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
 
 /**
  * Type for insert operations with cache eviction

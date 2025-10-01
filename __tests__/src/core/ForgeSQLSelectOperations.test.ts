@@ -84,12 +84,12 @@ describe("ForgeSQLSelectOperations", () => {
   });
 
   it("test drizzle executeQuery", async () => {
-    const result = await forgeSqlOperation.execute(rawSql`select * from 1`);
+    const result = await forgeSqlOperation.execute<{id: number, name:string, data: 't'  }>(rawSql`select * from 1`);
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-
     expect(sql.prepare).toHaveBeenCalledWith("select * from 1");
-    expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([[{ id: 1, name: "Test", data: "t" }]]);
+
+      expect(preparedStatement.execute).toHaveBeenCalled();
+      expect(result).toEqual([{ id: 1, name: "Test", data: "t" }]);
   });
 
   it("test drizzle executeQuery Cacheable", async () => {
@@ -98,7 +98,7 @@ describe("ForgeSQLSelectOperations", () => {
 
     expect(sql.prepare).toHaveBeenCalledWith("select * from 1");
     expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([[{ id: 1, name: "Test", data: "t" }]]);
+    expect(result).toEqual([{ id: 1, name: "Test", data: "t" }]);
   });
 
   it("test drizzle executeQuery Cacheable simple text", async () => {
@@ -107,7 +107,7 @@ describe("ForgeSQLSelectOperations", () => {
 
     expect(sql.prepare).toHaveBeenCalledWith("select * from 1");
     expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([[{ id: 1, name: "Test", data: "t" }]]);
+    expect(result).toEqual([{ id: 1, name: "Test", data: "t" }]);
   });
   it("test drizzle executeDDL", async () => {
     vi.mocked(sql.executeDDL).mockResolvedValue({
