@@ -62,13 +62,23 @@ export function isUpdateQueryResponse(obj: unknown): obj is UpdateQueryResponse 
   );
 }
 
+function inlineParams(sql: string, params: unknown[]): string {
+  let i = 0;
+  return sql.replace(/\?/g, () => {
+    const val = params[i++];
+    if (val === null) return "NULL";
+    if (typeof val === "number") return val.toString();
+    return `'${String(val).replace(/'/g, "''")}'`;
+  });
+}
+
 /**
  * Processes DDL query results and saves metadata.
  *
  * @param result - The DDL query result
  * @returns Processed result for Drizzle ORM
  */
-async function processDDLResult(result: any): Promise<ForgeDriverResult> {
+async function processDDLResult(method: QueryMethod, result: any): Promise<ForgeDriverResult> {
   if (result.metadata) {
     await saveMetaDataInContextContext(result.metadata as ForgeSQLMetadata);
   }
@@ -78,12 +88,17 @@ async function processDDLResult(result: any): Promise<ForgeDriverResult> {
   }
 
   if (isUpdateQueryResponse(result.rows)) {
-      const oneRow = result.rows as any;
-      return {...oneRow, rows: [oneRow] };
+    const oneRow = result.rows as any;
+    return { ...oneRow, rows: [oneRow] };
   }
 
   if (Array.isArray(result.rows)) {
-    return {rows: result.rows};
+    if (method === "execute") {
+      return { rows: result.rows };
+    } else {
+      const rows = (result.rows as any[]).map((r) => Object.values(r as Record<string, unknown>));
+      return { rows };
+    }
   }
 
   return { rows: [] };
@@ -105,17 +120,16 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
 
   const result = await sqlStatement.execute();
   await saveMetaDataInContextContext(result.metadata as ForgeSQLMetadata);
-    if (!result.rows) {
-        return { rows: [] };
-    }
+  if (!result.rows) {
+    return { rows: [] };
+  }
 
-    if (isUpdateQueryResponse(result.rows)) {
-        const oneRow = result.rows as any;
-        return {...oneRow, rows: [oneRow] };
-    }
+  if (isUpdateQueryResponse(result.rows)) {
+    const oneRow = result.rows as any;
+    return { ...oneRow, rows: [oneRow] };
+  }
 
-
-    return { rows: result.rows};
+  return { rows: result.rows };
 }
 
 /**
@@ -139,9 +153,7 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
     return { rows: [] };
   }
 
-  const rows = (result.rows as any[]).map((r) =>
-    Object.values(r as Record<string, unknown>)
-  );
+  const rows = (result.rows as any[]).map((r) => Object.values(r as Record<string, unknown>));
 
   return { rows };
 }
@@ -178,21 +190,15 @@ export const forgeDriver = async (
 
   // Handle DDL operations
   if (operationType === "DDL") {
-    if (params && params.length > 0) {
-      throw new Error(
-        "Query parameters are not supported for DDL operations. Execute DDL statements without parameters (don't use DML helpers for DDL)",
-      );
-    }
-
-    const result = await sql.executeDDL(query);
-    return await processDDLResult(result);
+    const result = await sql.executeDDL(inlineParams(query, params));
+    return await processDDLResult(method, result);
   }
 
   // Handle execute method (UPDATE, INSERT, DELETE)
   if (method === "execute") {
-    return await processExecuteMethod(query, params?? []);
+    return await processExecuteMethod(query, params ?? []);
   }
 
   // Handle all method (SELECT)
-  return await processAllMethod(query, params??[]);
+  return await processAllMethod(query, params ?? []);
 };

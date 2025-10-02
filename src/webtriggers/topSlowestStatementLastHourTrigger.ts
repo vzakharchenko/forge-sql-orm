@@ -1,8 +1,9 @@
 import { ForgeSqlOperation } from "../core/ForgeSQLQueryBuilder";
-import { clusterStatementsSummary, clusterStatementsSummaryHistory } from "../core/SystemTables";
+import {clusterStatementsSummary, clusterStatementsSummaryHistory, statementsSummary} from "../core/SystemTables";
 import { desc, gte, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/mysql-core";
 import { formatLimitOffset } from "../utils/sqlUtils";
+import { OperationType } from "../utils/requestTypeContextUtils";
 
 const DEFAULT_MEMORY_THRESHOLD = 8 * 1024 * 1024;
 const DEFAULT_TIMEOUT = 300;
@@ -85,6 +86,10 @@ export const topSlowestStatementLastHourTrigger = async (
     warnThresholdMs?: number;
     memoryThresholdBytes?: number;
     showPlan?: boolean;
+    operationType?: OperationType;
+    topN?: number;
+    hours?: number;
+    tables?: 'SUMMARY'|"HISTORY"|"SUMMARY_AND_HISTORY"|'CLUSTER_SUMMARY'|"CLUSTER_HISTORY"|"CLUSTER_SUMMARY_AND_HISTORY"
   },
 ) => {
   // Validate required parameters
@@ -103,10 +108,10 @@ export const topSlowestStatementLastHourTrigger = async (
     warnThresholdMs: DEFAULT_TIMEOUT,
     memoryThresholdBytes: DEFAULT_MEMORY_THRESHOLD,
     showPlan: false,
-    maxQueryMs: 10_000,
-    retries: 2, // total attempts = 1 + retries
-    retryBaseDelayMs: 2_000,
-    retryBackoffFactor: 2,
+    operationType: "DML",
+      topN: 1,
+      hours: 1,
+      tables: 'SUMMARY'
   };
 
   // Helper: Convert nanoseconds to milliseconds (for latency fields)
@@ -193,14 +198,16 @@ export const topSlowestStatementLastHourTrigger = async (
   }
 
   // Number of top slow queries to fetch
-  const TOP_N = 1;
+  const TOP_N = newOptions.topN ?? 1;
 
   try {
     // Get references to system summary tables
-    const summaryHistory = clusterStatementsSummaryHistory;
-    const summary = clusterStatementsSummary;
+    const summaryHistory = statementsSummary;
+    const summary = statementsSummary;
+    const summaryHistoryCluster = clusterStatementsSummaryHistory;
+    const summaryCluster = clusterStatementsSummary;
     // Helper to define the selected fields (selection shape) for both tables
-    const selectShape = (t: typeof summaryHistory | typeof summary) => ({
+    const selectShape = (t: typeof summaryHistory | typeof summary| typeof summaryCluster| typeof summaryHistoryCluster) => ({
       digest: t.digest,
       stmtType: t.stmtType,
       schemaName: t.schemaName,
@@ -226,13 +233,21 @@ export const topSlowestStatementLastHourTrigger = async (
     });
 
     // Filters: Only include rows from the last hour for each table
-    const lastHourFilterHistory = gte(
+    const lastHoursFilterHistory = gte(
       summaryHistory.summaryEndTime,
-      sql`DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
+      sql`DATE_SUB(NOW(), INTERVAL ${newOptions.hours ?? 1} HOUR)`,
     );
-    const lastHourFilterSummary = gte(
+    const lastHoursFilterSummary = gte(
       summary.summaryEndTime,
-      sql`DATE_SUB(NOW(), INTERVAL 1 HOUR)`,
+      sql`DATE_SUB(NOW(), INTERVAL ${newOptions.hours ?? 1} HOUR)`,
+    );
+    const lastHoursFilterHistoryCluster = gte(
+      summaryHistoryCluster.summaryEndTime,
+      sql`DATE_SUB(NOW(), INTERVAL ${newOptions.hours ?? 1} HOUR)`,
+    );
+    const lastHoursFilterSummaryCluster = gte(
+      summaryCluster.summaryEndTime,
+      sql`DATE_SUB(NOW(), INTERVAL ${newOptions.hours ?? 1} HOUR)`,
     );
 
     // Query for summary history table (last hour)
@@ -240,18 +255,58 @@ export const topSlowestStatementLastHourTrigger = async (
       .getDrizzleQueryBuilder()
       .select(selectShape(summaryHistory))
       .from(summaryHistory)
-      .where(lastHourFilterHistory);
+      .where(lastHoursFilterHistory);
+
+    const qHistoryCluster = orm
+      .getDrizzleQueryBuilder()
+      .select(selectShape(summaryHistoryCluster))
+      .from(summaryHistoryCluster)
+      .where(lastHoursFilterHistoryCluster);
 
     // Query for summary table (last hour)
     const qSummary = orm
       .getDrizzleQueryBuilder()
       .select(selectShape(summary))
       .from(summary)
-      .where(lastHourFilterSummary);
-
+      .where(lastHoursFilterSummary);
+    const qSummaryCluster = orm
+      .getDrizzleQueryBuilder()
+      .select(selectShape(summaryCluster))
+      .from(summaryCluster)
+      .where(lastHoursFilterSummaryCluster);
+    let tables = newOptions.tables ?? 'SUMMARY'
     // Use UNION ALL to combine results from both tables (avoids duplicates, keeps all rows)
     // This is necessary because some statements may only be present in one of the tables.
-    const combined = unionAll(qHistory, qSummary).as("combined");
+    let combined = unionAll(qHistory, qSummary).as("combined");
+     switch (tables) {
+         case 'HISTORY' :{
+             combined = qHistory.as("combined");
+             break;
+         }
+         case 'SUMMARY': {
+             combined = qSummary.as("combined");
+             break;
+         }
+         case 'SUMMARY_AND_HISTORY': {
+             combined = unionAll(qHistory, qSummary).as("combined");
+             break;
+         }
+         case 'CLUSTER_HISTORY' :{
+             combined = qHistoryCluster.as("combined");
+             break;
+         }
+         case 'CLUSTER_SUMMARY': {
+             combined = qSummaryCluster.as("combined");
+             break;
+         }
+         case 'CLUSTER_SUMMARY_AND_HISTORY': {
+             combined = unionAll(qHistoryCluster, qSummaryCluster).as("combined");
+             break;
+         }
+         default: {
+             throw new Error('Unsupported table '+tables)
+         }
+     }
 
     // Threshold in nanoseconds (warnThresholdMs → ns)
     const thresholdNs = Math.floor((newOptions.warnThresholdMs ?? DEFAULT_TIMEOUT) * 1e6);
@@ -295,8 +350,8 @@ export const topSlowestStatementLastHourTrigger = async (
       .as("grouped");
 
     // Build the SELECT each time (Drizzle query builders are single-use once awaited)
-    const buildQuery = () =>
-      orm
+    const buildQuery = () => {
+      const query = orm
         .getDrizzleQueryBuilder()
         .select({
           digest: grouped.digest,
@@ -329,12 +384,17 @@ export const topSlowestStatementLastHourTrigger = async (
         )
         .orderBy(desc(grouped.avgLatencyNs))
         .limit(formatLimitOffset(TOP_N));
+      if (newOptions.operationType === "DDL") {
+        return orm.executeDDLActions(async () => await query);
+      } else {
+        return query;
+      }
+    };
 
     const rows = await executeWithRetries(
-      () => withTimeout(buildQuery(), 5_000),
+      () => withTimeout(buildQuery(), 10_000),
       "topSlowestStatementLastHourTrigger",
     );
-
     // Map each row into a formatted object with ms and rank, for easier consumption/logging
     const formatted = rows.map((r, i) => ({
       rank: i + 1, // 1-based rank in the top N
@@ -357,7 +417,7 @@ export const topSlowestStatementLastHourTrigger = async (
       lastSeen: r.lastSeen,
       planInCache: r.planInCache,
       planCacheHits: r.planCacheHits,
-      digestText: sanitizeSQL(r.digestText),
+      digestText: newOptions.operationType === "DDL" ? r.digestText : sanitizeSQL(r.digestText),
       plan: newOptions.showPlan ? r.plan : undefined,
     }));
 
@@ -383,7 +443,7 @@ export const topSlowestStatementLastHourTrigger = async (
       statusText: "OK",
       body: jsonSafeStringify({
         success: true,
-        window: "last_1h",
+        window: `last_${newOptions.hours??1}h`,
         top: TOP_N,
         warnThresholdMs: newOptions.warnThresholdMs,
         memoryThresholdBytes: newOptions.memoryThresholdBytes,

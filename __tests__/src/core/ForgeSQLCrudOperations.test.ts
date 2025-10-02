@@ -61,7 +61,7 @@ vi.mock("@forge/sql", () => ({
             mockResult.params = params;
             return mockResult;
           }),
-          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId:0} }),
+          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId: 0 } }),
         } as any;
         return mockResult;
       } else if (query.startsWith("insert")) {
@@ -74,10 +74,10 @@ vi.mock("@forge/sql", () => ({
             mockResult.params = params;
             return mockResult;
           }),
-          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId:1 } }),
+          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId: 1 } }),
         } as any;
         return mockResult;
-      }else if (query.startsWith("delete")) {
+      } else if (query.startsWith("delete")) {
         const mockResult = {
           query: "MOCK_QUERY",
           _params: [],
@@ -87,7 +87,7 @@ vi.mock("@forge/sql", () => ({
             mockResult.params = params;
             return mockResult;
           }),
-          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId:0 } }),
+          execute: vi.fn().mockResolvedValue({ rows: { affectedRows: 1, insertId: 0 } }),
         } as any;
         return mockResult;
       }

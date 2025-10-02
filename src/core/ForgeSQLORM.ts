@@ -41,7 +41,7 @@ import { WithSubquery } from "drizzle-orm/subquery";
 import { ForgeSQLMetadata } from "../utils/forgeDriver";
 import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
 import { operationTypeQueryContext } from "../utils/requestTypeContextUtils";
-import type {MySqlQueryResultKind} from "drizzle-orm/mysql-core/session";
+import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -596,17 +596,17 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   /**
    * Executes a Data Definition Language (DDL) SQL query.
    * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
-   * 
+   *
    * This method is specifically designed for DDL operations and provides:
    * - Proper operation type context for DDL queries
    * - No caching (DDL operations should not be cached)
    * - Direct execution without query optimization
-   * 
+   *
    * @template T - The expected return type of the query result
    * @param query - The DDL SQL query to execute (SQLWrapper or string)
    * @returns Promise with query results
    * @throws {Error} If the DDL operation fails
-   * 
+   *
    * @example
    * ```typescript
    * // Create a new table
@@ -617,13 +617,13 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *     email VARCHAR(255) UNIQUE
    *   )
    * `);
-   * 
+   *
    * // Alter table structure
    * await forgeSQL.executeDDL(sql`
-   *   ALTER TABLE users 
+   *   ALTER TABLE users
    *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
    * `);
-   * 
+   *
    * // Drop a table
    * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
    * ```
@@ -632,6 +632,10 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
     return operationTypeQueryContext.run({ operationType: "DDL" }, async () =>
       this.drizzle.executeQuery<T>(query),
     );
+  }
+
+  async executeDDLActions<T>(actions: () => Promise<T>): Promise<T> {
+    return operationTypeQueryContext.run({ operationType: "DDL" }, async () => actions());
   }
 
   /**
@@ -1040,24 +1044,26 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute<T>(query: SQLWrapper | string): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>> {
+  execute<T>(
+    query: SQLWrapper | string,
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>> {
     return this.ormInstance.execute(query);
   }
 
   /**
    * Executes a Data Definition Language (DDL) SQL query.
    * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
-   * 
+   *
    * This method is specifically designed for DDL operations and provides:
    * - Proper operation type context for DDL queries
    * - No caching (DDL operations should not be cached)
    * - Direct execution without query optimization
-   * 
+   *
    * @template T - The expected return type of the query result
    * @param query - The DDL SQL query to execute (SQLWrapper or string)
    * @returns Promise with query results
    * @throws {Error} If the DDL operation fails
-   * 
+   *
    * @example
    * ```typescript
    * // Create a new table
@@ -1068,19 +1074,23 @@ class ForgeSQLORM implements ForgeSqlOperation {
    *     email VARCHAR(255) UNIQUE
    *   )
    * `);
-   * 
+   *
    * // Alter table structure
    * await forgeSQL.executeDDL(sql`
-   *   ALTER TABLE users 
+   *   ALTER TABLE users
    *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
    * `);
-   * 
+   *
    * // Drop a table
    * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
    * ```
    */
   executeDDL(query: SQLWrapper | string) {
     return this.ormInstance.executeDDL(query);
+  }
+
+  executeDDLActions<T>(actions: () => Promise<T>): Promise<T> {
+    return this.ormInstance.executeDDLActions(actions);
   }
 
   /**

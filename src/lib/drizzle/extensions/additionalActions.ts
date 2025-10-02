@@ -22,7 +22,7 @@ import {
   saveQueryLocalCacheQuery,
   saveTableIfInsideCacheContext,
 } from "../../../utils/cacheContextUtils";
-import { BuildQueryConfig, isSQLWrapper, SQLWrapper } from "drizzle-orm/sql/sql";
+import { isSQLWrapper, SQLWrapper } from "drizzle-orm/sql/sql";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 import { getTableColumns, Query, SQL } from "drizzle-orm";
 import { MySqlDialect } from "drizzle-orm/mysql-core/dialect";

@@ -1,17 +1,16 @@
 import Resolver, { Request } from "@forge/resolver";
 import {
-  dropSchemaMigrations,
   applySchemaMigrations,
-  fetchSchemaWebTrigger,
   clearCacheSchedulerTrigger,
+  dropSchemaMigrations,
+  fetchSchemaWebTrigger,
   topSlowestStatementLastHourTrigger,
 } from "forge-sql-orm";
 import migration from "./migration";
 import { FORGE_SQL_ORM } from "./utils/forgeSqlOrmUtils";
 import { demoOrders, demoUsers } from "./entities";
-import { eq, or, and, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import { NewUserOrder, UserOrderRow } from "./utils/Constants";
-import { MySqlDialect } from "drizzle-orm/mysql-core";
 
 const SQL_CACHE_QUERY = FORGE_SQL_ORM.selectCacheable({
   userId: demoUsers.id,
@@ -47,8 +46,6 @@ resolver.define(
     const beginTime = new Date().getTime();
     try {
       let diff = 0;
-      const newVar = await FORGE_SQL_ORM.getDrizzleQueryBuilder().execute<{a_userid_id: number}>(SQL_CACHE_QUERY.toSQL().sql);
-     console.log(JSON.stringify(newVar));
       const result = await FORGE_SQL_ORM.executeWithMetadata(
         async () => await (req.payload.cacheable ? SQL_CACHE_QUERY : SQL_QUERY),
         (totalDbExecutionTime, totalResponseSize) => {
@@ -149,9 +146,7 @@ resolver.define("insertUserOrOrder", async (req: Request<NewUserOrder>): Promise
 });
 
 export const handlerMigration = async () => {
-  const migrations = await applySchemaMigrations(migration);
-  await SQL_QUERY;
-  return migrations;
+  return await applySchemaMigrations(migration);
 };
 
 export const dropMigrations = () => {
@@ -161,12 +156,40 @@ export const dropMigrations = () => {
 export const fetchMigrations = () => {
   return fetchSchemaWebTrigger();
 };
-export const runPerformanceAnalyze = () => {
-  return topSlowestStatementLastHourTrigger(FORGE_SQL_ORM, {
-    warnThresholdMs: 300,
-    memoryThresholdBytes: 4 * 1024 * 1024,
-    showPlan: true,
-  });
+export const runPerformanceAnalyze = async () => {
+  const topSlowestStatementLastHourTriggerDML = await topSlowestStatementLastHourTrigger(
+    FORGE_SQL_ORM,
+    {
+      warnThresholdMs: 300,
+      memoryThresholdBytes: 4 * 1024 * 1024,
+      showPlan: true,
+      operationType: "DML",
+        hours: 3
+    },
+  );
+  const topSlowestStatementLastHourTriggerDDL = await topSlowestStatementLastHourTrigger(
+    FORGE_SQL_ORM,
+    {
+      warnThresholdMs: 200,
+      memoryThresholdBytes: 1 * 1024 * 1024,
+      showPlan: true,
+      operationType: "DDL",
+        hours: 3
+    },
+  );
+  return {
+    headers: { "Content-Type": ["application/json"] },
+    statusCode:
+      topSlowestStatementLastHourTriggerDML.statusCode >
+      topSlowestStatementLastHourTriggerDDL.statusCode
+        ? topSlowestStatementLastHourTriggerDML.statusCode
+        : topSlowestStatementLastHourTriggerDDL.statusCode,
+    statusText: "OK",
+    body: JSON.stringify({
+      DML: JSON.parse(topSlowestStatementLastHourTriggerDML.body),
+      DDL: JSON.parse(topSlowestStatementLastHourTriggerDDL.body),
+    }),
+  };
 };
 
 export const clearCache = () => {

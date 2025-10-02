@@ -32,14 +32,14 @@ export const applySchemaMigrations = async (
       throw new Error("migration is not a function");
     }
     // eslint-disable-next-line no-console
-    console.log("Provisioning the database");
+    console.debug("Provisioning the database");
     await sql._provision();
     // eslint-disable-next-line no-console
-    console.info("Running schema migrations");
+    console.debug("Running schema migrations");
     const migrations = await migration(migrationRunner);
     const successfulMigrations = await migrations.run();
     // eslint-disable-next-line no-console
-    console.info("Migrations applied:", successfulMigrations);
+    console.debug("Migrations applied:", successfulMigrations);
 
     const migrationList = await migrationRunner.list();
     let migrationHistory = "No migrations found";
@@ -54,7 +54,7 @@ export const applySchemaMigrations = async (
         .join("\n");
     }
     // eslint-disable-next-line no-console
-    console.info("Migrations history:\nid, name, migrated_at\n", migrationHistory);
+    console.debug("Migrations history:\nid, name, migrated_at\n", migrationHistory);
 
     return {
       headers: { "Content-Type": ["application/json"] },
