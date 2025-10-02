@@ -8,7 +8,7 @@ export type MetadataQueryContext = {
 };
 export const metadataQueryContext = new AsyncLocalStorage<MetadataQueryContext>();
 
-export async function saveMetaDataInContextContext(metadata: ForgeSQLMetadata): Promise<void> {
+export async function saveMetaDataToContext(metadata: ForgeSQLMetadata): Promise<void> {
   const context = metadataQueryContext.getStore();
   if (context && metadata) {
     context.totalResponseSize += metadata.responseSize;

@@ -59,6 +59,7 @@ vi.mock("@forge/sql", () => ({
         execute: executeMock,
       };
     }),
+    executeDDL: vi.fn(),
   },
 }));
 
@@ -83,12 +84,14 @@ describe("ForgeSQLSelectOperations", () => {
   });
 
   it("test drizzle executeQuery", async () => {
-    const result = await forgeSqlOperation.execute(rawSql`select * from 1`);
+    const result = await forgeSqlOperation.execute<{ id: number; name: string; data: "t" }>(
+      rawSql`select * from 1`,
+    );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
-
     expect(sql.prepare).toHaveBeenCalledWith("select * from 1");
+
     expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([[{ id: 1, name: "Test", data: "t" }]]);
+    expect(result).toEqual([{ id: 1, name: "Test", data: "t" }]);
   });
 
   it("test drizzle executeQuery Cacheable", async () => {
@@ -97,7 +100,81 @@ describe("ForgeSQLSelectOperations", () => {
 
     expect(sql.prepare).toHaveBeenCalledWith("select * from 1");
     expect(preparedStatement.execute).toHaveBeenCalled();
-    expect(result).toEqual([[{ id: 1, name: "Test", data: "t" }]]);
+    expect(result).toEqual([{ id: 1, name: "Test", data: "t" }]);
+  });
+
+  it("test drizzle executeQuery Cacheable simple text", async () => {
+    const result = await forgeSqlOperation.executeCacheable(`select * from 1`);
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+
+    expect(sql.prepare).toHaveBeenCalledWith("select * from 1");
+    expect(preparedStatement.execute).toHaveBeenCalled();
+    expect(result).toEqual([{ id: 1, name: "Test", data: "t" }]);
+  });
+  it("test drizzle executeDDL", async () => {
+    vi.mocked(sql.executeDDL).mockResolvedValue({
+      rows: {
+        affectedRows: 0,
+        fieldCount: 0,
+        info: "",
+        insertId: 0,
+        serverStatus: 1,
+        warningStatus: 1,
+      },
+      metadata: {
+        dbExecutionTime: 1234,
+        responseSize: 525,
+      },
+    });
+    const result = await forgeSqlOperation.executeDDL<{ affectedRows: number }>(
+      rawSql`CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
+    );
+    expect(sql.executeDDL).toHaveBeenCalledWith(
+      `CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
+    );
+    expect(result).toEqual([
+      {
+        affectedRows: 0,
+        fieldCount: 0,
+        info: "",
+        insertId: 0,
+        serverStatus: 1,
+        warningStatus: 1,
+      },
+    ]);
+  });
+
+  it("test drizzle executeDDL string", async () => {
+    vi.mocked(sql.executeDDL).mockResolvedValue({
+      rows: {
+        affectedRows: 0,
+        fieldCount: 0,
+        info: "",
+        insertId: 0,
+        serverStatus: 1,
+        warningStatus: 1,
+      },
+      metadata: {
+        dbExecutionTime: 1234,
+        responseSize: 525,
+      },
+    });
+    const result = await forgeSqlOperation.executeDDL<{ affectedRows: number }>(
+      `CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
+    );
+    expect(sql.executeDDL).toHaveBeenCalledWith(
+      `CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
+    );
+    expect(result).toEqual([
+      {
+        affectedRows: 0,
+        fieldCount: 0,
+        info: "",
+        insertId: 0,
+        serverStatus: 1,
+        warningStatus: 1,
+      },
+    ]);
   });
 
   it("test drizzle selectFrom", async () => {

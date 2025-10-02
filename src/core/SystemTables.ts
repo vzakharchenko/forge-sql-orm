@@ -312,6 +312,22 @@ export const clusterStatementsSummaryHistory = informationSchema.table(
 // Types
 export type ClusterStatementsSummaryHistory = typeof clusterStatementsSummaryHistory.$inferSelect;
 
+export const statementsSummaryHistory = informationSchema.table(
+  "STATEMENTS_SUMMARY_HISTORY",
+  createClusterStatementsSummarySchema(),
+);
+
+// Types
+export type StatementsSummaryHistory = typeof statementsSummaryHistory.$inferSelect;
+
+export const statementsSummary = informationSchema.table(
+  "STATEMENTS_SUMMARY",
+  createClusterStatementsSummarySchema(),
+);
+
+// Types
+export type StatementsSummary = typeof statementsSummary.$inferSelect;
+
 export const clusterStatementsSummary = informationSchema.table(
   "CLUSTER_STATEMENTS_SUMMARY",
   createClusterStatementsSummarySchema(),

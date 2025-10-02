@@ -1,0 +1,24 @@
+._2rkolb4i {
+  border-radius: var(--ds-radius-xsmall, 2px);
+}
+._12y3e4h9 {
+  outline-width: var(--ds-border-width, 1px);
+}
+._16qs1cd0 {
+  box-shadow: var(--ds-shadow-overlay, 0 8px 9pt #091e4226, 0 0 1px #091e424f);
+}
+._1e0c1ule {
+  display: block;
+}
+._bfhk1bhr {
+  background-color: var(--ds-surface-overlay, #fff);
+}
+._mizu1p6i:focus-visible {
+  outline-color: var(--ds-border-focused, #388bff);
+}
+._ra3xnqa1:focus-visible {
+  outline-style: solid;
+}
+._vchhusvi {
+  box-sizing: border-box;
+}

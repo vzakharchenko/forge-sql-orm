@@ -40,6 +40,8 @@ import { SQLWrapper } from "drizzle-orm/sql/sql";
 import { WithSubquery } from "drizzle-orm/subquery";
 import { ForgeSQLMetadata } from "../utils/forgeDriver";
 import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
+import { operationTypeQueryContext } from "../utils/requestTypeContextUtils";
+import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -587,8 +589,101 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute(query: SQLWrapper | string) {
-    return this.drizzle.executeQuery(query);
+  execute<T>(query: SQLWrapper | string) {
+    return this.drizzle.executeQuery<T>(query);
+  }
+
+  /**
+   * Executes a Data Definition Language (DDL) SQL query.
+   * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
+   *
+   * This method is specifically designed for DDL operations and provides:
+   * - Proper operation type context for DDL queries
+   * - No caching (DDL operations should not be cached)
+   * - Direct execution without query optimization
+   *
+   * @template T - The expected return type of the query result
+   * @param query - The DDL SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @throws {Error} If the DDL operation fails
+   *
+   * @example
+   * ```typescript
+   * // Create a new table
+   * await forgeSQL.executeDDL(`
+   *   CREATE TABLE users (
+   *     id INT PRIMARY KEY AUTO_INCREMENT,
+   *     name VARCHAR(255) NOT NULL,
+   *     email VARCHAR(255) UNIQUE
+   *   )
+   * `);
+   *
+   * // Alter table structure
+   * await forgeSQL.executeDDL(sql`
+   *   ALTER TABLE users
+   *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   * `);
+   *
+   * // Drop a table
+   * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+   * ```
+   */
+  async executeDDL<T>(query: SQLWrapper | string) {
+    return this.executeDDLActions(async () => this.drizzle.executeQuery<T>(query));
+  }
+
+  /**
+   * Executes a series of actions within a DDL operation context.
+   * This method provides a way to execute regular SQL queries that should be treated
+   * as DDL operations, ensuring proper operation type context for performance monitoring.
+   *
+   * This method is useful for:
+   * - Executing regular SQL queries in DDL context for monitoring purposes
+   * - Wrapping non-DDL operations that should be treated as DDL for analysis
+   * - Ensuring proper operation type context for complex workflows
+   * - Maintaining DDL operation context across multiple function calls
+   *
+   * @template T - The return type of the actions function
+   * @param actions - Function containing SQL operations to execute in DDL context
+   * @returns Promise that resolves to the return value of the actions function
+   *
+   * @example
+   * ```typescript
+   * // Execute regular SQL queries in DDL context for monitoring
+   * await forgeSQL.executeDDLActions(async () => {
+   *   const slowQueries = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     WHERE AVG_LATENCY > 1000000
+   *   `);
+   *   return slowQueries;
+   * });
+   *
+   * // Execute complex analysis queries in DDL context
+   * const result = await forgeSQL.executeDDLActions(async () => {
+   *   const tableInfo = await forgeSQL.execute("SHOW TABLES");
+   *   const performanceData = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+   *     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+   *   `);
+   *   return { tableInfo, performanceData };
+   * });
+   *
+   * // Execute monitoring queries with error handling
+   * try {
+   *   await forgeSQL.executeDDLActions(async () => {
+   *     const metrics = await forgeSQL.execute(`
+   *       SELECT COUNT(*) as query_count
+   *       FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     `);
+   *     console.log(`Total queries: ${metrics[0].query_count}`);
+   *   });
+   * } catch (error) {
+   *   console.error("Monitoring query failed:", error);
+   * }
+   * ```
+   */
+  async executeDDLActions<T>(actions: () => Promise<T>): Promise<T> {
+    return operationTypeQueryContext.run({ operationType: "DDL" }, async () => actions());
   }
 
   /**
@@ -609,8 +704,8 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
-    return this.drizzle.executeQueryCacheable(query, cacheTtl);
+  executeCacheable<T>(query: SQLWrapper | string, cacheTtl?: number) {
+    return this.drizzle.executeQueryCacheable<T>(query, cacheTtl);
   }
 
   /**
@@ -997,8 +1092,103 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute(query: SQLWrapper | string) {
-    return this.ormInstance.getDrizzleQueryBuilder().executeQuery(query);
+  execute<T>(
+    query: SQLWrapper | string,
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>> {
+    return this.ormInstance.execute(query);
+  }
+
+  /**
+   * Executes a Data Definition Language (DDL) SQL query.
+   * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
+   *
+   * This method is specifically designed for DDL operations and provides:
+   * - Proper operation type context for DDL queries
+   * - No caching (DDL operations should not be cached)
+   * - Direct execution without query optimization
+   *
+   * @template T - The expected return type of the query result
+   * @param query - The DDL SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @throws {Error} If the DDL operation fails
+   *
+   * @example
+   * ```typescript
+   * // Create a new table
+   * await forgeSQL.executeDDL(`
+   *   CREATE TABLE users (
+   *     id INT PRIMARY KEY AUTO_INCREMENT,
+   *     name VARCHAR(255) NOT NULL,
+   *     email VARCHAR(255) UNIQUE
+   *   )
+   * `);
+   *
+   * // Alter table structure
+   * await forgeSQL.executeDDL(sql`
+   *   ALTER TABLE users
+   *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   * `);
+   *
+   * // Drop a table
+   * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+   * ```
+   */
+  executeDDL(query: SQLWrapper | string) {
+    return this.ormInstance.executeDDL(query);
+  }
+
+  /**
+   * Executes a series of actions within a DDL operation context.
+   * This method provides a way to execute regular SQL queries that should be treated
+   * as DDL operations, ensuring proper operation type context for performance monitoring.
+   *
+   * This method is useful for:
+   * - Executing regular SQL queries in DDL context for monitoring purposes
+   * - Wrapping non-DDL operations that should be treated as DDL for analysis
+   * - Ensuring proper operation type context for complex workflows
+   * - Maintaining DDL operation context across multiple function calls
+   *
+   * @template T - The return type of the actions function
+   * @param actions - Function containing SQL operations to execute in DDL context
+   * @returns Promise that resolves to the return value of the actions function
+   *
+   * @example
+   * ```typescript
+   * // Execute regular SQL queries in DDL context for monitoring
+   * await forgeSQL.executeDDLActions(async () => {
+   *   const slowQueries = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     WHERE AVG_LATENCY > 1000000
+   *   `);
+   *   return slowQueries;
+   * });
+   *
+   * // Execute complex analysis queries in DDL context
+   * const result = await forgeSQL.executeDDLActions(async () => {
+   *   const tableInfo = await forgeSQL.execute("SHOW TABLES");
+   *   const performanceData = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+   *     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+   *   `);
+   *   return { tableInfo, performanceData };
+   * });
+   *
+   * // Execute monitoring queries with error handling
+   * try {
+   *   await forgeSQL.executeDDLActions(async () => {
+   *     const metrics = await forgeSQL.execute(`
+   *       SELECT COUNT(*) as query_count
+   *       FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     `);
+   *     console.log(`Total queries: ${metrics[0].query_count}`);
+   *   });
+   * } catch (error) {
+   *   console.error("Monitoring query failed:", error);
+   * }
+   * ```
+   */
+  executeDDLActions<T>(actions: () => Promise<T>): Promise<T> {
+    return this.ormInstance.executeDDLActions(actions);
   }
 
   /**
@@ -1020,7 +1210,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * ```
    */
   executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
-    return this.ormInstance.getDrizzleQueryBuilder().executeQueryCacheable(query, cacheTtl);
+    return this.ormInstance.executeCacheable(query, cacheTtl);
   }
 
   /**
@@ -1031,7 +1221,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @example
    * ```typescript
    * const withQuery = forgeSQL.$with('userStats').as(
-   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *   forgeSQL.getDrizzleQueryBuilder().select({ userId: users.id, count: sql<number>`count(*)` })
    *     .from(users)
    *     .groupBy(users.id)
    * );
@@ -1050,7 +1240,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @example
    * ```typescript
    * const withQuery = forgeSQL.$with('userStats').as(
-   *   forgeSQL.select({ userId: users.id, count: sql<number>`count(*)` })
+   *   forgeSQL.getDrizzleQueryBuilder().select({ userId: users.id, count: sql<number>`count(*)` })
    *     .from(users)
    *     .groupBy(users.id)
    * );

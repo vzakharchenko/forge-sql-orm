@@ -543,9 +543,100 @@ export interface QueryBuilderForgeSql {
    * const result = await forgeSQL.execute("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  execute(
+  execute<T>(
     query: SQLWrapper | string,
-  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
+
+  /**
+   * Executes a Data Definition Language (DDL) SQL query.
+   * DDL operations include CREATE, ALTER, DROP, TRUNCATE, and other schema modification statements.
+   *
+   * This method is specifically designed for DDL operations and provides:
+   * - Proper operation type context for DDL queries
+   * - No caching (DDL operations should not be cached)
+   * - Direct execution without query optimization
+   *
+   * @template T - The expected return type of the query result
+   * @param query - The DDL SQL query to execute (SQLWrapper or string)
+   * @returns Promise with query results
+   * @throws {Error} If the DDL operation fails
+   *
+   * @example
+   * ```typescript
+   * // Create a new table
+   * await forgeSQL.executeDDL(`
+   *   CREATE TABLE users (
+   *     id INT PRIMARY KEY AUTO_INCREMENT,
+   *     name VARCHAR(255) NOT NULL,
+   *     email VARCHAR(255) UNIQUE
+   *   )
+   * `);
+   *
+   * // Alter table structure
+   * await forgeSQL.executeDDL(sql`
+   *   ALTER TABLE users
+   *   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   * `);
+   *
+   * // Drop a table
+   * await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+   * ```
+   */
+  executeDDL<T>(
+    query: SQLWrapper | string,
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
+
+  /**
+   * Executes a series of actions within a DDL operation context.
+   * This method provides a way to execute regular SQL queries that should be treated
+   * as DDL operations, ensuring proper operation type context for performance monitoring.
+   *
+   * This method is useful for:
+   * - Executing regular SQL queries in DDL context for monitoring purposes
+   * - Wrapping non-DDL operations that should be treated as DDL for analysis
+   * - Ensuring proper operation type context for complex workflows
+   * - Maintaining DDL operation context across multiple function calls
+   *
+   * @template T - The return type of the actions function
+   * @param actions - Function containing SQL operations to execute in DDL context
+   * @returns Promise that resolves to the return value of the actions function
+   *
+   * @example
+   * ```typescript
+   * // Execute regular SQL queries in DDL context for monitoring
+   * await forgeSQL.executeDDLActions(async () => {
+   *   const slowQueries = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     WHERE AVG_LATENCY > 1000000
+   *   `);
+   *   return slowQueries;
+   * });
+   *
+   * // Execute complex analysis queries in DDL context
+   * const result = await forgeSQL.executeDDLActions(async () => {
+   *   const tableInfo = await forgeSQL.execute("SHOW TABLES");
+   *   const performanceData = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+   *     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+   *   `);
+   *   return { tableInfo, performanceData };
+   * });
+   *
+   * // Execute monitoring queries with error handling
+   * try {
+   *   await forgeSQL.executeDDLActions(async () => {
+   *     const metrics = await forgeSQL.execute(`
+   *       SELECT COUNT(*) as query_count
+   *       FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     `);
+   *     console.log(`Total queries: ${metrics[0].query_count}`);
+   *   });
+   * } catch (error) {
+   *   console.error("Monitoring query failed:", error);
+   * }
+   * ```
+   */
+  executeDDLActions<T>(actions: () => Promise<T>): Promise<T>;
 
   /**
    * Executes a raw SQL query with both local and global cache support.
@@ -565,10 +656,10 @@ export interface QueryBuilderForgeSql {
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  executeCacheable(
+  executeCacheable<T>(
     query: SQLWrapper | string,
     cacheTtl?: number,
-  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
   /**
    * Creates a Common Table Expression (CTE) builder for complex queries.
    * CTEs allow you to define temporary named result sets that exist within the scope of a single query.

@@ -22,9 +22,9 @@ import {
   saveQueryLocalCacheQuery,
   saveTableIfInsideCacheContext,
 } from "../../../utils/cacheContextUtils";
-import { BuildQueryConfig, isSQLWrapper, SQLWrapper } from "drizzle-orm/sql/sql";
+import { isSQLWrapper, SQLWrapper } from "drizzle-orm/sql/sql";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
-import { getTableColumns, Query } from "drizzle-orm";
+import { getTableColumns, Query, SQL } from "drizzle-orm";
 import { MySqlDialect } from "drizzle-orm/mysql-core/dialect";
 import type {
   GetSelectTableName,
@@ -204,17 +204,17 @@ export type SelectAllDistinctFromCacheableAliasedType = <T extends MySqlTable>(
 /**
  * Type for executing raw SQL queries with local cache
  */
-export type ExecuteQuery = (
+export type ExecuteQuery = <T>(
   query: SQLWrapper | string,
-) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
 
 /**
  * Type for executing raw SQL queries with local and global cache
  */
-export type ExecuteQueryCacheable = (
+export type ExecuteQueryCacheable = <T>(
   query: SQLWrapper | string,
   cacheTtl?: number,
-) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, unknown>>;
+) => Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>>;
 
 /**
  * Type for insert operations with cache eviction
@@ -617,12 +617,8 @@ function createRawQueryExecutor(
     let sql: Query;
 
     if (isSQLWrapper(query)) {
-      const sqlWrapper = query as SQLWrapper;
-      sql = sqlWrapper
-        .getSQL()
-        .toQuery(
-          (db as unknown as { dialect: MySqlDialect }).dialect as unknown as BuildQueryConfig,
-        );
+      const dialect = (db as unknown as { dialect: MySqlDialect }).dialect;
+      sql = dialect.sqlToQuery(query as SQL);
     } else {
       sql = {
         sql: query,
