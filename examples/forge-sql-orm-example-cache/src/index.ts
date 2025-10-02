@@ -165,7 +165,7 @@ export const runPerformanceAnalyze = async () => {
           warnThresholdMs: 300,
           memoryThresholdBytes: 4 * 1024 * 1024,
           showPlan: true,
-          // operationType: "DML",
+          operationType: "DML",
         },
       );
       const topSlowestStatementLastHourTriggerDDL = await topSlowestStatementLastHourTrigger(
@@ -174,7 +174,7 @@ export const runPerformanceAnalyze = async () => {
           warnThresholdMs: 200,
           memoryThresholdBytes: 1 * 1024 * 1024,
           showPlan: true,
-          // operationType: "DDL",
+          operationType: "DDL",
         },
       );
       return {
