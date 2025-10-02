@@ -24,7 +24,7 @@
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
 - ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and Forge SQL metadata
-- ✅ **Raw SQL Execution**: `execute()`, `executeCacheable()`, and `executeDDL()` methods for direct SQL queries with local and global caching
+- ✅ **Raw SQL Execution**: `execute()`, `executeCacheable()`, `executeDDL()`, and `executeDDLActions()` methods for direct SQL queries with local and global caching
 - ✅ **Common Table Expressions (CTEs)**: `with()` method for complex queries with subqueries
 - ✅ **Schema migration support**, allowing automatic schema evolution
 - ✅ **Automatic entity generation** from MySQL/tidb databases
@@ -343,6 +343,32 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
     console.log('Forge metadata:', forgeMetadata);
   }
 );
+
+// DDL operations for schema modifications
+await forgeSQL.executeDDL(`
+  CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE
+  )
+`);
+
+// Execute regular SQL queries in DDL context for performance monitoring
+await forgeSQL.executeDDLActions(async () => {
+  // Execute regular SQL queries in DDL context for monitoring
+  const slowQueries = await forgeSQL.execute(`
+    SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
+    WHERE AVG_LATENCY > 1000000
+  `);
+  
+  // Execute complex analysis queries in DDL context
+  const performanceData = await forgeSQL.execute(`
+    SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+    WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+  `);
+  
+  return { slowQueries, performanceData };
+});
 
 // Common Table Expressions (CTEs)
 const userStats = await forgeSQL
@@ -779,6 +805,7 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
 | `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
 | `executeDDL()` | DDL operations (CREATE, ALTER, DROP, etc.) | ❌ No | No Caching |
+| `executeDDLActions()` | Execute regular SQL queries in DDL operation context | ❌ No | No Caching |
 | `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 
 
@@ -801,6 +828,7 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 | `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
 | `executeWithMetadata()` | Raw SQL queries with execution metrics capture | ❌ No | Local Cache |
 | `executeDDL()` | DDL operations (CREATE, ALTER, DROP, etc.) | ❌ No | No Caching |
+| `executeDDLActions()` | Execute regular SQL queries in DDL operation context | ❌ No | No Caching |
 | `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
 where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
@@ -1213,6 +1241,24 @@ await forgeSQL.executeDDL(sql`
 `);
 
 await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
+
+// Using executeDDLActions() for executing regular SQL queries in DDL context
+// This method executes a series of actions within a DDL operation context for monitoring
+await forgeSQL.executeDDLActions(async () => {
+  // Execute regular SQL queries in DDL context for performance monitoring
+  const slowQueries = await forgeSQL.execute(`
+    SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
+    WHERE AVG_LATENCY > 1000000
+  `);
+  
+  // Execute complex analysis queries in DDL context
+  const performanceData = await forgeSQL.execute(`
+    SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+    WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+  `);
+  
+  return { slowQueries, performanceData };
+});
 
 // Using execute() with complex queries
 const userStats = await forgeSQL
@@ -2356,6 +2402,7 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
 - `forgeSQL.execute()` - Raw SQL queries with local caching
 - `forgeSQL.executeCacheable()` - Raw SQL queries with local and global caching
 - `forgeSQL.executeDDL()` - DDL operations (CREATE, ALTER, DROP, etc.)
+- `forgeSQL.executeDDLActions()` - Execute actions within DDL operation context
 - `forgeSQL.with()` - Common Table Expressions (CTEs)
 
 **Optional Migration:**
@@ -2415,6 +2462,23 @@ await forgeSQL.executeDDL(sql`
   ALTER TABLE users 
   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 `);
+
+// ✅ Execute regular SQL queries in DDL context for performance monitoring
+await forgeSQL.executeDDLActions(async () => {
+  // Execute regular SQL queries in DDL context for monitoring
+  const slowQueries = await forgeSQL.execute(`
+    SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
+    WHERE AVG_LATENCY > 1000000
+  `);
+  
+  // Execute complex analysis queries in DDL context
+  const performanceData = await forgeSQL.execute(`
+    SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+    WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+  `);
+  
+  return { slowQueries, performanceData };
+});
 
 // ✅ Common Table Expressions (CTEs)
 const userStats = await forgeSQL

@@ -629,11 +629,59 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * ```
    */
   async executeDDL<T>(query: SQLWrapper | string) {
-    return operationTypeQueryContext.run({ operationType: "DDL" }, async () =>
-      this.drizzle.executeQuery<T>(query),
-    );
+    return this.executeDDLActions(async ()=> this.drizzle.executeQuery<T>(query))
   }
 
+  /**
+   * Executes a series of actions within a DDL operation context.
+   * This method provides a way to execute regular SQL queries that should be treated
+   * as DDL operations, ensuring proper operation type context for performance monitoring.
+   * 
+   * This method is useful for:
+   * - Executing regular SQL queries in DDL context for monitoring purposes
+   * - Wrapping non-DDL operations that should be treated as DDL for analysis
+   * - Ensuring proper operation type context for complex workflows
+   * - Maintaining DDL operation context across multiple function calls
+   * 
+   * @template T - The return type of the actions function
+   * @param actions - Function containing SQL operations to execute in DDL context
+   * @returns Promise that resolves to the return value of the actions function
+   * 
+   * @example
+   * ```typescript
+   * // Execute regular SQL queries in DDL context for monitoring
+   * await forgeSQL.executeDDLActions(async () => {
+   *   const slowQueries = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
+   *     WHERE AVG_LATENCY > 1000000
+   *   `);
+   *   return slowQueries;
+   * });
+   * 
+   * // Execute complex analysis queries in DDL context
+   * const result = await forgeSQL.executeDDLActions(async () => {
+   *   const tableInfo = await forgeSQL.execute("SHOW TABLES");
+   *   const performanceData = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+   *     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+   *   `);
+   *   return { tableInfo, performanceData };
+   * });
+   * 
+   * // Execute monitoring queries with error handling
+   * try {
+   *   await forgeSQL.executeDDLActions(async () => {
+   *     const metrics = await forgeSQL.execute(`
+   *       SELECT COUNT(*) as query_count 
+   *       FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     `);
+   *     console.log(`Total queries: ${metrics[0].query_count}`);
+   *   });
+   * } catch (error) {
+   *   console.error("Monitoring query failed:", error);
+   * }
+   * ```
+   */
   async executeDDLActions<T>(actions: () => Promise<T>): Promise<T> {
     return operationTypeQueryContext.run({ operationType: "DDL" }, async () => actions());
   }
@@ -1089,6 +1137,56 @@ class ForgeSQLORM implements ForgeSqlOperation {
     return this.ormInstance.executeDDL(query);
   }
 
+  /**
+   * Executes a series of actions within a DDL operation context.
+   * This method provides a way to execute regular SQL queries that should be treated
+   * as DDL operations, ensuring proper operation type context for performance monitoring.
+   * 
+   * This method is useful for:
+   * - Executing regular SQL queries in DDL context for monitoring purposes
+   * - Wrapping non-DDL operations that should be treated as DDL for analysis
+   * - Ensuring proper operation type context for complex workflows
+   * - Maintaining DDL operation context across multiple function calls
+   * 
+   * @template T - The return type of the actions function
+   * @param actions - Function containing SQL operations to execute in DDL context
+   * @returns Promise that resolves to the return value of the actions function
+   * 
+   * @example
+   * ```typescript
+   * // Execute regular SQL queries in DDL context for monitoring
+   * await forgeSQL.executeDDLActions(async () => {
+   *   const slowQueries = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
+   *     WHERE AVG_LATENCY > 1000000
+   *   `);
+   *   return slowQueries;
+   * });
+   * 
+   * // Execute complex analysis queries in DDL context
+   * const result = await forgeSQL.executeDDLActions(async () => {
+   *   const tableInfo = await forgeSQL.execute("SHOW TABLES");
+   *   const performanceData = await forgeSQL.execute(`
+   *     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
+   *     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+   *   `);
+   *   return { tableInfo, performanceData };
+   * });
+   * 
+   * // Execute monitoring queries with error handling
+   * try {
+   *   await forgeSQL.executeDDLActions(async () => {
+   *     const metrics = await forgeSQL.execute(`
+   *       SELECT COUNT(*) as query_count 
+   *       FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
+   *     `);
+   *     console.log(`Total queries: ${metrics[0].query_count}`);
+   *   });
+   * } catch (error) {
+   *   console.error("Monitoring query failed:", error);
+   * }
+   * ```
+   */
   executeDDLActions<T>(actions: () => Promise<T>): Promise<T> {
     return this.ormInstance.executeDDLActions(actions);
   }
