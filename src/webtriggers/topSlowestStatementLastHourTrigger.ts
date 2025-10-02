@@ -89,7 +89,7 @@ export const topSlowestStatementLastHourTrigger = async (
     operationType?: OperationType;
     topN?: number;
     hours?: number;
-    tables?: 'SUMMARY'|"HISTORY"|"SUMMARY_AND_HISTORY"|'CLUSTER_SUMMARY'|"CLUSTER_HISTORY"|"CLUSTER_SUMMARY_AND_HISTORY"
+    tables?: "SUMMARY_AND_HISTORY"|"CLUSTER_SUMMARY_AND_HISTORY"
   },
 ) => {
   // Validate required parameters
@@ -111,7 +111,7 @@ export const topSlowestStatementLastHourTrigger = async (
     operationType: "DML",
       topN: 1,
       hours: 1,
-      tables: 'SUMMARY'
+      tables: 'SUMMARY_AND_HISTORY'
   };
 
   // Helper: Convert nanoseconds to milliseconds (for latency fields)
@@ -279,24 +279,8 @@ export const topSlowestStatementLastHourTrigger = async (
     // This is necessary because some statements may only be present in one of the tables.
     let combined = unionAll(qHistory, qSummary).as("combined");
      switch (tables) {
-         case 'HISTORY' :{
-             combined = qHistory.as("combined");
-             break;
-         }
-         case 'SUMMARY': {
-             combined = qSummary.as("combined");
-             break;
-         }
          case 'SUMMARY_AND_HISTORY': {
              combined = unionAll(qHistory, qSummary).as("combined");
-             break;
-         }
-         case 'CLUSTER_HISTORY' :{
-             combined = qHistoryCluster.as("combined");
-             break;
-         }
-         case 'CLUSTER_SUMMARY': {
-             combined = qSummaryCluster.as("combined");
              break;
          }
          case 'CLUSTER_SUMMARY_AND_HISTORY': {
