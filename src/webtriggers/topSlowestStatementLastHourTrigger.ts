@@ -1,5 +1,9 @@
 import { ForgeSqlOperation } from "../core/ForgeSQLQueryBuilder";
-import { clusterStatementsSummary, clusterStatementsSummaryHistory, statementsSummary } from "../core/SystemTables";
+import {
+  clusterStatementsSummary,
+  clusterStatementsSummaryHistory,
+  statementsSummary,
+} from "../core/SystemTables";
 import { desc, gte, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/mysql-core";
 import { formatLimitOffset } from "../utils/sqlUtils";
@@ -10,7 +14,7 @@ const DEFAULT_MEMORY_THRESHOLD = 8 * 1024 * 1024; // 8MB
 const DEFAULT_TIMEOUT = 300; // 300ms
 const DEFAULT_TOP_N = 1;
 const DEFAULT_HOURS = 1;
-const DEFAULT_TABLES = 'CLUSTER_SUMMARY_AND_HISTORY' as const;
+const DEFAULT_TABLES = "CLUSTER_SUMMARY_AND_HISTORY" as const;
 const MAX_QUERY_TIMEOUT_MS = 3_000;
 const MAX_SQL_LENGTH = 1000;
 const RETRY_ATTEMPTS = 2;
@@ -18,12 +22,12 @@ const RETRY_BASE_DELAY_MS = 1_000;
 
 // Types
 interface TriggerOptions {
-    warnThresholdMs?: number;
-    memoryThresholdBytes?: number;
-    showPlan?: boolean;
-    operationType?: OperationType;
-    topN?: number;
-    hours?: number;
+  warnThresholdMs?: number;
+  memoryThresholdBytes?: number;
+  showPlan?: boolean;
+  operationType?: OperationType;
+  topN?: number;
+  hours?: number;
   tables?: "SUMMARY_AND_HISTORY" | "CLUSTER_SUMMARY_AND_HISTORY";
 }
 
@@ -65,64 +69,64 @@ interface TriggerResponse {
  */
 const nsToMs = (value: unknown): number => {
   const n = Number(value);
-    return Number.isFinite(n) ? n / 1e6 : NaN;
-  };
+  return Number.isFinite(n) ? n / 1e6 : NaN;
+};
 
 /**
  * Converts bytes to megabytes for better readability
  */
 const bytesToMB = (value: unknown): number => {
   const n = Number(value);
-    return Number.isFinite(n) ? n / (1024 * 1024) : NaN;
-  };
+  return Number.isFinite(n) ? n / (1024 * 1024) : NaN;
+};
 
 /**
  * JSON stringify replacer to handle BigInt values safely
  */
 const jsonSafeStringify = (value: unknown): string =>
-    JSON.stringify(value, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
+  JSON.stringify(value, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
 
-  /**
+/**
  * Sanitizes SQL for safe logging by removing comments, replacing literals, and truncating
  */
 const sanitizeSQL = (sql: string, maxLen = MAX_SQL_LENGTH): string => {
-    let s = sql;
+  let s = sql;
 
   // Remove comments (-- ... and /* ... */)
-    s = s.replace(/--[^\n\r]*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+  s = s.replace(/--[^\n\r]*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
 
   // Replace string literals with '?'
-    s = s.replace(/'(?:\\'|[^'])*'/g, "?");
-  
+  s = s.replace(/'(?:\\'|[^'])*'/g, "?");
+
   // Replace numbers with '?'
-    s = s.replace(/\b-?\d+(?:\.\d+)?\b/g, "?");
-  
+  s = s.replace(/\b-?\d+(?:\.\d+)?\b/g, "?");
+
   // Normalize whitespace
-    s = s.replace(/\s+/g, " ").trim();
-  
+  s = s.replace(/\s+/g, " ").trim();
+
   // Truncate long queries
-    if (s.length > maxLen) {
-      s = s.slice(0, maxLen) + " …[truncated]";
-    }
-  
-    return s;
+  if (s.length > maxLen) {
+    s = s.slice(0, maxLen) + " …[truncated]";
+  }
+
+  return s;
 };
 
-  /**
+/**
  * Promise timeout helper that rejects if the promise doesn't settle within the specified time
-   */
+ */
 const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    try {
-      return await Promise.race<T>([
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race<T>([
       promise,
-        new Promise<T>((_resolve, reject) => {
-          timer = setTimeout(() => reject(new Error(`TIMEOUT:${ms}`)), ms);
-        }),
-      ]);
-    } finally {
-      if (timer) clearTimeout(timer);
-    }
+      new Promise<T>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(`TIMEOUT:${ms}`)), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 };
 
 /**
@@ -134,25 +138,25 @@ const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
  * Executes a task with retries and exponential backoff
  */
 const executeWithRetries = async <T>(task: () => Promise<T>, label: string): Promise<T> => {
-    let attempt = 0;
+  let attempt = 0;
   let delay = RETRY_BASE_DELAY_MS;
-  
-    while (true) {
-      try {
-        attempt++;
-        return await task();
+
+  while (true) {
+    try {
+      attempt++;
+      return await task();
     } catch (error: any) {
       const msg = String(error?.message ?? error);
-        const isTimeout = msg.startsWith("TIMEOUT:");
-      
+      const isTimeout = msg.startsWith("TIMEOUT:");
+
       if (attempt > RETRY_ATTEMPTS) throw error;
-        // eslint-disable-next-line no-console
-        console.warn(
+      // eslint-disable-next-line no-console
+      console.warn(
         `${label}: attempt ${attempt} failed${isTimeout ? " (timeout)" : ""}; retrying in ${delay}ms...`,
-        error
-        );
-      
-        await sleep(delay);
+        error,
+      );
+
+      await sleep(delay);
       delay *= 2; // Exponential backoff
     }
   }
@@ -168,7 +172,7 @@ const createErrorResponse = (message: string, error?: any): TriggerResponse => (
   body: jsonSafeStringify({
     success: false,
     message,
-    error: error?.cause?.context?.debug?.sqlMessage ?? error?.cause?.message?? error?.message,
+    error: error?.cause?.context?.debug?.sqlMessage ?? error?.cause?.message ?? error?.message,
     timestamp: new Date().toISOString(),
   }),
 });
@@ -178,7 +182,7 @@ const createErrorResponse = (message: string, error?: any): TriggerResponse => (
  */
 const createSuccessResponse = (
   formatted: FormattedQueryResult[],
-  options: Required<TriggerOptions>
+  options: Required<TriggerOptions>,
 ): TriggerResponse => ({
   headers: { "Content-Type": ["application/json"] },
   statusCode: 200,
@@ -225,22 +229,20 @@ const createSelectShape = (table: any) => ({
  * Builds the combined query from multiple tables
  */
 const buildCombinedQuery = (orm: ForgeSqlOperation, options: Required<TriggerOptions>) => {
-    const summaryHistory = statementsSummary;
-    const summary = statementsSummary;
-    const summaryHistoryCluster = clusterStatementsSummaryHistory;
-    const summaryCluster = clusterStatementsSummary;
+  const summaryHistory = statementsSummary;
+  const summary = statementsSummary;
+  const summaryHistoryCluster = clusterStatementsSummaryHistory;
+  const summaryCluster = clusterStatementsSummary;
 
   // Time filters for last N hours
-  const lastHoursFilter = (table: any) => gte(
-    table.summaryEndTime,
-    sql`DATE_SUB(NOW(), INTERVAL ${options.hours} HOUR)`
-  );
+  const lastHoursFilter = (table: any) =>
+    gte(table.summaryEndTime, sql`DATE_SUB(NOW(), INTERVAL ${options.hours} HOUR)`);
 
   // Build queries for each table
-    const qHistory = orm
-      .getDrizzleQueryBuilder()
+  const qHistory = orm
+    .getDrizzleQueryBuilder()
     .select(createSelectShape(summaryHistory))
-      .from(summaryHistory)
+    .from(summaryHistory)
     .where(lastHoursFilter(summaryHistory));
 
   const qSummary = orm
@@ -249,23 +251,23 @@ const buildCombinedQuery = (orm: ForgeSqlOperation, options: Required<TriggerOpt
     .from(summary)
     .where(lastHoursFilter(summary));
 
-    const qHistoryCluster = orm
-      .getDrizzleQueryBuilder()
+  const qHistoryCluster = orm
+    .getDrizzleQueryBuilder()
     .select(createSelectShape(summaryHistoryCluster))
-      .from(summaryHistoryCluster)
+    .from(summaryHistoryCluster)
     .where(lastHoursFilter(summaryHistoryCluster));
 
-    const qSummaryCluster = orm
-      .getDrizzleQueryBuilder()
+  const qSummaryCluster = orm
+    .getDrizzleQueryBuilder()
     .select(createSelectShape(summaryCluster))
-      .from(summaryCluster)
+    .from(summaryCluster)
     .where(lastHoursFilter(summaryCluster));
 
   // Combine tables based on configuration
   switch (options.tables) {
-    case 'SUMMARY_AND_HISTORY':
+    case "SUMMARY_AND_HISTORY":
       return unionAll(qHistory, qSummary).as("combined");
-    case 'CLUSTER_SUMMARY_AND_HISTORY':
+    case "CLUSTER_SUMMARY_AND_HISTORY":
       return unionAll(qHistoryCluster, qSummaryCluster).as("combined");
     default:
       throw new Error(`Unsupported table configuration: ${options.tables}`);
@@ -277,85 +279,92 @@ const buildCombinedQuery = (orm: ForgeSqlOperation, options: Required<TriggerOpt
  */
 const buildGroupedQuery = (orm: ForgeSqlOperation, combined: any) => {
   return orm
-      .getDrizzleQueryBuilder()
-      .select({
-        digest: combined.digest,
-        stmtType: combined.stmtType,
-        schemaName: combined.schemaName,
-        execCount: sql<number>`SUM(${combined.execCount})`.as("execCount"),
-        avgLatencyNs: sql<number>`MAX(${combined.avgLatencyNs})`.as("avgLatencyNs"),
-        maxLatencyNs: sql<number>`MAX(${combined.maxLatencyNs})`.as("maxLatencyNs"),
-        minLatencyNs: sql<number>`MIN(${combined.minLatencyNs})`.as("minLatencyNs"),
-        avgProcessTimeNs: sql<number>`MAX(${combined.avgProcessTimeNs})`.as("avgProcessTimeNs"),
-        avgWaitTimeNs: sql<number>`MAX(${combined.avgWaitTimeNs})`.as("avgWaitTimeNs"),
-        avgBackoffTimeNs: sql<number>`MAX(${combined.avgBackoffTimeNs})`.as("avgBackoffTimeNs"),
-        avgMemBytes: sql<number>`MAX(${combined.avgMemBytes})`.as("avgMemBytes"),
-        maxMemBytes: sql<number>`MAX(${combined.maxMemBytes})`.as("maxMemBytes"),
-        avgTotalKeys: sql<number>`MAX(${combined.avgTotalKeys})`.as("avgTotalKeys"),
-        firstSeen: sql<string>`MIN(${combined.firstSeen})`.as("firstSeen"),
-        lastSeen: sql<string>`MAX(${combined.lastSeen})`.as("lastSeen"),
-        planInCache: sql<boolean>`MAX(${combined.planInCache})`.as("planInCache"),
-        planCacheHits: sql<number>`SUM(${combined.planCacheHits})`.as("planCacheHits"),
-        digestText: sql<string>`MAX(${combined.digestText})`.as("digestText"),
-        plan: sql<string>`MAX(${combined.plan})`.as("plan"),
-      })
-      .from(combined)
-      .where(
-      sql`COALESCE(${combined.digest}, '') <> '' AND COALESCE(${combined.digestText}, '') <> '' AND COALESCE(${combined.stmtType}, '') NOT IN ('Use','Set','Show')`
-      )
-      .groupBy(combined.digest, combined.stmtType, combined.schemaName)
-      .as("grouped");
+    .getDrizzleQueryBuilder()
+    .select({
+      digest: combined.digest,
+      stmtType: combined.stmtType,
+      schemaName: combined.schemaName,
+      execCount: sql<number>`SUM(${combined.execCount})`.as("execCount"),
+      avgLatencyNs: sql<number>`MAX(${combined.avgLatencyNs})`.as("avgLatencyNs"),
+      maxLatencyNs: sql<number>`MAX(${combined.maxLatencyNs})`.as("maxLatencyNs"),
+      minLatencyNs: sql<number>`MIN(${combined.minLatencyNs})`.as("minLatencyNs"),
+      avgProcessTimeNs: sql<number>`MAX(${combined.avgProcessTimeNs})`.as("avgProcessTimeNs"),
+      avgWaitTimeNs: sql<number>`MAX(${combined.avgWaitTimeNs})`.as("avgWaitTimeNs"),
+      avgBackoffTimeNs: sql<number>`MAX(${combined.avgBackoffTimeNs})`.as("avgBackoffTimeNs"),
+      avgMemBytes: sql<number>`MAX(${combined.avgMemBytes})`.as("avgMemBytes"),
+      maxMemBytes: sql<number>`MAX(${combined.maxMemBytes})`.as("maxMemBytes"),
+      avgTotalKeys: sql<number>`MAX(${combined.avgTotalKeys})`.as("avgTotalKeys"),
+      firstSeen: sql<string>`MIN(${combined.firstSeen})`.as("firstSeen"),
+      lastSeen: sql<string>`MAX(${combined.lastSeen})`.as("lastSeen"),
+      planInCache: sql<boolean>`MAX(${combined.planInCache})`.as("planInCache"),
+      planCacheHits: sql<number>`SUM(${combined.planCacheHits})`.as("planCacheHits"),
+      digestText: sql<string>`MAX(${combined.digestText})`.as("digestText"),
+      plan: sql<string>`MAX(${combined.plan})`.as("plan"),
+    })
+    .from(combined)
+    .where(
+      sql`COALESCE(${combined.digest}, '') <> '' AND COALESCE(${combined.digestText}, '') <> '' AND COALESCE(${combined.stmtType}, '') NOT IN ('Use','Set','Show')`,
+    )
+    .groupBy(combined.digest, combined.stmtType, combined.schemaName)
+    .as("grouped");
 };
 
 /**
  * Builds the final query with filtering, sorting, and limiting
  */
-const buildFinalQuery = (orm: ForgeSqlOperation, grouped: any, options: Required<TriggerOptions>) => {
+const buildFinalQuery = (
+  orm: ForgeSqlOperation,
+  grouped: any,
+  options: Required<TriggerOptions>,
+) => {
   const thresholdNs = Math.floor(options.warnThresholdMs * 1e6);
   const memoryThresholdBytes = options.memoryThresholdBytes;
 
-      const query = orm
-        .getDrizzleQueryBuilder()
-        .select({
-          digest: grouped.digest,
-          stmtType: grouped.stmtType,
-          schemaName: grouped.schemaName,
-          execCount: grouped.execCount,
-          avgLatencyNs: grouped.avgLatencyNs,
-          maxLatencyNs: grouped.maxLatencyNs,
-          minLatencyNs: grouped.minLatencyNs,
-          avgProcessTimeNs: grouped.avgProcessTimeNs,
-          avgWaitTimeNs: grouped.avgWaitTimeNs,
-          avgBackoffTimeNs: grouped.avgBackoffTimeNs,
-          avgMemBytes: grouped.avgMemBytes,
-          maxMemBytes: grouped.maxMemBytes,
-          avgTotalKeys: grouped.avgTotalKeys,
-          firstSeen: grouped.firstSeen,
-          lastSeen: grouped.lastSeen,
-          planInCache: grouped.planInCache,
-          planCacheHits: grouped.planCacheHits,
-          digestText: grouped.digestText,
-          plan: grouped.plan,
-        })
-        .from(grouped)
-        .where(
-      sql`${grouped.avgLatencyNs} > ${thresholdNs} OR ${grouped.avgMemBytes} > ${memoryThresholdBytes}`
-        )
-        .orderBy(desc(grouped.avgLatencyNs))
+  const query = orm
+    .getDrizzleQueryBuilder()
+    .select({
+      digest: grouped.digest,
+      stmtType: grouped.stmtType,
+      schemaName: grouped.schemaName,
+      execCount: grouped.execCount,
+      avgLatencyNs: grouped.avgLatencyNs,
+      maxLatencyNs: grouped.maxLatencyNs,
+      minLatencyNs: grouped.minLatencyNs,
+      avgProcessTimeNs: grouped.avgProcessTimeNs,
+      avgWaitTimeNs: grouped.avgWaitTimeNs,
+      avgBackoffTimeNs: grouped.avgBackoffTimeNs,
+      avgMemBytes: grouped.avgMemBytes,
+      maxMemBytes: grouped.maxMemBytes,
+      avgTotalKeys: grouped.avgTotalKeys,
+      firstSeen: grouped.firstSeen,
+      lastSeen: grouped.lastSeen,
+      planInCache: grouped.planInCache,
+      planCacheHits: grouped.planCacheHits,
+      digestText: grouped.digestText,
+      plan: grouped.plan,
+    })
+    .from(grouped)
+    .where(
+      sql`${grouped.avgLatencyNs} > ${thresholdNs} OR ${grouped.avgMemBytes} > ${memoryThresholdBytes}`,
+    )
+    .orderBy(desc(grouped.avgLatencyNs))
     .limit(formatLimitOffset(options.topN));
 
   // Execute with DDL context if specified
   if (options.operationType === "DDL") {
-        return orm.executeDDLActions(async () => await query);
+    return orm.executeDDLActions(async () => await query);
   }
-  
-        return query;
+
+  return query;
 };
 
 /**
  * Formats query results for output
  */
-const formatQueryResults = (rows: any[], options: Required<TriggerOptions>): FormattedQueryResult[] => {
+const formatQueryResults = (
+  rows: any[],
+  options: Required<TriggerOptions>,
+): FormattedQueryResult[] => {
   return rows.map((row, index) => ({
     rank: index + 1,
     digest: row.digest,
@@ -385,17 +394,20 @@ const formatQueryResults = (rows: any[], options: Required<TriggerOptions>): For
 /**
  * Logs formatted query results to console
  */
-const logQueryResults = (formatted: FormattedQueryResult[], options: Required<TriggerOptions>): void => {
+const logQueryResults = (
+  formatted: FormattedQueryResult[],
+  options: Required<TriggerOptions>,
+): void => {
   for (const result of formatted) {
-      // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.warn(
       `${result.rank}. ${result.stmtType}  avg=${result.avgLatencyMs?.toFixed?.(2)}ms  max=${result.maxLatencyMs?.toFixed?.(2)}ms  mem≈${result.avgMemMB?.toFixed?.(2)}MB(max ${result.maxMemMB?.toFixed?.(2)}MB)  exec=${result.execCount} \n` +
         `   digest=${result.digest}\n` +
-        `   sql=${(result.digestText || "").slice(0, 300)}${result.digestText && result.digestText.length > 300 ? "…" : ""}`
+        `   sql=${(result.digestText || "").slice(0, 300)}${result.digestText && result.digestText.length > 300 ? "…" : ""}`,
     );
-    
+
     if (options.showPlan && result.plan) {
-        // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.warn(`   full plan:\n${result.plan}`);
     }
   }
@@ -403,7 +415,7 @@ const logQueryResults = (formatted: FormattedQueryResult[], options: Required<Tr
 
 /**
  * Performance monitoring scheduler trigger for Atlassian Forge SQL.
- * 
+ *
  * This trigger analyzes query performance from the last hour and identifies slow or memory-intensive queries
  * that exceed configurable thresholds. It's designed specifically for Atlassian Forge's 16 MiB memory limit
  * and provides detailed insights for query optimization.
@@ -457,15 +469,15 @@ const logQueryResults = (formatted: FormattedQueryResult[], options: Required<Tr
  *
  * // Conservative memory monitoring: 4MB threshold
  * export const conservativeTrigger = () =>
- *   topSlowestStatementLastHourTrigger(forgeSQL, { 
- *     memoryThresholdBytes: 4 * 1024 * 1024 
+ *   topSlowestStatementLastHourTrigger(forgeSQL, {
+ *     memoryThresholdBytes: 4 * 1024 * 1024
  *   });
  *
  * // Memory-only monitoring: 4MB threshold (latency effectively disabled)
  * export const memoryOnlyTrigger = () =>
- *   topSlowestStatementLastHourTrigger(forgeSQL, { 
- *     warnThresholdMs: 10000, 
- *     memoryThresholdBytes: 4 * 1024 * 1024 
+ *   topSlowestStatementLastHourTrigger(forgeSQL, {
+ *     warnThresholdMs: 10000,
+ *     memoryThresholdBytes: 4 * 1024 * 1024
  *   });
  *
  * // With execution plan in logs
@@ -488,7 +500,7 @@ const logQueryResults = (formatted: FormattedQueryResult[], options: Required<Tr
  */
 /**
  * Main scheduler trigger function to log the single slowest SQL statement from the last hour.
- * 
+ *
  * @param orm - ForgeSQL ORM instance (required)
  * @param options - Configuration options
  * @returns Promise<TriggerResponse> - HTTP response with query results or error
@@ -516,17 +528,17 @@ export const topSlowestStatementLastHourTrigger = async (
   try {
     // Build the combined query from multiple tables
     const combined = buildCombinedQuery(orm, mergedOptions);
-    
+
     // Build the grouped query with filtering and aggregation
     const grouped = buildGroupedQuery(orm, combined);
-    
+
     // Build the final query with filtering, sorting, and limiting
     const finalQuery = buildFinalQuery(orm, grouped, mergedOptions);
 
     // Execute the query with retries and timeout
     const rows = await executeWithRetries(
       () => withTimeout(finalQuery, MAX_QUERY_TIMEOUT_MS),
-      "topSlowestStatementLastHourTrigger"
+      "topSlowestStatementLastHourTrigger",
     );
 
     // Format the results for output
@@ -537,13 +549,12 @@ export const topSlowestStatementLastHourTrigger = async (
 
     // Return success response
     return createSuccessResponse(formatted, mergedOptions);
-
   } catch (error: any) {
     // Log error details for debugging
-      // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.warn(
       "Error in topSlowestStatementLastHourTrigger (one-off errors can be ignored; if it recurs, investigate):",
-      error?.cause?.context?.debug?.sqlMessage ?? error?.cause ?? error
+      error?.cause?.context?.debug?.sqlMessage ?? error?.cause ?? error,
     );
 
     // Return error response

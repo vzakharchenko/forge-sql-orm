@@ -64,7 +64,7 @@ export function isUpdateQueryResponse(obj: unknown): obj is UpdateQueryResponse 
 
 /**
  * Executes a promise with a timeout.
- * 
+ *
  * @param promise - The promise to execute
  * @param timeoutMs - Timeout in milliseconds (default: 10000ms)
  * @returns Promise that resolves with the result or rejects on timeout
@@ -72,10 +72,14 @@ export function isUpdateQueryResponse(obj: unknown): obj is UpdateQueryResponse 
  */
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 10000): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  
+
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
-      reject(new Error(`Atlassian @forge/sql did not return a response within ${timeoutMs}ms (${timeoutMs / 1000} seconds), so the request is blocked. Possible causes: slow query, network issues, or exceeding Forge SQL limits.`));
+      reject(
+        new Error(
+          `Atlassian @forge/sql did not return a response within ${timeoutMs}ms (${timeoutMs / 1000} seconds), so the request is blocked. Possible causes: slow query, network issues, or exceeding Forge SQL limits.`,
+        ),
+      );
     }, timeoutMs);
   });
 

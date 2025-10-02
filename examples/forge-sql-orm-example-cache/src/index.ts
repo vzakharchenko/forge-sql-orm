@@ -157,42 +157,44 @@ export const fetchMigrations = () => {
   return fetchSchemaWebTrigger();
 };
 export const runPerformanceAnalyze = async () => {
- return FORGE_SQL_ORM.executeWithMetadata(async ()=>{
-     const topSlowestStatementLastHourTriggerDML = await topSlowestStatementLastHourTrigger(
-         FORGE_SQL_ORM,
-         {
-             warnThresholdMs: 300,
-             memoryThresholdBytes: 4 * 1024 * 1024,
-             showPlan: true,
-             operationType: "DML",
-         },
-     );
-     const topSlowestStatementLastHourTriggerDDL = await topSlowestStatementLastHourTrigger(
-         FORGE_SQL_ORM,
-         {
-             warnThresholdMs: 200,
-             memoryThresholdBytes: 1 * 1024 * 1024,
-             showPlan: true,
-             operationType: "DDL",
-         },
-     );
-     return {
-         headers: { "Content-Type": ["application/json"] },
-         statusCode:
-             topSlowestStatementLastHourTriggerDML.statusCode >
-             topSlowestStatementLastHourTriggerDDL.statusCode
-                 ? topSlowestStatementLastHourTriggerDML.statusCode
-                 : topSlowestStatementLastHourTriggerDDL.statusCode,
-         statusText: "OK",
-         body: JSON.stringify({
-             DML: JSON.parse(topSlowestStatementLastHourTriggerDML.body),
-             DDL: JSON.parse(topSlowestStatementLastHourTriggerDDL.body),
-         }),
-     };
- }, (      totalDbExecutionTime: number)=>{
-     console.warn('totalDbExecutionTime: '+totalDbExecutionTime)
- })
-
+  return FORGE_SQL_ORM.executeWithMetadata(
+    async () => {
+      const topSlowestStatementLastHourTriggerDML = await topSlowestStatementLastHourTrigger(
+        FORGE_SQL_ORM,
+        {
+          warnThresholdMs: 300,
+          memoryThresholdBytes: 4 * 1024 * 1024,
+          showPlan: true,
+          operationType: "DML",
+        },
+      );
+      const topSlowestStatementLastHourTriggerDDL = await topSlowestStatementLastHourTrigger(
+        FORGE_SQL_ORM,
+        {
+          warnThresholdMs: 200,
+          memoryThresholdBytes: 1 * 1024 * 1024,
+          showPlan: true,
+          operationType: "DDL",
+        },
+      );
+      return {
+        headers: { "Content-Type": ["application/json"] },
+        statusCode:
+          topSlowestStatementLastHourTriggerDML.statusCode >
+          topSlowestStatementLastHourTriggerDDL.statusCode
+            ? topSlowestStatementLastHourTriggerDML.statusCode
+            : topSlowestStatementLastHourTriggerDDL.statusCode,
+        statusText: "OK",
+        body: JSON.stringify({
+          DML: JSON.parse(topSlowestStatementLastHourTriggerDML.body),
+          DDL: JSON.parse(topSlowestStatementLastHourTriggerDDL.body),
+        }),
+      };
+    },
+    (totalDbExecutionTime: number) => {
+      console.warn("totalDbExecutionTime: " + totalDbExecutionTime);
+    },
+  );
 };
 
 export const clearCache = () => {

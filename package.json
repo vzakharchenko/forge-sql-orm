@@ -77,7 +77,7 @@
   ],
   "peerDependencies": {
     "@forge/sql": "^3.0.7",
-    "drizzle-orm": "^0.44.5"
+    "drizzle-orm": "^0.44.6"
   },
   "optionalDependencies": {
     "@forge/kvs": "^1.0.5"

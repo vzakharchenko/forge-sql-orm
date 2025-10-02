@@ -313,16 +313,16 @@ export const clusterStatementsSummaryHistory = informationSchema.table(
 export type ClusterStatementsSummaryHistory = typeof clusterStatementsSummaryHistory.$inferSelect;
 
 export const statementsSummaryHistory = informationSchema.table(
-"STATEMENTS_SUMMARY_HISTORY",
-createClusterStatementsSummarySchema(),
+  "STATEMENTS_SUMMARY_HISTORY",
+  createClusterStatementsSummarySchema(),
 );
 
 // Types
 export type StatementsSummaryHistory = typeof statementsSummaryHistory.$inferSelect;
 
 export const statementsSummary = informationSchema.table(
-"STATEMENTS_SUMMARY",
-createClusterStatementsSummarySchema(),
+  "STATEMENTS_SUMMARY",
+  createClusterStatementsSummarySchema(),
 );
 
 // Types
