@@ -6,7 +6,7 @@
   "dependencies": {
     "@forge/resolver": "1.7.0",
     "@forge/sql": "^3.0.7",
-    "drizzle-orm": "^0.44.5",
+    "drizzle-orm": "^0.44.6",
     "forge-sql-orm": "2.1.5"
   },
   "scripts": {
