@@ -187,9 +187,9 @@ export const topSlowestStatementLastHourTrigger = async (
       } catch (e: any) {
         const msg = String(e?.message ?? e);
         const isTimeout = msg.startsWith("TIMEOUT:");
-        if (attempt > 3) throw e;
+        if (attempt > 2) throw e;
         // eslint-disable-next-line no-console
-        console.error(
+        console.warn(
           `${label}: attempt ${attempt} failed${isTimeout ? " (timeout)" : e}; retrying in ${delay}ms...`,
         );
         await sleep(delay);
@@ -274,7 +274,7 @@ export const topSlowestStatementLastHourTrigger = async (
       .select(selectShape(summaryCluster))
       .from(summaryCluster)
       .where(lastHoursFilterSummaryCluster);
-    let tables = newOptions.tables ?? 'SUMMARY'
+    let tables = newOptions.tables ?? 'CLUSTER_SUMMARY_AND_HISTORY'
     // Use UNION ALL to combine results from both tables (avoids duplicates, keeps all rows)
     // This is necessary because some statements may only be present in one of the tables.
     let combined = unionAll(qHistory, qSummary).as("combined");
@@ -376,7 +376,7 @@ export const topSlowestStatementLastHourTrigger = async (
     };
 
     const rows = await executeWithRetries(
-      () => withTimeout(buildQuery(), 10_000),
+      () => withTimeout(buildQuery(), 3_000),
       "topSlowestStatementLastHourTrigger",
     );
     // Map each row into a formatted object with ms and rank, for easier consumption/logging
