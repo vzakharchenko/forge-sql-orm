@@ -71,7 +71,7 @@ export function isUpdateQueryResponse(obj: unknown): obj is UpdateQueryResponse 
  * @throws {Error} When the operation times out
  */
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 10000): Promise<T> {
-  let timeoutId: NodeJS.Timeout | undefined;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
