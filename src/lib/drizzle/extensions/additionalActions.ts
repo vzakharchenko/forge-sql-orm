@@ -464,7 +464,10 @@ async function handleCachedQuery(
 
     return onfulfilled?.(transformed);
   } catch (error) {
-    return onrejected?.(error);
+    if (onrejected) {
+      return onrejected(error);
+    }
+    throw error;
   }
 }
 
@@ -497,7 +500,10 @@ async function handleNonCachedQuery(
     await saveQueryLocalCacheQuery(target, transformed, options);
     return onfulfilled?.(transformed);
   } catch (error) {
-    return onrejected?.(error);
+    if (onrejected) {
+      return onrejected(error);
+    }
+    throw error;
   }
 }
 
