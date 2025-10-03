@@ -3,16 +3,16 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-Dpbk_eoJ.js",
+      "./body-7ma1gN0e.js",
       "./react-dom-vendor-DTSHKYJW.js",
-      "./client-core-vendor-Bz5kMKC-.js",
-      "./lodash-vendor-Ce0R6Syi.js",
+      "./client-core-vendor-B0W_rt5h.js",
+      "./lodash-vendor-DeBNf1p6.js",
       "./body-C3aXNd8H.css",
     ]),
 ) => i.map((i) => d[i]);
 import { r as _t, a as Do, c as Dh } from "./react-dom-vendor-DTSHKYJW.js";
-import { g as ur, a as zs, r as cr, s as tt } from "./client-core-vendor-Bz5kMKC-.js";
-import { r as Th } from "./lodash-vendor-Ce0R6Syi.js";
+import { g as ur, a as zs, r as cr, s as tt } from "./client-core-vendor-B0W_rt5h.js";
+import { r as Th } from "./lodash-vendor-DeBNf1p6.js";
 function Mh(e, t) {
   for (var r = 0; r < t.length; r++) {
     const n = t[r];
@@ -6724,20 +6724,21 @@ function gy() {
         : null;
     }
     setValues(n, a) {
-      var o;
+      var o, i;
       if (!n) return !1;
-      const i = (0, e._typedJsonParse)(n.data, "has_updates", "EvaluationResponse");
-      return i == null
+      const s = (0, e._typedJsonParse)(n.data, "has_updates", "EvaluationResponse");
+      return s == null
         ? !1
         : ((this._source = n.source),
-          i?.has_updates !== !0 ||
+          s?.has_updates !== !0 ||
+            ((o = s.time) !== null && o !== void 0 ? o : 0) < this._lcut ||
             ((this._rawValues = n.data),
-            (this._lcut = i.time),
+            (this._lcut = s.time),
             (this._receivedAt = n.receivedAt),
-            (this._values = i),
-            (this._bootstrapMetadata = this._extractBootstrapMetadata(n.source, i)),
-            n.source && i.user && this._setWarningState(a, i),
-            e.SDKFlags.setFlags(this._sdkKey, (o = i.sdk_flags) !== null && o !== void 0 ? o : {})),
+            (this._values = s),
+            (this._bootstrapMetadata = this._extractBootstrapMetadata(n.source, s)),
+            n.source && s.user && this._setWarningState(a, s),
+            e.SDKFlags.setFlags(this._sdkKey, (i = s.sdk_flags) !== null && i !== void 0 ? i : {})),
           !0);
     }
     getWarnings() {
@@ -19396,7 +19397,7 @@ var GS = function (t) {
   },
   HS = b.lazy(function () {
     return ey(
-      () => import("./body-Dpbk_eoJ.js"),
+      () => import("./body-7ma1gN0e.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

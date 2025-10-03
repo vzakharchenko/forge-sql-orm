@@ -260,7 +260,7 @@ async function handleSuccessfulExecution(
     if (isCached && !cacheApplicationContext.getStore()) {
       await clearCache(table, options);
     }
-    const result = onfulfilled?.(rows);
+    const result = onfulfilled ? onfulfilled(rows) : rows;
     return result;
   } catch (error) {
     // Only clear cache for certain types of errors
@@ -447,11 +447,11 @@ async function handleCachedQuery(
   try {
     const localCached = await getQueryLocalCacheQuery(target, options);
     if (localCached) {
-      return onfulfilled?.(localCached);
+      return onfulfilled ? onfulfilled(localCached) : localCached;
     }
     const cacheResult = await getFromCache(target, options);
     if (cacheResult) {
-      return onfulfilled?.(cacheResult);
+      return onfulfilled ? onfulfilled(cacheResult) : cacheResult;
     }
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
@@ -462,7 +462,7 @@ async function handleCachedQuery(
       console.warn("Cache set error:", cacheError);
     });
 
-    return onfulfilled?.(transformed);
+    return onfulfilled ? onfulfilled(transformed) : transformed;
   } catch (error) {
     if (onrejected) {
       return onrejected(error);
@@ -493,12 +493,12 @@ async function handleNonCachedQuery(
   try {
     const localCached = await getQueryLocalCacheQuery(target, options);
     if (localCached) {
-      return onfulfilled?.(localCached);
+      return onfulfilled ? onfulfilled(localCached) : localCached;
     }
     const rows = await target.execute();
     const transformed = applyFromDriverTransform(rows, selections, aliasMap);
     await saveQueryLocalCacheQuery(target, transformed, options);
-    return onfulfilled?.(transformed);
+    return onfulfilled ? onfulfilled(transformed) : transformed;
   } catch (error) {
     if (onrejected) {
       return onrejected(error);

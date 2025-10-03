@@ -113,7 +113,7 @@ async function processDDLResult(method: QueryMethod, result: any): Promise<Forge
     await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
   }
 
-  if (!result.rows) {
+  if (!result?.rows) {
     return { rows: [] };
   }
 
@@ -150,7 +150,7 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
 
   const result = await withTimeout(sqlStatement.execute());
   await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
-  if (!result.rows) {
+  if (!result?.rows) {
     return { rows: [] };
   }
 
@@ -179,7 +179,7 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
   const result = (await withTimeout(sqlStatement.execute())) as ForgeSQLResult;
   await saveMetaDataToContext(result.metadata);
 
-  if (!result.rows) {
+  if (!result?.rows) {
     return { rows: [] };
   }
 
