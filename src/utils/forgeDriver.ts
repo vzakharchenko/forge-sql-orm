@@ -151,15 +151,15 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
   const result = await withTimeout(sqlStatement.execute());
   await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
   if (!result?.rows) {
-    return { rows: [] };
+    return { rows: [[]] };
   }
 
   if (isUpdateQueryResponse(result.rows)) {
     const oneRow = result.rows as any;
-    return { ...oneRow, rows: [oneRow] };
+    return { rows: [oneRow] };
   }
 
-  return { rows: result.rows };
+  return { rows: [result.rows] };
 }
 
 /**

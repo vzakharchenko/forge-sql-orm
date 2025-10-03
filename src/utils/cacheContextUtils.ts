@@ -35,6 +35,15 @@ export interface LocalCacheApplicationContext {
   >;
 }
 
+function isQuery(obj: any): obj is Query {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    typeof obj.sql === "string" &&
+    Array.isArray(obj.params)
+  );
+}
+
 /**
  * AsyncLocalStorage instance for managing cache context across async operations.
  * This allows tracking which tables are being processed within a cache context
@@ -96,7 +105,13 @@ export async function saveQueryLocalCacheQuery<
     if (!context.cache) {
       context.cache = {};
     }
-    const sql = query as { toSQL: () => Query };
+    let sql: { toSQL: () => Query };
+    if (isQuery(query)) {
+      sql = { toSQL: () => query };
+    } else {
+      sql = query as { toSQL: () => Query };
+    }
+
     const key = hashKey(sql.toSQL());
     context.cache[key] = {
       sql: sql.toSQL().sql.toLowerCase(),
@@ -138,7 +153,12 @@ export async function getQueryLocalCacheQuery<
     if (!context.cache) {
       context.cache = {};
     }
-    const sql = query as { toSQL: () => Query };
+    let sql: { toSQL: () => Query };
+    if (isQuery(query)) {
+      sql = { toSQL: () => query };
+    } else {
+      sql = query as { toSQL: () => Query };
+    }
     const key = hashKey(sql.toSQL());
     if (context.cache[key] && context.cache[key].sql === sql.toSQL().sql.toLowerCase()) {
       if (options.logCache) {
