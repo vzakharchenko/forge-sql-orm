@@ -124,7 +124,7 @@ async function processDDLResult(method: QueryMethod, result: any): Promise<Forge
 
   if (Array.isArray(result.rows)) {
     if (method === "execute") {
-      return { rows: result.rows };
+      return { rows: [result.rows] };
     } else {
       const rows = (result.rows as any[]).map((r) => Object.values(r as Record<string, unknown>));
       return { rows };
@@ -150,13 +150,8 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
 
   const result = await withTimeout(sqlStatement.execute());
   await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
-  if (!result?.rows) {
+  if (!result.rows) {
     return { rows: [[]] };
-  }
-
-  if (isUpdateQueryResponse(result.rows)) {
-    const oneRow = result.rows as any;
-    return { rows: [oneRow] };
   }
 
   return { rows: [result.rows] };
@@ -179,7 +174,7 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
   const result = (await withTimeout(sqlStatement.execute())) as ForgeSQLResult;
   await saveMetaDataToContext(result.metadata);
 
-  if (!result?.rows) {
+  if (!result.rows) {
     return { rows: [] };
   }
 
