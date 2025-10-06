@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-DRyv_p7h.js",
+      "./body-CzIlk8n0.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-B0W_rt5h.js",
       "./lodash-vendor-DeBNf1p6.js",
@@ -1892,7 +1892,7 @@ function qh() {
   );
 }
 var Nt = qh();
-function de(e, t) {
+function fe(e, t) {
   if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
 }
 function Ae(e) {
@@ -1937,7 +1937,7 @@ function Qu(e, t) {
       Object.defineProperty(e, Cf(n.key), n));
   }
 }
-function fe(e, t, r) {
+function ve(e, t, r) {
   return (
     t && Qu(e.prototype, t),
     r && Qu(e, r),
@@ -1984,7 +1984,7 @@ function Be(e, t) {
     Object.defineProperty(e, "prototype", { writable: !1 }),
     t && ia(e, t));
 }
-function x(e, t, r) {
+function E(e, t, r) {
   return (
     (t = Cf(t)) in e
       ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 })
@@ -2214,7 +2214,7 @@ function uo(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? rc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -2227,15 +2227,15 @@ function uo(e) {
 var tg = (function () {
   function e(t) {
     var r = this;
-    (de(this, e),
-      x(this, "_isAnalyticsEvent", !0),
-      x(this, "clone", function () {
+    (fe(this, e),
+      E(this, "_isAnalyticsEvent", !0),
+      E(this, "clone", function () {
         var n = uo({}, r.payload);
         return new e({ payload: n });
       }),
       (this.payload = t.payload));
   }
-  return fe(e, [
+  return ve(e, [
     {
       key: "update",
       value: function (r) {
@@ -2307,17 +2307,17 @@ var ug = (function (e) {
   function t(r) {
     var n;
     return (
-      de(this, t),
+      fe(this, t),
       (n = og(this, t, [r])),
-      x(n, "_isUIAnalyticsEvent", !0),
-      x(n, "clone", function () {
+      E(n, "_isUIAnalyticsEvent", !0),
+      E(n, "clone", function () {
         if (n.hasFired) return null;
         var a = De(n.context),
           i = De(n.handlers),
           o = JSON.parse(JSON.stringify(n.payload));
         return new t({ context: a, handlers: i, payload: o });
       }),
-      x(n, "fire", function (a) {
+      E(n, "fire", function (a) {
         n.hasFired ||
           (n.handlers.forEach(function (i) {
             return i(n, a);
@@ -2332,7 +2332,7 @@ var ug = (function (e) {
   }
   return (
     Be(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "update",
         value: function (n) {
@@ -2351,7 +2351,7 @@ function nc(e, t, r, n, a, i, o) {
   }
   s.done ? t(u) : Promise.resolve(u).then(n, a);
 }
-function pe(e) {
+function de(e) {
   return function () {
     var t = this,
       r = arguments;
@@ -2440,7 +2440,7 @@ function Df() {
               t(
                 m,
                 "_invoke",
-                (function (S, E, j) {
+                (function (S, x, j) {
                   var D,
                     R,
                     T,
@@ -2457,32 +2457,32 @@ function Df() {
                         return ((D = X), (R = 0), (T = n), (J.n = N), c);
                       },
                     };
-                  function G(q, X) {
-                    for (R = q, T = X, a = 0; !V && z && !N && a < B.length; a++) {
+                  function G(U, X) {
+                    for (R = U, T = X, a = 0; !V && z && !N && a < B.length; a++) {
                       var N,
                         A = B[a],
                         be = J.p,
                         oe = A[2];
-                      q > 3
+                      U > 3
                         ? (N = oe === X) &&
                           ((T = A[(R = A[4]) ? 5 : ((R = 3), 3)]), (A[4] = A[5] = n))
                         : A[0] <= be &&
-                          ((N = q < 2 && be < A[1])
+                          ((N = U < 2 && be < A[1])
                             ? ((R = 0), (J.v = X), (J.n = A[1]))
                             : be < oe &&
-                              (N = q < 3 || A[0] > X || X > oe) &&
-                              ((A[4] = q), (A[5] = X), (J.n = oe), (R = 0)));
+                              (N = U < 3 || A[0] > X || X > oe) &&
+                              ((A[4] = U), (A[5] = X), (J.n = oe), (R = 0)));
                     }
-                    if (N || q > 1) return c;
+                    if (N || U > 1) return c;
                     throw ((V = !0), X);
                   }
-                  return function (q, X, N) {
+                  return function (U, X, N) {
                     if (z > 1) throw TypeError("Generator is already running");
                     for (V && X === 1 && G(X, N), R = X, T = N; (a = R < 2 ? n : T) || !V; ) {
                       D || (R ? (R < 3 ? (R > 1 && (J.n = -1), G(R, T)) : (J.n = T)) : (J.v = T));
                       try {
                         if (((z = 2), D)) {
-                          if ((R || (q = "next"), (a = D[q]))) {
+                          if ((R || (U = "next"), (a = D[U]))) {
                             if (!(a = a.call(D, T)))
                               throw TypeError("iterator result is not an object");
                             if (!a.done) return a;
@@ -2491,11 +2491,11 @@ function Df() {
                             (R === 1 && (a = D.return) && a.call(D),
                               R < 2 &&
                                 ((T = TypeError(
-                                  "The iterator does not provide a '" + q + "' method",
+                                  "The iterator does not provide a '" + U + "' method",
                                 )),
                                 (R = 1)));
                           D = n;
-                        } else if ((a = (V = J.n < 0) ? T : S.call(E, J)) !== c) break;
+                        } else if ((a = (V = J.n < 0) ? T : S.call(x, J)) !== c) break;
                       } catch (A) {
                         ((D = n), (R = 1), (T = A));
                       } finally {
@@ -3968,7 +3968,7 @@ function Wt(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? kc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -3981,9 +3981,9 @@ function Wt(e) {
 var ja = "@all-features",
   Eg = (function () {
     function e() {
-      (de(this, e), x(this, "eventToValue", new Map()), (this.emitter = new Sg()));
+      (fe(this, e), E(this, "eventToValue", new Map()), (this.emitter = new Sg()));
     }
-    return fe(e, [
+    return ve(e, [
       {
         key: "onGateUpdated",
         value: function (r, n, a, i) {
@@ -4126,7 +4126,7 @@ function Ko(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Sc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -4237,7 +4237,7 @@ var Ia = function (t) {
       var i = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : [],
         o = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : "",
         s = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : null;
-      (de(this, e),
+      (fe(this, e),
         (this.value = r),
         (this._name = t),
         (this._ruleID = n),
@@ -4246,7 +4246,7 @@ var Ia = function (t) {
         (this._evaluationDetails = a),
         (this._onDefaultValueFallback = s));
     }
-    return fe(
+    return ve(
       e,
       [
         {
@@ -4325,7 +4325,7 @@ var Ia = function (t) {
         s = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : [],
         u = arguments.length > 7 && arguments[7] !== void 0 ? arguments[7] : "",
         c = arguments.length > 8 && arguments[8] !== void 0 ? arguments[8] : [];
-      (de(this, e),
+      (fe(this, e),
         (this._logParameterFunction = i),
         (this._name = t),
         (this._value = JSON.parse(JSON.stringify(r ?? {}))),
@@ -4336,7 +4336,7 @@ var Ia = function (t) {
         (this._allocatedExperimentName = u),
         (this._explicitParameters = c));
     }
-    return fe(
+    return ve(
       e,
       [
         {
@@ -4481,9 +4481,9 @@ function Ff() {
 }
 var Rc = (function (e) {
   function t(r) {
-    return (de(this, t), Dg(this, t, [r]));
+    return (fe(this, t), Dg(this, t, [r]));
   }
-  return (Be(t, e), fe(t));
+  return (Be(t, e), ve(t));
 })(Jo(Error));
 function Pc(e, t) {
   var r = Object.keys(e);
@@ -4502,7 +4502,7 @@ function Tg(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Pc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -4524,13 +4524,13 @@ var Mg = 5e3,
   Vg = "/gateway/api/flags",
   Oo = (function () {
     function e() {
-      de(this, e);
+      fe(this, e);
     }
-    return fe(e, null, [
+    return ve(e, null, [
       {
         key: "fetchClientSdk",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a) {
               var i, o;
               return F.wrap(
@@ -4575,7 +4575,7 @@ var Mg = 5e3,
       {
         key: "fetchExperimentValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s;
               return F.wrap(
@@ -4619,7 +4619,7 @@ var Mg = 5e3,
       {
         key: "handleResponseError",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a) {
               var i;
               return F.wrap(function (s) {
@@ -4662,7 +4662,7 @@ var Mg = 5e3,
       {
         key: "extractResponseBody",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a) {
               var i;
               return F.wrap(function (s) {
@@ -4720,7 +4720,7 @@ var Mg = 5e3,
       {
         key: "fetchRequest",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o, s) {
               var u, c, l, d, f;
               return F.wrap(
@@ -4822,7 +4822,7 @@ function An(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Ac(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -4858,15 +4858,15 @@ var Wg = (function (e) {
   function t() {
     var r;
     return (
-      de(this, t),
+      fe(this, t),
       (r = Gg(this, t, ["NoFetchDataAdapter", "nofetch"])),
-      x(r, "bootstrapResult", null),
+      E(r, "bootstrapResult", null),
       r
     );
   }
   return (
     Be(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "setBootstrapData",
         value: function (n) {
@@ -4884,7 +4884,7 @@ var Wg = (function (e) {
       {
         key: "prefetchData",
         value: (function () {
-          var r = pe(
+          var r = de(
             F.mark(function a(i, o) {
               return F.wrap(function (u) {
                 for (;;)
@@ -4905,7 +4905,7 @@ var Wg = (function (e) {
       {
         key: "getDataAsync",
         value: (function () {
-          var r = pe(
+          var r = de(
             F.mark(function a(i, o, s) {
               return F.wrap(
                 function (c) {
@@ -4949,7 +4949,7 @@ var Wg = (function (e) {
       {
         key: "_fetchFromNetwork",
         value: (function () {
-          var r = pe(
+          var r = de(
             F.mark(function a(i, o, s) {
               return F.wrap(function (c) {
                 for (;;)
@@ -5015,7 +5015,7 @@ function xe(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? jc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -5099,12 +5099,12 @@ var ko = "LocalOverride:Recognized",
   },
   Xg = (function () {
     function e(t) {
-      (de(this, e),
+      (fe(this, e),
         (this._overrides = Er()),
         (this._djb2Map = new Map()),
         (this._localStorageKey = t));
     }
-    return fe(e, [
+    return ve(e, [
       {
         key: "parseStoredOverrides",
         value: function (r) {
@@ -5147,11 +5147,11 @@ var ko = "LocalOverride:Recognized",
               r.configs[w] = O;
             }
             for (
-              var m = 0, S = Object.entries((E = u.layers) !== null && E !== void 0 ? E : {});
+              var m = 0, S = Object.entries((x = u.layers) !== null && x !== void 0 ? x : {});
               m < S.length;
               m++
             ) {
-              var E,
+              var x,
                 j = K(S[m], 2),
                 D = j[0],
                 R = j[1];
@@ -5391,7 +5391,7 @@ function Kt(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Tc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -5410,28 +5410,28 @@ var Mc = "client-default-key",
         n = r.localStorageKey,
         a = n === void 0 ? Jg : n,
         i = r.overrideAdapter;
-      (de(this, e),
-        x(this, "initPromise", null),
-        x(this, "initCompleted", !1),
-        x(this, "initWithDefaults", !1),
-        x(this, "hasCheckGateErrorOccurred", !1),
-        x(this, "hasGetExperimentErrorOccurred", !1),
-        x(this, "hasGetExperimentValueErrorOccurred", !1),
-        x(this, "hasGetLayerErrorOccurred", !1),
-        x(this, "hasGetLayerValueErrorOccurred", !1),
-        x(this, "subscriptions", new Eg()),
-        x(this, "dataAdapter", new Wg()),
-        x(this, "statsigValuesUpdated", function () {
+      (fe(this, e),
+        E(this, "initPromise", null),
+        E(this, "initCompleted", !1),
+        E(this, "initWithDefaults", !1),
+        E(this, "hasCheckGateErrorOccurred", !1),
+        E(this, "hasGetExperimentErrorOccurred", !1),
+        E(this, "hasGetExperimentValueErrorOccurred", !1),
+        E(this, "hasGetLayerErrorOccurred", !1),
+        E(this, "hasGetLayerValueErrorOccurred", !1),
+        E(this, "subscriptions", new Eg()),
+        E(this, "dataAdapter", new Wg()),
+        E(this, "statsigValuesUpdated", function () {
           (t.user && t.statsigClient.updateUserSync(t.user, { disableBackgroundCacheRefresh: !0 }),
             t.subscriptions.anyUpdated());
         }),
         (this.overrideAdapter = i || new Xg(a)));
     }
-    return fe(e, [
+    return ve(e, [
       {
         key: "initialize",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s = this,
                 u,
@@ -5486,7 +5486,7 @@ var Mc = "client-default-key",
       {
         key: "initializeWithProvider",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o, s) {
               var u = this,
                 c,
@@ -5601,7 +5601,7 @@ var Mc = "client-default-key",
       {
         key: "initializeFromValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s = this,
                 u,
@@ -5670,7 +5670,7 @@ var Mc = "client-default-key",
       {
         key: "updateUser",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s, u;
               return F.wrap(
@@ -5710,7 +5710,7 @@ var Mc = "client-default-key",
       {
         key: "updateUserWithProvider",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i) {
               var o = this;
               return F.wrap(
@@ -5757,7 +5757,7 @@ var Mc = "client-default-key",
       {
         key: "updateUserWithValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i) {
               var o,
                 s,
@@ -5806,6 +5806,47 @@ var Mc = "client-default-key",
         value: function () {
           return this.initCompleted;
         },
+      },
+      {
+        key: "waitUntilInitializeCompleted",
+        value: (function () {
+          var t = de(
+            F.mark(function n() {
+              return F.wrap(
+                function (i) {
+                  for (;;)
+                    switch ((i.prev = i.next)) {
+                      case 0:
+                        if (this.initPromise) {
+                          i.next = 2;
+                          break;
+                        }
+                        throw new Error(
+                          "The client must be initialized before you can wait until initialized.",
+                        );
+                      case 2:
+                        if (!this.initCompleted) {
+                          i.next = 4;
+                          break;
+                        }
+                        return i.abrupt("return");
+                      case 4:
+                        return ((i.next = 6), this.initPromise);
+                      case 6:
+                      case "end":
+                        return i.stop();
+                    }
+                },
+                n,
+                this,
+              );
+            }),
+          );
+          function r() {
+            return t.apply(this, arguments);
+          }
+          return r;
+        })(),
       },
       {
         key: "checkGate",
@@ -6047,7 +6088,7 @@ var Mc = "client-default-key",
       {
         key: "init",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s, u, c, l, d, f, p, h;
               return F.wrap(
@@ -6111,7 +6152,7 @@ var Mc = "client-default-key",
       {
         key: "initWithProvider",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o, s) {
               var u, c, l, d, f, p, h, v;
               return F.wrap(
@@ -6180,7 +6221,7 @@ var Mc = "client-default-key",
       {
         key: "initFromValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s,
                 u,
@@ -6278,7 +6319,7 @@ var Mc = "client-default-key",
       {
         key: "updateUserUsingInitializeValuesProducer",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s = this,
                 u,
@@ -6319,7 +6360,7 @@ var Mc = "client-default-key",
                           (c = a()),
                           (l = this.updateStatsigClientUser(c, i, o)),
                           (this.initPromise = l.catch(
-                            pe(
+                            de(
                               F.mark(function p() {
                                 return F.wrap(function (v) {
                                   for (;;)
@@ -6367,7 +6408,7 @@ var Mc = "client-default-key",
       {
         key: "updateStatsigClientUser",
         value: (function () {
-          var t = pe(
+          var t = de(
             F.mark(function n(a, i, o) {
               var s, u, c, l, d, f, p, h, v;
               return F.wrap(
@@ -6507,11 +6548,11 @@ var Mc = "client-default-key",
     ]);
   })(),
   I,
-  U = (function () {
+  q = (function () {
     function e() {
-      de(this, e);
+      fe(this, e);
     }
-    return fe(e, null, [
+    return ve(e, null, [
       {
         key: "isGateExists",
         value: function (r) {
@@ -6526,11 +6567,11 @@ var Mc = "client-default-key",
       },
     ]);
   })();
-I = U;
-x(U, "client", new eb());
-x(U, "hasCheckGateErrorOccurred", !1);
-x(U, "hasGetExperimentValueErrorOccurred", !1);
-x(U, "checkGate", function (e, t) {
+I = q;
+E(q, "client", new eb());
+E(q, "hasCheckGateErrorOccurred", !1);
+E(q, "hasGetExperimentValueErrorOccurred", !1);
+E(q, "checkGate", function (e, t) {
   try {
     if (
       typeof window < "u" &&
@@ -6551,7 +6592,7 @@ x(U, "checkGate", function (e, t) {
   }
   return I.client.checkGate(e, t);
 });
-x(U, "getExperimentValue", function (e, t, r, n) {
+E(q, "getExperimentValue", function (e, t, r, n) {
   try {
     if (
       typeof window < "u" &&
@@ -6577,36 +6618,37 @@ x(U, "getExperimentValue", function (e, t, r, n) {
   }
   return I.client.getExperimentValue(e, t, r, n);
 });
-x(U, "initializeCalled", I.client.initializeCalled.bind(I.client));
-x(U, "initializeCompleted", I.client.initializeCompleted.bind(I.client));
-x(U, "initialize", I.client.initialize.bind(I.client));
-x(U, "initializeWithProvider", I.client.initializeWithProvider.bind(I.client));
-x(U, "initializeFromValues", I.client.initializeFromValues.bind(I.client));
-x(U, "manuallyLogGateExposure", I.client.manuallyLogGateExposure.bind(I.client));
-x(U, "getExperiment", I.client.getExperiment.bind(I.client));
-x(U, "manuallyLogExperimentExposure", I.client.manuallyLogExperimentExposure.bind(I.client));
-x(U, "manuallyLogLayerExposure", I.client.manuallyLogLayerExposure.bind(I.client));
-x(U, "shutdownStatsig", I.client.shutdownStatsig.bind(I.client));
-x(U, "overrideGate", I.client.overrideGate.bind(I.client));
-x(U, "clearGateOverride", I.client.clearGateOverride.bind(I.client));
-x(U, "overrideConfig", I.client.overrideConfig.bind(I.client));
-x(U, "clearConfigOverride", I.client.clearConfigOverride.bind(I.client));
-x(U, "setOverrides", I.client.setOverrides.bind(I.client));
-x(U, "getOverrides", I.client.getOverrides.bind(I.client));
-x(U, "clearAllOverrides", I.client.clearAllOverrides.bind(I.client));
-x(U, "isCurrentUser", I.client.isCurrentUser.bind(I.client));
-x(U, "onGateUpdated", I.client.onGateUpdated.bind(I.client));
-x(U, "onExperimentValueUpdated", I.client.onExperimentValueUpdated.bind(I.client));
-x(U, "onAnyUpdated", I.client.onAnyUpdated.bind(I.client));
-x(U, "updateUser", I.client.updateUser.bind(I.client));
-x(U, "updateUserWithProvider", I.client.updateUserWithProvider.bind(I.client));
-x(U, "updateUserWithValues", I.client.updateUserWithValues.bind(I.client));
-x(U, "getPackageVersion", I.client.getPackageVersion.bind(I.client));
-x(U, "getLayer", I.client.getLayer.bind(I.client));
-x(U, "getLayerValue", I.client.getLayerValue.bind(I.client));
-var Xo = U;
+E(q, "initializeCalled", I.client.initializeCalled.bind(I.client));
+E(q, "initializeCompleted", I.client.initializeCompleted.bind(I.client));
+E(q, "waitUntilInitializeCompleted", I.client.waitUntilInitializeCompleted.bind(I.client));
+E(q, "initialize", I.client.initialize.bind(I.client));
+E(q, "initializeWithProvider", I.client.initializeWithProvider.bind(I.client));
+E(q, "initializeFromValues", I.client.initializeFromValues.bind(I.client));
+E(q, "manuallyLogGateExposure", I.client.manuallyLogGateExposure.bind(I.client));
+E(q, "getExperiment", I.client.getExperiment.bind(I.client));
+E(q, "manuallyLogExperimentExposure", I.client.manuallyLogExperimentExposure.bind(I.client));
+E(q, "manuallyLogLayerExposure", I.client.manuallyLogLayerExposure.bind(I.client));
+E(q, "shutdownStatsig", I.client.shutdownStatsig.bind(I.client));
+E(q, "overrideGate", I.client.overrideGate.bind(I.client));
+E(q, "clearGateOverride", I.client.clearGateOverride.bind(I.client));
+E(q, "overrideConfig", I.client.overrideConfig.bind(I.client));
+E(q, "clearConfigOverride", I.client.clearConfigOverride.bind(I.client));
+E(q, "setOverrides", I.client.setOverrides.bind(I.client));
+E(q, "getOverrides", I.client.getOverrides.bind(I.client));
+E(q, "clearAllOverrides", I.client.clearAllOverrides.bind(I.client));
+E(q, "isCurrentUser", I.client.isCurrentUser.bind(I.client));
+E(q, "onGateUpdated", I.client.onGateUpdated.bind(I.client));
+E(q, "onExperimentValueUpdated", I.client.onExperimentValueUpdated.bind(I.client));
+E(q, "onAnyUpdated", I.client.onAnyUpdated.bind(I.client));
+E(q, "updateUser", I.client.updateUser.bind(I.client));
+E(q, "updateUserWithProvider", I.client.updateUserWithProvider.bind(I.client));
+E(q, "updateUserWithValues", I.client.updateUserWithValues.bind(I.client));
+E(q, "getPackageVersion", I.client.getPackageVersion.bind(I.client));
+E(q, "getLayer", I.client.getLayer.bind(I.client));
+E(q, "getLayerValue", I.client.getLayerValue.bind(I.client));
+var Xo = q;
 if (typeof window < "u")
-  if (window.__FEATUREGATES_JS__ === void 0) window.__FEATUREGATES_JS__ = U;
+  if (window.__FEATUREGATES_JS__ === void 0) window.__FEATUREGATES_JS__ = q;
   else {
     var Da, So;
     Xo = window.__FEATUREGATES_JS__;
@@ -6758,7 +6800,7 @@ function gb(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? $c(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -6813,7 +6855,7 @@ function bb(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Nc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -6975,7 +7017,7 @@ function zc(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Bc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -7039,13 +7081,13 @@ function Pb(e) {
   var t = (function (r) {
     function n() {
       var a;
-      de(this, n);
+      fe(this, n);
       for (var i = arguments.length, o = new Array(i), s = 0; s < i; s++) o[s] = arguments[s];
-      return ((a = Cb(this, n, [].concat(o))), x(a, "state", { pageRows: [] }), a);
+      return ((a = Cb(this, n, [].concat(o))), E(a, "state", { pageRows: [] }), a);
     }
     return (
       Be(n, r),
-      fe(
+      ve(
         n,
         [
           {
@@ -7108,7 +7150,7 @@ function Pb(e) {
 var Ab = "--local-dynamic-table-width",
   Hf = function (t) {
     var r = t.width;
-    return typeof r < "u" ? x({}, Ab, "".concat(r, "%")) : void 0;
+    return typeof r < "u" ? E({}, Ab, "".concat(r, "%")) : void 0;
   },
   jb = ["width", "isFixedSize", "shouldTruncate", "innerRef"],
   Ib = function (t) {
@@ -7215,11 +7257,11 @@ function Wf() {
 }
 var Fb = (function (e) {
     function t() {
-      return (de(this, t), Nb(this, t, arguments));
+      return (fe(this, t), Nb(this, t, arguments));
     }
     return (
       Be(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "render",
           value: function () {
@@ -7273,11 +7315,11 @@ function Kf() {
 var qb = (function (e) {
   function t(r) {
     var n;
-    return (de(this, t), (n = zb(this, t, [r])), (n.state = { hasError: !1 }), n);
+    return (fe(this, t), (n = zb(this, t, [r])), (n.state = { hasError: !1 }), n);
   }
   return (
     Be(t, e),
-    fe(
+    ve(
       t,
       [
         {
@@ -7415,7 +7457,7 @@ function el(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Qc(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -7444,7 +7486,7 @@ var tl = "--contents-opacity",
       {
         "data-testid": a && "".concat(a, "--contents--container"),
         className: C(["_tzy47hfw _lcxvglyw"]),
-        style: el(el({}, x({}, tl, n)), {}, { "--_cnddr8": Vf("var(".concat(tl, ")")) }),
+        style: el(el({}, E({}, tl, n)), {}, { "--_cnddr8": Vf("var(".concat(tl, ")")) }),
       },
       r,
     );
@@ -7477,11 +7519,11 @@ function Jf() {
 }
 var Xf = (function (e) {
   function t() {
-    return (de(this, t), ey(this, t, arguments));
+    return (fe(this, t), ey(this, t, arguments));
   }
   return (
     Be(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "render",
         value: function () {
@@ -7512,7 +7554,7 @@ var Xf = (function (e) {
     ])
   );
 })(k.Component);
-x(Xf, "defaultProps", {
+E(Xf, "defaultProps", {
   isLoading: !0,
   spinnerSize: ni,
   contentsOpacity: Uf,
@@ -7562,59 +7604,59 @@ function Zf() {
 var Qf = (function (e) {
   function t() {
     var r;
-    de(this, t);
+    fe(this, t);
     for (var n = arguments.length, a = new Array(n), i = 0; i < n; i++) a[i] = arguments[i];
     return (
       (r = iy(this, t, [].concat(a))),
-      x(r, "spinnerRef", k.createRef()),
-      x(r, "containerRef", k.createRef()),
-      x(r, "componentDidMount", function () {
+      E(r, "spinnerRef", k.createRef()),
+      E(r, "containerRef", k.createRef()),
+      E(r, "componentDidMount", function () {
         r.props.isLoading &&
           r.hasTargetNode() &&
           (r.attachListeners(), r.updateTargetAppearance(), r.updateSpinnerPosition());
       }),
-      x(r, "UNSAFE_componentWillReceiveProps", function (o) {
+      E(r, "UNSAFE_componentWillReceiveProps", function (o) {
         !o.isLoading || !r.hasTargetNode(o)
           ? r.detachListeners()
           : r.props.isLoading || r.attachListeners();
       }),
-      x(r, "componentDidUpdate", function () {
+      E(r, "componentDidUpdate", function () {
         r.hasTargetNode() &&
           (r.updateTargetAppearance(), r.props.isLoading && r.updateSpinnerPosition());
       }),
-      x(r, "componentWillUnmount", function () {
+      E(r, "componentWillUnmount", function () {
         r.detachListeners();
       }),
-      x(r, "getTargetNode", function () {
+      E(r, "getTargetNode", function () {
         var o = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : r.props,
           s = o.targetRef,
           u = s?.();
         return u || r.containerRef.current;
       }),
-      x(r, "hasTargetNode", function (o) {
+      E(r, "hasTargetNode", function (o) {
         return !!r.getTargetNode(o);
       }),
-      x(r, "isVerticallyVisible", function (o, s) {
+      E(r, "isVerticallyVisible", function (o, s) {
         var u = o.top,
           c = o.bottom;
         return c <= 0 ? !1 : u < s;
       }),
-      x(r, "isFullyVerticallyVisible", function (o, s) {
+      E(r, "isFullyVerticallyVisible", function (o, s) {
         var u = o.top,
           c = o.bottom;
         return u >= 0 && c <= s;
       }),
-      x(r, "handleResize", function () {
+      E(r, "handleResize", function () {
         r.updateSpinnerPosition();
       }),
-      x(r, "handleScroll", function () {
+      E(r, "handleScroll", function () {
         r.updateSpinnerPosition();
       }),
-      x(r, "translateSpinner", function (o, s, u) {
+      E(r, "translateSpinner", function (o, s, u) {
         ((o.style.position = u ? "fixed" : ""),
           (o.style.transform = s !== 0 ? "translate3d(0, ".concat(s, "px, 0)") : ""));
       }),
-      x(r, "updateTargetAppearance", function () {
+      E(r, "updateTargetAppearance", function () {
         var o = r.getTargetNode(),
           s = r.props,
           u = s.isLoading,
@@ -7629,7 +7671,7 @@ var Qf = (function (e) {
   }
   return (
     Be(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "attachListeners",
         value: function () {
@@ -7681,8 +7723,8 @@ var Qf = (function (e) {
             } else if (!this.isVerticallyVisible(c, i)) return;
             var S = (a = this.containerRef) === null || a === void 0 ? void 0 : a.current;
             if (S && typeof S.getBoundingClientRect == "function") {
-              var E = S.getBoundingClientRect().top,
-                j = (f - E) / 2;
+              var x = S.getBoundingClientRect().top,
+                j = (f - x) / 2;
               this.translateSpinner(s, j, !1);
             }
           }
@@ -7721,7 +7763,7 @@ var Qf = (function (e) {
     ])
   );
 })(k.Component);
-x(Qf, "defaultProps", {
+E(Qf, "defaultProps", {
   isLoading: !0,
   spinnerSize: ni,
   contentsOpacity: "var(--ds-opacity-loading, ".concat("".concat(Uf), ")"),
@@ -7817,8 +7859,8 @@ var Tn = {},
       }
     }
     var S = ly[w],
-      E = dy[w][O][g],
-      j = S + 2 * E;
+      x = dy[w][O][g],
+      j = S + 2 * x;
     return y.createElement(
       "span",
       {
@@ -7837,8 +7879,8 @@ var Tn = {},
       y.createElement("svg", {
         fill: "none",
         viewBox: ""
-          .concat(0 - E, " ")
-          .concat(0 - E, " ")
+          .concat(0 - x, " ")
+          .concat(0 - x, " ")
           .concat(j, " ")
           .concat(j),
         role: "presentation",
@@ -7897,7 +7939,7 @@ function il(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? al(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -8391,7 +8433,7 @@ var xy = [
       m = e.xcss,
       S = ae(e, xy);
     S.className;
-    var E = ae(S, Cy),
+    var x = ae(S, Cy),
       j = y.createElement(
         n,
         te(
@@ -8409,7 +8451,7 @@ var xy = [
               m,
             ]),
           },
-          E,
+          x,
           { "data-testid": O },
         ),
         a,
@@ -9352,29 +9394,29 @@ function Ha(e, t, r, n, a, i, o, s, u) {
       O = a,
       m = i,
       S = n,
-      E = w;
+      x = w;
     g;
 
   )
     switch (((h = _), (_ = $e()))) {
       case 40:
-        if (h != 108 && ye(E, d - 1) == 58) {
-          Qo((E += Q(Ga(_), "&", "&\f")), "&\f") != -1 && (b = -1);
+        if (h != 108 && ye(x, d - 1) == 58) {
+          Qo((x += Q(Ga(_), "&", "&\f")), "&\f") != -1 && (b = -1);
           break;
         }
       case 34:
       case 39:
       case 91:
-        E += Ga(_);
+        x += Ga(_);
         break;
       case 9:
       case 10:
       case 13:
       case 32:
-        E += $m(h);
+        x += $m(h);
         break;
       case 92:
-        E += Nm(Va() - 1, 7);
+        x += Nm(Va() - 1, 7);
         continue;
       case 47:
         switch (_t()) {
@@ -9383,11 +9425,11 @@ function Ha(e, t, r, n, a, i, o, s, u) {
             La(qm(Fm($e(), Va()), t, r), u);
             break;
           default:
-            E += "/";
+            x += "/";
         }
         break;
       case 123 * v:
-        s[c++] = gt(E) * b;
+        s[c++] = gt(x) * b;
       case 125 * v:
       case 59:
       case 0:
@@ -9396,18 +9438,18 @@ function Ha(e, t, r, n, a, i, o, s, u) {
           case 125:
             g = 0;
           case 59 + l:
-            (b == -1 && (E = Q(E, /\f/g, "")),
+            (b == -1 && (x = Q(x, /\f/g, "")),
               p > 0 &&
-                gt(E) - d &&
-                La(p > 32 ? _l(E + ";", n, r, d - 1) : _l(Q(E, " ", "") + ";", n, r, d - 2), u));
+                gt(x) - d &&
+                La(p > 32 ? _l(x + ";", n, r, d - 1) : _l(Q(x, " ", "") + ";", n, r, d - 2), u));
             break;
           case 59:
-            E += ";";
+            x += ";";
           default:
-            if ((La((S = ml(E, t, r, c, l, a, s, w, (O = []), (m = []), d)), i), _ === 123))
-              if (l === 0) Ha(E, t, S, S, O, i, d, s, m);
+            if ((La((S = ml(x, t, r, c, l, a, s, w, (O = []), (m = []), d)), i), _ === 123))
+              if (l === 0) Ha(x, t, S, S, O, i, d, s, m);
               else
-                switch (f === 99 && ye(E, 3) === 110 ? 100 : f) {
+                switch (f === 99 && ye(x, 3) === 110 ? 100 : f) {
                   case 100:
                   case 108:
                   case 109:
@@ -9425,30 +9467,30 @@ function Ha(e, t, r, n, a, i, o, s, u) {
                     );
                     break;
                   default:
-                    Ha(E, S, S, S, [""], m, 0, s, m);
+                    Ha(x, S, S, S, [""], m, 0, s, m);
                 }
         }
-        ((c = l = p = 0), (v = b = 1), (w = E = ""), (d = o));
+        ((c = l = p = 0), (v = b = 1), (w = x = ""), (d = o));
         break;
       case 58:
-        ((d = 1 + gt(E)), (p = h));
+        ((d = 1 + gt(x)), (p = h));
       default:
         if (v < 1) {
           if (_ == 123) --v;
           else if (_ == 125 && v++ == 0 && Lm() == 125) continue;
         }
-        switch (((E += wi(_)), _ * v)) {
+        switch (((x += wi(_)), _ * v)) {
           case 38:
-            b = l > 0 ? 1 : ((E += "\f"), -1);
+            b = l > 0 ? 1 : ((x += "\f"), -1);
             break;
           case 44:
-            ((s[c++] = (gt(E) - 1) * b), (b = 1));
+            ((s[c++] = (gt(x) - 1) * b), (b = 1));
             break;
           case 64:
-            (_t() === 45 && (E += Ga($e())), (f = _t()), (l = d = gt((w = E += Bm(Va())))), _++);
+            (_t() === 45 && (x += Ga($e())), (f = _t()), (l = d = gt((w = x += Bm(Va())))), _++);
             break;
           case 45:
-            h === 45 && gt(E) == 2 && (v = 0);
+            h === 45 && gt(x) == 2 && (v = 0);
         }
     }
   return i;
@@ -9972,9 +10014,9 @@ function n_() {
       for (var w = o(h), O = o(v), m = 0; m < _.length; ++m) {
         var S = _[m];
         if (!r[S] && !(g && g[S]) && !(O && O[S]) && !(w && w[S])) {
-          var E = l(v, S);
+          var x = l(v, S);
           try {
-            s(h, S, E);
+            s(h, S, x);
           } catch {}
         }
       }
@@ -10739,7 +10781,7 @@ function ne(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? jl(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -11095,7 +11137,7 @@ var q_ = {
       O = w === void 0 ? !1 : w,
       m = t.onBlur,
       S = t.onClick,
-      E = S === void 0 ? _e : S,
+      x = S === void 0 ? _e : S,
       j = t.onFocus,
       D = t.onMouseDown,
       R = D === void 0 ? _e : D,
@@ -11106,18 +11148,18 @@ var q_ = {
       V = t.tabIndex,
       J = V === void 0 ? 0 : V,
       G = t.type,
-      q = G === void 0 ? (d ? void 0 : "button") : G,
+      U = G === void 0 ? (d ? void 0 : "button") : G,
       X = t.testId,
       N = ae(t, U_),
       A = y.useRef(),
       be = y.useCallback(
-        function (ve) {
-          if (((A.current = ve), r != null)) {
+        function (pe) {
+          if (((A.current = pe), r != null)) {
             if (typeof r == "function") {
-              r(ve);
+              r(pe);
               return;
             }
-            r.current = ve;
+            r.current = pe;
           }
         },
         [A, r],
@@ -11125,10 +11167,10 @@ var q_ = {
     __(A, s);
     var oe = y.useContext(Cs),
       ue = y.useCallback(
-        function (ve, Ue) {
-          (oe && oe.tracePress(g, ve.timeStamp), E(ve, Ue));
+        function (pe, Ue) {
+          (oe && oe.tracePress(g, pe.timeStamp), x(pe, Ue));
         },
-        [E, oe, g],
+        [x, oe, g],
       ),
       le = sa({
         fn: ue,
@@ -11139,15 +11181,15 @@ var q_ = {
         analyticsData: n,
       }),
       ge = y.useCallback(
-        function (ve) {
-          (ve.preventDefault(), R(ve));
+        function (pe) {
+          (pe.preventDefault(), R(pe));
         },
         [R],
       );
     y.useEffect(
       function () {
-        var ve = A.current;
-        _ && ve && ve === document.activeElement && ve.blur();
+        var pe = A.current;
+        _ && pe && pe === document.activeElement && pe.blur();
       },
       [_],
     );
@@ -11188,7 +11230,7 @@ var q_ = {
               onFocus: j,
               onMouseDown: ge,
               tabIndex: _ ? -1 : J,
-              type: q,
+              type: U,
             },
             x_({ isInteractive: Oe }),
           ),
@@ -11240,9 +11282,9 @@ var J_ = [
         O = w.mode,
         m = Y_({ children: i, iconBefore: o, iconAfter: s }),
         S = y.useState(!1),
-        E = K(S, 2),
-        j = E[0],
-        D = E[1],
+        x = K(S, 2),
+        j = x[0],
+        D = x[1],
         R = y.useCallback(
           function (B) {
             (d(B), Ll && D(!0));
@@ -11413,7 +11455,7 @@ function a0(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Bl(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -11470,8 +11512,8 @@ function o0(e, t) {
     O = w === void 0 ? _e : w,
     m = e.pages,
     S = e.getPageLabel,
-    E = e.renderEllipsis,
-    j = E === void 0 ? Q_ : E,
+    x = e.renderEllipsis,
+    j = x === void 0 ? Q_ : x,
     D = e.analyticsContext,
     R = e.testId,
     T = e.isDisabled,
@@ -11496,7 +11538,7 @@ function o0(e, t) {
         i0,
       ),
     ),
-    q = function (N, A, be) {
+    U = function (N, A, be) {
       var oe = m[V],
         ue = "".concat(l, " ").concat(S ? S(N, A) : N),
         le = N === oe;
@@ -11546,7 +11588,7 @@ function o0(e, t) {
       k.createElement(
         qa,
         { space: "space.0", alignBlock: "baseline", as: "ul", xcss: is.paginationMenu },
-        n0(m, V, { max: _, ellipsis: j, transform: q }, R),
+        n0(m, V, { max: _, ellipsis: j, transform: U }, R),
       ),
       k.createElement($l, {
         key: "right-navigator",
@@ -11580,11 +11622,11 @@ function xv() {
 var c0 = (function (e) {
     function t() {
       var r;
-      de(this, t);
+      fe(this, t);
       for (var n = arguments.length, a = new Array(n), i = 0; i < n; i++) a[i] = arguments[i];
       return (
         (r = u0(this, t, [].concat(a))),
-        x(r, "onChange", function (o, s, u) {
+        E(r, "onChange", function (o, s, u) {
           r.props.onChange(s, u);
         }),
         r
@@ -11592,7 +11634,7 @@ var c0 = (function (e) {
     }
     return (
       Be(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "render",
           value: function () {
@@ -11652,7 +11694,7 @@ function qn(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? ql(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -11686,7 +11728,7 @@ var Ul = "--local-dynamic-table-text-color",
       l = qn(
         qn(qn({}, s), r && Hf({ width: r })),
         {},
-        x({}, Ul, "var(--ds-text-subtlest, #626F86)"),
+        E({}, Ul, "var(--ds-text-subtlest, #626F86)"),
       ),
       d = a === dr,
       f = a === ri,
@@ -11732,15 +11774,15 @@ function h0(e) {
   return (function (t) {
     function r() {
       var n;
-      de(this, r);
+      fe(this, r);
       for (var a = arguments.length, i = new Array(a), o = 0; o < a; o++) i[o] = arguments[o];
       return (
         (n = p0(this, r, [].concat(i))),
-        x(n, "state", { refWidth: 0, refHeight: 0 }),
-        x(n, "innerRef", function (s) {
+        E(n, "state", { refWidth: 0, refHeight: 0 }),
+        E(n, "innerRef", function (s) {
           s && !n.props.isRanking && (n.ref = s);
         }),
-        x(n, "updateDimensions", function () {
+        E(n, "updateDimensions", function () {
           if (n.ref) {
             var s = n.ref.getBoundingClientRect(),
               u = s.width,
@@ -11754,7 +11796,7 @@ function h0(e) {
     }
     return (
       Be(r, t),
-      fe(r, [
+      ve(r, [
         {
           key: "UNSAFE_componentWillReceiveProps",
           value: function (a) {
@@ -12022,9 +12064,9 @@ var Yn = { none: 0, small: 100, medium: 350, large: 700 },
       m = Wl(w);
     w !== n && u([w, n]);
     var S = M0(m, O),
-      E = !!S.size,
+      x = !!S.size,
       j = m;
-    if ((E && (j = D0(m, O)), a))
+    if ((x && (j = D0(m, O)), a))
       if (d.length) j = d;
       else {
         var D = j.filter(function (R) {
@@ -12100,9 +12142,9 @@ var N0 = y.createContext(function () {
       O = v ? 0 : p.delay,
       m = v ? "exiting" : "entering",
       S = y.useState(b),
-      E = K(S, 2),
-      j = E[0],
-      D = E[1];
+      x = K(S, 2),
+      j = x[0],
+      D = x[1];
     return (
       y.useEffect(
         function () {
@@ -12542,9 +12584,9 @@ function fw(e) {
       O = d[p],
       m = _ - f[l] - d[h],
       S = _ / 2 - f[l] / 2 + w,
-      E = Qn(O, S, m),
+      x = Qn(O, S, m),
       j = u;
-    r.modifiersData[n] = ((t = {}), (t[j] = E), (t.centerOffset = E - S), t);
+    r.modifiersData[n] = ((t = {}), (t[j] = x), (t.centerOffset = x - S), t);
   }
 }
 function vw(e) {
@@ -12600,19 +12642,19 @@ function Zl(e) {
     m = window;
   if (c) {
     var S = _a(r),
-      E = "clientHeight",
+      x = "clientHeight",
       j = "clientWidth";
     if (
       (S === Ne(r) &&
         ((S = tr(r)),
         zt(S).position !== "static" &&
           s === "absolute" &&
-          ((E = "scrollHeight"), (j = "scrollWidth"))),
+          ((x = "scrollHeight"), (j = "scrollWidth"))),
       (S = S),
       a === Re || ((a === Pe || a === tt) && i === fa))
     ) {
       O = et;
-      var D = d && S === m && m.visualViewport ? m.visualViewport.height : S[E];
+      var D = d && S === m && m.visualViewport ? m.visualViewport.height : S[x];
       ((v -= D - n.height), (v *= u ? 1 : -1));
     }
     if (a === Pe || ((a === Re || a === et) && i === fa)) {
@@ -12922,8 +12964,8 @@ function va(e, t) {
     O = e.elements[h ? _ : f],
     m = Cw(fr(O) ? O : O.contextElement || tr(e.elements.popper), u, l, o),
     S = Gr(e.elements.reference),
-    E = Fv({ reference: S, element: w, placement: a }),
-    j = ss(Object.assign({}, w, E)),
+    x = Fv({ reference: S, element: w, placement: a }),
+    j = ss(Object.assign({}, w, x)),
     D = f === Hn ? j : S,
     R = {
       top: m.top - D.top + b.top,
@@ -13014,7 +13056,7 @@ function Aw(e) {
         }, []),
         m = t.rects.reference,
         S = t.rects.popper,
-        E = new Map(),
+        x = new Map(),
         j = !0,
         D = O[0],
         R = 0;
@@ -13027,13 +13069,13 @@ function Aw(e) {
         V = [Re, et].indexOf(z) >= 0,
         J = V ? "width" : "height",
         G = va(t, { placement: T, boundary: l, rootBoundary: d, altBoundary: f, padding: c }),
-        q = V ? (B ? tt : Pe) : B ? et : Re;
-      m[J] > S[J] && (q = Wa(q));
-      var X = Wa(q),
+        U = V ? (B ? tt : Pe) : B ? et : Re;
+      m[J] > S[J] && (U = Wa(U));
+      var X = Wa(U),
         N = [];
       if (
         (i && N.push(G[z] <= 0),
-        s && N.push(G[q] <= 0, G[X] <= 0),
+        s && N.push(G[U] <= 0, G[X] <= 0),
         N.every(function (le) {
           return le;
         }))
@@ -13041,14 +13083,14 @@ function Aw(e) {
         ((D = T), (j = !1));
         break;
       }
-      E.set(T, N);
+      x.set(T, N);
     }
     if (j)
       for (
         var A = h ? 3 : 1,
           be = function (ge) {
             var ce = O.find(function (qe) {
-              var Oe = E.get(qe);
+              var Oe = x.get(qe);
               if (Oe)
                 return Oe.slice(0, ge).every(function (rt) {
                   return rt;
@@ -13185,7 +13227,7 @@ function Bw(e) {
     O = Bs(b),
     m = Fw(O),
     S = t.modifiersData.popperOffsets,
-    E = t.rects.reference,
+    x = t.rects.reference,
     j = t.rects.popper,
     D = typeof v == "function" ? v(Object.assign({}, t.rects, { placement: t.placement })) : v,
     R =
@@ -13200,12 +13242,12 @@ function Bw(e) {
         V = O === "y" ? Re : Pe,
         J = O === "y" ? et : tt,
         G = O === "y" ? "height" : "width",
-        q = S[O],
-        X = q + g[V],
-        N = q - g[J],
+        U = S[O],
+        X = U + g[V],
+        N = U - g[J],
         A = p ? -j[G] / 2 : 0,
-        be = _ === Ur ? E[G] : j[G],
-        oe = _ === Ur ? -j[G] : -E[G],
+        be = _ === Ur ? x[G] : j[G],
+        oe = _ === Ur ? -j[G] : -x[G],
         ue = t.elements.arrow,
         le = p && ue ? Fs(ue) : { width: 0, height: 0 },
         ge = t.modifiersData["arrow#persistent"]
@@ -13213,16 +13255,16 @@ function Bw(e) {
           : Mv(),
         ce = ge[V],
         qe = ge[J],
-        Oe = Qn(0, E[G], le[G]),
-        rt = w ? E[G] / 2 - A - Oe - ce - R.mainAxis : be - Oe - ce - R.mainAxis,
-        ve = w ? -E[G] / 2 + A + Oe + qe + R.mainAxis : oe + Oe + qe + R.mainAxis,
+        Oe = Qn(0, x[G], le[G]),
+        rt = w ? x[G] / 2 - A - Oe - ce - R.mainAxis : be - Oe - ce - R.mainAxis,
+        pe = w ? -x[G] / 2 + A + Oe + qe + R.mainAxis : oe + Oe + qe + R.mainAxis,
         Ue = t.elements.arrow && _a(t.elements.arrow),
         wr = Ue ? (O === "y" ? Ue.clientTop || 0 : Ue.clientLeft || 0) : 0,
         Pt = (B = T?.[O]) != null ? B : 0,
-        ke = q + rt - Pt - wr,
-        Se = q + ve - Pt,
-        Vt = Qn(p ? oi(X, ke) : X, q, p ? cr(N, Se) : N);
-      ((S[O] = Vt), (z[O] = Vt - q));
+        ke = U + rt - Pt - wr,
+        Se = U + pe - Pt,
+        Vt = Qn(p ? oi(X, ke) : X, U, p ? cr(N, Se) : N);
+      ((S[O] = Vt), (z[O] = Vt - U));
     }
     if (s) {
       var pt,
@@ -13234,8 +13276,8 @@ function Bw(e) {
         at = Ve - g[Gt],
         Ht = [Re, Pe].indexOf(b) !== -1,
         xa = (pt = T?.[m]) != null ? pt : 0,
-        Ca = Ht ? Ee : Ve - E[Ie] - j[Ie] - xa + R.altAxis,
-        Ra = Ht ? Ve + E[Ie] + j[Ie] - xa - R.altAxis : at,
+        Ca = Ht ? Ee : Ve - x[Ie] - j[Ie] - xa + R.altAxis,
+        Ra = Ht ? Ve + x[Ie] + j[Ie] - xa - R.altAxis : at,
         Pa = p && Ht ? lw(Ca, Ve, Ra) : Qn(p ? Ca : Ee, Ve, p ? Ra : at);
       ((S[m] = Pa), (z[m] = Pa - Ve));
     }
@@ -13415,8 +13457,8 @@ function Jw(e) {
                 }
                 var m = l.orderedModifiers[O],
                   S = m.fn,
-                  E = m.options,
-                  j = E === void 0 ? {} : E,
+                  x = m.options,
+                  j = x === void 0 ? {} : x,
                   D = m.name;
                 typeof S == "function" &&
                   (l = S({ state: l, options: j, name: D, instance: p }) || l);
@@ -13672,7 +13714,7 @@ function s1(e) {
     O = w.state,
     m = w.styles,
     S = w.forceUpdate,
-    E = w.update,
+    x = w.update,
     j = y.useMemo(
       function () {
         return {
@@ -13685,10 +13727,10 @@ function s1(e) {
             O && O.modifiersData.hide ? O.modifiersData.hide.isReferenceHidden : null,
           arrowProps: { style: m.arrow, ref: b },
           forceUpdate: S || a1,
-          update: E || i1,
+          update: x || i1,
         };
       },
-      [h, b, r, O, m, E, S],
+      [h, b, r, O, m, x, S],
     );
   return V0(l)(j);
 }
@@ -14243,7 +14285,7 @@ function Mr(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? fd(Object(r), !0).forEach(function (n) {
-          x(e, n, r[n]);
+          E(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -14286,8 +14328,8 @@ function M1(e) {
     O = e.canAppear,
     m = e.hideTooltipOnClick,
     S = m === void 0 ? !1 : m,
-    E = e.hideTooltipOnMouseDown,
-    j = E === void 0 ? !1 : E,
+    x = e.hideTooltipOnMouseDown,
+    j = x === void 0 ? !1 : x,
     D = e.analyticsContext,
     R = e.strategy,
     T = R === void 0 ? "fixed" : R,
@@ -14296,7 +14338,7 @@ function M1(e) {
     V = e.isScreenReaderAnnouncementDisabled,
     J = V === void 0 ? !1 : V,
     G = e.shortcut,
-    q = n === "mouse" ? i : n,
+    U = n === "mouse" ? i : n,
     X = Fc(Mr({ fn: b, action: "displayed", analyticsData: D }, vd)),
     N = Fc(Mr({ fn: w, action: "hidden", analyticsData: D }, vd)),
     A = y.useRef(null),
@@ -14313,7 +14355,7 @@ function M1(e) {
       ge.current = L;
     }, []),
     rt = Gn(ue),
-    ve = Gn(X),
+    pe = Gn(X),
     Ue = Gn(N),
     wr = Gn(v),
     Pt = Gn(O),
@@ -14373,7 +14415,7 @@ function M1(e) {
                 delay: wr.current,
                 show: function (Or) {
                   var en = Or.isImmediate;
-                  (ke.current || ((ke.current = !0), ve.current()),
+                  (ke.current || ((ke.current = !0), pe.current()),
                     le(en ? "show-immediate" : "fade-in"));
                 },
                 hide: function (Or) {
@@ -14387,7 +14429,7 @@ function M1(e) {
           }
         }
       },
-      [Pt, wr, Vt, Se, pt, ve],
+      [Pt, wr, Vt, Se, pt, pe],
     ),
     Ve = y.useCallback(
       function () {
@@ -14546,7 +14588,7 @@ function M1(e) {
       ? k.createElement(
           x1,
           { zIndex: I1 },
-          k.createElement(f1, { placement: q, referenceElement: tu(), strategy: T }, function (L) {
+          k.createElement(f1, { placement: U, referenceElement: tu(), strategy: T }, function (L) {
             var re = L.ref,
               At = L.style,
               qi = L.update,
@@ -14574,7 +14616,7 @@ function M1(e) {
                         className: "Tooltip ".concat(Zp),
                         style: Mr(Mr({}, At), B && { pointerEvents: "none" }),
                         truncate: u,
-                        placement: q,
+                        placement: U,
                         testId: tu() ? p : p && "".concat(p, "--unresolved"),
                         onMouseOut: Ht,
                         onMouseOver: Ca,
@@ -14639,8 +14681,8 @@ var L1 = [
       O = K(w, 2),
       m = O[0],
       S = O[1],
-      E = y.useState(!1),
-      j = K(E, 2),
+      x = y.useState(!1),
+      j = K(x, 2),
       D = j[0],
       R = j[1],
       T = c === l || s !== void 0,
@@ -14659,7 +14701,7 @@ var L1 = [
         },
         [R],
       ),
-      q = y.useCallback(
+      U = y.useCallback(
         function () {
           S(!0);
         },
@@ -14673,7 +14715,7 @@ var L1 = [
       ),
       N = k.createElement(
         mi,
-        { xcss: pd.headCellContainer, onMouseEnter: q, onMouseLeave: X, onFocus: J, onBlur: G },
+        { xcss: pd.headCellContainer, onMouseEnter: U, onMouseLeave: X, onFocus: J, onBlur: G },
         k.createElement(
           M1,
           { content: s === dr ? f : h },
@@ -14735,11 +14777,11 @@ function Jv() {
 }
 var F1 = (function (e) {
     function t() {
-      return (de(this, t), N1(this, t, arguments));
+      return (fe(this, t), N1(this, t, arguments));
     }
     return (
       Be(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "render",
           value: function () {
@@ -14787,11 +14829,11 @@ function Xv() {
 var V1 = (function (e) {
     function t(r) {
       var n;
-      return (de(this, t), (n = U1(this, t, [r])), (n.state = { activeSortButtonId: null }), n);
+      return (fe(this, t), (n = U1(this, t, [r])), (n.state = { activeSortButtonId: null }), n);
     }
     return (
       Be(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "UNSAFE_componentWillMount",
           value: function () {
@@ -14834,7 +14876,7 @@ var V1 = (function (e) {
                     O = b.buttonAriaRoleDescription,
                     m = b.colSpan,
                     S = b.content,
-                    E = b.descendingSortTooltip,
+                    x = b.descendingSortTooltip,
                     j = b.isIconOnlyHeader,
                     D = b.isSortable,
                     R = b.key,
@@ -14865,7 +14907,7 @@ var V1 = (function (e) {
                         sortOrder: R === o ? s : void 0,
                         width: B,
                         ascendingSortTooltip: w,
-                        descendingSortTooltip: E,
+                        descendingSortTooltip: x,
                         buttonAriaRoleDescription: O,
                       },
                       V,
@@ -14912,8 +14954,8 @@ var W1 = function (t) {
       O = w === void 0 ? _e : w,
       m = t.onSort,
       S = m === void 0 ? _e : m,
-      E = t.page,
-      j = E === void 0 ? 1 : E,
+      x = t.page,
+      j = x === void 0 ? 1 : x,
       D = t.emptyView,
       R = t.isRankable,
       T = R === void 0 ? !1 : R,
@@ -14922,7 +14964,7 @@ var W1 = function (t) {
       V = t.onRankStart,
       J = V === void 0 ? _e : V,
       G = t.onRankEnd,
-      q = G === void 0 ? _e : G,
+      U = G === void 0 ? _e : G,
       X = t.loadingSpinnerSize,
       N = t.paginationi18n,
       A =
@@ -14942,7 +14984,7 @@ var W1 = function (t) {
         packageVersion: "18.2.18",
       }),
       qe = sa({
-        fn: q,
+        fn: U,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
@@ -14970,7 +15012,7 @@ var W1 = function (t) {
       rt = function (Ee, at) {
         O(Ee, at);
       },
-      ve = function (Ee) {
+      pe = function (Ee) {
         (le(!0), J(Ee));
       },
       Ue = function (Ee) {
@@ -15037,7 +15079,7 @@ var W1 = function (t) {
               testId: l,
               isRankable: T,
               isRanking: ue,
-              onRankStart: ve,
+              onRankStart: pe,
               onRankEnd: Ue,
               isRankingDisabled: B || h || !1,
             }),
@@ -15064,7 +15106,7 @@ var W1 = function (t) {
   },
   K1 = y.lazy(function () {
     return Qh(
-      () => import("./body-DRyv_p7h.js"),
+      () => import("./body-CzIlk8n0.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
@@ -15126,31 +15168,31 @@ function Zv() {
 var Vs = (function (e) {
   function t() {
     var r;
-    de(this, t);
+    fe(this, t);
     for (var n = arguments.length, a = new Array(n), i = 0; i < n; i++) a[i] = arguments[i];
     return (
       (r = J1(this, t, [].concat(a))),
-      x(r, "state", {
+      E(r, "state", {
         page: r.props.defaultPage,
         sortKey: r.props.defaultSortKey,
         sortOrder: r.props.defaultSortOrder,
         rows: r.props.rows,
       }),
-      x(r, "onSetPageHandler", function (o, s) {
+      E(r, "onSetPageHandler", function (o, s) {
         var u = r.props.onSetPage;
         u && (u(o, s), r.setState({ page: o }));
       }),
-      x(r, "onSortHandler", function (o, s) {
+      E(r, "onSortHandler", function (o, s) {
         var u = o.key,
           c = o.item,
           l = o.sortOrder,
           d = r.props.onSort;
         d && (d({ key: u, item: c, sortOrder: l }, s), r.setState({ sortKey: u, sortOrder: l }));
       }),
-      x(r, "onRankEndIfExistsHandler", function (o) {
+      E(r, "onRankEndIfExistsHandler", function (o) {
         r.props.onRankEnd && r.props.onRankEnd(o);
       }),
-      x(r, "onRankEndHandler", function (o) {
+      E(r, "onRankEndHandler", function (o) {
         var s = o.destination,
           u = r.state,
           c = u.rows,
@@ -15168,7 +15210,7 @@ var Vs = (function (e) {
   }
   return (
     Be(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "UNSAFE_componentWillReceiveProps",
         value: function (n) {
@@ -15201,7 +15243,7 @@ var Vs = (function (e) {
             O = u.paginationi18n,
             m = u.onRankStart,
             S = u.onPageRowsUpdate,
-            E = u.testId,
+            x = u.testId,
             j = u.label;
           return k.createElement(W1, {
             paginationi18n: O,
@@ -15225,7 +15267,7 @@ var Vs = (function (e) {
             onRankEnd: this.onRankEndHandler,
             onRankStart: m,
             onPageRowsUpdate: S,
-            testId: E,
+            testId: x,
             label: j,
           });
         },
@@ -15233,7 +15275,7 @@ var Vs = (function (e) {
     ])
   );
 })(k.Component);
-x(Vs, "defaultProps", {
+E(Vs, "defaultProps", {
   defaultPage: 1,
   isLoading: !1,
   isFixedSize: !1,
@@ -17666,12 +17708,12 @@ var Mk = {},
             if (!s)
               if (a.data_.size !== o.size) a.keysAtom_.reportChanged();
               else
-                for (var O = a.data_.keys(), m = o.keys(), S = O.next(), E = m.next(); !S.done; ) {
-                  if (S.value !== E.value) {
+                for (var O = a.data_.keys(), m = o.keys(), S = O.next(), x = m.next(); !S.done; ) {
+                  if (S.value !== x.value) {
                     a.keysAtom_.reportChanged();
                     break;
                   }
-                  ((S = O.next()), (E = m.next()));
+                  ((S = O.next()), (x = m.next()));
                 }
             a.data_ = o;
           }),
@@ -19290,13 +19332,13 @@ export {
   k as R,
   Tb as T,
   Be as _,
-  fe as a,
+  ve as a,
   Jo as b,
-  de as c,
+  fe as c,
   Fe as d,
   Y as e,
   K as f,
-  x as g,
+  E as g,
   ae as h,
   _i as i,
   De as j,

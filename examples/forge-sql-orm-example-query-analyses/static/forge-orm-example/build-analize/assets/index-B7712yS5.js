@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-n4Po3s6G.js",
+      "./body-oXgFmHdX.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-DFsBoZ-a.js",
       "./lodash-vendor-DZ7y6scO.js",
@@ -4296,12 +4296,12 @@ var Rb = {},
             if (!s)
               if (a.data_.size !== o.size) a.keysAtom_.reportChanged();
               else
-                for (var k = a.data_.keys(), m = o.keys(), S = k.next(), x = m.next(); !S.done; ) {
-                  if (S.value !== x.value) {
+                for (var k = a.data_.keys(), m = o.keys(), S = k.next(), C = m.next(); !S.done; ) {
+                  if (S.value !== C.value) {
                     a.keysAtom_.reportChanged();
                     break;
                   }
-                  ((S = k.next()), (x = m.next()));
+                  ((S = k.next()), (C = m.next()));
                 }
             a.data_ = o;
           }),
@@ -5694,7 +5694,7 @@ class py {
 const Sv = new py(),
   hy = y.createContext(Sv),
   Ti = () => y.useContext(hy);
-function de(e, t) {
+function fe(e, t) {
   if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
 }
 function je(e) {
@@ -5739,7 +5739,7 @@ function ju(e, t) {
       Object.defineProperty(e, Ev(n.key), n));
   }
 }
-function fe(e, t, r) {
+function ve(e, t, r) {
   return (
     t && ju(e.prototype, t),
     r && ju(e, r),
@@ -5786,7 +5786,7 @@ function qe(e, t) {
     Object.defineProperty(e, "prototype", { writable: !1 }),
     t && ua(e, t));
 }
-function C(e, t, r) {
+function x(e, t, r) {
   return (
     (t = Ev(t)) in e
       ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 })
@@ -6016,7 +6016,7 @@ function mo(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Tu(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -6029,15 +6029,15 @@ function mo(e) {
 var Ry = (function () {
   function e(t) {
     var r = this;
-    (de(this, e),
-      C(this, "_isAnalyticsEvent", !0),
-      C(this, "clone", function () {
+    (fe(this, e),
+      x(this, "_isAnalyticsEvent", !0),
+      x(this, "clone", function () {
         var n = mo({}, r.payload);
         return new e({ payload: n });
       }),
       (this.payload = t.payload));
   }
-  return fe(e, [
+  return ve(e, [
     {
       key: "update",
       value: function (r) {
@@ -6109,17 +6109,17 @@ var My = (function (e) {
   function t(r) {
     var n;
     return (
-      de(this, t),
+      fe(this, t),
       (n = Dy(this, t, [r])),
-      C(n, "_isUIAnalyticsEvent", !0),
-      C(n, "clone", function () {
+      x(n, "_isUIAnalyticsEvent", !0),
+      x(n, "clone", function () {
         if (n.hasFired) return null;
         var a = Te(n.context),
           i = Te(n.handlers),
           o = JSON.parse(JSON.stringify(n.payload));
         return new t({ context: a, handlers: i, payload: o });
       }),
-      C(n, "fire", function (a) {
+      x(n, "fire", function (a) {
         n.hasFired ||
           (n.handlers.forEach(function (i) {
             return i(n, a);
@@ -6134,7 +6134,7 @@ var My = (function (e) {
   }
   return (
     qe(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "update",
         value: function (n) {
@@ -6153,7 +6153,7 @@ function Mu(e, t, r, n, a, i, o) {
   }
   s.done ? t(c) : Promise.resolve(c).then(n, a);
 }
-function pe(e) {
+function de(e) {
   return function () {
     var t = this,
       r = arguments;
@@ -6242,7 +6242,7 @@ function jv() {
               t(
                 m,
                 "_invoke",
-                (function (S, x, I) {
+                (function (S, C, I) {
                   var T,
                     P,
                     M,
@@ -6259,32 +6259,32 @@ function jv() {
                         return ((T = X), (P = 0), (M = n), (J.n = F), u);
                       },
                     };
-                  function G(q, X) {
-                    for (P = q, M = X, a = 0; !V && z && !F && a < B.length; a++) {
+                  function G(U, X) {
+                    for (P = U, M = X, a = 0; !V && z && !F && a < B.length; a++) {
                       var F,
                         j = B[a],
                         be = J.p,
                         oe = j[2];
-                      q > 3
+                      U > 3
                         ? (F = oe === X) &&
                           ((M = j[(P = j[4]) ? 5 : ((P = 3), 3)]), (j[4] = j[5] = n))
                         : j[0] <= be &&
-                          ((F = q < 2 && be < j[1])
+                          ((F = U < 2 && be < j[1])
                             ? ((P = 0), (J.v = X), (J.n = j[1]))
                             : be < oe &&
-                              (F = q < 3 || j[0] > X || X > oe) &&
-                              ((j[4] = q), (j[5] = X), (J.n = oe), (P = 0)));
+                              (F = U < 3 || j[0] > X || X > oe) &&
+                              ((j[4] = U), (j[5] = X), (J.n = oe), (P = 0)));
                     }
-                    if (F || q > 1) return u;
+                    if (F || U > 1) return u;
                     throw ((V = !0), X);
                   }
-                  return function (q, X, F) {
+                  return function (U, X, F) {
                     if (z > 1) throw TypeError("Generator is already running");
                     for (V && X === 1 && G(X, F), P = X, M = F; (a = P < 2 ? n : M) || !V; ) {
                       T || (P ? (P < 3 ? (P > 1 && (J.n = -1), G(P, M)) : (J.n = M)) : (J.v = M));
                       try {
                         if (((z = 2), T)) {
-                          if ((P || (q = "next"), (a = T[q]))) {
+                          if ((P || (U = "next"), (a = T[U]))) {
                             if (!(a = a.call(T, M)))
                               throw TypeError("iterator result is not an object");
                             if (!a.done) return a;
@@ -6293,11 +6293,11 @@ function jv() {
                             (P === 1 && (a = T.return) && a.call(T),
                               P < 2 &&
                                 ((M = TypeError(
-                                  "The iterator does not provide a '" + q + "' method",
+                                  "The iterator does not provide a '" + U + "' method",
                                 )),
                                 (P = 1)));
                           T = n;
-                        } else if ((a = (V = J.n < 0) ? M : S.call(x, J)) !== u) break;
+                        } else if ((a = (V = J.n < 0) ? M : S.call(C, J)) !== u) break;
                       } catch (j) {
                         ((T = n), (P = 1), (M = j));
                       } finally {
@@ -7770,7 +7770,7 @@ function Kt(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? tl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -7783,9 +7783,9 @@ function Kt(e) {
 var Ma = "@all-features",
   Qy = (function () {
     function e() {
-      (de(this, e), C(this, "eventToValue", new Map()), (this.emitter = new Xy()));
+      (fe(this, e), x(this, "eventToValue", new Map()), (this.emitter = new Xy()));
     }
-    return fe(e, [
+    return ve(e, [
       {
         key: "onGateUpdated",
         value: function (r, n, a, i) {
@@ -7928,7 +7928,7 @@ function ds(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? rl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -8039,7 +8039,7 @@ var La = function (t) {
       var i = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : [],
         o = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : "",
         s = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : null;
-      (de(this, e),
+      (fe(this, e),
         (this.value = r),
         (this._name = t),
         (this._ruleID = n),
@@ -8048,7 +8048,7 @@ var La = function (t) {
         (this._evaluationDetails = a),
         (this._onDefaultValueFallback = s));
     }
-    return fe(
+    return ve(
       e,
       [
         {
@@ -8127,7 +8127,7 @@ var La = function (t) {
         s = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : [],
         c = arguments.length > 7 && arguments[7] !== void 0 ? arguments[7] : "",
         u = arguments.length > 8 && arguments[8] !== void 0 ? arguments[8] : [];
-      (de(this, e),
+      (fe(this, e),
         (this._logParameterFunction = i),
         (this._name = t),
         (this._value = JSON.parse(JSON.stringify(r ?? {}))),
@@ -8138,7 +8138,7 @@ var La = function (t) {
         (this._allocatedExperimentName = c),
         (this._explicitParameters = u));
     }
-    return fe(
+    return ve(
       e,
       [
         {
@@ -8283,9 +8283,9 @@ function Nv() {
 }
 var ol = (function (e) {
   function t(r) {
-    return (de(this, t), om(this, t, [r]));
+    return (fe(this, t), om(this, t, [r]));
   }
-  return (qe(t, e), fe(t));
+  return (qe(t, e), ve(t));
 })(vs(Error));
 function sl(e, t) {
   var r = Object.keys(e);
@@ -8304,7 +8304,7 @@ function sm(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? sl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -8326,13 +8326,13 @@ var cm = 5e3,
   bm = "/gateway/api/flags",
   Io = (function () {
     function e() {
-      de(this, e);
+      fe(this, e);
     }
-    return fe(e, null, [
+    return ve(e, null, [
       {
         key: "fetchClientSdk",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a) {
               var i, o;
               return $.wrap(
@@ -8377,7 +8377,7 @@ var cm = 5e3,
       {
         key: "fetchExperimentValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s;
               return $.wrap(
@@ -8421,7 +8421,7 @@ var cm = 5e3,
       {
         key: "handleResponseError",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a) {
               var i;
               return $.wrap(function (s) {
@@ -8464,7 +8464,7 @@ var cm = 5e3,
       {
         key: "extractResponseBody",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a) {
               var i;
               return $.wrap(function (s) {
@@ -8522,7 +8522,7 @@ var cm = 5e3,
       {
         key: "fetchRequest",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o, s) {
               var c, u, l, d, f;
               return $.wrap(
@@ -8624,7 +8624,7 @@ function jn(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? cl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -8660,15 +8660,15 @@ var _m = (function (e) {
   function t() {
     var r;
     return (
-      de(this, t),
+      fe(this, t),
       (r = ym(this, t, ["NoFetchDataAdapter", "nofetch"])),
-      C(r, "bootstrapResult", null),
+      x(r, "bootstrapResult", null),
       r
     );
   }
   return (
     qe(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "setBootstrapData",
         value: function (n) {
@@ -8686,7 +8686,7 @@ var _m = (function (e) {
       {
         key: "prefetchData",
         value: (function () {
-          var r = pe(
+          var r = de(
             $.mark(function a(i, o) {
               return $.wrap(function (c) {
                 for (;;)
@@ -8707,7 +8707,7 @@ var _m = (function (e) {
       {
         key: "getDataAsync",
         value: (function () {
-          var r = pe(
+          var r = de(
             $.mark(function a(i, o, s) {
               return $.wrap(
                 function (u) {
@@ -8751,7 +8751,7 @@ var _m = (function (e) {
       {
         key: "_fetchFromNetwork",
         value: (function () {
-          var r = pe(
+          var r = de(
             $.mark(function a(i, o, s) {
               return $.wrap(function (u) {
                 for (;;)
@@ -8817,7 +8817,7 @@ function xe(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? ul(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -8901,12 +8901,12 @@ var Do = "LocalOverride:Recognized",
   },
   Sm = (function () {
     function e(t) {
-      (de(this, e),
+      (fe(this, e),
         (this._overrides = Cr()),
         (this._djb2Map = new Map()),
         (this._localStorageKey = t));
     }
-    return fe(e, [
+    return ve(e, [
       {
         key: "parseStoredOverrides",
         value: function (r) {
@@ -8949,11 +8949,11 @@ var Do = "LocalOverride:Recognized",
               r.configs[w] = k;
             }
             for (
-              var m = 0, S = Object.entries((x = c.layers) !== null && x !== void 0 ? x : {});
+              var m = 0, S = Object.entries((C = c.layers) !== null && C !== void 0 ? C : {});
               m < S.length;
               m++
             ) {
-              var x,
+              var C,
                 I = K(S[m], 2),
                 T = I[0],
                 P = I[1];
@@ -9193,7 +9193,7 @@ function Yt(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? fl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -9212,28 +9212,28 @@ var vl = "client-default-key",
         n = r.localStorageKey,
         a = n === void 0 ? Om : n,
         i = r.overrideAdapter;
-      (de(this, e),
-        C(this, "initPromise", null),
-        C(this, "initCompleted", !1),
-        C(this, "initWithDefaults", !1),
-        C(this, "hasCheckGateErrorOccurred", !1),
-        C(this, "hasGetExperimentErrorOccurred", !1),
-        C(this, "hasGetExperimentValueErrorOccurred", !1),
-        C(this, "hasGetLayerErrorOccurred", !1),
-        C(this, "hasGetLayerValueErrorOccurred", !1),
-        C(this, "subscriptions", new Qy()),
-        C(this, "dataAdapter", new _m()),
-        C(this, "statsigValuesUpdated", function () {
+      (fe(this, e),
+        x(this, "initPromise", null),
+        x(this, "initCompleted", !1),
+        x(this, "initWithDefaults", !1),
+        x(this, "hasCheckGateErrorOccurred", !1),
+        x(this, "hasGetExperimentErrorOccurred", !1),
+        x(this, "hasGetExperimentValueErrorOccurred", !1),
+        x(this, "hasGetLayerErrorOccurred", !1),
+        x(this, "hasGetLayerValueErrorOccurred", !1),
+        x(this, "subscriptions", new Qy()),
+        x(this, "dataAdapter", new _m()),
+        x(this, "statsigValuesUpdated", function () {
           (t.user && t.statsigClient.updateUserSync(t.user, { disableBackgroundCacheRefresh: !0 }),
             t.subscriptions.anyUpdated());
         }),
         (this.overrideAdapter = i || new Sm(a)));
     }
-    return fe(e, [
+    return ve(e, [
       {
         key: "initialize",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s = this,
                 c,
@@ -9288,7 +9288,7 @@ var vl = "client-default-key",
       {
         key: "initializeWithProvider",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o, s) {
               var c = this,
                 u,
@@ -9403,7 +9403,7 @@ var vl = "client-default-key",
       {
         key: "initializeFromValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s = this,
                 c,
@@ -9472,7 +9472,7 @@ var vl = "client-default-key",
       {
         key: "updateUser",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s, c;
               return $.wrap(
@@ -9512,7 +9512,7 @@ var vl = "client-default-key",
       {
         key: "updateUserWithProvider",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i) {
               var o = this;
               return $.wrap(
@@ -9559,7 +9559,7 @@ var vl = "client-default-key",
       {
         key: "updateUserWithValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i) {
               var o,
                 s,
@@ -9608,6 +9608,47 @@ var vl = "client-default-key",
         value: function () {
           return this.initCompleted;
         },
+      },
+      {
+        key: "waitUntilInitializeCompleted",
+        value: (function () {
+          var t = de(
+            $.mark(function n() {
+              return $.wrap(
+                function (i) {
+                  for (;;)
+                    switch ((i.prev = i.next)) {
+                      case 0:
+                        if (this.initPromise) {
+                          i.next = 2;
+                          break;
+                        }
+                        throw new Error(
+                          "The client must be initialized before you can wait until initialized.",
+                        );
+                      case 2:
+                        if (!this.initCompleted) {
+                          i.next = 4;
+                          break;
+                        }
+                        return i.abrupt("return");
+                      case 4:
+                        return ((i.next = 6), this.initPromise);
+                      case 6:
+                      case "end":
+                        return i.stop();
+                    }
+                },
+                n,
+                this,
+              );
+            }),
+          );
+          function r() {
+            return t.apply(this, arguments);
+          }
+          return r;
+        })(),
       },
       {
         key: "checkGate",
@@ -9849,7 +9890,7 @@ var vl = "client-default-key",
       {
         key: "init",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s, c, u, l, d, f, h, v;
               return $.wrap(
@@ -9913,7 +9954,7 @@ var vl = "client-default-key",
       {
         key: "initWithProvider",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o, s) {
               var c, u, l, d, f, h, v, p;
               return $.wrap(
@@ -9982,7 +10023,7 @@ var vl = "client-default-key",
       {
         key: "initFromValues",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s,
                 c,
@@ -10080,7 +10121,7 @@ var vl = "client-default-key",
       {
         key: "updateUserUsingInitializeValuesProducer",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s = this,
                 c,
@@ -10121,7 +10162,7 @@ var vl = "client-default-key",
                           (u = a()),
                           (l = this.updateStatsigClientUser(u, i, o)),
                           (this.initPromise = l.catch(
-                            pe(
+                            de(
                               $.mark(function h() {
                                 return $.wrap(function (p) {
                                   for (;;)
@@ -10169,7 +10210,7 @@ var vl = "client-default-key",
       {
         key: "updateStatsigClientUser",
         value: (function () {
-          var t = pe(
+          var t = de(
             $.mark(function n(a, i, o) {
               var s, c, u, l, d, f, h, v, p;
               return $.wrap(
@@ -10309,11 +10350,11 @@ var vl = "client-default-key",
     ]);
   })(),
   D,
-  U = (function () {
+  q = (function () {
     function e() {
-      de(this, e);
+      fe(this, e);
     }
-    return fe(e, null, [
+    return ve(e, null, [
       {
         key: "isGateExists",
         value: function (r) {
@@ -10328,11 +10369,11 @@ var vl = "client-default-key",
       },
     ]);
   })();
-D = U;
-C(U, "client", new Cm());
-C(U, "hasCheckGateErrorOccurred", !1);
-C(U, "hasGetExperimentValueErrorOccurred", !1);
-C(U, "checkGate", function (e, t) {
+D = q;
+x(q, "client", new Cm());
+x(q, "hasCheckGateErrorOccurred", !1);
+x(q, "hasGetExperimentValueErrorOccurred", !1);
+x(q, "checkGate", function (e, t) {
   try {
     if (
       typeof window < "u" &&
@@ -10353,7 +10394,7 @@ C(U, "checkGate", function (e, t) {
   }
   return D.client.checkGate(e, t);
 });
-C(U, "getExperimentValue", function (e, t, r, n) {
+x(q, "getExperimentValue", function (e, t, r, n) {
   try {
     if (
       typeof window < "u" &&
@@ -10379,36 +10420,37 @@ C(U, "getExperimentValue", function (e, t, r, n) {
   }
   return D.client.getExperimentValue(e, t, r, n);
 });
-C(U, "initializeCalled", D.client.initializeCalled.bind(D.client));
-C(U, "initializeCompleted", D.client.initializeCompleted.bind(D.client));
-C(U, "initialize", D.client.initialize.bind(D.client));
-C(U, "initializeWithProvider", D.client.initializeWithProvider.bind(D.client));
-C(U, "initializeFromValues", D.client.initializeFromValues.bind(D.client));
-C(U, "manuallyLogGateExposure", D.client.manuallyLogGateExposure.bind(D.client));
-C(U, "getExperiment", D.client.getExperiment.bind(D.client));
-C(U, "manuallyLogExperimentExposure", D.client.manuallyLogExperimentExposure.bind(D.client));
-C(U, "manuallyLogLayerExposure", D.client.manuallyLogLayerExposure.bind(D.client));
-C(U, "shutdownStatsig", D.client.shutdownStatsig.bind(D.client));
-C(U, "overrideGate", D.client.overrideGate.bind(D.client));
-C(U, "clearGateOverride", D.client.clearGateOverride.bind(D.client));
-C(U, "overrideConfig", D.client.overrideConfig.bind(D.client));
-C(U, "clearConfigOverride", D.client.clearConfigOverride.bind(D.client));
-C(U, "setOverrides", D.client.setOverrides.bind(D.client));
-C(U, "getOverrides", D.client.getOverrides.bind(D.client));
-C(U, "clearAllOverrides", D.client.clearAllOverrides.bind(D.client));
-C(U, "isCurrentUser", D.client.isCurrentUser.bind(D.client));
-C(U, "onGateUpdated", D.client.onGateUpdated.bind(D.client));
-C(U, "onExperimentValueUpdated", D.client.onExperimentValueUpdated.bind(D.client));
-C(U, "onAnyUpdated", D.client.onAnyUpdated.bind(D.client));
-C(U, "updateUser", D.client.updateUser.bind(D.client));
-C(U, "updateUserWithProvider", D.client.updateUserWithProvider.bind(D.client));
-C(U, "updateUserWithValues", D.client.updateUserWithValues.bind(D.client));
-C(U, "getPackageVersion", D.client.getPackageVersion.bind(D.client));
-C(U, "getLayer", D.client.getLayer.bind(D.client));
-C(U, "getLayerValue", D.client.getLayerValue.bind(D.client));
-var ps = U;
+x(q, "initializeCalled", D.client.initializeCalled.bind(D.client));
+x(q, "initializeCompleted", D.client.initializeCompleted.bind(D.client));
+x(q, "waitUntilInitializeCompleted", D.client.waitUntilInitializeCompleted.bind(D.client));
+x(q, "initialize", D.client.initialize.bind(D.client));
+x(q, "initializeWithProvider", D.client.initializeWithProvider.bind(D.client));
+x(q, "initializeFromValues", D.client.initializeFromValues.bind(D.client));
+x(q, "manuallyLogGateExposure", D.client.manuallyLogGateExposure.bind(D.client));
+x(q, "getExperiment", D.client.getExperiment.bind(D.client));
+x(q, "manuallyLogExperimentExposure", D.client.manuallyLogExperimentExposure.bind(D.client));
+x(q, "manuallyLogLayerExposure", D.client.manuallyLogLayerExposure.bind(D.client));
+x(q, "shutdownStatsig", D.client.shutdownStatsig.bind(D.client));
+x(q, "overrideGate", D.client.overrideGate.bind(D.client));
+x(q, "clearGateOverride", D.client.clearGateOverride.bind(D.client));
+x(q, "overrideConfig", D.client.overrideConfig.bind(D.client));
+x(q, "clearConfigOverride", D.client.clearConfigOverride.bind(D.client));
+x(q, "setOverrides", D.client.setOverrides.bind(D.client));
+x(q, "getOverrides", D.client.getOverrides.bind(D.client));
+x(q, "clearAllOverrides", D.client.clearAllOverrides.bind(D.client));
+x(q, "isCurrentUser", D.client.isCurrentUser.bind(D.client));
+x(q, "onGateUpdated", D.client.onGateUpdated.bind(D.client));
+x(q, "onExperimentValueUpdated", D.client.onExperimentValueUpdated.bind(D.client));
+x(q, "onAnyUpdated", D.client.onAnyUpdated.bind(D.client));
+x(q, "updateUser", D.client.updateUser.bind(D.client));
+x(q, "updateUserWithProvider", D.client.updateUserWithProvider.bind(D.client));
+x(q, "updateUserWithValues", D.client.updateUserWithValues.bind(D.client));
+x(q, "getPackageVersion", D.client.getPackageVersion.bind(D.client));
+x(q, "getLayer", D.client.getLayer.bind(D.client));
+x(q, "getLayerValue", D.client.getLayerValue.bind(D.client));
+var ps = q;
 if (typeof window < "u")
-  if (window.__FEATUREGATES_JS__ === void 0) window.__FEATUREGATES_JS__ = U;
+  if (window.__FEATUREGATES_JS__ === void 0) window.__FEATUREGATES_JS__ = q;
   else {
     var Na, To;
     ps = window.__FEATUREGATES_JS__;
@@ -10560,7 +10602,7 @@ function Um(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? hl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -10615,7 +10657,7 @@ function Vm(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? gl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -10777,7 +10819,7 @@ function ml(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? yl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -10841,13 +10883,13 @@ function r_(e) {
   var t = (function (r) {
     function n() {
       var a;
-      de(this, n);
+      fe(this, n);
       for (var i = arguments.length, o = new Array(i), s = 0; s < i; s++) o[s] = arguments[s];
-      return ((a = e_(this, n, [].concat(o))), C(a, "state", { pageRows: [] }), a);
+      return ((a = e_(this, n, [].concat(o))), x(a, "state", { pageRows: [] }), a);
     }
     return (
       qe(n, r),
-      fe(
+      ve(
         n,
         [
           {
@@ -10910,7 +10952,7 @@ function r_(e) {
 var n_ = "--local-dynamic-table-width",
   Vv = function (t) {
     var r = t.width;
-    return typeof r < "u" ? C({}, n_, "".concat(r, "%")) : void 0;
+    return typeof r < "u" ? x({}, n_, "".concat(r, "%")) : void 0;
   },
   a_ = ["width", "isFixedSize", "shouldTruncate", "innerRef"],
   i_ = function (t) {
@@ -11017,11 +11059,11 @@ function Gv() {
 }
 var f_ = (function (e) {
     function t() {
-      return (de(this, t), d_(this, t, arguments));
+      return (fe(this, t), d_(this, t, arguments));
     }
     return (
       qe(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "render",
           value: function () {
@@ -11075,11 +11117,11 @@ function Hv() {
 var h_ = (function (e) {
   function t(r) {
     var n;
-    return (de(this, t), (n = p_(this, t, [r])), (n.state = { hasError: !1 }), n);
+    return (fe(this, t), (n = p_(this, t, [r])), (n.state = { hasError: !1 }), n);
   }
   return (
     qe(t, e),
-    fe(
+    ve(
       t,
       [
         {
@@ -11217,7 +11259,7 @@ function Il(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? jl(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -11246,7 +11288,7 @@ var Dl = "--contents-opacity",
       {
         "data-testid": a && "".concat(a, "--contents--container"),
         className: R(["_tzy47hfw _lcxvglyw"]),
-        style: Il(Il({}, C({}, Dl, n)), {}, { "--_cnddr8": qv("var(".concat(Dl, ")")) }),
+        style: Il(Il({}, x({}, Dl, n)), {}, { "--_cnddr8": qv("var(".concat(Dl, ")")) }),
       },
       r,
     );
@@ -11279,11 +11321,11 @@ function Kv() {
 }
 var Yv = (function (e) {
   function t() {
-    return (de(this, t), C_(this, t, arguments));
+    return (fe(this, t), C_(this, t, arguments));
   }
   return (
     qe(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "render",
         value: function () {
@@ -11314,7 +11356,7 @@ var Yv = (function (e) {
     ])
   );
 })(O.Component);
-C(Yv, "defaultProps", {
+x(Yv, "defaultProps", {
   isLoading: !0,
   spinnerSize: vi,
   contentsOpacity: zv,
@@ -11364,59 +11406,59 @@ function Jv() {
 var Xv = (function (e) {
   function t() {
     var r;
-    de(this, t);
+    fe(this, t);
     for (var n = arguments.length, a = new Array(n), i = 0; i < n; i++) a[i] = arguments[i];
     return (
       (r = I_(this, t, [].concat(a))),
-      C(r, "spinnerRef", O.createRef()),
-      C(r, "containerRef", O.createRef()),
-      C(r, "componentDidMount", function () {
+      x(r, "spinnerRef", O.createRef()),
+      x(r, "containerRef", O.createRef()),
+      x(r, "componentDidMount", function () {
         r.props.isLoading &&
           r.hasTargetNode() &&
           (r.attachListeners(), r.updateTargetAppearance(), r.updateSpinnerPosition());
       }),
-      C(r, "UNSAFE_componentWillReceiveProps", function (o) {
+      x(r, "UNSAFE_componentWillReceiveProps", function (o) {
         !o.isLoading || !r.hasTargetNode(o)
           ? r.detachListeners()
           : r.props.isLoading || r.attachListeners();
       }),
-      C(r, "componentDidUpdate", function () {
+      x(r, "componentDidUpdate", function () {
         r.hasTargetNode() &&
           (r.updateTargetAppearance(), r.props.isLoading && r.updateSpinnerPosition());
       }),
-      C(r, "componentWillUnmount", function () {
+      x(r, "componentWillUnmount", function () {
         r.detachListeners();
       }),
-      C(r, "getTargetNode", function () {
+      x(r, "getTargetNode", function () {
         var o = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : r.props,
           s = o.targetRef,
           c = s?.();
         return c || r.containerRef.current;
       }),
-      C(r, "hasTargetNode", function (o) {
+      x(r, "hasTargetNode", function (o) {
         return !!r.getTargetNode(o);
       }),
-      C(r, "isVerticallyVisible", function (o, s) {
+      x(r, "isVerticallyVisible", function (o, s) {
         var c = o.top,
           u = o.bottom;
         return u <= 0 ? !1 : c < s;
       }),
-      C(r, "isFullyVerticallyVisible", function (o, s) {
+      x(r, "isFullyVerticallyVisible", function (o, s) {
         var c = o.top,
           u = o.bottom;
         return c >= 0 && u <= s;
       }),
-      C(r, "handleResize", function () {
+      x(r, "handleResize", function () {
         r.updateSpinnerPosition();
       }),
-      C(r, "handleScroll", function () {
+      x(r, "handleScroll", function () {
         r.updateSpinnerPosition();
       }),
-      C(r, "translateSpinner", function (o, s, c) {
+      x(r, "translateSpinner", function (o, s, c) {
         ((o.style.position = c ? "fixed" : ""),
           (o.style.transform = s !== 0 ? "translate3d(0, ".concat(s, "px, 0)") : ""));
       }),
-      C(r, "updateTargetAppearance", function () {
+      x(r, "updateTargetAppearance", function () {
         var o = r.getTargetNode(),
           s = r.props,
           c = s.isLoading,
@@ -11431,7 +11473,7 @@ var Xv = (function (e) {
   }
   return (
     qe(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "attachListeners",
         value: function () {
@@ -11483,8 +11525,8 @@ var Xv = (function (e) {
             } else if (!this.isVerticallyVisible(u, i)) return;
             var S = (a = this.containerRef) === null || a === void 0 ? void 0 : a.current;
             if (S && typeof S.getBoundingClientRect == "function") {
-              var x = S.getBoundingClientRect().top,
-                I = (f - x) / 2;
+              var C = S.getBoundingClientRect().top,
+                I = (f - C) / 2;
               this.translateSpinner(s, I, !1);
             }
           }
@@ -11523,7 +11565,7 @@ var Xv = (function (e) {
     ])
   );
 })(O.Component);
-C(Xv, "defaultProps", {
+x(Xv, "defaultProps", {
   isLoading: !0,
   spinnerSize: vi,
   contentsOpacity: "var(--ds-opacity-loading, ".concat("".concat(zv), ")"),
@@ -11619,8 +11661,8 @@ var Mn = {},
       }
     }
     var S = N_[w],
-      x = F_[w][k][g],
-      I = S + 2 * x;
+      C = F_[w][k][g],
+      I = S + 2 * C;
     return y.createElement(
       "span",
       {
@@ -11639,8 +11681,8 @@ var Mn = {},
       y.createElement("svg", {
         fill: "none",
         viewBox: ""
-          .concat(0 - x, " ")
-          .concat(0 - x, " ")
+          .concat(0 - C, " ")
+          .concat(0 - C, " ")
           .concat(I, " ")
           .concat(I),
         role: "presentation",
@@ -11699,7 +11741,7 @@ function Nl(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Ll(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -12193,7 +12235,7 @@ var Z_ = [
       m = e.xcss,
       S = ae(e, Z_);
     S.className;
-    var x = ae(S, e0),
+    var C = ae(S, e0),
       I = y.createElement(
         n,
         te(
@@ -12211,7 +12253,7 @@ var Z_ = [
               m,
             ]),
           },
-          x,
+          C,
           { "data-testid": k },
         ),
         a,
@@ -13154,29 +13196,29 @@ function Ja(e, t, r, n, a, i, o, s, c) {
       k = a,
       m = i,
       S = n,
-      x = w;
+      C = w;
     g;
 
   )
     switch (((v = _), (_ = Fe()))) {
       case 40:
-        if (v != 108 && ye(x, d - 1) == 58) {
-          gs((x += Z(Ya(_), "&", "&\f")), "&\f") != -1 && (b = -1);
+        if (v != 108 && ye(C, d - 1) == 58) {
+          gs((C += Z(Ya(_), "&", "&\f")), "&\f") != -1 && (b = -1);
           break;
         }
       case 34:
       case 39:
       case 91:
-        x += Ya(_);
+        C += Ya(_);
         break;
       case 9:
       case 10:
       case 13:
       case 32:
-        x += lw(v);
+        C += lw(v);
         break;
       case 92:
-        x += dw(Ka() - 1, 7);
+        C += dw(Ka() - 1, 7);
         continue;
       case 47:
         switch (xt()) {
@@ -13185,11 +13227,11 @@ function Ja(e, t, r, n, a, i, o, s, c) {
             Ba(hw(fw(Fe(), Ka()), t, r), c);
             break;
           default:
-            x += "/";
+            C += "/";
         }
         break;
       case 123 * p:
-        s[u++] = mt(x) * b;
+        s[u++] = mt(C) * b;
       case 125 * p:
       case 59:
       case 0:
@@ -13198,18 +13240,18 @@ function Ja(e, t, r, n, a, i, o, s, c) {
           case 125:
             g = 0;
           case 59 + l:
-            (b == -1 && (x = Z(x, /\f/g, "")),
+            (b == -1 && (C = Z(C, /\f/g, "")),
               h > 0 &&
-                mt(x) - d &&
-                Ba(h > 32 ? Ql(x + ";", n, r, d - 1) : Ql(Z(x, " ", "") + ";", n, r, d - 2), c));
+                mt(C) - d &&
+                Ba(h > 32 ? Ql(C + ";", n, r, d - 1) : Ql(Z(C, " ", "") + ";", n, r, d - 2), c));
             break;
           case 59:
-            x += ";";
+            C += ";";
           default:
-            if ((Ba((S = Xl(x, t, r, u, l, a, s, w, (k = []), (m = []), d)), i), _ === 123))
-              if (l === 0) Ja(x, t, S, S, k, i, d, s, m);
+            if ((Ba((S = Xl(C, t, r, u, l, a, s, w, (k = []), (m = []), d)), i), _ === 123))
+              if (l === 0) Ja(C, t, S, S, k, i, d, s, m);
               else
-                switch (f === 99 && ye(x, 3) === 110 ? 100 : f) {
+                switch (f === 99 && ye(C, 3) === 110 ? 100 : f) {
                   case 100:
                   case 108:
                   case 109:
@@ -13227,30 +13269,30 @@ function Ja(e, t, r, n, a, i, o, s, c) {
                     );
                     break;
                   default:
-                    Ja(x, S, S, S, [""], m, 0, s, m);
+                    Ja(C, S, S, S, [""], m, 0, s, m);
                 }
         }
-        ((u = l = h = 0), (p = b = 1), (w = x = ""), (d = o));
+        ((u = l = h = 0), (p = b = 1), (w = C = ""), (d = o));
         break;
       case 58:
-        ((d = 1 + mt(x)), (h = v));
+        ((d = 1 + mt(C)), (h = v));
       default:
         if (p < 1) {
           if (_ == 123) --p;
           else if (_ == 125 && p++ == 0 && uw() == 125) continue;
         }
-        switch (((x += Fi(_)), _ * p)) {
+        switch (((C += Fi(_)), _ * p)) {
           case 38:
-            b = l > 0 ? 1 : ((x += "\f"), -1);
+            b = l > 0 ? 1 : ((C += "\f"), -1);
             break;
           case 44:
-            ((s[u++] = (mt(x) - 1) * b), (b = 1));
+            ((s[u++] = (mt(C) - 1) * b), (b = 1));
             break;
           case 64:
-            (xt() === 45 && (x += Ya(Fe())), (f = xt()), (l = d = mt((w = x += vw(Ka())))), _++);
+            (xt() === 45 && (C += Ya(Fe())), (f = xt()), (l = d = mt((w = C += vw(Ka())))), _++);
             break;
           case 45:
-            v === 45 && mt(x) == 2 && (p = 0);
+            v === 45 && mt(C) == 2 && (p = 0);
         }
     }
   return i;
@@ -13774,9 +13816,9 @@ function Aw() {
       for (var w = o(v), k = o(p), m = 0; m < _.length; ++m) {
         var S = _[m];
         if (!r[S] && !(g && g[S]) && !(k && k[S]) && !(w && w[S])) {
-          var x = l(p, S);
+          var C = l(p, S);
           try {
-            s(v, S, x);
+            s(v, S, C);
           } catch {}
         }
       }
@@ -14541,7 +14583,7 @@ function ne(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? ud(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -14897,7 +14939,7 @@ var h1 = {
       k = w === void 0 ? !1 : w,
       m = t.onBlur,
       S = t.onClick,
-      x = S === void 0 ? _e : S,
+      C = S === void 0 ? _e : S,
       I = t.onFocus,
       T = t.onMouseDown,
       P = T === void 0 ? _e : T,
@@ -14908,18 +14950,18 @@ var h1 = {
       V = t.tabIndex,
       J = V === void 0 ? 0 : V,
       G = t.type,
-      q = G === void 0 ? (d ? void 0 : "button") : G,
+      U = G === void 0 ? (d ? void 0 : "button") : G,
       X = t.testId,
       F = ae(t, g1),
       j = y.useRef(),
       be = y.useCallback(
-        function (ve) {
-          if (((j.current = ve), r != null)) {
+        function (pe) {
+          if (((j.current = pe), r != null)) {
             if (typeof r == "function") {
-              r(ve);
+              r(pe);
               return;
             }
-            r.current = ve;
+            r.current = pe;
           }
         },
         [j, r],
@@ -14927,10 +14969,10 @@ var h1 = {
     Ww(j, s);
     var oe = y.useContext($s),
       ce = y.useCallback(
-        function (ve, Ve) {
-          (oe && oe.tracePress(g, ve.timeStamp), x(ve, Ve));
+        function (pe, Ve) {
+          (oe && oe.tracePress(g, pe.timeStamp), C(pe, Ve));
         },
-        [x, oe, g],
+        [C, oe, g],
       ),
       le = da({
         fn: ce,
@@ -14941,15 +14983,15 @@ var h1 = {
         analyticsData: n,
       }),
       ge = y.useCallback(
-        function (ve) {
-          (ve.preventDefault(), P(ve));
+        function (pe) {
+          (pe.preventDefault(), P(pe));
         },
         [P],
       );
     y.useEffect(
       function () {
-        var ve = j.current;
-        _ && ve && ve === document.activeElement && ve.blur();
+        var pe = j.current;
+        _ && pe && pe === document.activeElement && pe.blur();
       },
       [_],
     );
@@ -14990,7 +15032,7 @@ var h1 = {
               onFocus: I,
               onMouseDown: ge,
               tabIndex: _ ? -1 : J,
-              type: q,
+              type: U,
             },
             Zw({ isInteractive: ke }),
           ),
@@ -15042,9 +15084,9 @@ var O1 = [
         k = w.mode,
         m = k1({ children: i, iconBefore: o, iconAfter: s }),
         S = y.useState(!1),
-        x = K(S, 2),
-        I = x[0],
-        T = x[1],
+        C = K(S, 2),
+        I = C[0],
+        T = C[1],
         P = y.useCallback(
           function (B) {
             (d(B), pd && T(!0));
@@ -15215,7 +15257,7 @@ function j1(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? yd(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -15272,8 +15314,8 @@ function D1(e, t) {
     k = w === void 0 ? _e : w,
     m = e.pages,
     S = e.getPageLabel,
-    x = e.renderEllipsis,
-    I = x === void 0 ? x1 : x,
+    C = e.renderEllipsis,
+    I = C === void 0 ? x1 : C,
     T = e.analyticsContext,
     P = e.testId,
     M = e.isDisabled,
@@ -15298,7 +15340,7 @@ function D1(e, t) {
         I1,
       ),
     ),
-    q = function (F, j, be) {
+    U = function (F, j, be) {
       var oe = m[V],
         ce = "".concat(l, " ").concat(S ? S(F, j) : F),
         le = F === oe;
@@ -15348,7 +15390,7 @@ function D1(e, t) {
       O.createElement(
         Ha,
         { space: "space.0", alignBlock: "baseline", as: "ul", xcss: ks.paginationMenu },
-        A1(m, V, { max: _, ellipsis: I, transform: q }, P),
+        A1(m, V, { max: _, ellipsis: I, transform: U }, P),
       ),
       O.createElement(hd, {
         key: "right-navigator",
@@ -15382,11 +15424,11 @@ function Sp() {
 var L1 = (function (e) {
     function t() {
       var r;
-      de(this, t);
+      fe(this, t);
       for (var n = arguments.length, a = new Array(n), i = 0; i < n; i++) a[i] = arguments[i];
       return (
         (r = M1(this, t, [].concat(a))),
-        C(r, "onChange", function (o, s, c) {
+        x(r, "onChange", function (o, s, c) {
           r.props.onChange(s, c);
         }),
         r
@@ -15394,7 +15436,7 @@ var L1 = (function (e) {
     }
     return (
       qe(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "render",
           value: function () {
@@ -15454,7 +15496,7 @@ function Un(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? _d(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -15488,7 +15530,7 @@ var wd = "--local-dynamic-table-text-color",
       l = Un(
         Un(Un({}, s), r && Vv({ width: r })),
         {},
-        C({}, wd, "var(--ds-text-subtlest, #626F86)"),
+        x({}, wd, "var(--ds-text-subtlest, #626F86)"),
       ),
       d = a === gr,
       f = a === fi,
@@ -15534,15 +15576,15 @@ function q1(e) {
   return (function (t) {
     function r() {
       var n;
-      de(this, r);
+      fe(this, r);
       for (var a = arguments.length, i = new Array(a), o = 0; o < a; o++) i[o] = arguments[o];
       return (
         (n = z1(this, r, [].concat(i))),
-        C(n, "state", { refWidth: 0, refHeight: 0 }),
-        C(n, "innerRef", function (s) {
+        x(n, "state", { refWidth: 0, refHeight: 0 }),
+        x(n, "innerRef", function (s) {
           s && !n.props.isRanking && (n.ref = s);
         }),
-        C(n, "updateDimensions", function () {
+        x(n, "updateDimensions", function () {
           if (n.ref) {
             var s = n.ref.getBoundingClientRect(),
               c = s.width,
@@ -15556,7 +15598,7 @@ function q1(e) {
     }
     return (
       qe(r, t),
-      fe(r, [
+      ve(r, [
         {
           key: "UNSAFE_componentWillReceiveProps",
           value: function (a) {
@@ -15824,9 +15866,9 @@ var Jn = { none: 0, small: 100, medium: 350, large: 700 },
       m = Ed(w);
     w !== n && c([w, n]);
     var S = ck(m, k),
-      x = !!S.size,
+      C = !!S.size,
       I = m;
-    if ((x && (I = ok(m, k)), a))
+    if ((C && (I = ok(m, k)), a))
       if (d.length) I = d;
       else {
         var T = I.filter(function (P) {
@@ -15902,9 +15944,9 @@ var dk = y.createContext(function () {
       k = p ? 0 : h.delay,
       m = p ? "exiting" : "entering",
       S = y.useState(b),
-      x = K(S, 2),
-      I = x[0],
-      T = x[1];
+      C = K(S, 2),
+      I = C[0],
+      T = C[1];
     return (
       y.useEffect(
         function () {
@@ -16344,9 +16386,9 @@ function $k(e) {
       k = d[h],
       m = _ - f[l] - d[v],
       S = _ / 2 - f[l] / 2 + w,
-      x = ra(k, S, m),
+      C = ra(k, S, m),
       I = c;
-    r.modifiersData[n] = ((t = {}), (t[I] = x), (t.centerOffset = x - S), t);
+    r.modifiersData[n] = ((t = {}), (t[I] = C), (t.centerOffset = C - S), t);
   }
 }
 function Bk(e) {
@@ -16402,19 +16444,19 @@ function Ad(e) {
     m = window;
   if (u) {
     var S = xa(r),
-      x = "clientHeight",
+      C = "clientHeight",
       I = "clientWidth";
     if (
       (S === $e(r) &&
         ((S = nr(r)),
         Ut(S).position !== "static" &&
           s === "absolute" &&
-          ((x = "scrollHeight"), (I = "scrollWidth"))),
+          ((C = "scrollHeight"), (I = "scrollWidth"))),
       (S = S),
       a === Pe || ((a === Ae || a === nt) && i === ga))
     ) {
       k = rt;
-      var T = d && S === m && m.visualViewport ? m.visualViewport.height : S[x];
+      var T = d && S === m && m.visualViewport ? m.visualViewport.height : S[C];
       ((p -= T - n.height), (p *= c ? 1 : -1));
     }
     if (a === Ae || ((a === Pe || a === rt) && i === ga)) {
@@ -16724,8 +16766,8 @@ function ba(e, t) {
     k = e.elements[v ? _ : f],
     m = eO(br(k) ? k : k.contextElement || nr(e.elements.popper), c, l, o),
     S = Kr(e.elements.reference),
-    x = Np({ reference: S, element: w, placement: a }),
-    I = Ss(Object.assign({}, w, x)),
+    C = Np({ reference: S, element: w, placement: a }),
+    I = Ss(Object.assign({}, w, C)),
     T = f === Wn ? I : S,
     P = {
       top: m.top - T.top + b.top,
@@ -16816,7 +16858,7 @@ function nO(e) {
         }, []),
         m = t.rects.reference,
         S = t.rects.popper,
-        x = new Map(),
+        C = new Map(),
         I = !0,
         T = k[0],
         P = 0;
@@ -16829,13 +16871,13 @@ function nO(e) {
         V = [Pe, rt].indexOf(z) >= 0,
         J = V ? "width" : "height",
         G = ba(t, { placement: M, boundary: l, rootBoundary: d, altBoundary: f, padding: u }),
-        q = V ? (B ? nt : Ae) : B ? rt : Pe;
-      m[J] > S[J] && (q = Xa(q));
-      var X = Xa(q),
+        U = V ? (B ? nt : Ae) : B ? rt : Pe;
+      m[J] > S[J] && (U = Xa(U));
+      var X = Xa(U),
         F = [];
       if (
         (i && F.push(G[z] <= 0),
-        s && F.push(G[q] <= 0, G[X] <= 0),
+        s && F.push(G[U] <= 0, G[X] <= 0),
         F.every(function (le) {
           return le;
         }))
@@ -16843,14 +16885,14 @@ function nO(e) {
         ((T = M), (I = !1));
         break;
       }
-      x.set(M, F);
+      C.set(M, F);
     }
     if (I)
       for (
         var j = v ? 3 : 1,
           be = function (ge) {
             var ue = k.find(function (Ue) {
-              var ke = x.get(Ue);
+              var ke = C.get(Ue);
               if (ke)
                 return ke.slice(0, ge).every(function (at) {
                   return at;
@@ -16987,7 +17029,7 @@ function vO(e) {
     k = Qs(b),
     m = fO(k),
     S = t.modifiersData.popperOffsets,
-    x = t.rects.reference,
+    C = t.rects.reference,
     I = t.rects.popper,
     T = typeof p == "function" ? p(Object.assign({}, t.rects, { placement: t.placement })) : p,
     P =
@@ -17002,12 +17044,12 @@ function vO(e) {
         V = k === "y" ? Pe : Ae,
         J = k === "y" ? rt : nt,
         G = k === "y" ? "height" : "width",
-        q = S[k],
-        X = q + g[V],
-        F = q - g[J],
+        U = S[k],
+        X = U + g[V],
+        F = U - g[J],
         j = h ? -I[G] / 2 : 0,
-        be = _ === Hr ? x[G] : I[G],
-        oe = _ === Hr ? -I[G] : -x[G],
+        be = _ === Hr ? C[G] : I[G],
+        oe = _ === Hr ? -I[G] : -C[G],
         ce = t.elements.arrow,
         le = h && ce ? Xs(ce) : { width: 0, height: 0 },
         ge = t.modifiersData["arrow#persistent"]
@@ -17015,16 +17057,16 @@ function vO(e) {
           : Dp(),
         ue = ge[V],
         Ue = ge[J],
-        ke = ra(0, x[G], le[G]),
-        at = w ? x[G] / 2 - j - ke - ue - P.mainAxis : be - ke - ue - P.mainAxis,
-        ve = w ? -x[G] / 2 + j + ke + Ue + P.mainAxis : oe + ke + Ue + P.mainAxis,
+        ke = ra(0, C[G], le[G]),
+        at = w ? C[G] / 2 - j - ke - ue - P.mainAxis : be - ke - ue - P.mainAxis,
+        pe = w ? -C[G] / 2 + j + ke + Ue + P.mainAxis : oe + ke + Ue + P.mainAxis,
         Ve = t.elements.arrow && xa(t.elements.arrow),
         kr = Ve ? (k === "y" ? Ve.clientTop || 0 : Ve.clientLeft || 0) : 0,
         It = (B = M?.[k]) != null ? B : 0,
-        Oe = q + at - It - kr,
-        Se = q + ve - It,
-        Gt = ra(h ? gi(X, Oe) : X, q, h ? dr(F, Se) : F);
-      ((S[k] = Gt), (z[k] = Gt - q));
+        Oe = U + at - It - kr,
+        Se = U + pe - It,
+        Gt = ra(h ? gi(X, Oe) : X, U, h ? dr(F, Se) : F);
+      ((S[k] = Gt), (z[k] = Gt - U));
     }
     if (s) {
       var bt,
@@ -17036,8 +17078,8 @@ function vO(e) {
         ot = Ge - g[Ht],
         Wt = [Pe, Ae].indexOf(b) !== -1,
         Ca = (bt = M?.[m]) != null ? bt : 0,
-        Ra = Wt ? Ee : Ge - x[De] - I[De] - Ca + P.altAxis,
-        Pa = Wt ? Ge + x[De] + I[De] - Ca - P.altAxis : ot,
+        Ra = Wt ? Ee : Ge - C[De] - I[De] - Ca + P.altAxis,
+        Pa = Wt ? Ge + C[De] + I[De] - Ca - P.altAxis : ot,
         Aa = h && Wt ? Nk(Ra, Ge, Pa) : ra(h ? Ra : Ee, Ge, h ? Pa : ot);
       ((S[m] = Aa), (z[m] = Aa - Ge));
     }
@@ -17217,8 +17259,8 @@ function OO(e) {
                 }
                 var m = l.orderedModifiers[k],
                   S = m.fn,
-                  x = m.options,
-                  I = x === void 0 ? {} : x,
+                  C = m.options,
+                  I = C === void 0 ? {} : C,
                   T = m.name;
                 typeof S == "function" &&
                   (l = S({ state: l, options: I, name: T, instance: h }) || l);
@@ -17474,7 +17516,7 @@ function TO(e) {
     k = w.state,
     m = w.styles,
     S = w.forceUpdate,
-    x = w.update,
+    C = w.update,
     I = y.useMemo(
       function () {
         return {
@@ -17487,10 +17529,10 @@ function TO(e) {
             k && k.modifiersData.hide ? k.modifiersData.hide.isReferenceHidden : null,
           arrowProps: { style: m.arrow, ref: b },
           forceUpdate: S || jO,
-          update: x || IO,
+          update: C || IO,
         };
       },
-      [v, b, r, k, m, x, S],
+      [v, b, r, k, m, C, S],
     );
   return bk(l)(I);
 }
@@ -18045,7 +18087,7 @@ function Nr(e) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2
       ? Vd(Object(r), !0).forEach(function (n) {
-          C(e, n, r[n]);
+          x(e, n, r[n]);
         })
       : Object.getOwnPropertyDescriptors
         ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(r))
@@ -18088,8 +18130,8 @@ function cS(e) {
     k = e.canAppear,
     m = e.hideTooltipOnClick,
     S = m === void 0 ? !1 : m,
-    x = e.hideTooltipOnMouseDown,
-    I = x === void 0 ? !1 : x,
+    C = e.hideTooltipOnMouseDown,
+    I = C === void 0 ? !1 : C,
     T = e.analyticsContext,
     P = e.strategy,
     M = P === void 0 ? "fixed" : P,
@@ -18098,7 +18140,7 @@ function cS(e) {
     V = e.isScreenReaderAnnouncementDisabled,
     J = V === void 0 ? !1 : V,
     G = e.shortcut,
-    q = n === "mouse" ? i : n,
+    U = n === "mouse" ? i : n,
     X = bl(Nr({ fn: b, action: "displayed", analyticsData: T }, Gd)),
     F = bl(Nr({ fn: w, action: "hidden", analyticsData: T }, Gd)),
     j = y.useRef(null),
@@ -18115,7 +18157,7 @@ function cS(e) {
       ge.current = L;
     }, []),
     at = Hn(ce),
-    ve = Hn(X),
+    pe = Hn(X),
     Ve = Hn(F),
     kr = Hn(p),
     It = Hn(k),
@@ -18175,7 +18217,7 @@ function cS(e) {
                 delay: kr.current,
                 show: function (Or) {
                   var tn = Or.isImmediate;
-                  (Oe.current || ((Oe.current = !0), ve.current()),
+                  (Oe.current || ((Oe.current = !0), pe.current()),
                     le(tn ? "show-immediate" : "fade-in"));
                 },
                 hide: function (Or) {
@@ -18189,7 +18231,7 @@ function cS(e) {
           }
         }
       },
-      [It, kr, Gt, Se, bt, ve],
+      [It, kr, Gt, Se, bt, pe],
     ),
     Ge = y.useCallback(
       function () {
@@ -18348,7 +18390,7 @@ function cS(e) {
       ? O.createElement(
           ZO,
           { zIndex: iS },
-          O.createElement($O, { placement: q, referenceElement: ic(), strategy: M }, function (L) {
+          O.createElement($O, { placement: U, referenceElement: ic(), strategy: M }, function (L) {
             var re = L.ref,
               Dt = L.style,
               Gi = L.update,
@@ -18376,7 +18418,7 @@ function cS(e) {
                         className: "Tooltip ".concat(eh),
                         style: Nr(Nr({}, Dt), B && { pointerEvents: "none" }),
                         truncate: c,
-                        placement: q,
+                        placement: U,
                         testId: ic() ? h : h && "".concat(h, "--unresolved"),
                         onMouseOut: Wt,
                         onMouseOver: Ra,
@@ -18441,8 +18483,8 @@ var uS = [
       k = K(w, 2),
       m = k[0],
       S = k[1],
-      x = y.useState(!1),
-      I = K(x, 2),
+      C = y.useState(!1),
+      I = K(C, 2),
       T = I[0],
       P = I[1],
       M = u === l || s !== void 0,
@@ -18461,7 +18503,7 @@ var uS = [
         },
         [P],
       ),
-      q = y.useCallback(
+      U = y.useCallback(
         function () {
           S(!0);
         },
@@ -18475,7 +18517,7 @@ var uS = [
       ),
       F = O.createElement(
         Li,
-        { xcss: Hd.headCellContainer, onMouseEnter: q, onMouseLeave: X, onFocus: J, onBlur: G },
+        { xcss: Hd.headCellContainer, onMouseEnter: U, onMouseLeave: X, onFocus: J, onBlur: G },
         O.createElement(
           cS,
           { content: s === gr ? f : v },
@@ -18537,11 +18579,11 @@ function Kp() {
 }
 var fS = (function (e) {
     function t() {
-      return (de(this, t), dS(this, t, arguments));
+      return (fe(this, t), dS(this, t, arguments));
     }
     return (
       qe(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "render",
           value: function () {
@@ -18589,11 +18631,11 @@ function Yp() {
 var bS = (function (e) {
     function t(r) {
       var n;
-      return (de(this, t), (n = gS(this, t, [r])), (n.state = { activeSortButtonId: null }), n);
+      return (fe(this, t), (n = gS(this, t, [r])), (n.state = { activeSortButtonId: null }), n);
     }
     return (
       qe(t, e),
-      fe(t, [
+      ve(t, [
         {
           key: "UNSAFE_componentWillMount",
           value: function () {
@@ -18636,7 +18678,7 @@ var bS = (function (e) {
                     k = b.buttonAriaRoleDescription,
                     m = b.colSpan,
                     S = b.content,
-                    x = b.descendingSortTooltip,
+                    C = b.descendingSortTooltip,
                     I = b.isIconOnlyHeader,
                     T = b.isSortable,
                     P = b.key,
@@ -18667,7 +18709,7 @@ var bS = (function (e) {
                         sortOrder: P === o ? s : void 0,
                         width: B,
                         ascendingSortTooltip: w,
-                        descendingSortTooltip: x,
+                        descendingSortTooltip: C,
                         buttonAriaRoleDescription: k,
                       },
                       V,
@@ -18714,8 +18756,8 @@ var _S = function (t) {
       k = w === void 0 ? _e : w,
       m = t.onSort,
       S = m === void 0 ? _e : m,
-      x = t.page,
-      I = x === void 0 ? 1 : x,
+      C = t.page,
+      I = C === void 0 ? 1 : C,
       T = t.emptyView,
       P = t.isRankable,
       M = P === void 0 ? !1 : P,
@@ -18724,7 +18766,7 @@ var _S = function (t) {
       V = t.onRankStart,
       J = V === void 0 ? _e : V,
       G = t.onRankEnd,
-      q = G === void 0 ? _e : G,
+      U = G === void 0 ? _e : G,
       X = t.loadingSpinnerSize,
       F = t.paginationi18n,
       j =
@@ -18744,7 +18786,7 @@ var _S = function (t) {
         packageVersion: "18.2.18",
       }),
       Ue = da({
-        fn: q,
+        fn: U,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
@@ -18772,7 +18814,7 @@ var _S = function (t) {
       at = function (Ee, ot) {
         k(Ee, ot);
       },
-      ve = function (Ee) {
+      pe = function (Ee) {
         (le(!0), J(Ee));
       },
       Ve = function (Ee) {
@@ -18839,7 +18881,7 @@ var _S = function (t) {
               testId: l,
               isRankable: M,
               isRanking: ce,
-              onRankStart: ve,
+              onRankStart: pe,
               onRankEnd: Ve,
               isRankingDisabled: B || v || !1,
             }),
@@ -18866,7 +18908,7 @@ var _S = function (t) {
   },
   wS = y.lazy(function () {
     return xy(
-      () => import("./body-n4Po3s6G.js"),
+      () => import("./body-oXgFmHdX.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
@@ -18928,31 +18970,31 @@ function Jp() {
 var qi = (function (e) {
   function t() {
     var r;
-    de(this, t);
+    fe(this, t);
     for (var n = arguments.length, a = new Array(n), i = 0; i < n; i++) a[i] = arguments[i];
     return (
       (r = OS(this, t, [].concat(a))),
-      C(r, "state", {
+      x(r, "state", {
         page: r.props.defaultPage,
         sortKey: r.props.defaultSortKey,
         sortOrder: r.props.defaultSortOrder,
         rows: r.props.rows,
       }),
-      C(r, "onSetPageHandler", function (o, s) {
+      x(r, "onSetPageHandler", function (o, s) {
         var c = r.props.onSetPage;
         c && (c(o, s), r.setState({ page: o }));
       }),
-      C(r, "onSortHandler", function (o, s) {
+      x(r, "onSortHandler", function (o, s) {
         var c = o.key,
           u = o.item,
           l = o.sortOrder,
           d = r.props.onSort;
         d && (d({ key: c, item: u, sortOrder: l }, s), r.setState({ sortKey: c, sortOrder: l }));
       }),
-      C(r, "onRankEndIfExistsHandler", function (o) {
+      x(r, "onRankEndIfExistsHandler", function (o) {
         r.props.onRankEnd && r.props.onRankEnd(o);
       }),
-      C(r, "onRankEndHandler", function (o) {
+      x(r, "onRankEndHandler", function (o) {
         var s = o.destination,
           c = r.state,
           u = c.rows,
@@ -18970,7 +19012,7 @@ var qi = (function (e) {
   }
   return (
     qe(t, e),
-    fe(t, [
+    ve(t, [
       {
         key: "UNSAFE_componentWillReceiveProps",
         value: function (n) {
@@ -19003,7 +19045,7 @@ var qi = (function (e) {
             k = c.paginationi18n,
             m = c.onRankStart,
             S = c.onPageRowsUpdate,
-            x = c.testId,
+            C = c.testId,
             I = c.label;
           return O.createElement(_S, {
             paginationi18n: k,
@@ -19027,7 +19069,7 @@ var qi = (function (e) {
             onRankEnd: this.onRankEndHandler,
             onRankStart: m,
             onPageRowsUpdate: S,
-            testId: x,
+            testId: C,
             label: I,
           });
         },
@@ -19035,7 +19077,7 @@ var qi = (function (e) {
     ])
   );
 })(O.Component);
-C(qi, "defaultProps", {
+x(qi, "defaultProps", {
   defaultPage: 1,
   isLoading: !1,
   isFixedSize: !1,
@@ -19561,13 +19603,13 @@ export {
   O as R,
   s_ as T,
   qe as _,
-  fe as a,
+  ve as a,
   vs as b,
-  de as c,
+  fe as c,
   ze as d,
   Y as e,
   K as f,
-  C as g,
+  x as g,
   ae as h,
   Ni as i,
   Te as j,

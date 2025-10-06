@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-7ma1gN0e.js",
+      "./body-DAamN7ca.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-B0W_rt5h.js",
       "./lodash-vendor-DeBNf1p6.js",
@@ -5734,7 +5734,7 @@ class Vm {
 const Kv = new Vm(),
   Gm = b.createContext(Kv),
   Yo = () => b.useContext(Gm);
-function ge(e, t) {
+function be(e, t) {
   if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
 }
 function qe(e) {
@@ -5779,7 +5779,7 @@ function Hl(e, t) {
       Object.defineProperty(e, Yv(n.key), n));
   }
 }
-function be(e, t, r) {
+function me(e, t, r) {
   return (
     t && Hl(e.prototype, t),
     r && Hl(e, r),
@@ -6069,7 +6069,7 @@ function ji(e) {
 var ry = (function () {
   function e(t) {
     var r = this;
-    (ge(this, e),
+    (be(this, e),
       C(this, "_isAnalyticsEvent", !0),
       C(this, "clone", function () {
         var n = ji({}, r.payload);
@@ -6077,7 +6077,7 @@ var ry = (function () {
       }),
       (this.payload = t.payload));
   }
-  return be(e, [
+  return me(e, [
     {
       key: "update",
       value: function (r) {
@@ -6149,7 +6149,7 @@ var cy = (function (e) {
   function t(r) {
     var n;
     return (
-      ge(this, t),
+      be(this, t),
       (n = iy(this, t, [r])),
       C(n, "_isUIAnalyticsEvent", !0),
       C(n, "clone", function () {
@@ -6174,7 +6174,7 @@ var cy = (function (e) {
   }
   return (
     Ze(t, e),
-    be(t, [
+    me(t, [
       {
         key: "update",
         value: function (n) {
@@ -6193,7 +6193,7 @@ function Jl(e, t, r, n, a, o, i) {
   }
   s.done ? t(c) : Promise.resolve(c).then(n, a);
 }
-function ye(e) {
+function ge(e) {
   return function () {
     var t = this,
       r = arguments;
@@ -6286,7 +6286,7 @@ function np() {
                   var D,
                     R,
                     M,
-                    F = 0,
+                    z = 0,
                     B = A || [],
                     U = !1,
                     q = {
@@ -6300,18 +6300,18 @@ function np() {
                       },
                     };
                   function V(G, W) {
-                    for (R = G, M = W, a = 0; !U && F && !$ && a < B.length; a++) {
+                    for (R = G, M = W, a = 0; !U && z && !$ && a < B.length; a++) {
                       var $,
                         j = B[a],
-                        me = q.p,
+                        ye = q.p,
                         se = j[2];
                       G > 3
                         ? ($ = se === W) &&
                           ((M = j[(R = j[4]) ? 5 : ((R = 3), 3)]), (j[4] = j[5] = n))
-                        : j[0] <= me &&
-                          (($ = G < 2 && me < j[1])
+                        : j[0] <= ye &&
+                          (($ = G < 2 && ye < j[1])
                             ? ((R = 0), (q.v = W), (q.n = j[1]))
-                            : me < se &&
+                            : ye < se &&
                               ($ = G < 3 || j[0] > W || W > se) &&
                               ((j[4] = G), (j[5] = W), (q.n = se), (R = 0)));
                     }
@@ -6319,11 +6319,11 @@ function np() {
                     throw ((U = !0), W);
                   }
                   return function (G, W, $) {
-                    if (F > 1) throw TypeError("Generator is already running");
+                    if (z > 1) throw TypeError("Generator is already running");
                     for (U && W === 1 && V(W, $), R = W, M = $; (a = R < 2 ? n : M) || !U; ) {
                       D || (R ? (R < 3 ? (R > 1 && (q.n = -1), V(R, M)) : (q.n = M)) : (q.v = M));
                       try {
-                        if (((F = 2), D)) {
+                        if (((z = 2), D)) {
                           if ((R || (G = "next"), (a = D[G]))) {
                             if (!(a = a.call(D, M)))
                               throw TypeError("iterator result is not an object");
@@ -6341,7 +6341,7 @@ function np() {
                       } catch (j) {
                         ((D = n), (R = 1), (M = j));
                       } finally {
-                        F = 1;
+                        z = 1;
                       }
                     }
                     return { value: a, done: U };
@@ -6686,7 +6686,7 @@ function py() {
   return Ui;
 }
 var hy = py();
-const z = ur(hy);
+const F = ur(hy);
 var hr = {},
   Mr = {},
   Ga = {},
@@ -7823,9 +7823,9 @@ function rr(e) {
 var Ha = "@all-features",
   xy = (function () {
     function e() {
-      (ge(this, e), C(this, "eventToValue", new Map()), (this.emitter = new Sy()));
+      (be(this, e), C(this, "eventToValue", new Map()), (this.emitter = new Sy()));
     }
-    return be(e, [
+    return me(e, [
       {
         key: "onGateUpdated",
         value: function (r, n, a, o) {
@@ -8079,7 +8079,7 @@ var Wa = function (t) {
       var o = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : [],
         i = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : "",
         s = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : null;
-      (ge(this, e),
+      (be(this, e),
         (this.value = r),
         (this._name = t),
         (this._ruleID = n),
@@ -8088,7 +8088,7 @@ var Wa = function (t) {
         (this._evaluationDetails = a),
         (this._onDefaultValueFallback = s));
     }
-    return be(
+    return me(
       e,
       [
         {
@@ -8167,7 +8167,7 @@ var Wa = function (t) {
         s = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : [],
         c = arguments.length > 7 && arguments[7] !== void 0 ? arguments[7] : "",
         l = arguments.length > 8 && arguments[8] !== void 0 ? arguments[8] : [];
-      (ge(this, e),
+      (be(this, e),
         (this._logParameterFunction = o),
         (this._name = t),
         (this._value = JSON.parse(JSON.stringify(r ?? {}))),
@@ -8178,7 +8178,7 @@ var Wa = function (t) {
         (this._allocatedExperimentName = c),
         (this._explicitParameters = l));
     }
-    return be(
+    return me(
       e,
       [
         {
@@ -8323,9 +8323,9 @@ function lp() {
 }
 var wu = (function (e) {
   function t(r) {
-    return (ge(this, t), Dy(this, t, [r]));
+    return (be(this, t), Dy(this, t, [r]));
   }
-  return (Ze(t, e), be(t));
+  return (Ze(t, e), me(t));
 })(Cs(Error));
 function ku(e, t) {
   var r = Object.keys(e);
@@ -8366,16 +8366,16 @@ var My = 5e3,
   Vy = "/gateway/api/flags",
   Gi = (function () {
     function e() {
-      ge(this, e);
+      be(this, e);
     }
-    return be(e, null, [
+    return me(e, null, [
       {
         key: "fetchClientSdk",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a) {
+          var t = ge(
+            F.mark(function n(a) {
               var o, i;
-              return z.wrap(
+              return F.wrap(
                 function (c) {
                   for (;;)
                     switch ((c.prev = c.next)) {
@@ -8417,10 +8417,10 @@ var My = 5e3,
       {
         key: "fetchExperimentValues",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s;
-              return z.wrap(
+              return F.wrap(
                 function (l) {
                   for (;;)
                     switch ((l.prev = l.next)) {
@@ -8461,10 +8461,10 @@ var My = 5e3,
       {
         key: "handleResponseError",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a) {
+          var t = ge(
+            F.mark(function n(a) {
               var o;
-              return z.wrap(function (s) {
+              return F.wrap(function (s) {
                 for (;;)
                   switch ((s.prev = s.next)) {
                     case 0:
@@ -8504,10 +8504,10 @@ var My = 5e3,
       {
         key: "extractResponseBody",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a) {
+          var t = ge(
+            F.mark(function n(a) {
               var o;
-              return z.wrap(function (s) {
+              return F.wrap(function (s) {
                 for (;;)
                   switch ((s.prev = s.next)) {
                     case 0:
@@ -8562,10 +8562,10 @@ var My = 5e3,
       {
         key: "fetchRequest",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i, s) {
+          var t = ge(
+            F.mark(function n(a, o, i, s) {
               var c, l, u, d, f;
-              return z.wrap(
+              return F.wrap(
                 function (h) {
                   for (;;)
                     switch ((h.prev = h.next)) {
@@ -8700,7 +8700,7 @@ var Wy = (function (e) {
   function t() {
     var r;
     return (
-      ge(this, t),
+      be(this, t),
       (r = Gy(this, t, ["NoFetchDataAdapter", "nofetch"])),
       C(r, "bootstrapResult", null),
       r
@@ -8708,7 +8708,7 @@ var Wy = (function (e) {
   }
   return (
     Ze(t, e),
-    be(t, [
+    me(t, [
       {
         key: "setBootstrapData",
         value: function (n) {
@@ -8726,9 +8726,9 @@ var Wy = (function (e) {
       {
         key: "prefetchData",
         value: (function () {
-          var r = ye(
-            z.mark(function a(o, i) {
-              return z.wrap(function (c) {
+          var r = ge(
+            F.mark(function a(o, i) {
+              return F.wrap(function (c) {
                 for (;;)
                   switch ((c.prev = c.next)) {
                     case 0:
@@ -8747,9 +8747,9 @@ var Wy = (function (e) {
       {
         key: "getDataAsync",
         value: (function () {
-          var r = ye(
-            z.mark(function a(o, i, s) {
-              return z.wrap(
+          var r = ge(
+            F.mark(function a(o, i, s) {
+              return F.wrap(
                 function (l) {
                   for (;;)
                     switch ((l.prev = l.next)) {
@@ -8791,9 +8791,9 @@ var Wy = (function (e) {
       {
         key: "_fetchFromNetwork",
         value: (function () {
-          var r = ye(
-            z.mark(function a(o, i, s) {
-              return z.wrap(function (l) {
+          var r = ge(
+            F.mark(function a(o, i, s) {
+              return F.wrap(function (l) {
                 for (;;)
                   switch ((l.prev = l.next)) {
                     case 0:
@@ -8941,12 +8941,12 @@ var Hi = "LocalOverride:Recognized",
   },
   Xy = (function () {
     function e(t) {
-      (ge(this, e),
+      (be(this, e),
         (this._overrides = Lr()),
         (this._djb2Map = new Map()),
         (this._localStorageKey = t));
     }
-    return be(e, [
+    return me(e, [
       {
         key: "parseStoredOverrides",
         value: function (r) {
@@ -9252,7 +9252,7 @@ var Pu = "client-default-key",
         n = r.localStorageKey,
         a = n === void 0 ? Jy : n,
         o = r.overrideAdapter;
-      (ge(this, e),
+      (be(this, e),
         C(this, "initPromise", null),
         C(this, "initCompleted", !1),
         C(this, "initWithDefaults", !1),
@@ -9269,16 +9269,16 @@ var Pu = "client-default-key",
         }),
         (this.overrideAdapter = o || new Xy(a)));
     }
-    return be(e, [
+    return me(e, [
       {
         key: "initialize",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s = this,
                 c,
                 l;
-              return z.wrap(
+              return F.wrap(
                 function (d) {
                   for (;;)
                     switch ((d.prev = d.next)) {
@@ -9328,12 +9328,12 @@ var Pu = "client-default-key",
       {
         key: "initializeWithProvider",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i, s) {
+          var t = ge(
+            F.mark(function n(a, o, i, s) {
               var c = this,
                 l,
                 u;
-              return z.wrap(
+              return F.wrap(
                 function (f) {
                   for (;;)
                     switch ((f.prev = f.next)) {
@@ -9443,14 +9443,14 @@ var Pu = "client-default-key",
       {
         key: "initializeFromValues",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s = this,
                 c,
                 l,
                 u,
                 d = arguments;
-              return z.wrap(
+              return F.wrap(
                 function (p) {
                   for (;;)
                     switch ((p.prev = p.next)) {
@@ -9512,10 +9512,10 @@ var Pu = "client-default-key",
       {
         key: "updateUser",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s, c;
-              return z.wrap(
+              return F.wrap(
                 function (u) {
                   for (;;)
                     switch ((u.prev = u.next)) {
@@ -9552,10 +9552,10 @@ var Pu = "client-default-key",
       {
         key: "updateUserWithProvider",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o) {
+          var t = ge(
+            F.mark(function n(a, o) {
               var i = this;
-              return z.wrap(
+              return F.wrap(
                 function (c) {
                   for (;;)
                     switch ((c.prev = c.next)) {
@@ -9599,12 +9599,12 @@ var Pu = "client-default-key",
       {
         key: "updateUserWithValues",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o) {
+          var t = ge(
+            F.mark(function n(a, o) {
               var i,
                 s,
                 c = arguments;
-              return z.wrap(
+              return F.wrap(
                 function (u) {
                   for (;;)
                     switch ((u.prev = u.next)) {
@@ -9648,6 +9648,47 @@ var Pu = "client-default-key",
         value: function () {
           return this.initCompleted;
         },
+      },
+      {
+        key: "waitUntilInitializeCompleted",
+        value: (function () {
+          var t = ge(
+            F.mark(function n() {
+              return F.wrap(
+                function (o) {
+                  for (;;)
+                    switch ((o.prev = o.next)) {
+                      case 0:
+                        if (this.initPromise) {
+                          o.next = 2;
+                          break;
+                        }
+                        throw new Error(
+                          "The client must be initialized before you can wait until initialized.",
+                        );
+                      case 2:
+                        if (!this.initCompleted) {
+                          o.next = 4;
+                          break;
+                        }
+                        return o.abrupt("return");
+                      case 4:
+                        return ((o.next = 6), this.initPromise);
+                      case 6:
+                      case "end":
+                        return o.stop();
+                    }
+                },
+                n,
+                this,
+              );
+            }),
+          );
+          function r() {
+            return t.apply(this, arguments);
+          }
+          return r;
+        })(),
       },
       {
         key: "checkGate",
@@ -9889,10 +9930,10 @@ var Pu = "client-default-key",
       {
         key: "init",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s, c, l, u, d, f, p, h;
-              return z.wrap(
+              return F.wrap(
                 function (g) {
                   for (;;)
                     switch ((g.prev = g.next)) {
@@ -9953,10 +9994,10 @@ var Pu = "client-default-key",
       {
         key: "initWithProvider",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i, s) {
+          var t = ge(
+            F.mark(function n(a, o, i, s) {
               var c, l, u, d, f, p, h, v;
-              return z.wrap(
+              return F.wrap(
                 function (m) {
                   for (;;)
                     switch ((m.prev = m.next)) {
@@ -10022,8 +10063,8 @@ var Pu = "client-default-key",
       {
         key: "initFromValues",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s,
                 c,
                 l,
@@ -10032,7 +10073,7 @@ var Pu = "client-default-key",
                 f,
                 p,
                 h = arguments;
-              return z.wrap(
+              return F.wrap(
                 function (g) {
                   for (;;)
                     switch ((g.prev = g.next)) {
@@ -10120,13 +10161,13 @@ var Pu = "client-default-key",
       {
         key: "updateUserUsingInitializeValuesProducer",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s = this,
                 c,
                 l,
                 u;
-              return z.wrap(
+              return F.wrap(
                 function (f) {
                   for (;;)
                     switch ((f.prev = f.next)) {
@@ -10161,9 +10202,9 @@ var Pu = "client-default-key",
                           (l = a()),
                           (u = this.updateStatsigClientUser(l, o, i)),
                           (this.initPromise = u.catch(
-                            ye(
-                              z.mark(function p() {
-                                return z.wrap(function (v) {
+                            ge(
+                              F.mark(function p() {
+                                return F.wrap(function (v) {
                                   for (;;)
                                     switch ((v.prev = v.next)) {
                                       case 0:
@@ -10209,10 +10250,10 @@ var Pu = "client-default-key",
       {
         key: "updateStatsigClientUser",
         value: (function () {
-          var t = ye(
-            z.mark(function n(a, o, i) {
+          var t = ge(
+            F.mark(function n(a, o, i) {
               var s, c, l, u, d, f, p, h, v;
-              return z.wrap(
+              return F.wrap(
                 function (m) {
                   for (;;)
                     switch ((m.prev = m.next)) {
@@ -10351,9 +10392,9 @@ var Pu = "client-default-key",
   T,
   H = (function () {
     function e() {
-      ge(this, e);
+      be(this, e);
     }
-    return be(e, null, [
+    return me(e, null, [
       {
         key: "isGateExists",
         value: function (r) {
@@ -10421,6 +10462,7 @@ C(H, "getExperimentValue", function (e, t, r, n) {
 });
 C(H, "initializeCalled", T.client.initializeCalled.bind(T.client));
 C(H, "initializeCompleted", T.client.initializeCompleted.bind(T.client));
+C(H, "waitUntilInitializeCompleted", T.client.waitUntilInitializeCompleted.bind(T.client));
 C(H, "initialize", T.client.initialize.bind(T.client));
 C(H, "initializeWithProvider", T.client.initializeWithProvider.bind(T.client));
 C(H, "initializeFromValues", T.client.initializeFromValues.bind(T.client));
@@ -10881,13 +10923,13 @@ function R_(e) {
   var t = (function (r) {
     function n() {
       var a;
-      ge(this, n);
+      be(this, n);
       for (var o = arguments.length, i = new Array(o), s = 0; s < o; s++) i[s] = arguments[s];
       return ((a = C_(this, n, [].concat(i))), C(a, "state", { pageRows: [] }), a);
     }
     return (
       Ze(n, r),
-      be(
+      me(
         n,
         [
           {
@@ -11057,11 +11099,11 @@ function gp() {
 }
 var B_ = (function (e) {
     function t() {
-      return (ge(this, t), $_(this, t, arguments));
+      return (be(this, t), $_(this, t, arguments));
     }
     return (
       Ze(t, e),
-      be(t, [
+      me(t, [
         {
           key: "render",
           value: function () {
@@ -11115,11 +11157,11 @@ function bp() {
 var q_ = (function (e) {
   function t(r) {
     var n;
-    return (ge(this, t), (n = z_(this, t, [r])), (n.state = { hasError: !1 }), n);
+    return (be(this, t), (n = z_(this, t, [r])), (n.state = { hasError: !1 }), n);
   }
   return (
     Ze(t, e),
-    be(
+    me(
       t,
       [
         {
@@ -11320,11 +11362,11 @@ function mp() {
 }
 var yp = (function (e) {
   function t() {
-    return (ge(this, t), t0(this, t, arguments));
+    return (be(this, t), t0(this, t, arguments));
   }
   return (
     Ze(t, e),
-    be(t, [
+    me(t, [
       {
         key: "render",
         value: function () {
@@ -11405,7 +11447,7 @@ function _p() {
 var wp = (function (e) {
   function t() {
     var r;
-    ge(this, t);
+    be(this, t);
     for (var n = arguments.length, a = new Array(n), o = 0; o < n; o++) a[o] = arguments[o];
     return (
       (r = i0(this, t, [].concat(a))),
@@ -11472,7 +11514,7 @@ var wp = (function (e) {
   }
   return (
     Ze(t, e),
-    be(t, [
+    me(t, [
       {
         key: "attachListeners",
         value: function () {
@@ -15434,8 +15476,8 @@ var Fk = {
       R = D === void 0 ? Re : D,
       M = t.overlay;
     t.shouldFitContainer;
-    var F = t.spacing,
-      B = F === void 0 ? "default" : F,
+    var z = t.spacing,
+      B = z === void 0 ? "default" : z,
       U = t.tabIndex,
       q = U === void 0 ? 0 : U,
       V = t.type,
@@ -15443,7 +15485,7 @@ var Fk = {
       W = t.testId,
       $ = te(t, zk),
       j = b.useRef(),
-      me = b.useCallback(
+      ye = b.useCallback(
         function (ve) {
           if (((j.current = ve), r != null)) {
             if (typeof r == "function") {
@@ -15509,7 +15551,7 @@ var Fk = {
             {},
             $,
             {
-              ref: me,
+              ref: ye,
               className: u,
               css: [c, ke ? null : qk],
               "data-has-overlay": ue ? !0 : void 0,
@@ -15588,7 +15630,7 @@ var Kk = [
           },
           [p, D],
         ),
-        F = b.useMemo(
+        z = b.useMemo(
           function () {
             return Lk({
               appearance: a,
@@ -15606,7 +15648,7 @@ var Kk = [
         Z({}, _, {
           ref: r,
           appearance: a,
-          buttonCss: F,
+          buttonCss: z,
           children: o,
           "data-firefox-is-active": A ? !0 : void 0,
           iconAfter: s,
@@ -15808,19 +15850,19 @@ function a1(e, t) {
     D = e.analyticsContext,
     R = e.testId,
     M = e.isDisabled,
-    F = s0(i, function () {
+    z = s0(i, function () {
       return o || 0;
     }),
-    B = Y(F, 2),
+    B = Y(z, 2),
     U = B[0],
     q = B[1],
     V = rn(
       r1(
         {
           fn: function ($, j) {
-            var me = $.event,
+            var ye = $.event,
               se = $.selectedPageIndex;
-            (i === void 0 && q(se), k && k(me, y[se], j));
+            (i === void 0 && q(se), k && k(ye, y[se], j));
           },
           action: "changed",
           actionSubject: "pageNumber",
@@ -15829,7 +15871,7 @@ function a1(e, t) {
         n1,
       ),
     ),
-    G = function ($, j, me) {
+    G = function ($, j, ye) {
       var se = y[U],
         le = "".concat(u, " ").concat(S ? S($, j) : $),
         fe = $ === se;
@@ -15849,9 +15891,9 @@ function a1(e, t) {
             isDisabled: M,
             page: $,
             testId:
-              me &&
+              ye &&
               ""
-                .concat(me, "--")
+                .concat(ye, "--")
                 .concat(fe ? "current-" : "", "page-")
                 .concat(j),
           },
@@ -15913,7 +15955,7 @@ function Zp() {
 var s1 = (function (e) {
     function t() {
       var r;
-      ge(this, t);
+      be(this, t);
       for (var n = arguments.length, a = new Array(n), o = 0; o < n; o++) a[o] = arguments[o];
       return (
         (r = i1(this, t, [].concat(a))),
@@ -15925,7 +15967,7 @@ var s1 = (function (e) {
     }
     return (
       Ze(t, e),
-      be(t, [
+      me(t, [
         {
           key: "render",
           value: function () {
@@ -16065,7 +16107,7 @@ function v1(e) {
   return (function (t) {
     function r() {
       var n;
-      ge(this, r);
+      be(this, r);
       for (var a = arguments.length, o = new Array(a), i = 0; i < a; i++) o[i] = arguments[i];
       return (
         (n = f1(this, r, [].concat(o))),
@@ -16087,7 +16129,7 @@ function v1(e) {
     }
     return (
       Ze(r, t),
-      be(r, [
+      me(r, [
         {
           key: "UNSAFE_componentWillReceiveProps",
           value: function (a) {
@@ -16955,8 +16997,8 @@ function Vd(e) {
     }
   }
   var M = Object.assign({ position: s }, l && vO),
-    F = u === !0 ? pO({ x: p, y: v }, Ye(r)) : { x: p, y: v };
-  if (((p = F.x), (v = F.y), c)) {
+    z = u === !0 ? pO({ x: p, y: v }, Ye(r)) : { x: p, y: v };
+  if (((p = z.x), (v = z.y), c)) {
     var B;
     return Object.assign(
       {},
@@ -17266,11 +17308,11 @@ function Aa(e, t) {
     },
     M = e.modifiersData.offset;
   if (f === ia && M) {
-    var F = M[a];
+    var z = M[a];
     Object.keys(R).forEach(function (B) {
       var U = [dt, ut].indexOf(B) >= 0 ? 1 : -1,
         q = [Fe, ut].indexOf(B) >= 0 ? "y" : "x";
-      R[B] += F[q] * U;
+      R[B] += z[q] * U;
     });
   }
   return R;
@@ -17355,9 +17397,9 @@ function PO(e) {
       R++
     ) {
       var M = k[R],
-        F = Tt(M),
+        z = Tt(M),
         B = ln(M) === on,
-        U = [Fe, ut].indexOf(F) >= 0,
+        U = [Fe, ut].indexOf(z) >= 0,
         q = U ? "width" : "height",
         V = Aa(t, { placement: M, boundary: u, rootBoundary: d, altBoundary: f, padding: l }),
         G = U ? (B ? dt : ze) : B ? ut : Fe;
@@ -17365,7 +17407,7 @@ function PO(e) {
       var W = vo(G),
         $ = [];
       if (
-        (o && $.push(V[F] <= 0),
+        (o && $.push(V[z] <= 0),
         s && $.push(V[G] <= 0, V[W] <= 0),
         $.every(function (fe) {
           return fe;
@@ -17379,7 +17421,7 @@ function PO(e) {
     if (A)
       for (
         var j = h ? 3 : 1,
-          me = function (he) {
+          ye = function (he) {
             var ue = k.find(function (Te) {
               var ke = E.get(Te);
               if (ke)
@@ -17393,7 +17435,7 @@ function PO(e) {
         se > 0;
         se--
       ) {
-        var le = me(se);
+        var le = ye(se);
         if (le === "break") break;
       }
     t.placement !== D && ((t.modifiersData[n]._skip = !0), (t.placement = D), (t.reset = !0));
@@ -17526,7 +17568,7 @@ function $O(e) {
         ? { mainAxis: D, altAxis: D }
         : Object.assign({ mainAxis: 0, altAxis: 0 }, D),
     M = t.modifiersData.offset ? t.modifiersData.offset[t.placement] : null,
-    F = { x: 0, y: 0 };
+    z = { x: 0, y: 0 };
   if (S) {
     if (o) {
       var B,
@@ -17537,7 +17579,7 @@ function $O(e) {
         W = G + g[U],
         $ = G - g[q],
         j = p ? -A[V] / 2 : 0,
-        me = _ === on ? E[V] : A[V],
+        ye = _ === on ? E[V] : A[V],
         se = _ === on ? -A[V] : -E[V],
         le = t.elements.arrow,
         fe = p && le ? vc(le) : { width: 0, height: 0 },
@@ -17547,7 +17589,7 @@ function $O(e) {
         ue = he[U],
         Te = he[q],
         ke = ga(0, E[V], fe[V]),
-        Me = w ? E[V] / 2 - j - ke - ue - R.mainAxis : me - ke - ue - R.mainAxis,
+        Me = w ? E[V] / 2 - j - ke - ue - R.mainAxis : ye - ke - ue - R.mainAxis,
         ve = w ? -E[V] / 2 + j + ke + Te + R.mainAxis : se + ke + Te + R.mainAxis,
         Ne = t.elements.arrow && Ba(t.elements.arrow),
         er = Ne ? (k === "y" ? Ne.clientTop || 0 : Ne.clientLeft || 0) : 0,
@@ -17555,7 +17597,7 @@ function $O(e) {
         Ee = G + Me - ft - er,
         Ce = G + ve - ft,
         Ot = ga(p ? jo(W, Ee) : W, G, p ? wr($, Ce) : $);
-      ((S[k] = Ot), (F[k] = Ot - G));
+      ((S[k] = Ot), (z[k] = Ot - G));
     }
     if (s) {
       var Qe,
@@ -17570,9 +17612,9 @@ function $O(e) {
         de = St ? Oe : Ie - E[re] - A[re] - jr + R.altAxis,
         tr = St ? Ie + E[re] + A[re] - jr - R.altAxis : je,
         et = p && St ? cO(de, Ie, tr) : ga(p ? de : Oe, Ie, p ? tr : je);
-      ((S[y] = et), (F[y] = et - Ie));
+      ((S[y] = et), (z[y] = et - Ie));
     }
-    t.modifiersData[n] = F;
+    t.modifiersData[n] = z;
   }
 }
 const BO = {
@@ -18624,8 +18666,8 @@ function DS(e) {
     D = e.analyticsContext,
     R = e.strategy,
     M = R === void 0 ? "fixed" : R,
-    F = e.ignoreTooltipPointerEvents,
-    B = F === void 0 ? !1 : F,
+    z = e.ignoreTooltipPointerEvents,
+    B = z === void 0 ? !1 : z,
     U = e.isScreenReaderAnnouncementDisabled,
     q = U === void 0 ? !1 : U,
     V = e.shortcut,
@@ -18633,8 +18675,8 @@ function DS(e) {
     W = ju(Hr({ fn: m, action: "displayed", analyticsData: D }, of)),
     $ = ju(Hr({ fn: w, action: "hidden", analyticsData: D }, of)),
     j = b.useRef(null),
-    me = b.useState("hide"),
-    se = Y(me, 2),
+    ye = b.useState("hide"),
+    se = Y(ye, 2),
     le = se[0],
     fe = se[1],
     he = b.useRef(null),
@@ -18977,9 +19019,9 @@ var TS = [
       D = A[0],
       R = A[1],
       M = l === u || s !== void 0,
-      F = y || M || D,
-      B = F && m,
-      U = !m || F || (m && !D),
+      z = y || M || D,
+      B = z && m,
+      U = !m || z || (m && !D),
       q = b.useCallback(
         function () {
           R?.(!0);
@@ -19021,7 +19063,7 @@ var TS = [
             U &&
               O.createElement(
                 Ao,
-                { xcss: F ? sa.sortIconVisibleWrapper : sa.sortIconHiddenWrapper },
+                { xcss: z ? sa.sortIconVisibleWrapper : sa.sortIconHiddenWrapper },
                 s === Er
                   ? O.createElement(y1, {
                       label: "",
@@ -19068,11 +19110,11 @@ function kh() {
 }
 var LS = (function (e) {
     function t() {
-      return (ge(this, t), NS(this, t, arguments));
+      return (be(this, t), NS(this, t, arguments));
     }
     return (
       Ze(t, e),
-      be(t, [
+      me(t, [
         {
           key: "render",
           value: function () {
@@ -19120,11 +19162,11 @@ function Oh() {
 var qS = (function (e) {
     function t(r) {
       var n;
-      return (ge(this, t), (n = zS(this, t, [r])), (n.state = { activeSortButtonId: null }), n);
+      return (be(this, t), (n = zS(this, t, [r])), (n.state = { activeSortButtonId: null }), n);
     }
     return (
       Ze(t, e),
-      be(t, [
+      me(t, [
         {
           key: "UNSAFE_componentWillMount",
           value: function () {
@@ -19172,7 +19214,7 @@ var qS = (function (e) {
                     D = m.isSortable,
                     R = m.key,
                     M = m.shouldTruncate,
-                    F = m.testId,
+                    z = m.testId,
                     B = m.width,
                     U = te(m, FS),
                     q = "head-cell-".concat(_),
@@ -19193,7 +19235,7 @@ var qS = (function (e) {
                         headCellId: q,
                         activeSortButtonId: p,
                         onClick: V,
-                        testId: F || f,
+                        testId: z || f,
                         shouldTruncate: M,
                         sortOrder: R === i ? s : void 0,
                         width: B,
@@ -19250,8 +19292,8 @@ var GS = function (t) {
       D = t.emptyView,
       R = t.isRankable,
       M = R === void 0 ? !1 : R,
-      F = t.isRankingDisabled,
-      B = F === void 0 ? !1 : F,
+      z = t.isRankingDisabled,
+      B = z === void 0 ? !1 : z,
       U = t.onRankStart,
       q = U === void 0 ? Re : U,
       V = t.onRankEnd,
@@ -19262,8 +19304,8 @@ var GS = function (t) {
         $ === void 0
           ? { prev: "Previous Page", next: "Next Page", label: "Pagination", pageLabel: "Page" }
           : $,
-      me = b.useState(!1),
-      se = Y(me, 2),
+      ye = b.useState(!1),
+      se = Y(ye, 2),
       le = se[0],
       fe = se[1],
       he = b.useRef(null),
@@ -19397,7 +19439,7 @@ var GS = function (t) {
   },
   HS = b.lazy(function () {
     return ey(
-      () => import("./body-7ma1gN0e.js"),
+      () => import("./body-DAamN7ca.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
@@ -19459,7 +19501,7 @@ function Sh() {
 var xh = (function (e) {
   function t() {
     var r;
-    ge(this, t);
+    be(this, t);
     for (var n = arguments.length, a = new Array(n), o = 0; o < n; o++) a[o] = arguments[o];
     return (
       (r = KS(this, t, [].concat(a))),
@@ -19501,7 +19543,7 @@ var xh = (function (e) {
   }
   return (
     Ze(t, e),
-    be(t, [
+    me(t, [
       {
         key: "UNSAFE_componentWillReceiveProps",
         value: function (n) {
@@ -19806,7 +19848,7 @@ var ax = [
       D = e.children,
       R = e.interactionName,
       M = e.onClick,
-      F = e.onMouseDown,
+      z = e.onMouseDown,
       B = e.onMouseDownCapture,
       U = e.onMouseUp,
       q = e.onMouseUpCapture,
@@ -19815,7 +19857,7 @@ var ax = [
       W = e.onKeyUp,
       $ = e.onKeyUpCapture,
       j = e.onTouchStart,
-      me = e.onTouchStartCapture,
+      ye = e.onTouchStartCapture,
       se = e.onTouchEnd,
       le = e.onTouchEndCapture,
       fe = e.onPointerDown,
@@ -19914,7 +19956,7 @@ var ax = [
           onMouseUpCapture: q,
           onKeyDownCapture: G,
           onKeyUpCapture: $,
-          onTouchStartCapture: me,
+          onTouchStartCapture: ye,
           onTouchEndCapture: le,
           onPointerDownCapture: he,
           onPointerUpCapture: Te,
@@ -19928,7 +19970,7 @@ var ax = [
           onBlur: Ot,
           type: Ve,
           interactionName: R,
-          onMouseDown: F,
+          onMouseDown: z,
           onMouseUp: U,
           onKeyDown: V,
           onMouseOut: Ee,
@@ -20055,7 +20097,7 @@ var pf = function (t) {
         D = t.onTouchStartCapture,
         R = t.shouldFitContainer,
         M = t.spacing,
-        F = t.testId,
+        z = t.testId,
         B = t.type,
         U = B === void 0 ? "button" : B,
         q = te(t, cx);
@@ -20088,7 +20130,7 @@ var pf = function (t) {
             onPointerUpCapture: E,
             onTouchStartCapture: D,
             onTouchEndCapture: A,
-            testId: F,
+            testId: z,
             componentName: "Button",
             type: U,
             interactionName: d,
@@ -20880,9 +20922,9 @@ export {
   O as R,
   T_ as T,
   Ze as _,
-  be as a,
+  me as a,
   Cs as b,
-  ge as c,
+  be as c,
   Xe as d,
   X as e,
   Y as f,
