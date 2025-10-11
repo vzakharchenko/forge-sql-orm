@@ -13,11 +13,11 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.7.1",
     "@types/react": "^18.3.1",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "17.2.3",
-    "knip": "^5.64.2",
+    "knip": "^5.64.3",
     "prettier": "^3.6.2",
     "prettier-plugin-pkg": "^0.21.2",
     "rollup-plugin-visualizer": "^6.0.4",
