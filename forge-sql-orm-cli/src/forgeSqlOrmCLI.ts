@@ -13,7 +13,7 @@ const args = process.argv.slice(2).join(" ");
 const cliPath = path.resolve(__dirname, "cli.mjs");
 
 try {
-    execSync(`npx  --yes tsm --no-warnings ${cliPath} ${args}`, { stdio: "inherit" });
+    execSync(`npx  --yes tsm --no-warnings "${cliPath}" ${args}`, { stdio: "inherit" });
     process.exit(0);
 } catch (e:any) {
     console.error("⚠️  Command execution failed:", e.message);
