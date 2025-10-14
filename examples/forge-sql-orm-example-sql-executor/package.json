@@ -5,7 +5,7 @@
   "private": true,
   "dependencies": {
     "@forge/resolver": "1.7.0",
-    "@forge/sql": "^3.0.7",
+    "@forge/sql": "^3.0.8",
     "forge-sql-orm": "2.1.9"
   },
   "scripts": {
@@ -19,9 +19,9 @@
     "knip": "knip"
   },
   "devDependencies": {
-    "@types/node": "^24.7.1",
+    "@types/node": "^24.7.2",
     "forge-sql-orm-cli": "^2.1.9",
-    "knip": "^5.64.3",
+    "knip": "^5.65.0",
     "typescript": "^5.9.3"
   },
   "overrides": {

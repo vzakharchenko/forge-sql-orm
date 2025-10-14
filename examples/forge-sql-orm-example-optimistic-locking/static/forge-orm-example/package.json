@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "@atlaskit/button": "^23.5.0",
+    "@atlaskit/button": "^23.5.1",
     "@atlaskit/css-reset": "^7.3.7",
-    "@atlaskit/dynamic-table": "^18.3.0",
-    "@atlaskit/tabs": "^18.2.0",
-    "@atlaskit/tokens": "^6.4.3",
-    "@forge/bridge": "^5.5.0",
+    "@atlaskit/dynamic-table": "^18.3.1",
+    "@atlaskit/tabs": "^18.2.1",
+    "@atlaskit/tokens": "^6.5.0",
+    "@forge/bridge": "^5.6.0",
     "mobx": "6.15.0",
     "mobx-react": "9.2.1",
     "react": "^18.3.1",
@@ -16,17 +16,17 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.7.1",
+    "@types/node": "^24.7.2",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "17.2.3",
-    "knip": "^5.64.3",
+    "knip": "^5.65.0",
     "prettier": "^3.6.2",
     "prettier-plugin-pkg": "^0.21.2",
     "rollup-plugin-visualizer": "^6.0.4",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9"
+    "vite": "^7.1.10"
   },
   "scripts": {
     "build": "vite build",
