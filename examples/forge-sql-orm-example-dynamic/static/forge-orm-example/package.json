@@ -23,7 +23,7 @@
     "prettier-plugin-pkg": "^0.21.2",
     "rollup-plugin-visualizer": "^6.0.4",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9"
+    "vite": "^7.1.10"
   },
   "scripts": {
     "build": "vite build",
