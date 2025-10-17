@@ -3336,10 +3336,6 @@ function ce() {
           } catch (o) {
             if (o instanceof Error && o.name === "SecurityError")
               return (e.Storage._setProvider(v), null);
-            if (o instanceof Error && o.name === "QuotaExceededError") {
-              const n = e.Storage.getAllKeys().filter((t) => t.startsWith("statsig."));
-              o.message = `${o.message}. Statsig Keys: ${n.length}`;
-            }
             throw o;
           }
         }
@@ -3770,7 +3766,7 @@ function at() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigMetadataProvider = e.SDK_VERSION = void 0),
-          (e.SDK_VERSION = "3.26.0"));
+          (e.SDK_VERSION = "3.27.0"));
         let m = { sdkVersion: e.SDK_VERSION, sdkType: "js-mono" };
         e.StatsigMetadataProvider = {
           get: () => m,
@@ -4070,7 +4066,14 @@ function Ti() {
           v.Storage.setItem(i, t);
           break;
         } catch (g) {
-          if (!(g instanceof Error) || g.name !== "QuotaExceededError" || this._cacheLimit <= 1)
+          if (
+            !(g instanceof Error) ||
+            !(
+              g.toString().includes("QuotaExceededError") ||
+              g.toString().includes("QUOTA_EXCEEDED_ERR")
+            ) ||
+            this._cacheLimit <= 1
+          )
             throw g;
           ((this._cacheLimit = Math.ceil(this._cacheLimit / 2)),
             this._runLocalStorageCacheEviction(i, this._cacheLimit - 1));
@@ -5448,9 +5451,12 @@ function Gi() {
   }
   W._makeFeatureGate = y;
   function v(l, u, r) {
-    var o;
-    const i = (o = r?.value) !== null && o !== void 0 ? o : {};
-    return Object.assign(Object.assign({}, c(l, u, r, i)), { get: f(l, r?.value) });
+    var o, i;
+    const n = (o = r?.value) !== null && o !== void 0 ? o : {};
+    return Object.assign(Object.assign({}, c(l, u, r, n)), {
+      idType: (i = r?.id_type) !== null && i !== void 0 ? i : null,
+      get: f(l, r?.value),
+    });
   }
   W._makeDynamicConfig = v;
   function _(l, u, r) {
