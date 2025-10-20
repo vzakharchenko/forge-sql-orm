@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-DI6cXQBV.js",
+      "./body-CCy69U_8.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-C5YZTC5j.js",
       "./lodash-vendor-sN-ezktm.js",
@@ -13886,7 +13886,7 @@ var hw = ["as", "children", "isInset", "testId", "style", "xcss"],
         action: "clicked",
         componentName: c || "Pressable",
         packageName: "@atlaskit/primitives",
-        packageVersion: "15.0.1",
+        packageVersion: "0.0.0-development",
         analyticsData: l,
         actionSubject: "button",
       });
@@ -19174,9 +19174,9 @@ function US(e, t) {
   return t ? "".concat(r(e)) : void 0;
 }
 var bf = {
-    shortcutSegmentsContainer: "_zulpv77o _1e0c1txw _1q511b66 _85i5v77o",
+    shortcutSegmentsContainer: "_zulpv77o _11c82smr _1e0c1txw _1q511b66 _85i5v77o",
     shortcutSegment:
-      "_11c81u0j _2rkolb4i _1dqonqa1 _189ee4h9 _1h6d7jlr _1q51v77o _85i5v77o _bozg12x7 _y4ti12x7",
+      "_11c81u0j _2rkolb4i _1dqonqa1 _189ee4h9 _1h6d7jlr _1e0c1txw _4cvr1h6o _4t3i1k92 _vchhusvi _1q51v77o _85i5v77o _bozg12x7 _y4ti12x7 _16qsn7od _1254n7od _cgnln7od _syazn7od _ahbqn7od _12l2n7od _1pfhn7od _6rthn7od _1ul9n7od _w19jn7od _bfhk261p",
   },
   VS = function (t) {
     var r = t.shortcut;
@@ -20105,7 +20105,7 @@ var oE = function (t) {
   },
   sE = _.lazy(function () {
     return ly(
-      () => import("./body-DI6cXQBV.js"),
+      () => import("./body-CCy69U_8.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

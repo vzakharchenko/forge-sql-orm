@@ -1658,18 +1658,6 @@ button {
     sans-serif
   );
 }
-._11c82smr {
-  font: var(
-    --ds-font-body,
-    normal 400 14px/20px ui-sans-serif,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Ubuntu,
-    "Helvetica Neue",
-    sans-serif
-  );
-}
 ._18u0idpf {
   margin-left: 0;
 }
@@ -1968,9 +1956,6 @@ button {
 }
 ._19bvze3t {
   padding-left: var(--ds-space-0, 0);
-}
-._4cvr1h6o {
-  align-items: center;
 }
 ._bfhk1j28 {
   background-color: transparent;
@@ -2512,9 +2497,6 @@ button {
 ._syaz15cr {
   color: var(--ds-text-inverse, #fff);
 }
-._vchhusvi {
-  box-sizing: border-box;
-}
 ._80om73ad {
   cursor: default;
 }
@@ -2526,6 +2508,18 @@ button {
     "Segoe UI Mono",
     "Ubuntu Mono",
     monospace
+  );
+}
+._11c82smr {
+  font: var(
+    --ds-font-body,
+    normal 400 14px/20px ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Ubuntu,
+    "Helvetica Neue",
+    sans-serif
   );
 }
 ._2rkolb4i {
@@ -2543,8 +2537,20 @@ button {
 ._1h6d7jlr {
   border-color: var(--ds-border-bold, #758195);
 }
+._1254n7od {
+  -webkit-box-shadow: unset;
+}
+._12l2n7od {
+  margin-inline-end: unset;
+}
+._16qsn7od {
+  box-shadow: unset;
+}
 ._1e0c1txw {
   display: flex;
+}
+._1pfhn7od {
+  margin-block-start: unset;
 }
 ._1q511b66 {
   padding-block-start: var(--ds-space-050, 4px);
@@ -2552,11 +2558,41 @@ button {
 ._1q51v77o {
   padding-block-start: var(--ds-space-025, 2px);
 }
+._1ul9n7od {
+  min-width: unset;
+}
+._4cvr1h6o {
+  align-items: center;
+}
+._4t3i1k92 {
+  height: 1.25rem;
+}
+._6rthn7od {
+  margin-block-end: unset;
+}
 ._85i5v77o {
   padding-block-end: var(--ds-space-025, 2px);
 }
+._ahbqn7od {
+  margin-inline-start: unset;
+}
+._bfhk261p {
+  background-color: unset !important;
+}
 ._bozg12x7 {
   padding-inline-start: var(--ds-space-075, 6px);
+}
+._cgnln7od {
+  -moz-box-shadow: unset;
+}
+._syazn7od {
+  color: unset;
+}
+._vchhusvi {
+  box-sizing: border-box;
+}
+._w19jn7od {
+  text-shadow: unset;
 }
 ._y4ti12x7 {
   padding-inline-end: var(--ds-space-075, 6px);

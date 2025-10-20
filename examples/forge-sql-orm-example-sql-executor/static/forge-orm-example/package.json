@@ -10,17 +10,17 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.8.0",
+    "@types/node": "^24.8.1",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "17.2.3",
-    "knip": "^5.65.0",
+    "knip": "^5.66.1",
     "prettier": "^3.6.2",
     "prettier-plugin-pkg": "^0.21.2",
     "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "^5.9.3",
-    "vite": "^7.1.10"
+    "vite": "^7.1.11"
   },
   "scripts": {
     "build": "vite build",
