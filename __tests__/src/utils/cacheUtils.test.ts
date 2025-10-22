@@ -32,18 +32,23 @@ const mockKvs = {
   })),
 };
 
-vi.mock("@forge/kvs", () => ({
-  kvs: mockKvs,
-  Filter: vi.fn(() => ({
-    or: vi.fn().mockReturnThis(),
-  })),
-  FilterConditions: {
-    contains: vi.fn((value) => ({ contains: value })),
-  },
-  WhereConditions: {
-    lessThan: vi.fn((value) => ({ lessThan: value })),
-  },
-}));
+vi.mock("@forge/kvs", () => {
+  class MockFilter<T> {
+    or = vi.fn(() => this);
+  }
+
+  return {
+    kvs: mockKvs,
+    // Vitest 4 requires a constructable for `new Filter()`
+    Filter: MockFilter,
+    FilterConditions: {
+      contains: vi.fn((value) => ({ contains: value })),
+    },
+    WhereConditions: {
+      lessThan: vi.fn((value) => ({ lessThan: value })),
+    },
+  };
+});
 
 // Mock cacheContextUtils
 vi.mock("../../../src/utils/cacheContextUtils", () => ({
