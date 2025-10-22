@@ -28,7 +28,7 @@ import {
 } from "../lib/drizzle/extensions/additionalActions";
 import { ForgeSQLAnalyseOperation } from "./ForgeSQLAnalyseOperations";
 import { ForgeSQLCacheOperations } from "./ForgeSQLCacheOperations";
-import type { MySqlTable } from "drizzle-orm/mysql-core/table";
+import { MySqlTable } from "drizzle-orm/mysql-core/table";
 import {
   MySqlDeleteBase,
   MySqlInsertBuilder,

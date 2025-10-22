@@ -8,7 +8,7 @@ import {
 import { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { applyFromDriverTransform, ForgeSqlOrmOptions, mapSelectFieldsWithAlias } from "../../..";
 import { MySqlSelectBase, MySqlSelectBuilder } from "drizzle-orm/mysql-core";
-import type { MySqlTable } from "drizzle-orm/mysql-core/table";
+import { MySqlTable } from "drizzle-orm/mysql-core/table";
 import {
   MySqlDeleteBase,
   MySqlInsertBuilder,
@@ -26,9 +26,10 @@ import { isSQLWrapper, SQLWrapper } from "drizzle-orm/sql/sql";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 import { getTableColumns, Query, SQL } from "drizzle-orm";
 import { MySqlDialect } from "drizzle-orm/mysql-core/dialect";
-import type {
+import {
   GetSelectTableName,
   GetSelectTableSelection,
+  SelectResultField,
 } from "drizzle-orm/query-builders/select.types";
 
 // ============================================================================
@@ -142,12 +143,19 @@ export type SelectAllFromAliasedType = <T extends MySqlTable>(
   table: T,
 ) => MySqlSelectBase<
   GetSelectTableName<T>,
-  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-  T["_"]["columns"] extends undefined ? "single" : "partial",
+  GetSelectTableSelection<T>,
+  "single",
   MySqlRemotePreparedQueryHKT,
   GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
   false,
   never,
+  {
+    [K in keyof {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }]: {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }[K];
+  }[],
   any
 >;
 
@@ -158,12 +166,19 @@ export type SelectAllDistinctFromAliasedType = <T extends MySqlTable>(
   table: T,
 ) => MySqlSelectBase<
   GetSelectTableName<T>,
-  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-  T["_"]["columns"] extends undefined ? "single" : "partial",
+  GetSelectTableSelection<T>,
+  "single",
   MySqlRemotePreparedQueryHKT,
   GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
   false,
   never,
+  {
+    [K in keyof {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }]: {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }[K];
+  }[],
   any
 >;
 
@@ -175,12 +190,19 @@ export type SelectAllFromCacheableAliasedType = <T extends MySqlTable>(
   cacheTtl?: number,
 ) => MySqlSelectBase<
   GetSelectTableName<T>,
-  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-  T["_"]["columns"] extends undefined ? "single" : "partial",
+  GetSelectTableSelection<T>,
+  "single",
   MySqlRemotePreparedQueryHKT,
   GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
   false,
   never,
+  {
+    [K in keyof {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }]: {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }[K];
+  }[],
   any
 >;
 
@@ -192,12 +214,19 @@ export type SelectAllDistinctFromCacheableAliasedType = <T extends MySqlTable>(
   cacheTtl?: number,
 ) => MySqlSelectBase<
   GetSelectTableName<T>,
-  T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-  T["_"]["columns"] extends undefined ? "single" : "partial",
+  GetSelectTableSelection<T>,
+  "single",
   MySqlRemotePreparedQueryHKT,
   GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
   false,
   never,
+  {
+    [K in keyof {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }]: {
+      [Key in keyof GetSelectTableSelection<T>]: SelectResultField<GetSelectTableSelection<T>[Key]>;
+    }[K];
+  }[],
   any
 >;
 
@@ -774,8 +803,52 @@ export function patchDbWithSelectAliased(
    * const users = await db.selectFrom(userTable).where(eq(userTable.id, 1));
    * ```
    */
-  db.selectFrom = function <T extends MySqlTable>(table: T) {
-    return db.selectAliased(getTableColumns(table)).from(table);
+  db.selectFrom = function <T extends MySqlTable>(
+    table: T,
+  ): MySqlSelectBase<
+    GetSelectTableName<T>,
+    GetSelectTableSelection<T>,
+    "single",
+    MySqlRemotePreparedQueryHKT,
+    GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+    false,
+    never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
+    any
+  > {
+    return db.selectAliased(getTableColumns(table)).from(table) as unknown as MySqlSelectBase<
+      GetSelectTableName<T>,
+      GetSelectTableSelection<T>,
+      "single",
+      MySqlRemotePreparedQueryHKT,
+      GetSelectTableName<T> extends string
+        ? Record<string & GetSelectTableName<T>, "not-null">
+        : {},
+      false,
+      never,
+      {
+        [K in keyof {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }]: {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }[K];
+      }[],
+      any
+    >;
   };
 
   /**
@@ -790,8 +863,55 @@ export function patchDbWithSelectAliased(
    * const users = await db.selectFromCacheable(userTable, 300).where(eq(userTable.id, 1));
    * ```
    */
-  db.selectFromCacheable = function <T extends MySqlTable>(table: T, cacheTtl?: number) {
-    return db.selectAliasedCacheable(getTableColumns(table), cacheTtl).from(table);
+  db.selectFromCacheable = function <T extends MySqlTable>(
+    table: T,
+    cacheTtl?: number,
+  ): MySqlSelectBase<
+    GetSelectTableName<T>,
+    GetSelectTableSelection<T>,
+    "single",
+    MySqlRemotePreparedQueryHKT,
+    GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+    false,
+    never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
+    any
+  > {
+    return db
+      .selectAliasedCacheable(getTableColumns(table), cacheTtl)
+      .from(table) as unknown as MySqlSelectBase<
+      GetSelectTableName<T>,
+      GetSelectTableSelection<T>,
+      "single",
+      MySqlRemotePreparedQueryHKT,
+      GetSelectTableName<T> extends string
+        ? Record<string & GetSelectTableName<T>, "not-null">
+        : {},
+      false,
+      never,
+      {
+        [K in keyof {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }]: {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }[K];
+      }[],
+      any
+    >;
   };
 
   /**
@@ -805,8 +925,54 @@ export function patchDbWithSelectAliased(
    * const uniqueUsers = await db.selectDistinctFrom(userTable).where(eq(userTable.status, 'active'));
    * ```
    */
-  db.selectDistinctFrom = function <T extends MySqlTable>(table: T) {
-    return db.selectAliasedDistinct(getTableColumns(table)).from(table);
+  db.selectDistinctFrom = function <T extends MySqlTable>(
+    table: T,
+  ): MySqlSelectBase<
+    GetSelectTableName<T>,
+    GetSelectTableSelection<T>,
+    "single",
+    MySqlRemotePreparedQueryHKT,
+    GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+    false,
+    never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
+    any
+  > {
+    return db
+      .selectAliasedDistinct(getTableColumns(table))
+      .from(table) as unknown as MySqlSelectBase<
+      GetSelectTableName<T>,
+      GetSelectTableSelection<T>,
+      "single",
+      MySqlRemotePreparedQueryHKT,
+      GetSelectTableName<T> extends string
+        ? Record<string & GetSelectTableName<T>, "not-null">
+        : {},
+      false,
+      never,
+      {
+        [K in keyof {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }]: {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }[K];
+      }[],
+      any
+    >;
   };
 
   /**
@@ -821,8 +987,55 @@ export function patchDbWithSelectAliased(
    * const uniqueUsers = await db.selectDistinctFromCacheable(userTable, 300).where(eq(userTable.status, 'active'));
    * ```
    */
-  db.selectDistinctFromCacheable = function <T extends MySqlTable>(table: T, cacheTtl?: number) {
-    return db.selectAliasedDistinctCacheable(getTableColumns(table), cacheTtl).from(table);
+  db.selectDistinctFromCacheable = function <T extends MySqlTable>(
+    table: T,
+    cacheTtl?: number,
+  ): MySqlSelectBase<
+    GetSelectTableName<T>,
+    GetSelectTableSelection<T>,
+    "single",
+    MySqlRemotePreparedQueryHKT,
+    GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
+    false,
+    never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
+    any
+  > {
+    return db
+      .selectAliasedDistinctCacheable(getTableColumns(table), cacheTtl)
+      .from(table) as unknown as MySqlSelectBase<
+      GetSelectTableName<T>,
+      GetSelectTableSelection<T>,
+      "single",
+      MySqlRemotePreparedQueryHKT,
+      GetSelectTableName<T> extends string
+        ? Record<string & GetSelectTableName<T>, "not-null">
+        : {},
+      false,
+      never,
+      {
+        [K in keyof {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }]: {
+          [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+            GetSelectTableSelection<T>[Key]
+          >;
+        }[K];
+      }[],
+      any
+    >;
   };
 
   // ============================================================================

@@ -3,16 +3,16 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-XReuzwd3.js",
+      "./body-DKUuT979.js",
       "./react-dom-vendor-DTSHKYJW.js",
-      "./client-core-vendor-Cqp86jmV.js",
-      "./lodash-vendor-C8n-YkpA.js",
+      "./client-core-vendor-o6VRcgZX.js",
+      "./lodash-vendor-3_zQ6utE.js",
       "./body-C3aXNd8H.css",
     ]),
 ) => i.map((i) => d[i]);
 import { r as wt, a as Ko, c as cg } from "./react-dom-vendor-DTSHKYJW.js";
-import { g as dr, a as tc, r as lr, b as Mt, s as tt } from "./client-core-vendor-Cqp86jmV.js";
-import { r as lg } from "./lodash-vendor-C8n-YkpA.js";
+import { g as dr, a as tc, r as lr, b as Mt, s as tt } from "./client-core-vendor-o6VRcgZX.js";
+import { r as lg } from "./lodash-vendor-3_zQ6utE.js";
 function ug(e, t) {
   for (var r = 0; r < t.length; r++) {
     const n = t[r];
@@ -20501,14 +20501,14 @@ var Ix = function (t) {
         action: "sorted",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.3.2",
+        packageVersion: "0.0.0-development",
       }),
       Te = cn({
         fn: G,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.3.2",
+        packageVersion: "0.0.0-development",
       });
     _.useEffect(
       function () {
@@ -20626,7 +20626,7 @@ var Ix = function (t) {
   },
   jx = _.lazy(function () {
     return Fm(
-      () => import("./body-XReuzwd3.js"),
+      () => import("./body-DKUuT979.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

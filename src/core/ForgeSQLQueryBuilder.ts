@@ -51,6 +51,7 @@ import {
 import {
   GetSelectTableName,
   GetSelectTableSelection,
+  SelectResultField,
 } from "drizzle-orm/query-builders/select.types";
 import { SQLWrapper } from "drizzle-orm/sql/sql";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
@@ -189,12 +190,23 @@ export interface QueryBuilderForgeSql {
     table: T,
   ): MySqlSelectBase<
     GetSelectTableName<T>,
-    T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-    T["_"]["columns"] extends undefined ? "single" : "partial",
+    GetSelectTableSelection<T>,
+    "single",
     MySqlRemotePreparedQueryHKT,
     GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
     false,
     never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
     any
   >;
 
@@ -233,12 +245,23 @@ export interface QueryBuilderForgeSql {
     table: T,
   ): MySqlSelectBase<
     GetSelectTableName<T>,
-    T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-    T["_"]["columns"] extends undefined ? "single" : "partial",
+    GetSelectTableSelection<T>,
+    "single",
     MySqlRemotePreparedQueryHKT,
     GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
     false,
     never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
     any
   >;
 
@@ -282,12 +305,23 @@ export interface QueryBuilderForgeSql {
     cacheTTL?: number,
   ): MySqlSelectBase<
     GetSelectTableName<T>,
-    T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-    T["_"]["columns"] extends undefined ? "single" : "partial",
+    GetSelectTableSelection<T>,
+    "single",
     MySqlRemotePreparedQueryHKT,
     GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
     false,
     never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
     any
   >;
 
@@ -331,12 +365,23 @@ export interface QueryBuilderForgeSql {
     cacheTTL?: number,
   ): MySqlSelectBase<
     GetSelectTableName<T>,
-    T["_"]["columns"] extends undefined ? GetSelectTableSelection<T> : T["_"]["columns"],
-    T["_"]["columns"] extends undefined ? "single" : "partial",
+    GetSelectTableSelection<T>,
+    "single",
     MySqlRemotePreparedQueryHKT,
     GetSelectTableName<T> extends string ? Record<string & GetSelectTableName<T>, "not-null"> : {},
     false,
     never,
+    {
+      [K in keyof {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }]: {
+        [Key in keyof GetSelectTableSelection<T>]: SelectResultField<
+          GetSelectTableSelection<T>[Key]
+        >;
+      }[K];
+    }[],
     any
   >;
 
