@@ -3,16 +3,16 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-BYYRMMgU.js",
+      "./body-CSWjzTu_.js",
       "./react-dom-vendor-DTSHKYJW.js",
-      "./client-core-vendor-o6VRcgZX.js",
-      "./lodash-vendor-3_zQ6utE.js",
+      "./client-core-vendor-CCduiybU.js",
+      "./lodash-vendor-JHlXGym1.js",
       "./body-C3aXNd8H.css",
     ]),
 ) => i.map((i) => d[i]);
 import { r as ft, a as ji, c as Ah } from "./react-dom-vendor-DTSHKYJW.js";
-import { g as tr, a as zs, r as Qt, b as Et, s as He } from "./client-core-vendor-o6VRcgZX.js";
-import { r as jh } from "./lodash-vendor-3_zQ6utE.js";
+import { g as tr, a as zs, r as Qt, b as Et, s as He } from "./client-core-vendor-CCduiybU.js";
+import { r as jh } from "./lodash-vendor-JHlXGym1.js";
 function Ih(e, t) {
   for (var r = 0; r < t.length; r++) {
     const n = t[r];
@@ -13119,14 +13119,15 @@ function pw() {
 }
 function hw(e) {
   var t = e.isOpen,
-    r = e.onClose,
-    n = _.useContext(fw),
-    a = pw();
+    r = e.type,
+    n = e.onClose,
+    a = _.useContext(fw),
+    i = pw();
   _.useEffect(
     function () {
-      if (n !== null && t) return n.onClose(r, { namespace: a });
+      if (a !== null && t) return a.onClose(n, { namespace: i, type: r });
     },
-    [n, t, a, r],
+    [a, t, i, n, r],
   );
 }
 var ua = { none: 0, small: 100, medium: 350, large: 700 },
@@ -16303,7 +16304,7 @@ var MO = function (t) {
   },
   LO = _.lazy(function () {
     return Ng(
-      () => import("./body-BYYRMMgU.js"),
+      () => import("./body-CSWjzTu_.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
