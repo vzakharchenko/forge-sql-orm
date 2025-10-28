@@ -190,17 +190,14 @@ describe("ForgeSQLSelectOperations", () => {
   it("test drizzle selectAndTakeMetadata", async () => {
     const result = await forgeSqlOperation.executeWithMetadata(
       async () => await forgeSqlOperation.select({ id: testEntity.id }).from(testEntity),
-      (
+      async (
         totalDbExecutionTime: number,
         totalResponseSize: number,
-        forgeMetadata: ForgeSQLMetadata,
+        printQueriesWithPlan: () => Promise<void>,
       ) => {
         expect(totalDbExecutionTime).toEqual(1234);
         expect(totalResponseSize).toEqual(525);
-        expect(forgeMetadata).toEqual({
-          dbExecutionTime: 1234,
-          responseSize: 525,
-        });
+        printQueriesWithPlan().then();
       },
     );
     const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;

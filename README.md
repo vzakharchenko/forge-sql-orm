@@ -9,7 +9,6 @@
 
 [![forge-sql-orm CI](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml/badge.svg)](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml)
 [![Coverage Status](https://coveralls.io/repos/github/vzakharchenko/forge-sql-orm/badge.svg?branch=master)](https://coveralls.io/github/vzakharchenko/forge-sql-orm?branch=master)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vzakharchenko_forge-sql-orm&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vzakharchenko_forge-sql-orm)
 [![DeepScan grade](https://deepscan.io/api/teams/26652/projects/29272/branches/940614/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=26652&pid=29272&bid=940614)
 
 
@@ -23,7 +22,7 @@
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
-- ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and Forge SQL metadata
+- ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and query analysis capabilities with performance monitoring
 - ✅ **Raw SQL Execution**: `execute()`, `executeCacheable()`, `executeDDL()`, and `executeDDLActions()` methods for direct SQL queries with local and global caching
 - ✅ **Common Table Expressions (CTEs)**: `with()` method for complex queries with subqueries
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -276,7 +275,41 @@ await forgeSQL.executeWithLocalContext(async () => {
 });
 ```
 
-### 4. Next Steps
+### 4. Resolver Performance Monitoring
+```typescript
+// Resolver with performance monitoring
+resolver.define("fetch", async (req: Request) => {
+  try {
+    return await forgeSQL.executeWithMetadata(
+      async () => {
+        // Resolver logic with multiple queries
+        const users = await forgeSQL.selectFrom(demoUsers);
+        const orders = await forgeSQL.selectFrom(demoOrders)
+          .where(eq(demoOrders.userId, demoUsers.id));
+        return { users, orders };
+      },
+      async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+        const threshold = 500; // ms baseline for this resolver
+        
+        if (totalDbExecutionTime > threshold * 1.5) {
+          console.warn(`[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+          await printQueriesWithPlan(); // Optionally log or capture diagnostics for further analysis
+        } else if (totalDbExecutionTime > threshold) {
+          console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+        }
+        
+        console.log(`DB response size: ${totalResponseSize} bytes`);
+      }
+    );
+  } catch (e) {
+    const error = e?.cause?.debug?.sqlMessage ?? e?.cause;
+    console.error(error, e);
+    throw error;
+  }
+});
+```
+
+### 5. Next Steps
 - [Full Installation Guide](#installation) - Complete setup instructions
 - [Core Features](#core-features) - Learn about key capabilities
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation caching features
@@ -334,13 +367,24 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
   300
 );
 
-// Raw SQL with execution metadata
+// Raw SQL with execution metadata and performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
-  async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
-  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-    console.log(`Response size: ${totalResponseSize} bytes`);
-    console.log('Forge metadata:', forgeMetadata);
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    return { users, orders };
+  },
+  (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    const threshold = 500; // ms baseline for this resolver
+    
+    if (totalDbExecutionTime > threshold * 1.5) {
+      console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+      await printQueriesWithPlan(); // Analyze and print query execution plans
+    } else if (totalDbExecutionTime > threshold) {
+      console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+    }
+    
+    console.log(`DB response size: ${totalResponseSize} bytes`);
   }
 );
 
@@ -444,13 +488,24 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
   300
 );
 
-// Raw SQL with execution metadata
+// Raw SQL with execution metadata and performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
-  async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
-  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-    console.log(`Response size: ${totalResponseSize} bytes`);
-    console.log('Forge metadata:', forgeMetadata);
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    return { users, orders };
+  },
+  (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    const threshold = 500; // ms baseline for this resolver
+    
+    if (totalDbExecutionTime > threshold * 1.5) {
+      console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+      await printQueriesWithPlan(); // Analyze and print query execution plans
+    } else if (totalDbExecutionTime > threshold) {
+      console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+    }
+    
+    console.log(`DB response size: ${totalResponseSize} bytes`);
   }
 );
 ```
@@ -1215,16 +1270,26 @@ const users = await forgeSQL
 const users = await forgeSQL
   .executeCacheable("SELECT * FROM users WHERE active = ?", [true], 300);
 
-// Using executeWithMetadata() for capturing execution metrics
-const usersWithMetadata = await forgeSQL
-    .executeWithMetadata(
-        async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
-        (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-            console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-            console.log(`Response size: ${totalResponseSize} bytes`);
-            console.log('Forge metadata:', forgeMetadata);
-        }
-    );
+// Using executeWithMetadata() for capturing execution metrics and performance monitoring
+const usersWithMetadata = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    return { users, orders };
+  },
+  (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    const threshold = 500; // ms baseline for this resolver
+    
+    if (totalDbExecutionTime > threshold * 1.5) {
+      console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+      await printQueriesWithPlan(); // Analyze and print query execution plans
+    } else if (totalDbExecutionTime > threshold) {
+      console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+    }
+    
+    console.log(`DB response size: ${totalResponseSize} bytes`);
+  }
+);
 
 // Using executeDDL() for DDL operations (CREATE, ALTER, DROP, etc.)
 await forgeSQL.executeDDL(`
@@ -1575,13 +1640,24 @@ await forgeSQL.executeWithLocalContext(async () => {
     [true]
   );
   
-  // Raw SQL with execution metadata and local caching
+  // Raw SQL with execution metadata and performance monitoring
   const usersWithMetadata = await forgeSQL.executeWithMetadata(
-    async () => await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [true]),
-    (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-      console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-      console.log(`Response size: ${totalResponseSize} bytes`);
-      console.log('Forge metadata:', forgeMetadata);
+    async () => {
+      const users = await forgeSQL.selectFrom(usersTable);
+      const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+      return { users, orders };
+    },
+    (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+      const threshold = 500; // ms baseline for this resolver
+      
+      if (totalDbExecutionTime > threshold * 1.5) {
+        console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+        await printQueriesWithPlan(); // Analyze and print query execution plans
+      } else if (totalDbExecutionTime > threshold) {
+        console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+      }
+      
+      console.log(`DB response size: ${totalResponseSize} bytes`);
     }
   );
   
@@ -1754,13 +1830,24 @@ const userStats = await forgeSQL
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
 
-// Using executeWithMetadata() for capturing execution metrics with caching
+// Using executeWithMetadata() for capturing execution metrics with performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
-  async () => await forgeSQL.executeCacheable("SELECT * FROM users WHERE active = ?", [true], 300),
-  (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-    console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-    console.log(`Response size: ${totalResponseSize} bytes`);
-    console.log('Forge metadata:', forgeMetadata);
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    return { users, orders };
+  },
+  (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    const threshold = 500; // ms baseline for this resolver
+    
+    if (totalDbExecutionTime > threshold * 1.5) {
+      console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+      await printQueriesWithPlan(); // Analyze and print query execution plans
+    } else if (totalDbExecutionTime > threshold) {
+      console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+    }
+    
+    console.log(`DB response size: ${totalResponseSize} bytes`);
   }
 );
 ```
@@ -2439,14 +2526,25 @@ const cachedRawUsers = await forgeSQL.executeCacheable(
   300
 );
 
-// ✅ Raw SQL execution with metadata capture
+// ✅ Raw SQL execution with metadata capture and performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
-    async () => await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]),
-    (totalDbExecutionTime, totalResponseSize, forgeMetadata) => {
-        console.log(`DB execution time: ${totalDbExecutionTime}ms`);
-        console.log(`Response size: ${totalResponseSize} bytes`);
-        console.log('Forge metadata:', forgeMetadata);
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    return { users, orders };
+  },
+  (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    const threshold = 500; // ms baseline for this resolver
+    
+    if (totalDbExecutionTime > threshold * 1.5) {
+      console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+      await printQueriesWithPlan(); // Analyze and print query execution plans
+    } else if (totalDbExecutionTime > threshold) {
+      console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
     }
+    
+    console.log(`DB response size: ${totalResponseSize} bytes`);
+  }
 );
 
 // ✅ DDL operations for schema modifications

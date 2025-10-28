@@ -3,6 +3,7 @@ import {
   clusterStatementsSummary,
   clusterStatementsSummaryHistory,
   statementsSummary,
+  statementsSummaryHistory,
 } from "../core/SystemTables";
 import { desc, gte, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/mysql-core";
@@ -21,7 +22,7 @@ const RETRY_ATTEMPTS = 2;
 const RETRY_BASE_DELAY_MS = 1_000;
 
 // Types
-interface TriggerOptions {
+export interface TriggerOptions {
   warnThresholdMs?: number;
   memoryThresholdBytes?: number;
   showPlan?: boolean;
@@ -115,13 +116,13 @@ const sanitizeSQL = (sql: string, maxLen = MAX_SQL_LENGTH): string => {
 /**
  * Promise timeout helper that rejects if the promise doesn't settle within the specified time
  */
-const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
+export const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race<T>([
       promise,
       new Promise<T>((_resolve, reject) => {
-        timer = setTimeout(() => reject(new Error(`TIMEOUT:${ms}`)), ms);
+        timer = setTimeout(() => reject(new Error(`performanceTrigger TIMEOUT:${ms}`)), ms);
       }),
     ]);
   } finally {
@@ -229,14 +230,14 @@ const createSelectShape = (table: any) => ({
  * Builds the combined query from multiple tables
  */
 const buildCombinedQuery = (orm: ForgeSqlOperation, options: Required<TriggerOptions>) => {
-  const summaryHistory = statementsSummary;
+  const summaryHistory = statementsSummaryHistory;
   const summary = statementsSummary;
   const summaryHistoryCluster = clusterStatementsSummaryHistory;
   const summaryCluster = clusterStatementsSummary;
 
   // Time filters for last N hours
   const lastHoursFilter = (table: any) =>
-    gte(table.summaryEndTime, sql`DATE_SUB(NOW(), INTERVAL ${options.hours} HOUR)`);
+    gte(table.lastSeen, sql`DATE_SUB(NOW(), INTERVAL ${options.hours} HOUR)`);
 
   // Build queries for each table
   const qHistory = orm
@@ -345,9 +346,9 @@ const buildFinalQuery = (
     })
     .from(grouped)
     .where(
-      sql`${grouped.avgLatencyNs} > ${thresholdNs} OR ${grouped.avgMemBytes} > ${memoryThresholdBytes}`,
+      sql`${grouped.maxLatencyNs} > ${thresholdNs} OR ${grouped.avgMemBytes} > ${memoryThresholdBytes}`,
     )
-    .orderBy(desc(grouped.avgLatencyNs))
+    .orderBy(desc(grouped.maxLatencyNs))
     .limit(formatLimitOffset(options.topN));
 
   // Execute with DDL context if specified

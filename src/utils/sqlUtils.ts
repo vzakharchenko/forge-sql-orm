@@ -1,4 +1,15 @@
-import { AnyColumn, Column, isTable, SQL, sql, StringChunk } from "drizzle-orm";
+import {
+  and,
+  AnyColumn,
+  Column,
+  gte,
+  isNotNull,
+  isTable,
+  notInArray,
+  SQL,
+  sql,
+  StringChunk,
+} from "drizzle-orm";
 import { AnyMySqlTable, MySqlCustomColumn } from "drizzle-orm/mysql-core/index";
 import { DateTime } from "luxon";
 import { PrimaryKeyBuilder } from "drizzle-orm/mysql-core/primary-keys";
@@ -9,6 +20,9 @@ import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constrain
 import type { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import { isSQLWrapper } from "drizzle-orm/sql/sql";
+import { clusterStatementsSummary } from "../core/SystemTables";
+import { withTimeout } from "../webtriggers";
+import { ForgeSqlOperation } from "../core/ForgeSQLQueryBuilder";
 
 /**
  * Interface representing table metadata information
@@ -535,4 +549,85 @@ export function formatLimitOffset(limitOrOffset: number): number {
 
 export function nextVal(sequenceName: string): number {
   return sql.raw(`NEXTVAL(${sequenceName})`) as unknown as number;
+}
+
+/**
+ * Analyzes and prints query performance data from CLUSTER_STATEMENTS_SUMMARY table.
+ *
+ * This function queries the CLUSTER_STATEMENTS_SUMMARY table to find queries that were executed
+ * within the specified time window and prints detailed performance information including:
+ * - SQL query text
+ * - Memory usage (average and max in MB)
+ * - Execution time (average in ms)
+ * - Number of executions
+ * - Execution plan
+ *
+ * @param forgeSQLORM - The ForgeSQL operation instance for database access
+ * @param timeDiffMs - Time window in milliseconds to look back for queries (e.g., 1500 for last 1.5 seconds)
+ * @param timeout - Optional timeout in milliseconds for the query execution (defaults to 1500ms)
+ *
+ * @example
+ * ```typescript
+ * // Analyze queries from the last 2 seconds
+ * await printQueriesWithPlan(forgeSQLORM, 2000);
+ *
+ * // Analyze queries with custom timeout
+ * await printQueriesWithPlan(forgeSQLORM, 1000, 3000);
+ * ```
+ *
+ * @throws Does not throw - errors are logged to console.debug instead
+ */
+export async function printQueriesWithPlan(
+  forgeSQLORM: ForgeSqlOperation,
+  timeDiffMs: number,
+  timeout?: number,
+) {
+  try {
+    const statementsTable = clusterStatementsSummary;
+    const results = await withTimeout(
+      forgeSQLORM
+        .getDrizzleQueryBuilder()
+        .select({
+          digestText: statementsTable.digestText,
+          avgLatency: statementsTable.avgLatency,
+          avgMem: statementsTable.avgMem,
+          execCount: statementsTable.execCount,
+          plan: statementsTable.plan,
+        })
+        .from(statementsTable)
+        .where(
+          and(
+            isNotNull(statementsTable.digest),
+            notInArray(statementsTable.stmtType, ["Use", "Set", "Show"]),
+            gte(
+              statementsTable.lastSeen,
+              sql`DATE_SUB
+                            (NOW(), INTERVAL
+                            ${timeDiffMs * 1000}
+                            MICROSECOND
+                            )`,
+            ),
+          ),
+        ),
+      timeout ?? 1500,
+    );
+
+    results.forEach((result) => {
+      // Average execution time (convert from nanoseconds to milliseconds)
+      const avgTimeMs = Number(result.avgLatency) / 1_000_000;
+      const avgMemMB = Number(result.avgMem) / 1_000_000;
+
+      // 1. Query info: SQL, memory, time, executions
+      // eslint-disable-next-line no-console
+      console.warn(
+        `SQL: ${result.digestText} | Memory: ${avgMemMB.toFixed(2)} MB | Time: ${avgTimeMs.toFixed(2)} ms | Executions: ${result.execCount}\n Plan:${result.plan}`,
+      );
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.debug(
+      `Error occurred while retrieving query execution plan: ${error instanceof Error ? error.message : "Unknown error"}. Try again after some time`,
+      error,
+    );
+  }
 }

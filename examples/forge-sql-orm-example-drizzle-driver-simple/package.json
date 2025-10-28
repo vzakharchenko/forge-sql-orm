@@ -4,16 +4,16 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@forge/resolver": "1.7.0",
-    "@forge/sql": "^3.0.8",
+    "@forge/resolver": "1.7.1",
+    "@forge/sql": "^3.0.9",
     "drizzle-orm": "^0.44.7",
     "forge-sql-orm": "2.1.10"
   },
   "devDependencies": {
-    "@types/node": "^24.9.1",
-    "drizzle-kit": "^0.31.5",
+    "@types/node": "^24.9.2",
+    "drizzle-kit": "^0.31.6",
     "forge-sql-orm-cli": "file:../../forge-sql-orm-cli",
-    "knip": "^5.66.2",
+    "knip": "^5.66.4",
     "mysql2": "^3.15.3",
     "typescript": "^5.9.3"
   },

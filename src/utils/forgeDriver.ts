@@ -212,7 +212,6 @@ export const forgeDriver = async (
   method: QueryMethod,
 ): Promise<ForgeDriverResult> => {
   const operationType = await getOperationType();
-
   // Handle DDL operations
   if (operationType === "DDL") {
     const result = await withTimeout(sql.executeDDL(inlineParams(query, params)));

@@ -332,7 +332,9 @@ export async function getFromCache<T>(
   }
 
   try {
-    const cacheResult = await kvs.entity<CacheEntity>(options.cacheEntityName).get(key);
+    const cacheResult = (await kvs.entity<CacheEntity>(options.cacheEntityName).get(key)) as
+      | CacheEntity
+      | undefined;
 
     if (
       cacheResult &&

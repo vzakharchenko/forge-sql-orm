@@ -9,7 +9,7 @@ modules:
     - key: scheduled-schema-migration
       function: runSchemaMigration
       interval: hour
-    - key: print-10slowest-queries
+    - key: runPerformanceAnalyzeQuery
       function: runPerformanceAnalyze
       interval: hour
     - key: clear-cache-trigger

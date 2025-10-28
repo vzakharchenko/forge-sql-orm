@@ -29,7 +29,6 @@ import {
   DeleteAndEvictCacheType,
   ExecuteQuery,
   ExecuteQueryCacheable,
-  ForgeSQLMetadata,
   InsertAndEvictCacheType,
   SelectAliasedCacheableType,
   SelectAliasedDistinctCacheableType,
@@ -544,32 +543,87 @@ export interface QueryBuilderForgeSql {
   executeWithLocalCacheContextAndReturnValue<T>(cacheContext: () => Promise<T>): Promise<T>;
 
   /**
-   * Executes a query and provides access to execution metadata.
+   * Executes a query and provides access to execution metadata with performance monitoring.
    * This method allows you to capture detailed information about query execution
-   * including database execution time, response size, and Forge SQL metadata.
+   * including database execution time, response size, and query analysis capabilities.
+   *
+   * The method aggregates metrics across all database operations within the query function,
+   * making it ideal for monitoring resolver performance and detecting performance issues.
    *
    * @template T - The return type of the query
-   * @param query - A function that returns a Promise with the query result
-   * @param onMetadata - Callback function that receives execution metadata
+   * @param query - A function that returns a Promise with the query result. Can contain multiple database operations.
+   * @param onMetadata - Callback function that receives aggregated execution metadata
+   * @param onMetadata.totalDbExecutionTime - Total database execution time across all operations in the query function (in milliseconds)
+   * @param onMetadata.totalResponseSize - Total response size across all operations (in bytes)
+   * @param onMetadata.printQueries - Function to analyze and print query execution plans from CLUSTER_STATEMENTS_SUMMARY
    * @returns Promise with the query result
+   *
    * @example
    * ```typescript
+   * // Basic usage with performance monitoring
    * const result = await forgeSQL.executeWithMetadata(
-   *   async () => await forgeSQL.select().from(users).where(eq(users.id, 1)),
-   *   (dbTime, responseSize, metadata) => {
-   *     console.log(`DB execution time: ${dbTime}ms`);
-   *     console.log(`Response size: ${responseSize} bytes`);
-   *     console.log('Forge metadata:', metadata);
+   *   async () => {
+   *     const users = await forgeSQL.selectFrom(usersTable);
+   *     const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+   *     return { users, orders };
+   *   },
+   *   (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *     const threshold = 500; // ms baseline for this resolver
+   *
+   *     if (totalDbExecutionTime > threshold * 1.5) {
+   *       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+   *       await printQueries(); // Analyze and print query execution plans
+   *     } else if (totalDbExecutionTime > threshold) {
+   *       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+   *     }
+   *
+   *     console.log(`DB response size: ${totalResponseSize} bytes`);
    *   }
    * );
    * ```
+   *
+   * @example
+   * ```typescript
+   * // Resolver with performance monitoring
+   * resolver.define("fetch", async (req: Request) => {
+   *   try {
+   *     return await forgeSQL.executeWithMetadata(
+   *       async () => {
+   *         // Resolver logic with multiple queries
+   *         const users = await forgeSQL.selectFrom(demoUsers);
+   *         const orders = await forgeSQL.selectFrom(demoOrders)
+   *           .where(eq(demoOrders.userId, demoUsers.id));
+   *         return { users, orders };
+   *       },
+   *       async (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *         const threshold = 500; // ms baseline for this resolver
+   *
+   *         if (totalDbExecutionTime > threshold * 1.5) {
+   *           console.warn(`[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+   *           await printQueries(); // Optionally log or capture diagnostics for further analysis
+   *         } else if (totalDbExecutionTime > threshold) {
+   *           console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+   *         }
+   *
+   *         console.log(`DB response size: ${totalResponseSize} bytes`);
+   *       }
+   *     );
+   *   } catch (e) {
+   *     const error = e?.cause?.debug?.sqlMessage ?? e?.cause;
+   *     console.error(error, e);
+   *     throw error;
+   *   }
+   * });
+   * ```
+   *
+   * @note **Important**: When multiple resolvers are running concurrently, their query data may also appear in `printQueries()` analysis, as it queries the global `CLUSTER_STATEMENTS_SUMMARY` table.
    */
   executeWithMetadata<T>(
     query: () => Promise<T>,
     onMetadata: (
       totalDbExecutionTime: number,
       totalResponseSize: number,
-      forgeMetadata: ForgeSQLMetadata,
+      printQueriesWithPlan: () => Promise<void>,
     ) => Promise<void> | void,
   ): Promise<T>;
   /**

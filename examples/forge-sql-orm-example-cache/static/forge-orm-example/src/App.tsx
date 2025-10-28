@@ -69,12 +69,12 @@ const App: React.FC = () => {
     product: "",
   });
 
-  const executeQuery = async (cacheable: boolean) => {
+  const executeQuery = async (action: 'cacheable'|'slow'|'outOfMemory'|'timeout') => {
     setLoading(true);
     setQueryError(null);
 
     try {
-      const result = await invoke<QueryResult>("fetch", { cacheable });
+      const result = await invoke<QueryResult>("fetch", { action });
       setQueryResult(result);
     } catch (err) {
       setQueryError(err instanceof Error ? err.message : "Unknown error occurred");
@@ -126,8 +126,8 @@ const App: React.FC = () => {
     setPerformanceError(null);
 
     try {
-      const result = await invoke<PerformanceAnalysisResult>("runPerformanceAnalyze");
-      setPerformanceResult(result);
+      const result = await invoke<{DML: PerformanceAnalysisResult, DDL: PerformanceAnalysisResult}>("runPerformanceAnalyze");
+      setPerformanceResult(result?.DML);
       setPerformanceError(null);
     } catch (err) {
       setPerformanceError(
@@ -168,6 +168,12 @@ const App: React.FC = () => {
             subsequent calls are instant
           </li>
           <li>
+            <strong>Timeout:</strong> Tests query timeout behavior with 10-second sleep
+          </li>
+          <li>
+            <strong>Out of Memory:</strong> Tests memory limit with large data operations
+          </li>
+          <li>
             <strong>Add User & Order:</strong> Uses <code>executeWithCacheContext</code> to
             automatically clear cache after operations
           </li>
@@ -192,9 +198,9 @@ const App: React.FC = () => {
           sleep to demonstrate the performance difference.
         </p>
 
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "10px", marginBottom: "20px" }}>
           <button
-            onClick={() => executeQuery(false)}
+            onClick={() => executeQuery('slow')}
             disabled={loading}
             style={{
               padding: "10px 20px",
@@ -206,11 +212,11 @@ const App: React.FC = () => {
               opacity: loading ? 0.6 : 1,
             }}
           >
-            {loading ? "Loading..." : "🚫 Non-Cached Query"}
+            {loading ? "Loading..." : "🚫 Non-Cached"}
           </button>
 
           <button
-            onClick={() => executeQuery(true)}
+            onClick={() => executeQuery('cacheable')}
             disabled={loading}
             style={{
               padding: "10px 20px",
@@ -222,7 +228,39 @@ const App: React.FC = () => {
               opacity: loading ? 0.6 : 1,
             }}
           >
-            {loading ? "Loading..." : "✅ Cached Query"}
+            {loading ? "Loading..." : "✅ Cached"}
+          </button>
+
+          <button
+            onClick={() => executeQuery('timeout')}
+            disabled={loading}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#FF8B00",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? "Loading..." : "⏱️ Timeout"}
+          </button>
+
+          <button
+            onClick={() => executeQuery('outOfMemory')}
+            disabled={loading}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#C43E37",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? "Loading..." : "💥 Out of Memory"}
           </button>
         </div>
 
