@@ -69,7 +69,7 @@ const App: React.FC = () => {
     product: "",
   });
 
-  const executeQuery = async (action: 'cacheable'|'slow'|'outOfMemory'|'timeout') => {
+  const executeQuery = async (action: "cacheable" | "slow" | "outOfMemory" | "timeout") => {
     setLoading(true);
     setQueryError(null);
 
@@ -126,7 +126,10 @@ const App: React.FC = () => {
     setPerformanceError(null);
 
     try {
-      const result = await invoke<{DML: PerformanceAnalysisResult, DDL: PerformanceAnalysisResult}>("runPerformanceAnalyze");
+      const result = await invoke<{
+        DML: PerformanceAnalysisResult;
+        DDL: PerformanceAnalysisResult;
+      }>("runPerformanceAnalyze");
       setPerformanceResult(result?.DML);
       setPerformanceError(null);
     } catch (err) {
@@ -198,9 +201,16 @@ const App: React.FC = () => {
           sleep to demonstrate the performance difference.
         </p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: "10px",
+            marginBottom: "20px",
+          }}
+        >
           <button
-            onClick={() => executeQuery('slow')}
+            onClick={() => executeQuery("slow")}
             disabled={loading}
             style={{
               padding: "10px 20px",
@@ -216,7 +226,7 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => executeQuery('cacheable')}
+            onClick={() => executeQuery("cacheable")}
             disabled={loading}
             style={{
               padding: "10px 20px",
@@ -232,7 +242,7 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => executeQuery('timeout')}
+            onClick={() => executeQuery("timeout")}
             disabled={loading}
             style={{
               padding: "10px 20px",
@@ -248,7 +258,7 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => executeQuery('outOfMemory')}
+            onClick={() => executeQuery("outOfMemory")}
             disabled={loading}
             style={{
               padding: "10px 20px",

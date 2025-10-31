@@ -3,11 +3,11 @@ import {
   AnyColumn,
   Column,
   gte,
-    ilike,
+  ilike,
   isNotNull,
   isTable,
-    ne,
-    not,
+  ne,
+  not,
   notInArray,
   SQL,
   sql,
@@ -20,16 +20,14 @@ import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
 import { CheckBuilder } from "drizzle-orm/mysql-core/checks";
 import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
 import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
-import {
-    SelectedFields
-} from "drizzle-orm/mysql-core/query-builders/select.types";
+import { SelectedFields } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import { isSQLWrapper } from "drizzle-orm/sql/sql";
-import {clusterStatementsSummary, slowQuery} from "../core/SystemTables";
+import { clusterStatementsSummary, slowQuery } from "../core/SystemTables";
 import { ForgeSqlOperation } from "../core/ForgeSQLQueryBuilder";
-import { ColumnDataType} from "drizzle-orm/column-builder";
-import {AnyMySqlColumn} from "drizzle-orm/mysql-core/columns/common";
-import type {ColumnBaseConfig} from "drizzle-orm/column";
+import { ColumnDataType } from "drizzle-orm/column-builder";
+import { AnyMySqlColumn } from "drizzle-orm/mysql-core/columns/common";
+import type { ColumnBaseConfig } from "drizzle-orm/column";
 
 /**
  * Interface representing table metadata information
@@ -591,8 +589,8 @@ export async function printQueriesWithPlan(
 ) {
   try {
     const statementsTable = clusterStatementsSummary;
-      const timeoutMs = timeout ?? 3000;
-      const results = await withTimeout(
+    const timeoutMs = timeout ?? 3000;
+    const results = await withTimeout(
       forgeSQLORM
         .getDrizzleQueryBuilder()
         .select({
@@ -601,14 +599,21 @@ export async function printQueriesWithPlan(
           avgMem: statementsTable.avgMem,
           execCount: statementsTable.execCount,
           plan: statementsTable.plan,
-            stmtType: statementsTable.stmtType,
+          stmtType: statementsTable.stmtType,
         })
         .from(statementsTable)
         .where(
           and(
             isNotNull(statementsTable.digest),
-              not(ilike(statementsTable.digestText, "%information_schema%")),
-            notInArray(statementsTable.stmtType, ["Use", "Set", "Show","Commit","Rollback", "Begin"]),
+            not(ilike(statementsTable.digestText, "%information_schema%")),
+            notInArray(statementsTable.stmtType, [
+              "Use",
+              "Set",
+              "Show",
+              "Commit",
+              "Rollback",
+              "Begin",
+            ]),
             gte(
               statementsTable.lastSeen,
               sql`DATE_SUB
@@ -619,9 +624,8 @@ export async function printQueriesWithPlan(
             ),
           ),
         ),
-          `Timeout ${timeoutMs}ms in printQueriesWithPlan - transient timeouts are usually fine; repeated timeouts mean this diagnostic query is consistently slow and should be investigated`
-        ,
-      timeoutMs+200,
+      `Timeout ${timeoutMs}ms in printQueriesWithPlan - transient timeouts are usually fine; repeated timeouts mean this diagnostic query is consistently slow and should be investigated`,
+      timeoutMs + 200,
     );
 
     results.forEach((result) => {
@@ -644,11 +648,11 @@ export async function printQueriesWithPlan(
   }
 }
 
-const SESSION_ALIAS_NAME_ORM = 'orm';
+const SESSION_ALIAS_NAME_ORM = "orm";
 
 /**
  * Analyzes and logs slow queries from the last specified number of hours.
- * 
+ *
  * This function queries the slow query system table to find queries that were executed
  * within the specified time window and logs detailed performance information including:
  * - SQL query text
@@ -656,77 +660,81 @@ const SESSION_ALIAS_NAME_ORM = 'orm';
  * - Query execution time (in ms)
  * - Execution count
  * - Execution plan
- * 
+ *
  * @param forgeSQLORM - The ForgeSQL operation instance for database access
  * @param hours - Number of hours to look back for slow queries (e.g., 1 for last hour, 24 for last day)
  * @param timeout - Optional timeout in milliseconds for the query execution (defaults to 1500ms)
- * 
+ *
  * @example
  * ```typescript
  * // Analyze slow queries from the last hour
  * await slowQueryPerHours(forgeSQLORM, 1);
- * 
+ *
  * // Analyze slow queries from the last 24 hours with custom timeout
  * await slowQueryPerHours(forgeSQLORM, 24, 3000);
- * 
+ *
  * // Analyze slow queries from the last 6 hours
  * await slowQueryPerHours(forgeSQLORM, 6);
  * ```
- * 
+ *
  * @throws Does not throw - errors are logged to console.debug instead
  */
-export async function slowQueryPerHours(forgeSQLORM: ForgeSqlOperation, hours:number, timeout?: number) {
-    try {
-        const timeoutMs = timeout ?? 1500;
-        const results = await withTimeout(
-            forgeSQLORM
-                .getDrizzleQueryBuilder()
-                .select({
-                    query: withTidbHint(slowQuery.query),
-                    queryTime: slowQuery.queryTime,
-                    memMax: slowQuery.memMax,
-                    plan: slowQuery.plan,
-                })
-                .from(slowQuery)
-                .where(
-                    and(
-                        isNotNull(slowQuery.digest),
-                        ne(slowQuery.sessionAlias, SESSION_ALIAS_NAME_ORM),
-                        gte(
-                            slowQuery.time,
-                            sql`DATE_SUB
+export async function slowQueryPerHours(
+  forgeSQLORM: ForgeSqlOperation,
+  hours: number,
+  timeout?: number,
+) {
+  try {
+    const timeoutMs = timeout ?? 1500;
+    const results = await withTimeout(
+      forgeSQLORM
+        .getDrizzleQueryBuilder()
+        .select({
+          query: withTidbHint(slowQuery.query),
+          queryTime: slowQuery.queryTime,
+          memMax: slowQuery.memMax,
+          plan: slowQuery.plan,
+        })
+        .from(slowQuery)
+        .where(
+          and(
+            isNotNull(slowQuery.digest),
+            ne(slowQuery.sessionAlias, SESSION_ALIAS_NAME_ORM),
+            gte(
+              slowQuery.time,
+              sql`DATE_SUB
                             (NOW(), INTERVAL
                             ${hours}
                             HOUR
                             )`,
-                        ),
-                    ),
-                ),
-            `Timeout ${timeoutMs}ms in slowQueryPerHours - transient timeouts are usually fine; repeated timeouts mean this diagnostic query is consistently slow and should be investigated`,
-            timeoutMs,
-        );
-       const response:string[] =[]
-        results.forEach((result) => {
-            // Convert memory from bytes to MB and handle null values
-            const memMaxMB = result.memMax ? Number(result.memMax) / 1_000_000 : 0;
+            ),
+          ),
+        ),
+      `Timeout ${timeoutMs}ms in slowQueryPerHours - transient timeouts are usually fine; repeated timeouts mean this diagnostic query is consistently slow and should be investigated`,
+      timeoutMs,
+    );
+    const response: string[] = [];
+    results.forEach((result) => {
+      // Convert memory from bytes to MB and handle null values
+      const memMaxMB = result.memMax ? Number(result.memMax) / 1_000_000 : 0;
 
-            const message = `Found SlowQuery SQL: ${result.query} | Memory: ${memMaxMB.toFixed(2)} MB | Time: ${result.queryTime} ms\n Plan:${result.plan}`;
-            response.push(message);
-            // 1. Query info: SQL, memory, time, executions
-            // eslint-disable-next-line no-console
-            console.warn(
-                message,
-            );
-        });
-        return response;
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.debug(
-            `Error occurred while retrieving query execution plan: ${error instanceof Error ? error.message : "Unknown error"}. Try again after some time`,
-            error,
-        );
-        return [`Error occurred while retrieving query execution plan: ${error instanceof Error ? error.message : "Unknown error"}`]
-    }
+      const message = `Found SlowQuery SQL: ${result.query} | Memory: ${memMaxMB.toFixed(2)} MB | Time: ${result.queryTime} ms\n Plan:${result.plan}`;
+      response.push(message);
+      // 1. Query info: SQL, memory, time, executions
+      // eslint-disable-next-line no-console
+      console.warn(message);
+    });
+    return response;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.debug(
+      `Error occurred while retrieving query execution plan: ${error instanceof Error ? error.message : "Unknown error"}. Try again after some time`,
+      error,
+    );
+    return [
+      `Error occurred while retrieving query execution plan: ${error instanceof Error ? error.message : "Unknown error"}`,
+    ];
+  }
 }
 
 /**
@@ -737,29 +745,33 @@ export async function slowQueryPerHours(forgeSQLORM: ForgeSqlOperation, hours:nu
  * @returns Promise that resolves with the result or rejects on timeout
  * @throws {Error} When the operation times out
  */
-export async function withTimeout<T>(promise: Promise<T>, message: string, timeoutMs: number): Promise<T> {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+export async function withTimeout<T>(
+  promise: Promise<T>,
+  message: string,
+  timeoutMs: number,
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => {
-            reject(
-                new Error(message),
-            );
-        }, timeoutMs);
-    });
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(message));
+    }, timeoutMs);
+  });
 
-    try {
-        return await Promise.race([promise, timeoutPromise]);
-    } finally {
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
     }
+  }
 }
 
-export function withTidbHint<TDataType extends ColumnDataType, TPartial extends Partial<ColumnBaseConfig<TDataType, string>>>(column: AnyMySqlColumn<TPartial>): AnyMySqlColumn<TPartial> {
-    // We lie a bit to TypeScript here: at runtime this is a new SQL fragment,
-    // but returning TExpr keeps the column type info in downstream inference.
-    return sql`/*+ SET_VAR(tidb_session_alias=${sql.raw(`${SESSION_ALIAS_NAME_ORM}`)}) */ ${column}` as unknown as AnyMySqlColumn<TPartial>;
+export function withTidbHint<
+  TDataType extends ColumnDataType,
+  TPartial extends Partial<ColumnBaseConfig<TDataType, string>>,
+>(column: AnyMySqlColumn<TPartial>): AnyMySqlColumn<TPartial> {
+  // We lie a bit to TypeScript here: at runtime this is a new SQL fragment,
+  // but returning TExpr keeps the column type info in downstream inference.
+  return sql`/*+ SET_VAR(tidb_session_alias=${sql.raw(`${SESSION_ALIAS_NAME_ORM}`)}) */ ${column}` as unknown as AnyMySqlColumn<TPartial>;
 }
-

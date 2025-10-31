@@ -1,19 +1,19 @@
-import Resolver, {Request} from "@forge/resolver";
-import {webTrigger} from "@forge/api";
+import Resolver, { Request } from "@forge/resolver";
+import { webTrigger } from "@forge/api";
 import {
-    applySchemaMigrations,
-    clearCacheSchedulerTrigger,
-    dropSchemaMigrations,
-    fetchSchemaWebTrigger,
-    getHttpResponse,
-    printQueriesWithPlan,
-    slowQuerySchedulerTrigger
+  applySchemaMigrations,
+  clearCacheSchedulerTrigger,
+  dropSchemaMigrations,
+  fetchSchemaWebTrigger,
+  getHttpResponse,
+  printQueriesWithPlan,
+  slowQuerySchedulerTrigger,
 } from "forge-sql-orm";
 import migration from "./migration";
-import {FORGE_SQL_ORM} from "./utils/forgeSqlOrmUtils";
-import {demoOrders, demoUsers} from "./entities";
-import {and, eq, or, sql} from "drizzle-orm";
-import {NewUserOrder, UserOrderRow} from "./utils/Constants";
+import { FORGE_SQL_ORM } from "./utils/forgeSqlOrmUtils";
+import { demoOrders, demoUsers } from "./entities";
+import { and, eq, or, sql } from "drizzle-orm";
+import { NewUserOrder, UserOrderRow } from "./utils/Constants";
 
 const SQL_CACHE_QUERY = FORGE_SQL_ORM.selectCacheable({
   userId: demoUsers.id,
@@ -49,24 +49,22 @@ const resolver = new Resolver();
 
 export const handler = resolver.getDefinitions();
 
-resolver.define(
-    "webTriggers",
-    async () => {
-    const runSchemaMigration = await webTrigger.getUrl('invoke-schema-migration');
-    const dropSchemaMigration = await webTrigger.getUrl('drop-schema-migration');
-    const fetchSchema = await webTrigger.getUrl('fetch-schema');
-    const printPerformance = await webTrigger.getUrl('print-performance');
-    const printSlowestQueries = await webTrigger.getUrl('print-slowest-queries');
-    const clearCacheWeb = await webTrigger.getUrl('clearCacheWeb');
-    return {
-        runSchemaMigration,
-        dropSchemaMigration,
-        fetchSchema,
-        printPerformance,
-        printSlowestQueries,
-        clearCacheWeb
-    }
-    });
+resolver.define("webTriggers", async () => {
+  const runSchemaMigration = await webTrigger.getUrl("invoke-schema-migration");
+  const dropSchemaMigration = await webTrigger.getUrl("drop-schema-migration");
+  const fetchSchema = await webTrigger.getUrl("fetch-schema");
+  const printPerformance = await webTrigger.getUrl("print-performance");
+  const printSlowestQueries = await webTrigger.getUrl("print-slowest-queries");
+  const clearCacheWeb = await webTrigger.getUrl("clearCacheWeb");
+  return {
+    runSchemaMigration,
+    dropSchemaMigration,
+    fetchSchema,
+    printPerformance,
+    printSlowestQueries,
+    clearCacheWeb,
+  };
+});
 
 resolver.define(
   "fetch",
@@ -147,7 +145,7 @@ resolver.define("clearCache", async (): Promise<void> => {
 });
 
 resolver.define("runPerformanceAnalyze", async () => {
-    return await runPerformanceAnalyze();
+  return await runPerformanceAnalyze();
 });
 
 resolver.define("insertUserOrOrder", async (req: Request<NewUserOrder>): Promise<void> => {
@@ -250,12 +248,12 @@ export const fetchMigrations = () => {
 };
 
 export const runSlowQuery = async () => {
-  return slowQuerySchedulerTrigger(FORGE_SQL_ORM, {hours: 1, timeout: 3000});
+  return slowQuerySchedulerTrigger(FORGE_SQL_ORM, { hours: 1, timeout: 3000 });
 };
 
 export const runPerformanceAnalyze = async () => {
-    await printQueriesWithPlan(FORGE_SQL_ORM, 15000);
-    return getHttpResponse(200, "Look into development console log")
+  await printQueriesWithPlan(FORGE_SQL_ORM, 15000);
+  return getHttpResponse(200, "Look into development console log");
 };
 
 export const clearCache = () => {

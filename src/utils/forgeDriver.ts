@@ -1,9 +1,9 @@
 import { sql, UpdateQueryResponse } from "@forge/sql";
 import { saveMetaDataToContext } from "./metadataContextUtils";
 import { getOperationType } from "./requestTypeContextUtils";
-import {withTimeout} from "./sqlUtils";
+import { withTimeout } from "./sqlUtils";
 
-const timeoutMs =10000;
+const timeoutMs = 10000;
 const timeoutMessage = `Atlassian @forge/sql did not return a response within ${timeoutMs}ms (${timeoutMs / 1000} seconds), so the request is blocked. Possible causes: slow query, network issues, or exceeding Forge SQL limits.`;
 
 /**
@@ -145,7 +145,11 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
     await sqlStatement.bindParams(...params);
   }
 
-  const result = (await withTimeout(sqlStatement.execute(), timeoutMessage, timeoutMs)) as ForgeSQLResult;
+  const result = (await withTimeout(
+    sqlStatement.execute(),
+    timeoutMessage,
+    timeoutMs,
+  )) as ForgeSQLResult;
   await saveMetaDataToContext(result.metadata);
 
   if (!result.rows) {
@@ -188,7 +192,11 @@ export const forgeDriver = async (
   const operationType = await getOperationType();
   // Handle DDL operations
   if (operationType === "DDL") {
-    const result = await withTimeout(sql.executeDDL(inlineParams(query, params)), timeoutMessage, timeoutMs);
+    const result = await withTimeout(
+      sql.executeDDL(inlineParams(query, params)),
+      timeoutMessage,
+      timeoutMs,
+    );
     return await processDDLResult(method, result);
   }
 

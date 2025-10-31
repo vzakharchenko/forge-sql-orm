@@ -5,11 +5,12 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@forge/api": "^6.1.5",
     "@forge/kvs": "^1.1.0",
     "@forge/resolver": "1.7.1",
     "@forge/sql": "^3.0.9",
     "drizzle-orm": "^0.44.7",
-    "forge-sql-orm": "file:../.."
+    "forge-sql-orm": "^2.1.11"
   },
   "scripts": {
     "models:create": "forge-sql-orm-cli generate:model --output src/entities",
@@ -23,7 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.9.2",
-    "forge-sql-orm-cli": "^2.1.10",
+    "forge-sql-orm-cli": "^2.1.11",
     "knip": "^5.66.4",
     "typescript": "^5.9.3"
   },

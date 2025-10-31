@@ -190,13 +190,17 @@ describe("transformValue", () => {
     it("should generate only table drop statements when sequence option is false", () => {
       const tables = ["users"];
       const expected = ["DROP TABLE IF EXISTS `users`;"];
-      expect(generateDropTableStatements(tables, { sequence: false, table: true })).toEqual(expected);
+      expect(generateDropTableStatements(tables, { sequence: false, table: true })).toEqual(
+        expected,
+      );
     });
 
     it("should generate only sequence drop statements when table option is false", () => {
       const tables = ["users"];
       const expected = ["DROP SEQUENCE IF EXISTS `users`;"];
-      expect(generateDropTableStatements(tables, { sequence: true, table: false })).toEqual(expected);
+      expect(generateDropTableStatements(tables, { sequence: true, table: false })).toEqual(
+        expected,
+      );
     });
 
     it("should return empty array when both options are false", () => {

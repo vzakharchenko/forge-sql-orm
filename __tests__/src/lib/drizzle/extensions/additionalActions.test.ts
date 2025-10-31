@@ -163,14 +163,14 @@ describe("additionalActions", () => {
   describe("selectFrom", () => {
     it("should create a select query builder from table", async () => {
       const query = db.selectFrom(testTable).where(eq(testTable.id, 1));
-      
+
       expect(query).toBeDefined();
       expect(query).toHaveProperty("then");
     });
 
     it("should execute selectFrom query and return results", async () => {
       const results = await db.selectFrom(testTable).where(eq(testTable.id, 1));
-      
+
       expect(results).toBeDefined();
       expect(Array.isArray(results)).toBe(true);
     });
@@ -179,7 +179,7 @@ describe("additionalActions", () => {
   describe("selectDistinctFrom", () => {
     it("should create a select distinct query builder from table", async () => {
       const query = db.selectDistinctFrom(testTable).where(eq(testTable.id, 1));
-      
+
       expect(query).toBeDefined();
       expect(query).toHaveProperty("then");
     });
@@ -188,7 +188,7 @@ describe("additionalActions", () => {
   describe("selectFromCacheable", () => {
     it("should create a cached select query builder from table", async () => {
       const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
-      
+
       expect(query).toBeDefined();
       expect(query).toHaveProperty("then");
     });
@@ -197,7 +197,7 @@ describe("additionalActions", () => {
   describe("selectDistinctFromCacheable", () => {
     it("should create a cached select distinct query builder from table", async () => {
       const query = db.selectDistinctFromCacheable(testTable, 300).where(eq(testTable.id, 1));
-      
+
       expect(query).toBeDefined();
       expect(query).toHaveProperty("then");
     });
@@ -256,7 +256,7 @@ describe("additionalActions", () => {
   describe("executeQuery", () => {
     it("should execute raw SQL query with local cache", async () => {
       const result = await db.executeQuery(sql`SELECT * FROM test_users WHERE id = 1`);
-      
+
       expect(result).toBeDefined();
       // executeQuery returns MySqlRawQueryResult which has rows property
       expect(Array.isArray(result) || typeof result === "object").toBe(true);
@@ -264,7 +264,7 @@ describe("additionalActions", () => {
 
     it("should execute string SQL query", async () => {
       const result = await db.executeQuery("SELECT * FROM test_users WHERE id = 1");
-      
+
       expect(result).toBeDefined();
       // executeQuery returns MySqlRawQueryResult which has rows property
       expect(Array.isArray(result) || typeof result === "object").toBe(true);
@@ -277,18 +277,15 @@ describe("additionalActions", () => {
         sql`SELECT * FROM test_users WHERE id = 1`,
         300,
       );
-      
+
       expect(result).toBeDefined();
       // executeQueryCacheable returns MySqlRawQueryResult which has rows property
       expect(Array.isArray(result) || typeof result === "object").toBe(true);
     });
 
     it("should execute string SQL query with caching", async () => {
-      const result = await db.executeQueryCacheable(
-        "SELECT * FROM test_users WHERE id = 1",
-        300,
-      );
-      
+      const result = await db.executeQueryCacheable("SELECT * FROM test_users WHERE id = 1", 300);
+
       expect(result).toBeDefined();
       // executeQueryCacheable returns MySqlRawQueryResult which has rows property
       expect(Array.isArray(result) || typeof result === "object").toBe(true);
@@ -298,7 +295,7 @@ describe("additionalActions", () => {
   describe("insertAndEvictCache", () => {
     it("should create insert builder that evicts cache", async () => {
       const insertBuilder = db.insertAndEvictCache(testTable);
-      
+
       expect(insertBuilder).toBeDefined();
       expect(insertBuilder).toHaveProperty("values");
       // then is added via Proxy when builder is executed
@@ -320,7 +317,7 @@ describe("additionalActions", () => {
   describe("updateAndEvictCache", () => {
     it("should create update builder that evicts cache", async () => {
       const updateBuilder = db.updateAndEvictCache(testTable);
-      
+
       expect(updateBuilder).toBeDefined();
       expect(updateBuilder).toHaveProperty("set");
       // where is available after calling set()
@@ -333,7 +330,7 @@ describe("additionalActions", () => {
   describe("deleteAndEvictCache", () => {
     it("should create delete builder that evicts cache", async () => {
       const deleteBuilder = db.deleteAndEvictCache(testTable);
-      
+
       expect(deleteBuilder).toBeDefined();
       expect(deleteBuilder).toHaveProperty("where");
       expect(deleteBuilder).toHaveProperty("then");
@@ -343,7 +340,7 @@ describe("additionalActions", () => {
   describe("insertWithCacheContext", () => {
     it("should create insert builder that participates in cache context", async () => {
       const insertBuilder = db.insertWithCacheContext(testTable);
-      
+
       expect(insertBuilder).toBeDefined();
       expect(insertBuilder).toHaveProperty("values");
     });
@@ -352,7 +349,7 @@ describe("additionalActions", () => {
   describe("updateWithCacheContext", () => {
     it("should create update builder that participates in cache context", async () => {
       const updateBuilder = db.updateWithCacheContext(testTable);
-      
+
       expect(updateBuilder).toBeDefined();
       expect(updateBuilder).toHaveProperty("set");
     });
@@ -361,7 +358,7 @@ describe("additionalActions", () => {
   describe("deleteWithCacheContext", () => {
     it("should create delete builder that participates in cache context", async () => {
       const deleteBuilder = db.deleteWithCacheContext(testTable);
-      
+
       expect(deleteBuilder).toBeDefined();
       expect(deleteBuilder).toHaveProperty("where");
     });
@@ -369,10 +366,7 @@ describe("additionalActions", () => {
 
   describe("query builder chaining", () => {
     it("should support method chaining on selectFrom", () => {
-      const query = db
-        .selectFrom(testTable)
-        .where(eq(testTable.id, 1))
-        .limit(10);
+      const query = db.selectFrom(testTable).where(eq(testTable.id, 1)).limit(10);
 
       expect(query).toBeDefined();
     });
@@ -391,10 +385,7 @@ describe("additionalActions", () => {
     });
 
     it("should support method chaining on cached queries", () => {
-      const query = db
-        .selectFromCacheable(testTable, 300)
-        .where(eq(testTable.id, 1))
-        .limit(10);
+      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1)).limit(10);
 
       expect(query).toBeDefined();
     });
@@ -404,7 +395,7 @@ describe("additionalActions", () => {
     it("should use default options when none provided", () => {
       const dbWithoutOptions = drizzle(forgeDriver);
       const patchedDb = patchDbWithSelectAliased(dbWithoutOptions);
-      
+
       expect(patchedDb).toBeDefined();
       expect(patchedDb).toHaveProperty("selectFrom");
     });
@@ -415,10 +406,10 @@ describe("additionalActions", () => {
         cacheTTL: 300,
         logRawSqlQuery: true,
       };
-      
+
       const dbWithOptions = drizzle(forgeDriver);
       const patchedDb = patchDbWithSelectAliased(dbWithOptions, customOptions);
-      
+
       expect(patchedDb).toBeDefined();
       expect(patchedDb).toHaveProperty("selectFrom");
     });
@@ -436,7 +427,7 @@ describe("additionalActions", () => {
     it("should execute cached query successfully", async () => {
       const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
       const result = await query;
-      
+
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
     });
@@ -444,7 +435,7 @@ describe("additionalActions", () => {
     it("should support custom cache TTL", async () => {
       const query = db.selectFromCacheable(testTable, 600).where(eq(testTable.id, 1));
       const result = await query;
-      
+
       expect(result).toBeDefined();
     });
   });
@@ -485,21 +476,21 @@ describe("additionalActions", () => {
   describe("cache context methods", () => {
     it("should create insert builder with cache context", () => {
       const insertBuilder = db.insertWithCacheContext(testTable);
-      
+
       expect(insertBuilder).toBeDefined();
       expect(insertBuilder).toHaveProperty("values");
     });
 
     it("should create update builder with cache context", () => {
       const updateBuilder = db.updateWithCacheContext(testTable);
-      
+
       expect(updateBuilder).toBeDefined();
       expect(updateBuilder).toHaveProperty("set");
     });
 
     it("should create delete builder with cache context", () => {
       const deleteBuilder = db.deleteWithCacheContext(testTable);
-      
+
       expect(deleteBuilder).toBeDefined();
       expect(deleteBuilder).toHaveProperty("where");
     });
@@ -508,7 +499,7 @@ describe("additionalActions", () => {
   describe("query builder properties", () => {
     it("should maintain drizzle query builder properties", () => {
       const query = db.selectFrom(testTable);
-      
+
       expect(query).toBeDefined();
       // Should support standard drizzle methods
       expect(typeof (query as any).where).toBe("function");

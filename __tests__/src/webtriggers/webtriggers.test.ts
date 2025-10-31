@@ -112,9 +112,11 @@ vi.mock("../../../src/core/SystemTables", () => ({
 vi.mock("../../../src/utils/sqlUtils", () => ({
   generateDropTableStatements: vi.fn().mockReturnValue([]),
   formatLimitOffset: vi.fn().mockReturnValue(1),
-  slowQueryPerHours: vi.fn().mockResolvedValue([
-    "Found SlowQuery SQL: SELECT * FROM users | Memory: 2.50 MB | Time: 150.00 ms\n Plan:IndexScan(users)",
-  ]),
+  slowQueryPerHours: vi
+    .fn()
+    .mockResolvedValue([
+      "Found SlowQuery SQL: SELECT * FROM users | Memory: 2.50 MB | Time: 150.00 ms\n Plan:IndexScan(users)",
+    ]),
 }));
 
 // Mock cacheUtils
