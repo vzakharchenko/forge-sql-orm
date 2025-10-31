@@ -18,7 +18,7 @@
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
 - ✅ **Local Cache System (Level 1)** for in-memory query optimization within single resolver invocation scope
 - ✅ **Global Cache System (Level 2)** with cross-invocation caching, automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
-- ✅ **Performance Monitoring**: Query execution metrics and analysis capabilities with automatic error analysis for timeout and OOM errors
+- ✅ **Performance Monitoring**: Query execution metrics and analysis capabilities with automatic error analysis for timeout and OOM errors, plus scheduled slow query monitoring with execution plans
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
@@ -64,7 +64,8 @@
 ### 🔒 Advanced Features
 - [Optimistic Locking](#optimistic-locking)
 - [Query Analysis and Performance Optimization](#query-analysis-and-performance-optimization)
-- [Performance Monitoring](#performance-monitoring)
+- [Automatic Error Analysis](#automatic-error-analysis) - Automatic timeout and OOM error detection with execution plans
+- [Slow Query Monitoring](#slow-query-monitoring) - Scheduled monitoring of slow queries with execution plans
 - [Date and Time Types](#date-and-time-types)
 
 ### 🛠️ Development Tools
@@ -294,10 +295,8 @@ resolver.define("fetch", async (req: Request) => {
           console.warn(`[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
           await printQueriesWithPlan(); // Optionally log or capture diagnostics for further analysis
         } else if (totalDbExecutionTime > threshold) {
-          console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+          console.debug(`[Performance Debug fetch] High DB time: ${totalDbExecutionTime} ms`);
         }
-        
-        console.log(`DB response size: ${totalResponseSize} bytes`);
       }
     );
   } catch (e) {
@@ -2122,6 +2121,34 @@ Configure in `manifest.yml`:
 - `hour` - Every hour
 - `day` - Every day
 
+### 5. Slow Query Scheduler Trigger
+
+This scheduler trigger automatically monitors and analyzes slow queries on a scheduled basis. For detailed information, see the [Slow Query Monitoring](#slow-query-monitoring) section.
+
+**Quick Setup:**
+
+```typescript
+import ForgeSQL, { slowQuerySchedulerTrigger } from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+export const slowQueryTrigger = () =>
+  slowQuerySchedulerTrigger(forgeSQL, { hours: 1, timeout: 3000 });
+```
+
+Configure in `manifest.yml`:
+```yaml
+  scheduledTrigger:
+    - key: slow-query-trigger
+      function: slowQueryTrigger
+      interval: hour
+  function:
+    - key: slowQueryTrigger
+      handler: index.slowQueryTrigger
+```
+
+> **💡 Note**: For complete documentation, examples, and configuration options, see the [Slow Query Monitoring](#slow-query-monitoring) section.
+
 ### Important Notes
 
 **Security Considerations**:
@@ -2209,6 +2236,112 @@ The error analysis mechanism:
 - **No Code Changes**: Existing code automatically benefits from error analysis
 
 > **💡 Tip**: The automatic error analysis only triggers for timeout and OOM errors. Other errors are logged normally without plan analysis.
+
+### Slow Query Monitoring
+
+Forge-SQL-ORM provides a scheduler trigger (`slowQuerySchedulerTrigger`) that automatically monitors and analyzes slow queries on an hourly basis. This trigger queries TiDB's slow query log system table and provides detailed performance information including SQL query text, memory usage, execution time, and execution plans.
+
+#### Key Features
+
+- **Automatic Monitoring**: Runs on a scheduled interval (recommended: hourly)
+- **Detailed Performance Metrics**: Memory usage, execution time, and execution plans
+- **Console Logging**: Results are automatically logged to the Forge Developer Console
+- **Configurable Time Window**: Analyze queries from the last N hours (default: 1 hour)
+- **Automatic Plan Retrieval**: Execution plans are included for all slow queries
+
+#### Basic Setup
+
+**1. Create the trigger function:**
+
+```typescript
+import ForgeSQL, { slowQuerySchedulerTrigger } from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+// Monitor slow queries from the last hour (recommended for hourly schedule)
+export const slowQueryTrigger = () =>
+  slowQuerySchedulerTrigger(forgeSQL, { hours: 1, timeout: 3000 });
+```
+
+**2. Configure in `manifest.yml`:**
+
+```yaml
+modules:
+  scheduledTrigger:
+    - key: slow-query-trigger
+      function: slowQueryTrigger
+      interval: hour  # Run every hour
+  
+  function:
+    - key: slowQueryTrigger
+      handler: index.slowQueryTrigger
+```
+
+#### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `hours` | `number` | `1` | Number of hours to look back for slow queries |
+| `timeout` | `number` | `3000` | Timeout in milliseconds for the diagnostic query execution |
+
+#### Example Console Output
+
+When slow queries are detected, you'll see output like this in the Forge Developer Console:
+
+```
+Found SlowQuery SQL: SELECT * FROM users u INNER JOIN orders o ON u.id = o.user_id WHERE u.active = ? | Memory: 8.50 MB | Time: 2500.00 ms
+ Plan:
+id task estRows operator info actRows execution info memory disk
+Projection_7 root 1000.00 forge_38dd1c6156b94bb59c2c9a45582bbfc7.users.id, ... 1000 time:2.5s, loops:1 8.50 MB N/A
+└─IndexHashJoin_14 root 1000.00 inner join, ... 1000 time:2.2s, loops:1 7.98 MB N/A
+
+Found SlowQuery SQL: SELECT * FROM products WHERE category = ? ORDER BY created_at DESC | Memory: 6.25 MB | Time: 1800.00 ms
+ Plan:
+...
+```
+
+#### Advanced Configuration
+
+```typescript
+import ForgeSQL, { slowQuerySchedulerTrigger } from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+// Monitor queries from the last 6 hours (for less frequent checks)
+export const sixHourSlowQueryTrigger = () =>
+  slowQuerySchedulerTrigger(forgeSQL, { hours: 6, timeout: 5000 });
+
+// Monitor queries from the last 24 hours (daily monitoring)
+export const dailySlowQueryTrigger = () =>
+  slowQuerySchedulerTrigger(forgeSQL, { hours: 24, timeout: 3000 });
+```
+
+#### How It Works
+
+1. **Scheduled Execution**: The trigger runs automatically on the configured interval (hourly recommended)
+2. **Query Analysis**: Queries TiDB's slow query log system table for queries executed within the specified time window
+3. **Performance Metrics**: Extracts and logs:
+   - SQL query text (sanitized for readability)
+   - Maximum memory usage (in MB)
+   - Query execution time (in ms)
+   - Detailed execution plan
+4. **Console Logging**: Results are logged to the Forge Developer Console via `console.warn()` for easy monitoring
+
+#### Best Practices
+
+- **Hourly Intervals**: Use `interval: hour` for timely detection of slow queries
+- **Default Time Window**: 1 hour is recommended for hourly schedules to avoid overlap
+- **Monitor Regularly**: Check console logs regularly to identify patterns in slow queries
+
+#### Benefits
+
+- **Proactive Monitoring**: Catch slow queries before they become critical issues
+- **Performance Trends**: Track query performance over time
+- **Optimization Insights**: Execution plans help identify optimization opportunities
+- **Zero Manual Intervention**: Fully automated monitoring with scheduled execution
+- **Production Safe**: Works silently in the background, only logs when slow queries are found
+
+> **💡 Tip**: The trigger queries up to 50 slow queries to prevent excessive logging. Transient timeouts are usually fine; repeated timeouts indicate the diagnostic query itself is slow and should be investigated.
 
 ### Available Analysis Tools
 
