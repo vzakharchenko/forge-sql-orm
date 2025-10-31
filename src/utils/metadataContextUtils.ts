@@ -19,7 +19,7 @@ export async function saveMetaDataToContext(metadata?: ForgeSQLMetadata): Promis
       if (process.env.NODE_ENV !== "test") {
         await new Promise((r) => setTimeout(r, 200));
       }
-      return await printQueriesWithPlan(
+       await printQueriesWithPlan(
         context.forgeSQLORM,
         Date.now() - context.beginTime.getTime(),
       );

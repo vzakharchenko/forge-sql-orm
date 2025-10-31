@@ -21,7 +21,7 @@ export const migrations = mysqlTable("__migrations", {
 
 const informationSchema = mysqlSchema("information_schema");
 
-export const slowQuery = informationSchema.table("SLOW_QUERY", {
+export const slowQuery = informationSchema.table("CLUSTER_SLOW_QUERY", {
   time: timestamp("Time", { fsp: 6, mode: "string" }).notNull(), // Timestamp when the slow query was recorded
 
   txnStartTs: bigint("Txn_start_ts", { mode: "bigint", unsigned: true }), // Transaction start timestamp (TSO)

@@ -1,6 +1,10 @@
 import { sql, UpdateQueryResponse } from "@forge/sql";
 import { saveMetaDataToContext } from "./metadataContextUtils";
 import { getOperationType } from "./requestTypeContextUtils";
+import {withTimeout} from "./sqlUtils";
+
+const timeoutMs =10000;
+const timeoutMessage = `Atlassian @forge/sql did not return a response within ${timeoutMs}ms (${timeoutMs / 1000} seconds), so the request is blocked. Possible causes: slow query, network issues, or exceeding Forge SQL limits.`;
 
 /**
  * Metadata structure for Forge SQL query results.
@@ -62,36 +66,6 @@ export function isUpdateQueryResponse(obj: unknown): obj is UpdateQueryResponse 
   );
 }
 
-/**
- * Executes a promise with a timeout.
- *
- * @param promise - The promise to execute
- * @param timeoutMs - Timeout in milliseconds (default: 10000ms)
- * @returns Promise that resolves with the result or rejects on timeout
- * @throws {Error} When the operation times out
- */
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 10000): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(
-        new Error(
-          `Atlassian @forge/sql did not return a response within ${timeoutMs}ms (${timeoutMs / 1000} seconds), so the request is blocked. Possible causes: slow query, network issues, or exceeding Forge SQL limits.`,
-        ),
-      );
-    }, timeoutMs);
-  });
-
-  try {
-    return await Promise.race([promise, timeoutPromise]);
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
-}
-
 function inlineParams(sql: string, params: unknown[]): string {
   let i = 0;
   return sql.replace(/\?/g, () => {
@@ -148,7 +122,7 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
     sqlStatement.bindParams(...params);
   }
 
-  const result = await withTimeout(sqlStatement.execute());
+  const result = await withTimeout(sqlStatement.execute(), timeoutMessage, timeoutMs);
   await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
   if (!result.rows) {
     return { rows: [[]] };
@@ -171,7 +145,7 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
     await sqlStatement.bindParams(...params);
   }
 
-  const result = (await withTimeout(sqlStatement.execute())) as ForgeSQLResult;
+  const result = (await withTimeout(sqlStatement.execute(), timeoutMessage, timeoutMs)) as ForgeSQLResult;
   await saveMetaDataToContext(result.metadata);
 
   if (!result.rows) {
@@ -214,7 +188,7 @@ export const forgeDriver = async (
   const operationType = await getOperationType();
   // Handle DDL operations
   if (operationType === "DDL") {
-    const result = await withTimeout(sql.executeDDL(inlineParams(query, params)));
+    const result = await withTimeout(sql.executeDDL(inlineParams(query, params)), timeoutMessage, timeoutMs);
     return await processDDLResult(method, result);
   }
 

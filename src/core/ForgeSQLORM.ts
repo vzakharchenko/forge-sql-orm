@@ -204,18 +204,31 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         },
       },
       async () => {
-        try {
-          return await query();
-        } finally {
+           const result = await query();
           const metadata = await getLastestMetadata();
-          if (metadata) {
-            await onMetadata(
-              metadata.totalDbExecutionTime,
-              metadata.totalResponseSize,
-              metadata.printQueriesWithPlan,
-            );
-          }
-        }
+          try {
+               if (metadata) {
+                   await onMetadata(
+                       metadata.totalDbExecutionTime,
+                       metadata.totalResponseSize,
+                       metadata.printQueriesWithPlan,
+                   );
+               }
+           } catch (e: any) {
+              // eslint-disable-next-line no-console
+               console.error(
+                 "[ForgeSQLORM][executeWithMetadata] Failed to run onMetadata callback",
+                 {
+                   errorMessage: e?.message,
+                   errorStack: e?.stack,
+                   totalDbExecutionTime: metadata?.totalDbExecutionTime,
+                   totalResponseSize: metadata?.totalResponseSize,
+                   beginTime: metadata?.beginTime,
+                 },
+                 e,
+               );
+           }
+           return result;
       },
     );
   }

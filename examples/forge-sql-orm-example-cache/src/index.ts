@@ -1,17 +1,19 @@
-import Resolver, { Request } from "@forge/resolver";
+import Resolver, {Request} from "@forge/resolver";
+import {webTrigger} from "@forge/api";
 import {
-  applySchemaMigrations,
-  clearCacheSchedulerTrigger,
-  dropSchemaMigrations,
-  fetchSchemaWebTrigger,
-  topSlowestStatementLastHourTrigger,
+    applySchemaMigrations,
+    clearCacheSchedulerTrigger,
+    dropSchemaMigrations,
+    fetchSchemaWebTrigger,
+    getHttpResponse,
+    printQueriesWithPlan,
+    slowQuerySchedulerTrigger
 } from "forge-sql-orm";
 import migration from "./migration";
-import { FORGE_SQL_ORM } from "./utils/forgeSqlOrmUtils";
-import { demoOrders, demoUsers } from "./entities";
-import { and, eq, or, sql } from "drizzle-orm";
-import { NewUserOrder, UserOrderRow } from "./utils/Constants";
-import kvs from "@forge/kvs";
+import {FORGE_SQL_ORM} from "./utils/forgeSqlOrmUtils";
+import {demoOrders, demoUsers} from "./entities";
+import {and, eq, or, sql} from "drizzle-orm";
+import {NewUserOrder, UserOrderRow} from "./utils/Constants";
 
 const SQL_CACHE_QUERY = FORGE_SQL_ORM.selectCacheable({
   userId: demoUsers.id,
@@ -46,6 +48,25 @@ const SQL_QUERY_TIMEOUT = FORGE_SQL_ORM.select({
 const resolver = new Resolver();
 
 export const handler = resolver.getDefinitions();
+
+resolver.define(
+    "webTriggers",
+    async () => {
+    const runSchemaMigration = await webTrigger.getUrl('invoke-schema-migration');
+    const dropSchemaMigration = await webTrigger.getUrl('drop-schema-migration');
+    const fetchSchema = await webTrigger.getUrl('fetch-schema');
+    const printPerformance = await webTrigger.getUrl('print-performance');
+    const printSlowestQueries = await webTrigger.getUrl('print-slowest-queries');
+    const clearCacheWeb = await webTrigger.getUrl('clearCacheWeb');
+    return {
+        runSchemaMigration,
+        dropSchemaMigration,
+        fetchSchema,
+        printPerformance,
+        printSlowestQueries,
+        clearCacheWeb
+    }
+    });
 
 resolver.define(
   "fetch",
@@ -126,8 +147,7 @@ resolver.define("clearCache", async (): Promise<void> => {
 });
 
 resolver.define("runPerformanceAnalyze", async () => {
-  const response = await runPerformanceAnalyze();
-  return JSON.parse(response.body);
+    return await runPerformanceAnalyze();
 });
 
 resolver.define("insertUserOrOrder", async (req: Request<NewUserOrder>): Promise<void> => {
@@ -229,36 +249,13 @@ export const fetchMigrations = () => {
   return fetchSchemaWebTrigger();
 };
 
+export const runSlowQuery = async () => {
+  return slowQuerySchedulerTrigger(FORGE_SQL_ORM, {hours: 1, timeout: 3000});
+};
+
 export const runPerformanceAnalyze = async () => {
-  return FORGE_SQL_ORM.executeWithMetadata(
-    async () => {
-      const topSlowestStatementLastHourTriggerDML = await topSlowestStatementLastHourTrigger(
-        FORGE_SQL_ORM,
-        {
-          warnThresholdMs: 300,
-          memoryThresholdBytes: 4 * 1024 * 1024,
-          showPlan: true,
-          operationType: "DML",
-        },
-      );
-      return {
-        headers: { "Content-Type": ["application/json"] },
-        statusCode: topSlowestStatementLastHourTriggerDML.statusCode,
-        statusText: "OK",
-        body: JSON.stringify({
-          DML: JSON.parse(topSlowestStatementLastHourTriggerDML.body),
-          DDL: undefined,
-        }),
-      };
-    },
-    (totalDbExecutionTime: number) => {
-      if (totalDbExecutionTime > 400) {
-        console.warn(
-          `RunPerformanceAnalyze has high database execution time: ${totalDbExecutionTime}ms`,
-        );
-      }
-    },
-  );
+    await printQueriesWithPlan(FORGE_SQL_ORM, 15000);
+    return getHttpResponse(200, "Look into development console log")
 };
 
 export const clearCache = () => {

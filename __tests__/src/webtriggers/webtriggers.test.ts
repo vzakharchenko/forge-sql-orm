@@ -5,10 +5,10 @@ import {
   applySchemaMigrations,
   dropTableSchemaMigrations,
   clearCacheSchedulerTrigger,
-  topSlowestStatementLastHourTrigger,
+  slowQuerySchedulerTrigger,
 } from "../../../src/webtriggers";
 import { getTables } from "../../../src/core/SystemTables";
-import { generateDropTableStatements } from "../../../src/utils/sqlUtils";
+import { generateDropTableStatements, slowQueryPerHours } from "../../../src/utils/sqlUtils";
 import { clearExpiredCache } from "../../../src/utils/cacheUtils";
 import { sql } from "@forge/sql";
 import { MigrationRunner } from "@forge/sql/out/migration";
@@ -112,6 +112,9 @@ vi.mock("../../../src/core/SystemTables", () => ({
 vi.mock("../../../src/utils/sqlUtils", () => ({
   generateDropTableStatements: vi.fn().mockReturnValue([]),
   formatLimitOffset: vi.fn().mockReturnValue(1),
+  slowQueryPerHours: vi.fn().mockResolvedValue([
+    "Found SlowQuery SQL: SELECT * FROM users | Memory: 2.50 MB | Time: 150.00 ms\n Plan:IndexScan(users)",
+  ]),
 }));
 
 // Mock cacheUtils
@@ -446,108 +449,175 @@ describe("WebTriggers", () => {
     });
   });
 
-  describe("topSlowestStatementLastHourTrigger", () => {
-    it("should handle errors gracefully when ORM is invalid", async () => {
-      const invalidORM = null as any;
+  describe("slowQuerySchedulerTrigger", () => {
+    let mockForgeSQLORM: any;
 
-      const result = await topSlowestStatementLastHourTrigger(invalidORM);
-
-      expect(result.statusCode).toBe(500);
-      expect(result.headers).toEqual({ "Content-Type": ["application/json"] });
-
-      const body = JSON.parse(result.body);
-      expect(body.success).toBe(false);
-      expect(body.message).toBe("ORM instance is required");
-      expect(body.timestamp).toBeDefined();
-    });
-
-    it("should handle errors gracefully when ORM methods are missing", async () => {
-      const incompleteORM = {
-        getDrizzleQueryBuilder: vi.fn().mockReturnValue({}),
-      } as any;
-
-      const result = await topSlowestStatementLastHourTrigger(incompleteORM);
-
-      expect(result.statusCode).toBe(500);
-      expect(result.headers).toEqual({ "Content-Type": ["application/json"] });
-
-      const body = JSON.parse(result.body);
-      expect(body.success).toBe(false);
-      expect(body.message).toBe("Failed to fetch or log slow queries");
-      expect(body.timestamp).toBeDefined();
-    });
-
-    it("should use default parameters when not provided", async () => {
-      const mockORM = {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      mockForgeSQLORM = {
         getDrizzleQueryBuilder: vi.fn().mockReturnValue({
           select: vi.fn().mockReturnThis(),
           from: vi.fn().mockReturnThis(),
           where: vi.fn().mockReturnThis(),
-          orderBy: vi.fn().mockReturnThis(),
-          limit: vi.fn().mockRejectedValue(new Error("Database error")),
-          groupBy: vi.fn().mockReturnThis(),
         }),
-      } as any;
-
-      const result = await topSlowestStatementLastHourTrigger(mockORM);
-
-      expect(result.statusCode).toBe(500);
-
-      const body = JSON.parse(result.body);
-      expect(body.success).toBe(false);
-      expect(body.message).toBe("Failed to fetch or log slow queries");
-    });
-
-    it("should accept custom parameters", async () => {
-      const mockORM = {
-        getDrizzleQueryBuilder: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnThis(),
-          from: vi.fn().mockReturnThis(),
-          where: vi.fn().mockReturnThis(),
-          orderBy: vi.fn().mockReturnThis(),
-          limit: vi.fn().mockRejectedValue(new Error("Database error")),
-          groupBy: vi.fn().mockReturnThis(),
-        }),
-      } as any;
-
-      const customOptions = {
-        warnThresholdMs: 500,
-        memoryThresholdBytes: 4 * 1024 * 1024, // 4MB
-        showPlan: true,
       };
-
-      const result = await topSlowestStatementLastHourTrigger(mockORM, customOptions);
-
-      expect(result.statusCode).toBe(500);
-
-      const body = JSON.parse(result.body);
-      expect(body.success).toBe(false);
-      expect(body.message).toBe("Failed to fetch or log slow queries");
     });
 
-    it("should handle showPlan parameter correctly", async () => {
-      const mockORM = {
-        getDrizzleQueryBuilder: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnThis(),
-          from: vi.fn().mockReturnThis(),
-          where: vi.fn().mockReturnThis(),
-          orderBy: vi.fn().mockReturnThis(),
-          limit: vi.fn().mockRejectedValue(new Error("Database error")),
-          groupBy: vi.fn().mockReturnThis(),
-        }),
-      } as any;
+    it("should successfully analyze slow queries with default options", async () => {
+      const mockResults = [
+        "Found SlowQuery SQL: SELECT * FROM users | Memory: 2.50 MB | Time: 150.00 ms\n Plan:IndexScan(users)",
+      ];
+      (slowQueryPerHours as any).mockResolvedValue(mockResults);
 
-      // Test with showPlan: true
-      const resultWithPlan = await topSlowestStatementLastHourTrigger(mockORM, { showPlan: true });
-
-      expect(resultWithPlan.statusCode).toBe(500);
-
-      // Test with showPlan: false (default)
-      const resultWithoutPlan = await topSlowestStatementLastHourTrigger(mockORM, {
-        showPlan: false,
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
       });
 
-      expect(resultWithoutPlan.statusCode).toBe(500);
+      expect(slowQueryPerHours).toHaveBeenCalledWith(mockForgeSQLORM, 1, 3000);
+      expect(result.statusCode).toBe(200);
+      expect(result.statusText).toBe("Ok");
+      expect(result.headers).toEqual({ "Content-Type": ["application/json"] });
+      expect(result.body).toBe(JSON.stringify(mockResults));
+    });
+
+    it("should use default values when options are not provided", async () => {
+      const mockResults = ["Found SlowQuery SQL: SELECT * FROM orders"];
+      (slowQueryPerHours as any).mockResolvedValue(mockResults);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: undefined as any,
+        timeout: undefined as any,
+      });
+
+      expect(slowQueryPerHours).toHaveBeenCalledWith(mockForgeSQLORM, 1, 3000);
+      expect(result.statusCode).toBe(200);
+      expect(result.body).toBe(JSON.stringify(mockResults));
+    });
+
+    it("should handle custom hours and timeout options", async () => {
+      const mockResults = [
+        "Found SlowQuery SQL: SELECT * FROM products | Memory: 5.00 MB | Time: 300.00 ms\n Plan:FullScan(products)",
+      ];
+      (slowQueryPerHours as any).mockResolvedValue(mockResults);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 6,
+        timeout: 5000,
+      });
+
+      expect(slowQueryPerHours).toHaveBeenCalledWith(mockForgeSQLORM, 6, 5000);
+      expect(result.statusCode).toBe(200);
+      expect(result.body).toBe(JSON.stringify(mockResults));
+    });
+
+    it("should handle errors with sqlMessage in debug context", async () => {
+      const error = {
+        debug: {
+          sqlMessage: "Query timeout exceeded",
+        },
+      };
+      (slowQueryPerHours as any).mockRejectedValue(error);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
+      });
+
+      expect(result.statusCode).toBe(500);
+      expect(result.statusText).toBe("Bad Request");
+      expect(result.body).toBe("Query timeout exceeded");
+    });
+
+    it("should handle errors with message in debug context", async () => {
+      const error = {
+        debug: {
+          message: "Database connection failed",
+        },
+      };
+      (slowQueryPerHours as any).mockRejectedValue(error);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
+      });
+
+      expect(result.statusCode).toBe(500);
+      expect(result.body).toBe("Database connection failed");
+    });
+
+    it("should handle errors with direct message property", async () => {
+      const error = {
+        message: "Network error occurred",
+      };
+      (slowQueryPerHours as any).mockRejectedValue(error);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
+      });
+
+      expect(result.statusCode).toBe(500);
+      expect(result.body).toBe("Network error occurred");
+    });
+
+    it("should handle errors with unknown error structure", async () => {
+      const error = {};
+      (slowQueryPerHours as any).mockRejectedValue(error);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
+      });
+
+      expect(result.statusCode).toBe(500);
+      expect(result.body).toBe("Unknown error occurred");
+    });
+
+    it("should handle empty results array", async () => {
+      (slowQueryPerHours as any).mockResolvedValue([]);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 24,
+        timeout: 2000,
+      });
+
+      expect(result.statusCode).toBe(200);
+      expect(result.body).toBe(JSON.stringify([]));
+    });
+
+    it("should handle multiple slow query results", async () => {
+      const mockResults = [
+        "Found SlowQuery SQL: SELECT * FROM users | Memory: 2.50 MB | Time: 150.00 ms\n Plan:IndexScan(users)",
+        "Found SlowQuery SQL: SELECT * FROM orders | Memory: 3.75 MB | Time: 200.00 ms\n Plan:FullScan(orders)",
+        "Found SlowQuery SQL: SELECT * FROM products | Memory: 1.25 MB | Time: 100.00 ms\n Plan:IndexLookup(products)",
+      ];
+      (slowQueryPerHours as any).mockResolvedValue(mockResults);
+
+      const result = await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
+      });
+
+      expect(result.statusCode).toBe(200);
+      expect(result.body).toBe(JSON.stringify(mockResults));
+      expect(JSON.parse(result.body as string)).toHaveLength(3);
+    });
+
+    it("should log error to console when error occurs", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const error = {
+        message: "Test error",
+      };
+      (slowQueryPerHours as any).mockRejectedValue(error);
+
+      await slowQuerySchedulerTrigger(mockForgeSQLORM, {
+        hours: 1,
+        timeout: 3000,
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Test error");
+      consoleErrorSpy.mockRestore();
     });
   });
 });

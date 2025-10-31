@@ -3,7 +3,7 @@ export * from "./applyMigrationsWebTrigger";
 export * from "./fetchSchemaWebTrigger";
 export * from "./dropTablesMigrationWebTrigger";
 export * from "./clearCacheSchedulerTrigger";
-export * from "./topSlowestStatementLastHourTrigger";
+export * from "./slowQuerySchedulerTrigger";
 
 export interface TriggerResponse<BODY> {
   body?: BODY;
