@@ -99,7 +99,7 @@ describe("cacheUtils", () => {
 
   const mockQuery = {
     toSQL: vi.fn(() => ({
-      sql: "SELECT * FROM users WHERE id = ?",
+      sql: "SELECT * FROM `users` WHERE id = ?",
       params: [1],
     })),
   };
@@ -167,7 +167,7 @@ describe("cacheUtils", () => {
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockCacheData = {
-        sql: "select * from users where id = ?",
+        sql: "`users`",
         expiration: Math.floor(DateTime.now().plus({ hours: 1 }).toSeconds()),
         data: JSON.stringify({ id: 1, name: "John" }),
       };
@@ -191,7 +191,7 @@ describe("cacheUtils", () => {
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockCacheData = {
-        sql: "select * from users where id = ?",
+        sql: "`users`",
         expiration: Math.floor(DateTime.now().minus({ hours: 1 }).toSeconds()),
         data: JSON.stringify({ id: 1, name: "John" }),
       };
@@ -223,6 +223,200 @@ describe("cacheUtils", () => {
       const result = await getFromCache(mockQuery, defaultOptions);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe("extractBacktickedValues (via setCacheResult/getFromCache)", () => {
+    it("should extract single table name from backticks", async () => {
+      const { setCacheResult } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } = await import(
+        "../../../src/utils/cacheContextUtils"
+      );
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined),
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const queryWithBackticks = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT * FROM `users` WHERE id = ?",
+          params: [1],
+        })),
+      };
+
+      await setCacheResult(queryWithBackticks, defaultOptions, { id: 1 }, 300);
+
+      expect(mockTransact.set).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          sql: "`users`",
+        }),
+        { entityName: "cache" },
+      );
+    });
+
+    it("should extract multiple table names and sort them", async () => {
+      const { setCacheResult } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } = await import(
+        "../../../src/utils/cacheContextUtils"
+      );
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined),
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const queryWithMultipleTables = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT * FROM `test2`, `test1`, `test2` WHERE id = ?",
+          params: [1],
+        })),
+      };
+
+      await setCacheResult(queryWithMultipleTables, defaultOptions, { id: 1 }, 300);
+
+      expect(mockTransact.set).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          sql: "`test1`,`test2`", // Sorted and deduplicated
+        }),
+        { entityName: "cache" },
+      );
+    });
+
+    it("should ignore tables starting with a_", async () => {
+      const { setCacheResult } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } = await import(
+        "../../../src/utils/cacheContextUtils"
+      );
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined),
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const queryWithA_Table = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT * FROM `users`, `a_temp_table`, `orders` WHERE id = ?",
+          params: [1],
+        })),
+      };
+
+      await setCacheResult(queryWithA_Table, defaultOptions, { id: 1 }, 300);
+
+      expect(mockTransact.set).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          sql: "`orders`,`users`", // a_temp_table is filtered out, sorted
+        }),
+        { entityName: "cache" },
+      );
+    });
+
+    it("should handle case-insensitive filtering of a_ tables", async () => {
+      const { setCacheResult } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } = await import(
+        "../../../src/utils/cacheContextUtils"
+      );
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined),
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const queryWithA_TableUpperCase = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT * FROM `users`, `A_TEMP_TABLE`, `orders` WHERE id = ?",
+          params: [1],
+        })),
+      };
+
+      await setCacheResult(queryWithA_TableUpperCase, defaultOptions, { id: 1 }, 300);
+
+      expect(mockTransact.set).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          sql: "`orders`,`users`", // A_TEMP_TABLE is filtered out (case-insensitive)
+        }),
+        { entityName: "cache" },
+      );
+    });
+
+    it("should return empty string when no backticked values found", async () => {
+      const { setCacheResult } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } = await import(
+        "../../../src/utils/cacheContextUtils"
+      );
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined),
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const queryWithoutBackticks = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT * FROM users WHERE id = ?",
+          params: [1],
+        })),
+      };
+
+      await setCacheResult(queryWithoutBackticks, defaultOptions, { id: 1 }, 300);
+
+      expect(mockTransact.set).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          sql: "", // Empty string when no backticks
+        }),
+        { entityName: "cache" },
+      );
+    });
+
+    it("should match extracted values in getFromCache", async () => {
+      const { getFromCache } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } = await import(
+        "../../../src/utils/cacheContextUtils"
+      );
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const queryWithMultipleTables = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT * FROM `test1`, `test2` WHERE id = ?",
+          params: [1],
+        })),
+      };
+
+      // Cache should have sorted and deduplicated values
+      const mockCacheData = {
+        sql: "`test1`,`test2`",
+        expiration: Math.floor(DateTime.now().plus({ hours: 1 }).toSeconds()),
+        data: JSON.stringify({ id: 1, name: "John" }),
+      };
+
+      mockKvs.entity.mockReturnValue({
+        get: vi.fn().mockResolvedValue(mockCacheData),
+        set: vi.fn(),
+        query: vi.fn(),
+      });
+
+      const result = await getFromCache(queryWithMultipleTables, defaultOptions);
+
+      expect(result).toEqual({ id: 1, name: "John" });
     });
   });
 
@@ -271,7 +465,7 @@ describe("cacheUtils", () => {
       expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          sql: "select * from users where id = ?",
+          sql: "`users`",
           expiration: expect.any(Number),
           data: JSON.stringify(testData),
         }),
@@ -329,7 +523,7 @@ describe("cacheUtils", () => {
       expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: "select * from users where id = ?",
+          query: "`users`",
           exp: expect.any(Number),
           result: JSON.stringify(testData),
         }),
@@ -438,6 +632,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -480,6 +676,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -513,6 +711,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -555,6 +755,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -597,6 +799,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -628,6 +832,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -693,11 +899,11 @@ describe("cacheUtils", () => {
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       // Mock setTimeout to resolve immediately
-      const originalSetTimeout = global.setTimeout;
-      global.setTimeout = vi.fn((callback: any) => {
+      const mockSetTimeout = vi.fn((callback: any) => {
         callback();
         return 1 as any;
       });
+      vi.stubGlobal("setTimeout", mockSetTimeout);
 
       let attempt = 0;
       const mockQueryBuilder = {
@@ -718,6 +924,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -736,7 +944,7 @@ describe("cacheUtils", () => {
       expect(mockQueryBuilder.getMany).toHaveBeenCalledTimes(3);
 
       // Restore original setTimeout
-      global.setTimeout = originalSetTimeout;
+      vi.unstubAllGlobals();
       consoleSpy.mockRestore();
     });
 
@@ -745,11 +953,11 @@ describe("cacheUtils", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
       // Mock setTimeout to resolve immediately
-      const originalSetTimeout = global.setTimeout;
-      global.setTimeout = vi.fn((callback: any) => {
+      const mockSetTimeout = vi.fn((callback: any) => {
         callback();
         return 1 as any;
       });
+      vi.stubGlobal("setTimeout", mockSetTimeout);
 
       const mockQueryBuilder = {
         index: vi.fn().mockReturnThis(),
@@ -760,6 +968,8 @@ describe("cacheUtils", () => {
       };
 
       mockKvs.entity.mockReturnValue({
+        get: vi.fn(),
+        set: vi.fn(),
         query: vi.fn().mockReturnValue(mockQueryBuilder),
       });
 
@@ -771,7 +981,7 @@ describe("cacheUtils", () => {
       );
 
       // Restore original setTimeout
-      global.setTimeout = originalSetTimeout;
+      vi.unstubAllGlobals();
       consoleSpy.mockRestore();
     });
   });
@@ -801,13 +1011,14 @@ describe("cacheUtils", () => {
 
       // Test getFromCache
       const mockCacheData = {
-        sql: "select * from users where id = ?",
+        sql: "`users`",
         expiration: Math.floor(DateTime.now().plus({ hours: 1 }).toSeconds()),
         data: JSON.stringify(testData),
       };
 
       mockKvs.entity.mockReturnValue({
         get: vi.fn().mockResolvedValue(mockCacheData),
+        set: vi.fn(),
         query: vi.fn(),
       });
 

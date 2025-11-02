@@ -780,7 +780,10 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  executeCacheable<T>(query: SQLWrapper | string, cacheTtl?: number) {
+  executeCacheable<T>(
+    query: SQLWrapper | string,
+    cacheTtl?: number,
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>> {
     return this.drizzle.executeQueryCacheable<T>(query, cacheTtl);
   }
 
@@ -1340,7 +1343,10 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * const result = await forgeSQL.executeCacheable("SELECT * FROM users WHERE status = 'active'");
    * ```
    */
-  executeCacheable(query: SQLWrapper | string, cacheTtl?: number) {
+  executeCacheable<T>(
+    query: SQLWrapper | string,
+    cacheTtl?: number,
+  ): Promise<MySqlQueryResultKind<MySqlRemoteQueryResultHKT, T>> {
     return this.ormInstance.executeCacheable(query, cacheTtl);
   }
 

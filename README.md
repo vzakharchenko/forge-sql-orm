@@ -359,8 +359,9 @@ const rawUsers = await forgeSQL.execute(
 );
 
 // Raw SQL with caching
+// ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const cachedRawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM users WHERE active = ?", 
+  "SELECT * FROM `users` WHERE active = ?", 
   [true], 
   300
 );
@@ -480,8 +481,9 @@ const rawUsers = await forgeSQL.execute(
 );
 
 // Raw SQL with caching
+// ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const cachedRawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM users WHERE active = ?", 
+  "SELECT * FROM `users` WHERE active = ?", 
   [true], 
   300
 );
@@ -615,6 +617,9 @@ Please review the [official @forge/kvs quotas and limits](https://developer.atla
 - Consider data size and frequency of changes
 - Monitor cache usage to stay within quotas
 - Use appropriate TTL values
+
+**⚠️ Important Cache Limitations:**
+- **Table names starting with `a_`**: Tables whose names start with `a_` (case-insensitive) are automatically ignored in cache operations. KVS Cache will not work with such tables, and they will be excluded from cache invalidation and cache key generation.
 
 ### Step 1: Install Dependencies
 
@@ -1135,8 +1140,10 @@ const user = await forgeSQL
     .execute("SELECT * FROM users WHERE id = ?", [1]);
 
 // Using forgeSQL.executeCacheable() - Execute raw SQL with local and global caching
+// ⚠️ IMPORTANT: When using executeCacheable(), all table names in SQL queries must be wrapped with backticks (`)
+// Example: SELECT * FROM `users` WHERE id = ? (NOT: SELECT * FROM users WHERE id = ?)
 const user = await forgeSQL
-    .executeCacheable("SELECT * FROM users WHERE id = ?", [1], 300);
+    .executeCacheable("SELECT * FROM `users` WHERE id = ?", [1], 300);
 
 // Using forgeSQL.getDrizzleQueryBuilder()
 const user = await forgeSQL
@@ -1265,8 +1272,10 @@ const users = await forgeSQL
   .execute("SELECT * FROM users WHERE active = ?", [true]);
 
 // Using executeCacheable() for raw SQL with local and global caching
+// ⚠️ IMPORTANT: When using executeCacheable(), all table names in SQL queries must be wrapped with backticks (`)
+// Example: SELECT * FROM `users` WHERE active = ? (NOT: SELECT * FROM users WHERE active = ?)
 const users = await forgeSQL
-  .executeCacheable("SELECT * FROM users WHERE active = ?", [true], 300);
+  .executeCacheable("SELECT * FROM `users` WHERE active = ?", [true], 300);
 
 // Using executeWithMetadata() for capturing execution metrics and performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
@@ -1759,8 +1768,9 @@ await forgeSQL.executeWithLocalContext(async () => {
     .where(eq(users.active, true));
   
   // Raw SQL with multi-level caching
+  // ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
   const rawUsers = await forgeSQL.executeCacheable(
-    "SELECT id, name FROM users WHERE active = ?", 
+    "SELECT id, name FROM `users` WHERE active = ?", 
     [true], 
     300 // TTL in seconds
   );
@@ -1809,8 +1819,9 @@ const usersDistinct = await forgeSQL.selectDistinctCacheableFrom(Users)
   .where(eq(Users.active, true));
 
 // Raw SQL with local and global caching
+// ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const rawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM users WHERE active = ?",
+  "SELECT * FROM `users` WHERE active = ?",
   [true],
   300 // TTL in seconds
 );
@@ -2503,8 +2514,9 @@ const rawUsers = await forgeSQL.execute(
   [true]
 );
 
+// ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const cachedRawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM users WHERE active = ?", 
+  "SELECT * FROM `users` WHERE active = ?", 
   [true], 
   300
 );

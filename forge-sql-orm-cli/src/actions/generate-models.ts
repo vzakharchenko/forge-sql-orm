@@ -155,6 +155,13 @@ export const generateModels = async (options: GenerateModelsOptions) => {
         for (const [tableName, tableData] of Object.entries(snapshotData.tables)) {
           const table = tableData as TableMetadata;
 
+          // Check if table name starts with 'a_' and warn about cache
+          if (tableName.toLowerCase().startsWith("a_")) {
+            console.warn(
+              `⚠️  Table "${tableName}" starts with "a_". Cache will not work with this table because such tables are ignored in cache operations.`,
+            );
+          }
+
           // Find version field in columns
           const versionField = Object.entries(table.columns).find(
             ([_, col]) => col.name.toLowerCase() === options.versionField,

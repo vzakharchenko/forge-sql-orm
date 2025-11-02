@@ -48,6 +48,27 @@ function nowPlusSeconds(secondsToAdd: number): number {
 }
 
 /**
+ * Extracts all table/column names between backticks from SQL query and returns them as comma-separated string.
+ *
+ * @param sql - SQL query string
+ * @returns Comma-separated string of unique backticked values
+ */
+function extractBacktickedValues(sql: string): string {
+  const regex = /`([^`]+)`/g;
+  const matches = new Set<string>();
+  let match;
+
+  while ((match = regex.exec(sql.toLowerCase())) !== null) {
+    if (!match[1].startsWith("a_")) {
+      matches.add(`\`${match[1]}\``);
+    }
+  }
+
+  // Sort to ensure consistent order for the same input
+  return Array.from(matches).sort().join(",");
+}
+
+/**
  * Generates a hash key for a query based on its SQL and parameters.
  *
  * @param query - The Drizzle query object
@@ -339,7 +360,7 @@ export async function getFromCache<T>(
     if (
       cacheResult &&
       (cacheResult[expirationName] as number) >= getCurrentTime() &&
-      sqlQuery.sql.toLowerCase() === cacheResult[entityQueryName]
+      extractBacktickedValues(sqlQuery.sql) === cacheResult[entityQueryName]
     ) {
       if (options.logCache) {
         // eslint-disable-next-line no-console
@@ -400,7 +421,7 @@ export async function setCacheResult(
       .set(
         key,
         {
-          [entityQueryName]: sqlQuery.sql.toLowerCase(),
+          [entityQueryName]: extractBacktickedValues(sqlQuery.sql),
           [expirationName]: nowPlusSeconds(cacheTtl),
           [dataName]: JSON.stringify(results),
         },
