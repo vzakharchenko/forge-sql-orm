@@ -22,7 +22,7 @@ import {
   w as ir,
   q as lr,
   s as un,
-} from "./index-CFFGUtp9.js";
+} from "./index-Qrpzx7x6.js";
 import { a as fe } from "./react-dom-vendor-DTSHKYJW.js";
 import "./client-core-vendor-CJaY3VOv.js";
 import "./lodash-vendor-C90NrQdG.js";

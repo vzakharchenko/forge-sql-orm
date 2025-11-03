@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-DwMkHTe-.js",
+      "./body-BDRUtmC4.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-hW6L3Q7d.js",
       "./lodash-vendor-CCRbW25J.js",
@@ -19393,11 +19393,7 @@ function qr(e) {
   return e;
 }
 var XS = $w.tooltip(),
-  Sf = {
-    componentName: "tooltip",
-    packageName: "@atlaskit/tooltip",
-    packageVersion: "0.0.0-development",
-  },
+  Sf = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.7.0" },
   QS = { top: "bottom", bottom: "top", left: "right", right: "left" },
   ZS = function (t) {
     return t.split("-")[0];
@@ -20203,7 +20199,7 @@ var fE = function (t) {
   },
   vE = _.lazy(function () {
     return gy(
-      () => import("./body-DwMkHTe-.js"),
+      () => import("./body-BDRUtmC4.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

@@ -19,9 +19,9 @@
     "knip": "knip"
   },
   "devDependencies": {
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.0",
     "forge-sql-orm-cli": "^2.1.12",
-    "knip": "^5.66.4",
+    "knip": "^5.67.1",
     "typescript": "^5.9.3"
   },
   "overrides": {

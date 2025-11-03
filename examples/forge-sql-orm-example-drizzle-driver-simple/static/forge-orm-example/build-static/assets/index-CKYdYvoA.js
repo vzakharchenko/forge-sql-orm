@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-BPEwVBhD.js",
+      "./body-eI1MHqlr.js",
       "./react-dom-vendor-DTSHKYJW.js",
       "./client-core-vendor-CJaY3VOv.js",
       "./lodash-vendor-C90NrQdG.js",
@@ -15591,11 +15591,7 @@ function zr(e) {
   return e;
 }
 var SO = fm.tooltip(),
-  Gd = {
-    componentName: "tooltip",
-    packageName: "@atlaskit/tooltip",
-    packageVersion: "0.0.0-development",
-  },
+  Gd = { componentName: "tooltip", packageName: "@atlaskit/tooltip", packageVersion: "20.7.0" },
   EO = { top: "bottom", bottom: "top", left: "right", right: "left" },
   xO = function (t) {
     return t.split("-")[0];
@@ -16401,7 +16397,7 @@ var NO = function (t) {
   },
   zO = _.lazy(function () {
     return qg(
-      () => import("./body-BPEwVBhD.js"),
+      () => import("./body-eI1MHqlr.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

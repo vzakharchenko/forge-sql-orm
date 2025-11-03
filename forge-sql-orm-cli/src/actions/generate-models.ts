@@ -158,7 +158,7 @@ export const generateModels = async (options: GenerateModelsOptions) => {
           // Check if table name starts with 'a_' and warn about cache
           if (tableName.toLowerCase().startsWith("a_")) {
             console.warn(
-              `⚠️  Table "${tableName}" starts with "a_". Cache will not work with this table because such tables are ignored in cache operations.`,
+              `⚠️  Table "${tableName}" starts with "a_". KVS Cache will not work with this table because such tables are ignored in cache operations.`,
             );
           }
 
