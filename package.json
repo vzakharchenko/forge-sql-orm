@@ -68,6 +68,7 @@
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
     "generate:models": "ts-node scripts/generate-models.ts",
+    "prepare": "husky",
     "knip": "knip"
   },
   "files": [
