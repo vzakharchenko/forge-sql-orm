@@ -201,12 +201,14 @@ export async function evictLocalCacheQuery<T extends AnyMySqlTable>(
     const tableName = getTableName(table);
     const searchString = options.cacheWrapTable ? `\`${tableName}\`` : tableName;
     const keyToEvicts: string[] = [];
-    Object.keys(context.cache).forEach((key) => {
+    for (const key of Object.keys(context.cache)) {
       if (context.cache[key].sql.includes(searchString)) {
         keyToEvicts.push(key);
       }
-    });
-    keyToEvicts.forEach((key) => delete context.cache[key]);
+    }
+    for (const key of keyToEvicts) {
+      delete context.cache[key];
+    }
   }
 }
 

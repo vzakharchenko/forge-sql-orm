@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import * as crypto from "crypto";
+import * as crypto from "node:crypto";
 import { Query } from "drizzle-orm";
 import { AnyMySqlTable } from "drizzle-orm/mysql-core";
 import { getTableName } from "drizzle-orm/table";
@@ -65,7 +65,9 @@ function extractBacktickedValues(sql: string): string {
   }
 
   // Sort to ensure consistent order for the same input
-  return Array.from(matches).sort().join(",");
+  return Array.from(matches)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base", numeric: true }))
+    .join(",");
 }
 
 /**
@@ -95,9 +97,9 @@ async function deleteCacheEntriesInBatches(
   for (let i = 0; i < results.length; i += CACHE_CONSTANTS.BATCH_SIZE) {
     const batch = results.slice(i, i + CACHE_CONSTANTS.BATCH_SIZE);
     let transactionBuilder = kvs.transact();
-    batch.forEach((result) => {
+    for (const result of batch) {
       transactionBuilder = transactionBuilder.delete(result.key, { entityName: cacheEntityName });
-    });
+    }
     await transactionBuilder.execute();
   }
 }

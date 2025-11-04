@@ -93,7 +93,7 @@ export const parseDateTime = (value: string | Date, format: string): Date => {
     }
   }
   // 4. Ensure the result is a valid Date object
-  if (isNaN(result.getTime())) {
+  if (Number.isNaN(result.getTime())) {
     result = new Date(value);
   }
   return result;
@@ -127,7 +127,7 @@ export function formatDateTime(
     }
     if (!dt?.isValid) {
       const parsed = Number(value);
-      if (!isNaN(parsed)) {
+      if (!Number.isNaN(parsed)) {
         dt = DateTime.fromMillis(parsed);
       }
     }
@@ -183,17 +183,15 @@ export function getPrimaryKeys<T extends AnyMySqlTable>(table: T): [string, AnyC
     // Collect all primary key columns from all primary key builders
     const primaryKeyColumns = new Set<[string, AnyColumn]>();
 
-    primaryKeys.forEach((primaryKeyBuilder) => {
+    for (const primaryKeyBuilder of primaryKeys) {
       // Get primary key columns from each builder
-      Object.entries(columns)
-        .filter(([, column]) => {
-          // @ts-ignore - PrimaryKeyBuilder has internal columns property
-          return primaryKeyBuilder.columns.includes(column);
-        })
-        .forEach(([name, column]) => {
-          primaryKeyColumns.add([name, column]);
-        });
-    });
+      for (const [name, column1] of Object.entries(columns).filter(([, column]) => {
+        // @ts-ignore - PrimaryKeyBuilder has internal columns property
+        return primaryKeyBuilder.columns.includes(column);
+      })) {
+        primaryKeyColumns.add([name, column1]);
+      }
+    }
 
     return Array.from(primaryKeyColumns);
   }
@@ -220,12 +218,12 @@ function processForeignKeys(
     // @ts-ignore
     const fkArray: any[] = table[foreignKeysSymbol];
     if (fkArray) {
-      fkArray.forEach((fk) => {
+      for (const fk of fkArray) {
         if (fk.reference) {
           const item = fk.reference(fk);
           foreignKeys.push(item);
         }
-      });
+      }
     }
   }
 
@@ -242,14 +240,14 @@ function processForeignKeys(
               (item) => (item as ConfigBuilderData).value ?? item,
             );
 
-        configBuilders.forEach((builder) => {
-          if (!builder?.constructor) return;
+        for (const builder of configBuilders) {
+          if (!builder?.constructor) continue;
 
           const builderName = builder.constructor.name.toLowerCase();
           if (builderName.includes("foreignkeybuilder")) {
             foreignKeys.push(builder);
           }
-        });
+        }
       }
     }
   }
@@ -297,8 +295,8 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
             );
 
         // Process each builder
-        configBuilders.forEach((builder) => {
-          if (!builder?.constructor) return;
+        for (const builder of configBuilders) {
+          if (!builder?.constructor) continue;
 
           const builderName = builder.constructor.name.toLowerCase();
 
@@ -320,7 +318,7 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
 
           // Always add to extras array
           builders.extras.push(builder);
-        });
+        }
       }
     }
   }
@@ -352,14 +350,14 @@ export function generateDropTableStatements(
     console.warn('No drop operations requested: both "table" and "sequence" options are false');
     return [];
   }
-  tables.forEach((tableName) => {
+  for (const tableName of tables) {
     if (validOptions.table) {
       dropStatements.push(`DROP TABLE IF EXISTS \`${tableName}\`;`);
     }
     if (validOptions.sequence) {
       dropStatements.push(`DROP SEQUENCE IF EXISTS \`${tableName}\`;`);
     }
-  });
+  }
 
   return dropStatements;
 }
@@ -373,13 +371,13 @@ function mapSelectTableToAlias(
 ): any {
   const { columns, tableName } = getTableMetadata(table);
   const selectionsTableFields: Record<string, unknown> = {};
-  Object.keys(columns).forEach((name) => {
+  for (const name of Object.keys(columns)) {
     const column = columns[name] as AnyColumn;
     const uniqName = `a_${uniqPrefix}_${tableName}_${column.name}`.toLowerCase();
     const fieldAlias = sql.raw(uniqName);
     selectionsTableFields[name] = sql`${column} as \`${fieldAlias}\``;
     aliasMap[uniqName] = column;
-  });
+  }
   return selectionsTableFields;
 }
 
@@ -406,9 +404,9 @@ export function mapSelectAllFieldsToAlias(
     selections[name] = fields;
   } else {
     const innerSelections: any = {};
-    Object.entries(fields).forEach(([iname, ifields]) => {
+    for (const [iname, ifields] of Object.entries(fields)) {
       mapSelectAllFieldsToAlias(innerSelections, iname, `${uniqName}_${iname}`, ifields, aliasMap);
-    });
+    }
     selections[name] = innerSelections;
   }
   return selections;
@@ -421,9 +419,10 @@ export function mapSelectFieldsWithAlias<TSelection extends SelectedFields>(
   }
   const aliasMap: AliasColumnMap = {};
   const selections: any = {};
-  Object.entries(fields).forEach(([name, fields]) => {
-    mapSelectAllFieldsToAlias(selections, name, name, fields, aliasMap);
-  });
+  for (let i = 0; i < Object.entries(fields).length; i++) {
+    const [name, fields1] = Object.entries(fields)[i];
+    mapSelectAllFieldsToAlias(selections, name, name, fields1, aliasMap);
+  }
   return { selections, aliasMap };
 }
 
@@ -546,7 +545,7 @@ function processNullBranches(obj: Record<string, unknown>): Record<string, unkno
 }
 
 export function formatLimitOffset(limitOrOffset: number): number {
-  if (typeof limitOrOffset !== "number" || isNaN(limitOrOffset)) {
+  if (typeof limitOrOffset !== "number" || Number.isNaN(limitOrOffset)) {
     throw new Error("limitOrOffset must be a valid number");
   }
   return sql.raw(`${limitOrOffset}`) as unknown as number;
@@ -628,7 +627,7 @@ export async function printQueriesWithPlan(
       timeoutMs + 200,
     );
 
-    results.forEach((result) => {
+    for (const result of results) {
       // Average execution time (convert from nanoseconds to milliseconds)
       const avgTimeMs = Number(result.avgLatency) / 1_000_000;
       const avgMemMB = Number(result.avgMem) / 1_000_000;
@@ -638,7 +637,7 @@ export async function printQueriesWithPlan(
       console.warn(
         `SQL: ${result.digestText} | Memory: ${avgMemMB.toFixed(2)} MB | Time: ${avgTimeMs.toFixed(2)} ms | stmtType: ${result.stmtType} | Executions: ${result.execCount}\n Plan:${result.plan}`,
       );
-    });
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.debug(
@@ -714,7 +713,7 @@ export async function slowQueryPerHours(
       timeoutMs,
     );
     const response: string[] = [];
-    results.forEach((result) => {
+    for (const result of results) {
       // Convert memory from bytes to MB and handle null values
       const memMaxMB = result.memMax ? Number(result.memMax) / 1_000_000 : 0;
 
@@ -723,7 +722,7 @@ export async function slowQueryPerHours(
       // 1. Query info: SQL, memory, time, executions
       // eslint-disable-next-line no-console
       console.warn(message);
-    });
+    }
     return response;
   } catch (error) {
     // eslint-disable-next-line no-console

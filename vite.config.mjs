@@ -16,7 +16,7 @@ export default defineConfig(() => {
       },
       ssr: true,
       sourcemap: true,
-      target: "node18",
+      target: "node22",
       rollupOptions: {
         external: ["@forge/sql"],
         output: {

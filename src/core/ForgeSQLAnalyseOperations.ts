@@ -294,9 +294,10 @@ export class ForgeSQLAnalyseOperation implements SchemaAnalyzeForgeSql {
         .map((s) => s.trim())
         .filter(Boolean);
       const row: Record<string, string> = {};
-      headers.forEach((key, i) => {
+      for (const key of headers) {
+        const i = headers.indexOf(key);
         row[key] = values[i] ?? "";
-      });
+      }
       return row as unknown as ExplainAnalyzeRow;
     });
   }
