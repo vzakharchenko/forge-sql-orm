@@ -43,6 +43,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vitest": "^0.5.4",
+    "husky": "^9.1.7",
     "knip": "^5.67.1",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
@@ -84,5 +85,16 @@
   },
   "dependencies": {
     "luxon": "^3.7.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,css,scss,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "cd .husky && ./pre-commit"
+    }
   }
 }

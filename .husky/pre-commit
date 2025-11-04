@@ -1,0 +1,30 @@
+#!/bin/sh
+set -e
+echo '🔍 Running forge-sql-orm checks...'
+
+echo '➡️ lint-staged (forge-sql-orm)'
+npx lint-staged || { echo '❌ lint-staged failed for resolver'; exit 1; }
+
+echo '➡️ typecheck (forge-sql-orm)'
+npm run build || { echo '❌ build failed'; exit 1; }
+
+echo '➡️ dependencies check'
+npm run knip || { echo '❌ Dependency check failed.'; exit 1; }
+
+echo '➡️ lint check'
+npm run lint || { echo '❌ lint check failed.'; exit 1; }
+
+echo '🔍 Running forge-sql-orm-cli resources checks...'
+pushd forge-sql-orm-cli > /dev/null
+
+echo '➡️ lint-staged (forge-sql-orm-cli resources)'
+npx lint-staged || { echo '❌ lint-staged failed for forge-sql-orm-cli resources'; popd > /dev/null; exit 1; }
+
+
+echo '➡️ dependencies check'
+npm run knip || { echo '❌ Dependency check for forge-sql-orm-cli resources failed.'; exit 1; }
+
+echo '➡️ build'
+npm run build || { echo '❌ Build failed'; popd > /dev/null; exit 1; }
+
+popd > /dev/null

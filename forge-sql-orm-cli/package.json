@@ -66,5 +66,16 @@
   "overrides": {
     "esbuild": "npm:esbuild@0.25.0",
     "tmp": "npm:tmp@latest"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,css,scss,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "cd .husky && ./pre-commit"
+    }
   }
 }
