@@ -1,6 +1,5 @@
 #!/bin/sh
 set -e
-exit 2;
 echo '🔍 Running forge-sql-orm checks...'
 
 echo '➡️ lint-staged (forge-sql-orm)'
