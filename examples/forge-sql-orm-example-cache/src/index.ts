@@ -1,5 +1,5 @@
 import Resolver, { Request } from "@forge/resolver";
-import api, { route } from "@forge/api";
+import { webTrigger } from "@forge/api";
 import {
   applySchemaMigrations,
   clearCacheSchedulerTrigger,
