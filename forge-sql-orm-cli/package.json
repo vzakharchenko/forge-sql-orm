@@ -61,7 +61,7 @@
     "knip": "^5.67.1",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.9.3",
-    "vite": "^7.1.12"
+    "vite": "^7.2.1"
   },
   "overrides": {
     "esbuild": "npm:esbuild@0.25.0",

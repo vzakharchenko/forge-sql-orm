@@ -593,6 +593,17 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
             }
           };
         }
+        if (prop === "catch") {
+          return (onrejected: any) => (receiver as any).then(undefined, onrejected);
+        }
+
+        if (prop === "finally") {
+          return (onfinally: any) =>
+            (receiver as any).then(
+              (value: any) => Promise.resolve(value).finally(onfinally),
+              (reason: any) => Promise.reject(reason).finally(onfinally),
+            );
+        }
 
         const value = Reflect.get(target, prop, receiver);
 

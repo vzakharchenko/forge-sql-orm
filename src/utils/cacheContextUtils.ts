@@ -159,10 +159,11 @@ export async function getQueryLocalCacheQuery<
     } else {
       sql = query as { toSQL: () => Query };
     }
-    const key = hashKey(sql.toSQL());
-    if (context.cache[key] && context.cache[key].sql === sql.toSQL().sql.toLowerCase()) {
+    const toSQL = sql.toSQL();
+    const key = hashKey(toSQL);
+    if (context.cache[key] && context.cache[key].sql === toSQL.sql.toLowerCase()) {
       if (options.logCache) {
-        const q = sql.toSQL();
+        const q = toSQL;
         // eslint-disable-next-line no-console
         console.debug(
           `[forge-sql-orm][local-cache][HIT] Returned cached result. sql="${q.sql}", params=${JSON.stringify(q.params)}`,

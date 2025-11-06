@@ -1,14 +1,6 @@
 var Si = { exports: {} },
   D = {};
-/**
- * @license React
- * react.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */ var wa;
+var wa;
 function Cc() {
   if (wa) return D;
   wa = 1;
@@ -368,15 +360,7 @@ var Pl = {},
   ze = {},
   Ei = { exports: {} },
   Ci = {};
-/**
- * @license React
- * scheduler.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */ var ka;
+var ka;
 function xc() {
   return (
     ka ||
@@ -660,15 +644,7 @@ var Ea;
 function Pc() {
   return (Ea || ((Ea = 1), (Ei.exports = xc())), Ei.exports);
 }
-/**
- * @license React
- * react-dom.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */ var Ca;
+var Ca;
 function Nc() {
   if (Ca) return ze;
   Ca = 1;

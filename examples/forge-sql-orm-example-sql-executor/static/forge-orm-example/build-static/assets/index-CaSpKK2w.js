@@ -1,4 +1,4 @@
-import { r as Yt, c as Lr } from "./react-dom-vendor-DUDfcWRj.js";
+import { r as Yt, c as Lr } from "./react-dom-vendor-u1YXTQK9.js";
 import { g as Ur, r as I } from "./client-core-vendor-BYfXJVhY.js";
 import { r as Nr } from "./lodash-vendor-BbpxWQUq.js";
 (function () {
@@ -32,15 +32,7 @@ import { r as Nr } from "./lodash-vendor-BbpxWQUq.js";
 })();
 var me = { exports: {} },
   M = {};
-/**
- * @license React
- * react-jsx-runtime.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */ var ze;
+var ze;
 function $r() {
   if (ze) return M;
   ze = 1;
