@@ -73,7 +73,6 @@ resolver.define(
   ): Promise<{ rows: UserOrderRow[]; times: number }> => {
     console.log("fetch action = " + req.payload.action);
     const beginTime = new Date().getTime();
-    api.asApp().requestGraph();
     try {
       let diff = 0;
       const result = await FORGE_SQL_ORM.executeWithMetadata(
