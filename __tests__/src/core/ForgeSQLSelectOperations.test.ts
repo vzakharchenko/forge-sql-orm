@@ -2,12 +2,7 @@ import { sql } from "@forge/sql";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { eq, sql as rawSql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql-proxy";
-import {
-  forgeDriver,
-  ForgeSQLMetadata,
-  ForgeSqlOperation,
-  patchDbWithSelectAliased,
-} from "../../../src";
+import { forgeDriver, ForgeSqlOperation, patchDbWithSelectAliased } from "../../../src";
 import ForgeSQLORM from "../../../src/core/ForgeSQLORM";
 import { testEntity } from "../../entities/TestEntity";
 import { testDataEntity } from "../../entities/TestDataEntity";

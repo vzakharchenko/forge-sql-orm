@@ -1,0 +1,3183 @@
+import { r as $t, c as Lr } from "./react-dom-vendor-BOEB6BZs.js";
+import { g as Ur, r as R } from "./client-core-vendor-D3kwrIkk.js";
+import { r as Nr } from "./lodash-vendor-DXG1mS21.js";
+(function () {
+  const t = document.createElement("link").relList;
+  if (t && t.supports && t.supports("modulepreload")) return;
+  for (const a of document.querySelectorAll('link[rel="modulepreload"]')) i(a);
+  new MutationObserver((a) => {
+    for (const n of a)
+      if (n.type === "childList")
+        for (const r of n.addedNodes) r.tagName === "LINK" && r.rel === "modulepreload" && i(r);
+  }).observe(document, { childList: !0, subtree: !0 });
+  function s(a) {
+    const n = {};
+    return (
+      a.integrity && (n.integrity = a.integrity),
+      a.referrerPolicy && (n.referrerPolicy = a.referrerPolicy),
+      a.crossOrigin === "use-credentials"
+        ? (n.credentials = "include")
+        : a.crossOrigin === "anonymous"
+          ? (n.credentials = "omit")
+          : (n.credentials = "same-origin"),
+      n
+    );
+  }
+  function i(a) {
+    if (a.ep) return;
+    a.ep = !0;
+    const n = s(a);
+    fetch(a.href, n);
+  }
+})();
+var me = { exports: {} },
+  q = {};
+var Ve;
+function xr() {
+  if (Ve) return q;
+  Ve = 1;
+  var e = $t(),
+    t = Symbol.for("react.element"),
+    s = Symbol.for("react.fragment"),
+    i = Object.prototype.hasOwnProperty,
+    a = e.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,
+    n = { key: !0, ref: !0, __self: !0, __source: !0 };
+  function r(c, u, o) {
+    var l,
+      d = {},
+      f = null,
+      _ = null;
+    (o !== void 0 && (f = "" + o),
+      u.key !== void 0 && (f = "" + u.key),
+      u.ref !== void 0 && (_ = u.ref));
+    for (l in u) i.call(u, l) && !n.hasOwnProperty(l) && (d[l] = u[l]);
+    if (c && c.defaultProps) for (l in ((u = c.defaultProps), u)) d[l] === void 0 && (d[l] = u[l]);
+    return { $$typeof: t, type: c, key: f, ref: _, props: d, _owner: a.current };
+  }
+  return ((q.Fragment = s), (q.jsx = r), (q.jsxs = r), q);
+}
+var Ke;
+function Gr() {
+  return (Ke || ((Ke = 1), (me.exports = xr())), me.exports);
+}
+var m = Gr(),
+  _e = $t(),
+  we = {},
+  Ne = function (e, t) {
+    return (
+      (Ne =
+        Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array &&
+          function (s, i) {
+            s.__proto__ = i;
+          }) ||
+        function (s, i) {
+          for (var a in i) Object.prototype.hasOwnProperty.call(i, a) && (s[a] = i[a]);
+        }),
+      Ne(e, t)
+    );
+  };
+function er(e, t) {
+  if (typeof t != "function" && t !== null)
+    throw new TypeError("Class extends value " + String(t) + " is not a constructor or null");
+  Ne(e, t);
+  function s() {
+    this.constructor = e;
+  }
+  e.prototype = t === null ? Object.create(t) : ((s.prototype = t.prototype), new s());
+}
+var ve = function () {
+  return (
+    (ve =
+      Object.assign ||
+      function (t) {
+        for (var s, i = 1, a = arguments.length; i < a; i++) {
+          s = arguments[i];
+          for (var n in s) Object.prototype.hasOwnProperty.call(s, n) && (t[n] = s[n]);
+        }
+        return t;
+      }),
+    ve.apply(this, arguments)
+  );
+};
+function tr(e, t) {
+  var s = {};
+  for (var i in e) Object.prototype.hasOwnProperty.call(e, i) && t.indexOf(i) < 0 && (s[i] = e[i]);
+  if (e != null && typeof Object.getOwnPropertySymbols == "function")
+    for (var a = 0, i = Object.getOwnPropertySymbols(e); a < i.length; a++)
+      t.indexOf(i[a]) < 0 &&
+        Object.prototype.propertyIsEnumerable.call(e, i[a]) &&
+        (s[i[a]] = e[i[a]]);
+  return s;
+}
+function rr(e, t, s, i) {
+  var a = arguments.length,
+    n = a < 3 ? t : i === null ? (i = Object.getOwnPropertyDescriptor(t, s)) : i,
+    r;
+  if (typeof Reflect == "object" && typeof Reflect.decorate == "function")
+    n = Reflect.decorate(e, t, s, i);
+  else
+    for (var c = e.length - 1; c >= 0; c--)
+      (r = e[c]) && (n = (a < 3 ? r(n) : a > 3 ? r(t, s, n) : r(t, s)) || n);
+  return (a > 3 && n && Object.defineProperty(t, s, n), n);
+}
+function nr(e, t) {
+  return function (s, i) {
+    t(s, i, e);
+  };
+}
+function ir(e, t, s, i, a, n) {
+  function r(p) {
+    if (p !== void 0 && typeof p != "function") throw new TypeError("Function expected");
+    return p;
+  }
+  for (
+    var c = i.kind,
+      u = c === "getter" ? "get" : c === "setter" ? "set" : "value",
+      o = !t && e ? (i.static ? e : e.prototype) : null,
+      l = t || (o ? Object.getOwnPropertyDescriptor(o, i.name) : {}),
+      d,
+      f = !1,
+      _ = s.length - 1;
+    _ >= 0;
+    _--
+  ) {
+    var v = {};
+    for (var h in i) v[h] = h === "access" ? {} : i[h];
+    for (var h in i.access) v.access[h] = i.access[h];
+    v.addInitializer = function (p) {
+      if (f) throw new TypeError("Cannot add initializers after decoration has completed");
+      n.push(r(p || null));
+    };
+    var g = (0, s[_])(c === "accessor" ? { get: l.get, set: l.set } : l[u], v);
+    if (c === "accessor") {
+      if (g === void 0) continue;
+      if (g === null || typeof g != "object") throw new TypeError("Object expected");
+      ((d = r(g.get)) && (l.get = d),
+        (d = r(g.set)) && (l.set = d),
+        (d = r(g.init)) && a.unshift(d));
+    } else (d = r(g)) && (c === "field" ? a.unshift(d) : (l[u] = d));
+  }
+  (o && Object.defineProperty(o, i.name, l), (f = !0));
+}
+function or(e, t, s) {
+  for (var i = arguments.length > 2, a = 0; a < t.length; a++)
+    s = i ? t[a].call(e, s) : t[a].call(e);
+  return i ? s : void 0;
+}
+function ar(e) {
+  return typeof e == "symbol" ? e : "".concat(e);
+}
+function sr(e, t, s) {
+  return (
+    typeof t == "symbol" && (t = t.description ? "[".concat(t.description, "]") : ""),
+    Object.defineProperty(e, "name", { configurable: !0, value: s ? "".concat(s, " ", t) : t })
+  );
+}
+function ur(e, t) {
+  if (typeof Reflect == "object" && typeof Reflect.metadata == "function")
+    return Reflect.metadata(e, t);
+}
+function lr(e, t, s, i) {
+  function a(n) {
+    return n instanceof s
+      ? n
+      : new s(function (r) {
+          r(n);
+        });
+  }
+  return new (s || (s = Promise))(function (n, r) {
+    function c(l) {
+      try {
+        o(i.next(l));
+      } catch (d) {
+        r(d);
+      }
+    }
+    function u(l) {
+      try {
+        o(i.throw(l));
+      } catch (d) {
+        r(d);
+      }
+    }
+    function o(l) {
+      l.done ? n(l.value) : a(l.value).then(c, u);
+    }
+    o((i = i.apply(e, t || [])).next());
+  });
+}
+function cr(e, t) {
+  var s = {
+      label: 0,
+      sent: function () {
+        if (n[0] & 1) throw n[1];
+        return n[1];
+      },
+      trys: [],
+      ops: [],
+    },
+    i,
+    a,
+    n,
+    r = Object.create((typeof Iterator == "function" ? Iterator : Object).prototype);
+  return (
+    (r.next = c(0)),
+    (r.throw = c(1)),
+    (r.return = c(2)),
+    typeof Symbol == "function" &&
+      (r[Symbol.iterator] = function () {
+        return this;
+      }),
+    r
+  );
+  function c(o) {
+    return function (l) {
+      return u([o, l]);
+    };
+  }
+  function u(o) {
+    if (i) throw new TypeError("Generator is already executing.");
+    for (; r && ((r = 0), o[0] && (s = 0)), s; )
+      try {
+        if (
+          ((i = 1),
+          a &&
+            (n =
+              o[0] & 2 ? a.return : o[0] ? a.throw || ((n = a.return) && n.call(a), 0) : a.next) &&
+            !(n = n.call(a, o[1])).done)
+        )
+          return n;
+        switch (((a = 0), n && (o = [o[0] & 2, n.value]), o[0])) {
+          case 0:
+          case 1:
+            n = o;
+            break;
+          case 4:
+            return (s.label++, { value: o[1], done: !1 });
+          case 5:
+            (s.label++, (a = o[1]), (o = [0]));
+            continue;
+          case 7:
+            ((o = s.ops.pop()), s.trys.pop());
+            continue;
+          default:
+            if (
+              ((n = s.trys), !(n = n.length > 0 && n[n.length - 1]) && (o[0] === 6 || o[0] === 2))
+            ) {
+              s = 0;
+              continue;
+            }
+            if (o[0] === 3 && (!n || (o[1] > n[0] && o[1] < n[3]))) {
+              s.label = o[1];
+              break;
+            }
+            if (o[0] === 6 && s.label < n[1]) {
+              ((s.label = n[1]), (n = o));
+              break;
+            }
+            if (n && s.label < n[2]) {
+              ((s.label = n[2]), s.ops.push(o));
+              break;
+            }
+            (n[2] && s.ops.pop(), s.trys.pop());
+            continue;
+        }
+        o = t.call(e, s);
+      } catch (l) {
+        ((o = [6, l]), (a = 0));
+      } finally {
+        i = n = 0;
+      }
+    if (o[0] & 5) throw o[1];
+    return { value: o[0] ? o[1] : void 0, done: !0 };
+  }
+}
+var ye = Object.create
+  ? function (e, t, s, i) {
+      i === void 0 && (i = s);
+      var a = Object.getOwnPropertyDescriptor(t, s);
+      ((!a || ("get" in a ? !t.__esModule : a.writable || a.configurable)) &&
+        (a = {
+          enumerable: !0,
+          get: function () {
+            return t[s];
+          },
+        }),
+        Object.defineProperty(e, i, a));
+    }
+  : function (e, t, s, i) {
+      (i === void 0 && (i = s), (e[i] = t[s]));
+    };
+function dr(e, t) {
+  for (var s in e) s !== "default" && !Object.prototype.hasOwnProperty.call(t, s) && ye(t, e, s);
+}
+function ge(e) {
+  var t = typeof Symbol == "function" && Symbol.iterator,
+    s = t && e[t],
+    i = 0;
+  if (s) return s.call(e);
+  if (e && typeof e.length == "number")
+    return {
+      next: function () {
+        return (e && i >= e.length && (e = void 0), { value: e && e[i++], done: !e });
+      },
+    };
+  throw new TypeError(t ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+function ze(e, t) {
+  var s = typeof Symbol == "function" && e[Symbol.iterator];
+  if (!s) return e;
+  var i = s.call(e),
+    a,
+    n = [],
+    r;
+  try {
+    for (; (t === void 0 || t-- > 0) && !(a = i.next()).done; ) n.push(a.value);
+  } catch (c) {
+    r = { error: c };
+  } finally {
+    try {
+      a && !a.done && (s = i.return) && s.call(i);
+    } finally {
+      if (r) throw r.error;
+    }
+  }
+  return n;
+}
+function fr() {
+  for (var e = [], t = 0; t < arguments.length; t++) e = e.concat(ze(arguments[t]));
+  return e;
+}
+function _r() {
+  for (var e = 0, t = 0, s = arguments.length; t < s; t++) e += arguments[t].length;
+  for (var i = Array(e), a = 0, t = 0; t < s; t++)
+    for (var n = arguments[t], r = 0, c = n.length; r < c; r++, a++) i[a] = n[r];
+  return i;
+}
+function hr(e, t, s) {
+  if (s || arguments.length === 2)
+    for (var i = 0, a = t.length, n; i < a; i++)
+      (n || !(i in t)) && (n || (n = Array.prototype.slice.call(t, 0, i)), (n[i] = t[i]));
+  return e.concat(n || Array.prototype.slice.call(t));
+}
+function k(e) {
+  return this instanceof k ? ((this.v = e), this) : new k(e);
+}
+function vr(e, t, s) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var i = s.apply(e, t || []),
+    a,
+    n = [];
+  return (
+    (a = Object.create((typeof AsyncIterator == "function" ? AsyncIterator : Object).prototype)),
+    c("next"),
+    c("throw"),
+    c("return", r),
+    (a[Symbol.asyncIterator] = function () {
+      return this;
+    }),
+    a
+  );
+  function r(_) {
+    return function (v) {
+      return Promise.resolve(v).then(_, d);
+    };
+  }
+  function c(_, v) {
+    i[_] &&
+      ((a[_] = function (h) {
+        return new Promise(function (g, p) {
+          n.push([_, h, g, p]) > 1 || u(_, h);
+        });
+      }),
+      v && (a[_] = v(a[_])));
+  }
+  function u(_, v) {
+    try {
+      o(i[_](v));
+    } catch (h) {
+      f(n[0][3], h);
+    }
+  }
+  function o(_) {
+    _.value instanceof k ? Promise.resolve(_.value.v).then(l, d) : f(n[0][2], _);
+  }
+  function l(_) {
+    u("next", _);
+  }
+  function d(_) {
+    u("throw", _);
+  }
+  function f(_, v) {
+    (_(v), n.shift(), n.length && u(n[0][0], n[0][1]));
+  }
+}
+function gr(e) {
+  var t, s;
+  return (
+    (t = {}),
+    i("next"),
+    i("throw", function (a) {
+      throw a;
+    }),
+    i("return"),
+    (t[Symbol.iterator] = function () {
+      return this;
+    }),
+    t
+  );
+  function i(a, n) {
+    t[a] = e[a]
+      ? function (r) {
+          return (s = !s) ? { value: k(e[a](r)), done: !1 } : n ? n(r) : r;
+        }
+      : n;
+  }
+}
+function pr(e) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var t = e[Symbol.asyncIterator],
+    s;
+  return t
+    ? t.call(e)
+    : ((e = typeof ge == "function" ? ge(e) : e[Symbol.iterator]()),
+      (s = {}),
+      i("next"),
+      i("throw"),
+      i("return"),
+      (s[Symbol.asyncIterator] = function () {
+        return this;
+      }),
+      s);
+  function i(n) {
+    s[n] =
+      e[n] &&
+      function (r) {
+        return new Promise(function (c, u) {
+          ((r = e[n](r)), a(c, u, r.done, r.value));
+        });
+      };
+  }
+  function a(n, r, c, u) {
+    Promise.resolve(u).then(function (o) {
+      n({ value: o, done: c });
+    }, r);
+  }
+}
+function yr(e, t) {
+  return (Object.defineProperty ? Object.defineProperty(e, "raw", { value: t }) : (e.raw = t), e);
+}
+var zr = Object.create
+    ? function (e, t) {
+        Object.defineProperty(e, "default", { enumerable: !0, value: t });
+      }
+    : function (e, t) {
+        e.default = t;
+      },
+  xe = function (e) {
+    return (
+      (xe =
+        Object.getOwnPropertyNames ||
+        function (t) {
+          var s = [];
+          for (var i in t) Object.prototype.hasOwnProperty.call(t, i) && (s[s.length] = i);
+          return s;
+        }),
+      xe(e)
+    );
+  };
+function br(e) {
+  if (e && e.__esModule) return e;
+  var t = {};
+  if (e != null) for (var s = xe(e), i = 0; i < s.length; i++) s[i] !== "default" && ye(t, e, s[i]);
+  return (zr(t, e), t);
+}
+function mr(e) {
+  return e && e.__esModule ? e : { default: e };
+}
+function wr(e, t, s, i) {
+  if (s === "a" && !i) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof t == "function" ? e !== t || !i : !t.has(e))
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return s === "m" ? i : s === "a" ? i.call(e) : i ? i.value : t.get(e);
+}
+function Er(e, t, s, i, a) {
+  if (i === "m") throw new TypeError("Private method is not writable");
+  if (i === "a" && !a) throw new TypeError("Private accessor was defined without a setter");
+  if (typeof t == "function" ? e !== t || !a : !t.has(e))
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return (i === "a" ? a.call(e, s) : a ? (a.value = s) : t.set(e, s), s);
+}
+function Or(e, t) {
+  if (t === null || (typeof t != "object" && typeof t != "function"))
+    throw new TypeError("Cannot use 'in' operator on non-object");
+  return typeof e == "function" ? t === e : e.has(t);
+}
+function Sr(e, t, s) {
+  if (t != null) {
+    if (typeof t != "object" && typeof t != "function") throw new TypeError("Object expected.");
+    var i, a;
+    if (s) {
+      if (!Symbol.asyncDispose) throw new TypeError("Symbol.asyncDispose is not defined.");
+      i = t[Symbol.asyncDispose];
+    }
+    if (i === void 0) {
+      if (!Symbol.dispose) throw new TypeError("Symbol.dispose is not defined.");
+      ((i = t[Symbol.dispose]), s && (a = i));
+    }
+    if (typeof i != "function") throw new TypeError("Object not disposable.");
+    (a &&
+      (i = function () {
+        try {
+          a.call(this);
+        } catch (n) {
+          return Promise.reject(n);
+        }
+      }),
+      e.stack.push({ value: t, dispose: i, async: s }));
+  } else s && e.stack.push({ async: !0 });
+  return t;
+}
+var Vr =
+  typeof SuppressedError == "function"
+    ? SuppressedError
+    : function (e, t, s) {
+        var i = new Error(s);
+        return ((i.name = "SuppressedError"), (i.error = e), (i.suppressed = t), i);
+      };
+function Pr(e) {
+  function t(n) {
+    ((e.error = e.hasError ? new Vr(n, e.error, "An error was suppressed during disposal.") : n),
+      (e.hasError = !0));
+  }
+  var s,
+    i = 0;
+  function a() {
+    for (; (s = e.stack.pop()); )
+      try {
+        if (!s.async && i === 1) return ((i = 0), e.stack.push(s), Promise.resolve().then(a));
+        if (s.dispose) {
+          var n = s.dispose.call(s.value);
+          if (s.async)
+            return (
+              (i |= 2),
+              Promise.resolve(n).then(a, function (r) {
+                return (t(r), a());
+              })
+            );
+        } else i |= 1;
+      } catch (r) {
+        t(r);
+      }
+    if (i === 1) return e.hasError ? Promise.reject(e.error) : Promise.resolve();
+    if (e.hasError) throw e.error;
+  }
+  return a();
+}
+function Rr(e, t) {
+  return typeof e == "string" && /^\.\.?\//.test(e)
+    ? e.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function (s, i, a, n, r) {
+        return i
+          ? t
+            ? ".jsx"
+            : ".js"
+          : a && (!n || !r)
+            ? s
+            : a + n + "." + r.toLowerCase() + "js";
+      })
+    : e;
+}
+const Kr = {
+    __extends: er,
+    __assign: ve,
+    __rest: tr,
+    __decorate: rr,
+    __param: nr,
+    __esDecorate: ir,
+    __runInitializers: or,
+    __propKey: ar,
+    __setFunctionName: sr,
+    __metadata: ur,
+    __awaiter: lr,
+    __generator: cr,
+    __createBinding: ye,
+    __exportStar: dr,
+    __values: ge,
+    __read: ze,
+    __spread: fr,
+    __spreadArrays: _r,
+    __spreadArray: hr,
+    __await: k,
+    __asyncGenerator: vr,
+    __asyncDelegator: gr,
+    __asyncValues: pr,
+    __makeTemplateObject: yr,
+    __importStar: br,
+    __importDefault: mr,
+    __classPrivateFieldGet: wr,
+    __classPrivateFieldSet: Er,
+    __classPrivateFieldIn: Or,
+    __addDisposableResource: Sr,
+    __disposeResources: Pr,
+    __rewriteRelativeImportExtension: Rr,
+  },
+  Hr = Object.freeze(
+    Object.defineProperty(
+      {
+        __proto__: null,
+        __addDisposableResource: Sr,
+        get __assign() {
+          return ve;
+        },
+        __asyncDelegator: gr,
+        __asyncGenerator: vr,
+        __asyncValues: pr,
+        __await: k,
+        __awaiter: lr,
+        __classPrivateFieldGet: wr,
+        __classPrivateFieldIn: Or,
+        __classPrivateFieldSet: Er,
+        __createBinding: ye,
+        __decorate: rr,
+        __disposeResources: Pr,
+        __esDecorate: ir,
+        __exportStar: dr,
+        __extends: er,
+        __generator: cr,
+        __importDefault: mr,
+        __importStar: br,
+        __makeTemplateObject: yr,
+        __metadata: ur,
+        __param: nr,
+        __propKey: ar,
+        __read: ze,
+        __rest: tr,
+        __rewriteRelativeImportExtension: Rr,
+        __runInitializers: or,
+        __setFunctionName: sr,
+        __spread: fr,
+        __spreadArray: hr,
+        __spreadArrays: _r,
+        __values: ge,
+        default: Kr,
+      },
+      Symbol.toStringTag,
+      { value: "Module" },
+    ),
+  ),
+  P = Ur(Hr);
+var M = {},
+  He;
+function Jr() {
+  return (
+    He ||
+      ((He = 1),
+      Object.defineProperty(M, "__esModule", { value: !0 }),
+      (M.NavigationTarget = void 0),
+      (M.NavigationTarget = {
+        ContentView: "contentView",
+        ContentEdit: "contentEdit",
+        ContentList: "contentList",
+        SpaceView: "spaceView",
+        Module: "module",
+        UserProfile: "userProfile",
+        Dashboard: "dashboard",
+        Issue: "issue",
+        ProjectSettingsDetails: "projectSettingsDetails",
+      })),
+    M
+  );
+}
+var Ee = {},
+  Oe = {},
+  B = {},
+  L = {},
+  Je;
+function w() {
+  if (Je) return L;
+  ((Je = 1), Object.defineProperty(L, "__esModule", { value: !0 }), (L.BridgeAPIError = void 0));
+  class e extends Error {}
+  return ((L.BridgeAPIError = e), L);
+}
+var We;
+function b() {
+  if (We) return B;
+  ((We = 1), Object.defineProperty(B, "__esModule", { value: !0 }), (B.getCallBridge = void 0));
+  const e = w();
+  function t(i) {
+    return !!i?.callBridge;
+  }
+  const s = () => {
+    if (!t(window.__bridge))
+      throw new e.BridgeAPIError(`
+      Unable to establish a connection with the Custom UI bridge.
+      If you are trying to run your app locally, Forge apps only work in the context of Atlassian products. Refer to https://go.atlassian.com/forge-tunneling-with-custom-ui for how to tunnel when using a local development server.
+    `);
+    return window.__bridge.callBridge;
+  };
+  return ((B.getCallBridge = s), B);
+}
+var U = {},
+  Xe;
+function be() {
+  if (Xe) return U;
+  ((Xe = 1), Object.defineProperty(U, "__esModule", { value: !0 }), (U.withRateLimiter = void 0));
+  const e = w(),
+    t = (s, i, a, n) => {
+      let r = Date.now(),
+        c = 0;
+      return async (...u) => {
+        const o = Date.now();
+        if ((o - r > a && ((r = o), (c = 0)), c >= i))
+          throw new e.BridgeAPIError(n || "Too many invocations.");
+        return ((c = c + 1), s(...u));
+      };
+    };
+  return ((U.withRateLimiter = t), U);
+}
+var Ye;
+function Wr() {
+  return (
+    Ye ||
+      ((Ye = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), (e.makeInvoke = e.invoke = void 0));
+        const t = b(),
+          s = w(),
+          i = be(),
+          a = (0, t.getCallBridge)(),
+          n = (u) => {
+            if (u && Object.values(u).some((o) => typeof o == "function"))
+              throw new s.BridgeAPIError(
+                "Passing functions as part of the payload is not supported!",
+              );
+          },
+          r = (u, o) => {
+            if (typeof u != "string") throw new s.BridgeAPIError("functionKey must be a string!");
+            return (n(o), a("invoke", { functionKey: u, payload: o }));
+          };
+        e.invoke = (0, i.withRateLimiter)(
+          r,
+          500,
+          1e3 * 25,
+          "Resolver calls are rate limited at 500req/25s",
+        );
+        function c() {
+          return e.invoke;
+        }
+        e.makeInvoke = c;
+      })(Oe)),
+    Oe
+  );
+}
+var Ze;
+function Xr() {
+  return (
+    Ze ||
+      ((Ze = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), P.__exportStar(Wr(), e));
+      })(Ee)),
+    Ee
+  );
+}
+var Se = {},
+  N = {},
+  Pe = {},
+  Qe;
+function Ir() {
+  return (
+    Qe ||
+      ((Qe = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e._invokeEndpointFn = e.InvokeType = void 0));
+        const t = b(),
+          s = w(),
+          i = be(),
+          a = 500,
+          n = 25,
+          r = 1e3 * n;
+        (function (d) {
+          ((d.REMOTE = "Remote"), (d.SERVICE = "Container"));
+        })(e.InvokeType || (e.InvokeType = {}));
+        const c = (0, t.getCallBridge)(),
+          u = (d) => {
+            if (d && Object.values(d).some((f) => typeof f == "function"))
+              throw new s.BridgeAPIError(
+                "Passing functions as part of the payload is not supported!",
+              );
+          },
+          o = (d) => async (f) => {
+            u(f);
+            const _ = { ...f, invokeType: `ui-${d.toLowerCase()}-fetch` },
+              v = await c("invoke", _),
+              { success: h, payload: g, error: p } = v ?? {},
+              y = { ...(h ? g : p) };
+            if (y && y.headers)
+              for (const T in y.headers)
+                Array.isArray(y.headers[T]) && (y.headers[T] = y.headers[T].join(","));
+            return y;
+          },
+          l = (d) => {
+            const f = o(d);
+            return (0, i.withRateLimiter)(
+              f,
+              a,
+              r,
+              `${d} invocation calls are rate limited at ${a}/${n}s`,
+            );
+          };
+        e._invokeEndpointFn = l;
+      })(Pe)),
+    Pe
+  );
+}
+var $e;
+function Yr() {
+  if ($e) return N;
+  (($e = 1), Object.defineProperty(N, "__esModule", { value: !0 }), (N.invokeRemote = void 0));
+  const e = Ir(),
+    t = (s) => (0, e._invokeEndpointFn)(e.InvokeType.REMOTE)(s);
+  return ((N.invokeRemote = t), N);
+}
+var x = {},
+  et;
+function Zr() {
+  if (et) return x;
+  ((et = 1), Object.defineProperty(x, "__esModule", { value: !0 }), (x.invokeService = void 0));
+  const e = Ir(),
+    t = (s) => (0, e._invokeEndpointFn)(e.InvokeType.SERVICE)(s);
+  return ((x.invokeService = t), x);
+}
+var tt;
+function Qr() {
+  return (
+    tt ||
+      ((tt = 1),
+      (function (e) {
+        Object.defineProperty(e, "__esModule", { value: !0 });
+        const t = P;
+        (t.__exportStar(Yr(), e), t.__exportStar(Zr(), e));
+      })(Se)),
+    Se
+  );
+}
+var Re = {},
+  G = {},
+  z = {},
+  rt;
+function $r() {
+  if (rt) return z;
+  ((rt = 1), Object.defineProperty(z, "__esModule", { value: !0 }), (z.submit = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = async (a) => {
+      if ((await s("submit", a)) === !1)
+        throw new t.BridgeAPIError("this resource's view is not submittable.");
+    };
+  return ((z.submit = i), z);
+}
+var V = {},
+  nt;
+function en() {
+  if (nt) return V;
+  ((nt = 1), Object.defineProperty(V, "__esModule", { value: !0 }), (V.close = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = async (a) => {
+      try {
+        if ((await s("close", a)) === !1)
+          throw new t.BridgeAPIError("this resource's view is not closable.");
+      } catch {
+        throw new t.BridgeAPIError("this resource's view is not closable.");
+      }
+    };
+  return ((V.close = i), V);
+}
+var K = {},
+  it;
+function tn() {
+  if (it) return K;
+  ((it = 1), Object.defineProperty(K, "__esModule", { value: !0 }), (K.open = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = async () => {
+      try {
+        if ((await s("open")) === !1)
+          throw new t.BridgeAPIError("this resource's view is not openable.");
+      } catch {
+        throw new t.BridgeAPIError("this resource's view is not openable.");
+      }
+    };
+  return ((K.open = i), K);
+}
+var H = {},
+  ot;
+function rn() {
+  if (ot) return H;
+  ((ot = 1), Object.defineProperty(H, "__esModule", { value: !0 }), (H.refresh = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = async (a) => {
+      if ((await s("refresh", a)) === !1)
+        throw new t.BridgeAPIError("this resource's view is not refreshable.");
+    };
+  return ((H.refresh = i), H);
+}
+var J = {},
+  at;
+function nn() {
+  if (at) return J;
+  ((at = 1), Object.defineProperty(J, "__esModule", { value: !0 }), (J.createHistory = void 0));
+  const t = (0, b().getCallBridge)(),
+    s = async () => {
+      const i = await t("createHistory");
+      return (
+        i.listen((a) => {
+          i.location = a;
+        }),
+        i
+      );
+    };
+  return ((J.createHistory = s), J);
+}
+var W = {},
+  Ie = {},
+  E = {},
+  st;
+function Cr() {
+  return (
+    st ||
+      ((st = 1),
+      Object.defineProperty(E, "__esModule", { value: !0 }),
+      (E.FORGE_SUPPORTED_LOCALE_CODES = E.I18N_BUNDLE_FOLDER_NAME = E.I18N_INFO_FILE_NAME = void 0),
+      (E.I18N_INFO_FILE_NAME = "i18n-info.json"),
+      (E.I18N_BUNDLE_FOLDER_NAME = "__LOCALES__"),
+      (E.FORGE_SUPPORTED_LOCALE_CODES = [
+        "zh-CN",
+        "zh-TW",
+        "cs-CZ",
+        "da-DK",
+        "nl-NL",
+        "en-US",
+        "en-GB",
+        "et-EE",
+        "fi-FI",
+        "fr-FR",
+        "de-DE",
+        "hu-HU",
+        "is-IS",
+        "it-IT",
+        "ja-JP",
+        "ko-KR",
+        "no-NO",
+        "pl-PL",
+        "pt-BR",
+        "pt-PT",
+        "ro-RO",
+        "ru-RU",
+        "sk-SK",
+        "tr-TR",
+        "es-ES",
+        "sv-SE",
+      ])),
+    E
+  );
+}
+var I = {},
+  ut;
+function on() {
+  if (ut) return I;
+  ((ut = 1),
+    Object.defineProperty(I, "__esModule", { value: !0 }),
+    (I.TranslationsGetter = I.TranslationGetterError = void 0));
+  const e = (i, a) => {
+    i.includes(a) || i.push(a);
+  };
+  class t extends Error {
+    constructor(a) {
+      (super(a), (this.name = "TranslationGetterError"));
+    }
+  }
+  I.TranslationGetterError = t;
+  class s {
+    resourcesAccessor;
+    i18nInfoConfig = null;
+    translationResources = new Map();
+    constructor(a) {
+      this.resourcesAccessor = a;
+    }
+    async getTranslations(a, n = { fallback: !0 }) {
+      const r = await this.getI18nInfoConfig(),
+        { fallback: c } = n;
+      if (!c) {
+        let u;
+        return (
+          r.locales.includes(a) && (u = await this.getTranslationResource(a)),
+          { translations: u ?? null, locale: a }
+        );
+      }
+      for (const u of this.getLocaleLookupOrder(a, r)) {
+        const o = await this.getTranslationResource(u);
+        if (o) return { translations: o, locale: u };
+      }
+      return { translations: null, locale: a };
+    }
+    async getTranslationsByLocaleLookupOrder(a) {
+      const n = await this.getI18nInfoConfig(),
+        r = this.getLocaleLookupOrder(a, n);
+      return await Promise.all(
+        r.map(async (c) => {
+          const u = await this.getTranslationResource(c);
+          return { locale: c, translations: u };
+        }),
+      );
+    }
+    reset() {
+      ((this.i18nInfoConfig = null), this.translationResources.clear());
+    }
+    async getTranslationResource(a) {
+      let n = this.translationResources.get(a);
+      if (!n)
+        try {
+          ((n = await this.resourcesAccessor.getTranslationResource(a)),
+            this.translationResources.set(a, n));
+        } catch (r) {
+          throw r instanceof t ? r : new t(`Failed to get translation resource for locale: ${a}`);
+        }
+      return n;
+    }
+    async getI18nInfoConfig() {
+      if (!this.i18nInfoConfig)
+        try {
+          this.i18nInfoConfig = await this.resourcesAccessor.getI18nInfoConfig();
+        } catch (a) {
+          throw a instanceof t ? a : new t("Failed to get i18n info config");
+        }
+      return this.i18nInfoConfig;
+    }
+    getLocaleLookupOrder(a, n) {
+      const { locales: r, fallback: c } = n,
+        u = [a],
+        o = c[a];
+      return (
+        o && Array.isArray(o) && o.length > 0 && u.push(...o),
+        e(u, n.fallback.default),
+        u.filter((l) => r.includes(l))
+      );
+    }
+  }
+  return ((I.TranslationsGetter = s), I);
+}
+var X = {},
+  Ce = {},
+  lt;
+function Fr() {
+  return (
+    lt ||
+      ((lt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.getTranslationValueFromContent = e.getTranslationValue = void 0));
+        const s = P.__importDefault(Nr()),
+          i = (n, r, c) => {
+            const u = n[c];
+            return u ? (0, e.getTranslationValueFromContent)(u, r) : null;
+          };
+        e.getTranslationValue = i;
+        const a = (n, r) => {
+          let c = n[r];
+          if (!c) {
+            const u = r.split(".");
+            u.length > 1 && (c = (0, s.default)(n, u, null));
+          }
+          return typeof c == "string" ? c : null;
+        };
+        e.getTranslationValueFromContent = a;
+      })(Ce)),
+    Ce
+  );
+}
+var ct;
+function an() {
+  if (ct) return X;
+  ((ct = 1), Object.defineProperty(X, "__esModule", { value: !0 }), (X.Translator = void 0));
+  const e = Fr();
+  class t {
+    locale;
+    translationsGetter;
+    localeLookupOrderedTranslations = null;
+    cache = new Map();
+    constructor(i, a) {
+      ((this.locale = i), (this.translationsGetter = a));
+    }
+    async init() {
+      this.localeLookupOrderedTranslations =
+        await this.translationsGetter.getTranslationsByLocaleLookupOrder(this.locale);
+    }
+    translate(i) {
+      if (!this.localeLookupOrderedTranslations)
+        throw new Error("TranslationLookup not initialized");
+      let a = this.cache.get(i);
+      if (a === void 0) {
+        for (const { translations: n } of this.localeLookupOrderedTranslations) {
+          const r = (0, e.getTranslationValueFromContent)(n, i);
+          if (r !== null) {
+            a = r;
+            break;
+          }
+        }
+        ((a = a ?? null), this.cache.set(i, a));
+      }
+      return a;
+    }
+  }
+  return ((X.Translator = t), X);
+}
+var Y = {},
+  dt;
+function sn() {
+  if (dt) return Y;
+  ((dt = 1), Object.defineProperty(Y, "__esModule", { value: !0 }), (Y.ensureLocale = void 0));
+  const e = Cr(),
+    t = new Set(e.FORGE_SUPPORTED_LOCALE_CODES),
+    s = { "en-UK": "en-GB", "nb-NO": "no-NO" },
+    i = e.FORGE_SUPPORTED_LOCALE_CODES.reduce(
+      (n, r) => {
+        const [c] = r.split("-");
+        return (n[c] || (n[c] = r), n);
+      },
+      { nb: "no-NO", pt: "pt-PT" },
+    ),
+    a = (n) => {
+      const r = n.replace("_", "-");
+      return t.has(r) ? r : (i[r] ?? s[r] ?? null);
+    };
+  return ((Y.ensureLocale = a), Y);
+}
+var Fe = {},
+  ft;
+function un() {
+  return (
+    ft ||
+      ((ft = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.extractI18nPropertiesFromModules =
+            e.extractI18nKeysFromModules =
+            e.getI18nSupportedModuleEntries =
+              void 0));
+        const t = (o) => typeof o == "object" && o !== null && !Array.isArray(o),
+          s = (o) => typeof o?.i18n == "string",
+          i = (o) => o.startsWith("connect-"),
+          a = (o) => o.startsWith("core:"),
+          n = (o) => {
+            const l = new Set(),
+              d = (f, _) =>
+                !t(f) || l.has(f)
+                  ? []
+                  : (l.add(f),
+                    Object.entries(f).flatMap(([v, h]) => {
+                      const g = [..._, v];
+                      return s(h)
+                        ? [{ propertyPath: g, key: h.i18n }]
+                        : Array.isArray(h)
+                          ? h.flatMap((p) => d(p, g))
+                          : d(h, g);
+                    }));
+            return d(o, []);
+          },
+          r = (o) =>
+            Object.entries(o).flatMap(([l, d]) =>
+              !i(l) && !a(l) && d && Array.isArray(d) && d.length > 0 ? d.map((f) => [f, l]) : [],
+            );
+        e.getI18nSupportedModuleEntries = r;
+        const c = (o) => {
+          const l = new Set();
+          for (const d of (0, e.getI18nSupportedModuleEntries)(o)) {
+            const f = n(d[0]);
+            for (const { key: _ } of f) l.add(_);
+          }
+          return l.size > 0 ? Array.from(l) : [];
+        };
+        e.extractI18nKeysFromModules = c;
+        const u = (o) => {
+          const l = [];
+          for (const d of (0, e.getI18nSupportedModuleEntries)(o)) {
+            const f = n(d[0]);
+            for (const _ of f) l.push({ moduleName: d[1], ..._ });
+          }
+          return l;
+        };
+        e.extractI18nPropertiesFromModules = u;
+      })(Fe)),
+    Fe
+  );
+}
+var je = {},
+  _t;
+function ln() {
+  return (_t || ((_t = 1), Object.defineProperty(je, "__esModule", { value: !0 })), je);
+}
+var ht;
+function jr() {
+  return (
+    ht ||
+      ((ht = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.getI18nSupportedModuleEntries =
+            e.extractI18nPropertiesFromModules =
+            e.extractI18nKeysFromModules =
+            e.getTranslationValue =
+              void 0));
+        const t = P;
+        (t.__exportStar(Cr(), e),
+          t.__exportStar(on(), e),
+          t.__exportStar(an(), e),
+          t.__exportStar(sn(), e));
+        var s = Fr();
+        Object.defineProperty(e, "getTranslationValue", {
+          enumerable: !0,
+          get: function () {
+            return s.getTranslationValue;
+          },
+        });
+        var i = un();
+        (Object.defineProperty(e, "extractI18nKeysFromModules", {
+          enumerable: !0,
+          get: function () {
+            return i.extractI18nKeysFromModules;
+          },
+        }),
+          Object.defineProperty(e, "extractI18nPropertiesFromModules", {
+            enumerable: !0,
+            get: function () {
+              return i.extractI18nPropertiesFromModules;
+            },
+          }),
+          Object.defineProperty(e, "getI18nSupportedModuleEntries", {
+            enumerable: !0,
+            get: function () {
+              return i.getI18nSupportedModuleEntries;
+            },
+          }),
+          t.__exportStar(ln(), e));
+      })(Ie)),
+    Ie
+  );
+}
+var vt;
+function cn() {
+  if (vt) return W;
+  ((vt = 1), Object.defineProperty(W, "__esModule", { value: !0 }), (W.getContext = void 0));
+  const e = b(),
+    t = jr(),
+    s = (0, e.getCallBridge)(),
+    i = async () => {
+      var a;
+      const n = await s("getContext"),
+        r = n?.locale;
+      return (r && (n.locale = (a = (0, t.ensureLocale)(r)) !== null && a !== void 0 ? a : r), n);
+    };
+  return ((W.getContext = i), W);
+}
+var Z = {},
+  gt;
+function dn() {
+  if (gt) return Z;
+  ((gt = 1), Object.defineProperty(Z, "__esModule", { value: !0 }), (Z.changeWindowTitle = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = async (a) => {
+      try {
+        await s("changeWindowTitle", a);
+      } catch {
+        throw new t.BridgeAPIError("the window title wasn't changed due to error.");
+      }
+    };
+  return ((Z.changeWindowTitle = i), Z);
+}
+var Q = {},
+  pt;
+function fn() {
+  if (pt) return Q;
+  ((pt = 1), Object.defineProperty(Q, "__esModule", { value: !0 }), (Q.theme = void 0));
+  const t = (0, b().getCallBridge)();
+  return ((Q.theme = { enable: () => t("enableTheming") }), Q);
+}
+var $ = {},
+  ee = {},
+  De = {},
+  C = {},
+  yt;
+function Dr() {
+  if (yt) return C;
+  ((yt = 1),
+    Object.defineProperty(C, "__esModule", { value: !0 }),
+    (C.blobToBase64 = C.base64ToBlob = void 0));
+  const e = (s, i) => {
+    if (!s) return null;
+    const a = s.includes(";base64") ? s.split(",")[1] : s,
+      n = atob(a),
+      r = new Array(n.length);
+    for (let u = 0; u < n.length; u++) r[u] = n.charCodeAt(u);
+    const c = new Uint8Array(r);
+    return new Blob([c], { type: i });
+  };
+  C.base64ToBlob = e;
+  const t = (s) =>
+    new Promise((i, a) => {
+      const n = new FileReader();
+      ((n.onloadend = () => {
+        i(n.result);
+      }),
+        (n.onerror = a),
+        n.readAsDataURL(s));
+    });
+  return ((C.blobToBase64 = t), C);
+}
+var bt;
+function _n() {
+  return (
+    bt ||
+      ((bt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.containsSerialisedBlobs =
+            e.containsBlobs =
+            e.deserialiseBlobsInPayload =
+            e.serialiseBlobsInPayload =
+              void 0));
+        const t = Dr(),
+          s = (o) => {
+            if (
+              typeof o != "object" ||
+              o === null ||
+              Object.prototype.toString.call(o) !== "[object Object]"
+            )
+              return !1;
+            const l = Object.getPrototypeOf(o);
+            if (l === null) return !0;
+            const d = Object.prototype.hasOwnProperty.call(l, "constructor") && l.constructor;
+            return (
+              typeof d == "function" &&
+              d instanceof d &&
+              Function.prototype.call(d) === Function.prototype.call(o)
+            );
+          },
+          i = async (o) => ({ data: await (0, t.blobToBase64)(o), type: o.type }),
+          a = (o) => (0, t.base64ToBlob)(o.data, o.type),
+          n = async (o) => {
+            if (o instanceof Blob) return { ...(await i(o)), __isBlobData: !0 };
+            if (Array.isArray(o))
+              return Promise.all(o.map((l) => (0, e.serialiseBlobsInPayload)(l)));
+            if (o && s(o)) {
+              const l = await Promise.all(
+                Object.entries(o).map(async ([d, f]) => [
+                  d,
+                  await (0, e.serialiseBlobsInPayload)(f),
+                ]),
+              );
+              return Object.fromEntries(l);
+            }
+            return o;
+          };
+        e.serialiseBlobsInPayload = n;
+        const r = (o) => {
+          if (o && s(o) && "__isBlobData" in o) {
+            const l = o;
+            return a({ data: l.data, type: l.type });
+          }
+          if (Array.isArray(o)) return o.map((l) => (0, e.deserialiseBlobsInPayload)(l));
+          if (o && s(o)) {
+            const l = {};
+            for (const [d, f] of Object.entries(o)) l[d] = (0, e.deserialiseBlobsInPayload)(f);
+            return l;
+          }
+          return o;
+        };
+        e.deserialiseBlobsInPayload = r;
+        const c = (o) =>
+          o instanceof Blob
+            ? !0
+            : Array.isArray(o)
+              ? o.some((l) => (0, e.containsBlobs)(l))
+              : o && s(o)
+                ? Object.values(o).some((l) => (0, e.containsBlobs)(l))
+                : !1;
+        e.containsBlobs = c;
+        const u = (o) =>
+          o && s(o) && "__isBlobData" in o
+            ? !0
+            : Array.isArray(o)
+              ? o.some((l) => (0, e.containsSerialisedBlobs)(l))
+              : o && s(o)
+                ? Object.values(o).some((l) => (0, e.containsSerialisedBlobs)(l))
+                : !1;
+        e.containsSerialisedBlobs = u;
+      })(De)),
+    De
+  );
+}
+var mt;
+function Ar() {
+  if (mt) return ee;
+  ((mt = 1), Object.defineProperty(ee, "__esModule", { value: !0 }), (ee.events = void 0));
+  const e = b(),
+    t = _n(),
+    s = (0, e.getCallBridge)(),
+    i = async (n, r) => {
+      let c = r;
+      return (
+        (0, t.containsBlobs)(r) && (c = await (0, t.serialiseBlobsInPayload)(r)),
+        s("emit", { event: n, payload: c })
+      );
+    },
+    a = (n, r) =>
+      s("on", {
+        event: n,
+        callback: (u) => {
+          let o = u;
+          return (
+            (0, t.containsSerialisedBlobs)(u) && (o = (0, t.deserialiseBlobsInPayload)(u)),
+            r(o)
+          );
+        },
+      });
+  return ((ee.events = { emit: i, on: a }), ee);
+}
+var wt;
+function hn() {
+  if (wt) return $;
+  ((wt = 1), Object.defineProperty($, "__esModule", { value: !0 }), ($.emitReadyEvent = void 0));
+  const e = Ar(),
+    t = kr(),
+    s = "EXTENSION_READY",
+    i = async () => {
+      const a = await t.view.getContext();
+      await e.events.emit(s, { localId: a.localId });
+    };
+  return (($.emitReadyEvent = i), $);
+}
+var Et;
+function kr() {
+  if (Et) return G;
+  ((Et = 1), Object.defineProperty(G, "__esModule", { value: !0 }), (G.view = void 0));
+  const e = $r(),
+    t = en(),
+    s = tn(),
+    i = rn(),
+    a = nn(),
+    n = cn(),
+    r = dn(),
+    c = fn(),
+    u = hn();
+  return (
+    (G.view = {
+      submit: e.submit,
+      close: t.close,
+      open: s.open,
+      refresh: i.refresh,
+      createHistory: a.createHistory,
+      getContext: n.getContext,
+      theme: c.theme,
+      changeWindowTitle: r.changeWindowTitle,
+      emitReadyEvent: u.emitReadyEvent,
+    }),
+    G
+  );
+}
+var Ot;
+function Tr() {
+  return (
+    Ot ||
+      ((Ot = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), P.__exportStar(kr(), e));
+      })(Re)),
+    Re
+  );
+}
+var Ae = {},
+  te = {},
+  St;
+function vn() {
+  if (St) return te;
+  ((St = 1), Object.defineProperty(te, "__esModule", { value: !0 }), (te.router = void 0));
+  const t = (0, b().getCallBridge)(),
+    s = async (r) => {
+      if (!r?.target) throw new Error("target is required for getUrl");
+      const c = await t("getUrl", r);
+      if (!c) throw new Error("Failed to get URL");
+      try {
+        return new URL(c);
+      } catch (u) {
+        throw new Error(`Failed to parse URL: ${c} (${u})`);
+      }
+    },
+    i = (r) => {
+      if (typeof r == "string") return t("navigate", { url: r, type: "same-tab" });
+      if (!r?.target) throw new Error("target is required for navigation");
+      return t("navigate", { ...r, type: "same-tab" });
+    },
+    a = (r) => {
+      if (typeof r == "string") return t("navigate", { url: r, type: "new-tab" });
+      if (!r?.target) throw new Error("target is required for navigation");
+      return t("navigate", { ...r, type: "new-tab" });
+    },
+    n = async () => t("reload");
+  return ((te.router = { getUrl: s, navigate: i, open: a, reload: n }), te);
+}
+var Pt;
+function gn() {
+  return (
+    Pt ||
+      ((Pt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), P.__exportStar(vn(), e));
+      })(Ae)),
+    Ae
+  );
+}
+var ke = {},
+  re = {},
+  Rt;
+function pn() {
+  if (Rt) return re;
+  ((Rt = 1), Object.defineProperty(re, "__esModule", { value: !0 }), (re.Modal = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = () => {};
+  class a {
+    constructor(r) {
+      var c, u;
+      ((this.resource = r?.resource || null),
+        (this.onClose = r?.onClose || i),
+        (this.size = r?.size || "medium"),
+        (this.context = r?.context || {}),
+        (this.closeOnEscape = (c = r?.closeOnEscape) !== null && c !== void 0 ? c : !0),
+        (this.closeOnOverlayClick =
+          (u = r?.closeOnOverlayClick) !== null && u !== void 0 ? u : !0));
+    }
+    async open() {
+      try {
+        if (
+          (await s("openModal", {
+            resource: this.resource,
+            onClose: this.onClose,
+            size: this.size,
+            context: this.context,
+            closeOnEscape: this.closeOnEscape,
+            closeOnOverlayClick: this.closeOnOverlayClick,
+          })) === !1
+        )
+          throw new t.BridgeAPIError("Unable to open modal.");
+      } catch {
+        throw new t.BridgeAPIError("Unable to open modal.");
+      }
+    }
+  }
+  return ((re.Modal = a), re);
+}
+var It;
+function yn() {
+  return (
+    It ||
+      ((It = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), P.__exportStar(pn(), e));
+      })(ke)),
+    ke
+  );
+}
+var O = {},
+  ne = {},
+  Ct;
+function bn() {
+  if (Ct) return ne;
+  ((Ct = 1), Object.defineProperty(ne, "__esModule", { value: !0 }), (ne.productFetchApi = void 0));
+  const e = Dr(),
+    t = async (n) => {
+      const r = {};
+      for (const [c, u] of n.entries())
+        if (c === "file") {
+          const o = u.name,
+            l = u.type;
+          ((r.file = await (0, e.blobToBase64)(u)), (r.__fileName = o), (r.__fileType = l));
+        } else r[c] = u;
+      return JSON.stringify(r);
+    },
+    s = (n) => {
+      if (!n) return n;
+      if ("signal" in n) {
+        const { signal: r, ...c } = n;
+        return (
+          console.error(
+            "Signal is not supported in @forge/bridge and was removed from fetch options. Please use the fetch method from @forge/api for signal support.",
+          ),
+          c
+        );
+      }
+      return n;
+    },
+    i = async (n) => {
+      const r = n?.body instanceof FormData,
+        c = r ? await t(n?.body) : n?.body,
+        u = new Request("", { body: c, method: n?.method, headers: n?.headers }),
+        o = Object.fromEntries(u.headers.entries());
+      return {
+        body: u.method !== "GET" ? await u.text() : null,
+        headers: new Headers(o),
+        isMultipartFormData: r,
+      };
+    },
+    a = (n) => {
+      const r = async (c, u, o) => {
+        const l = s(o),
+          { body: d, headers: f, isMultipartFormData: _ } = await i(l);
+        f.has("X-Atlassian-Token") || f.set("X-Atlassian-Token", "no-check");
+        const v = {
+            product: c,
+            restPath: u,
+            fetchRequestInit: { ...l, body: d, headers: [...f.entries()] },
+            isMultipartFormData: _,
+          },
+          {
+            body: h,
+            headers: g,
+            statusText: p,
+            status: y,
+            isAttachment: T,
+          } = await n("fetchProduct", v),
+          Br = T ? (0, e.base64ToBlob)(h, g["content-type"]) : h;
+        return new Response(Br || null, { headers: g, status: y, statusText: p });
+      };
+      return {
+        requestConfluence: (c, u) => r("confluence", c, u),
+        requestJira: (c, u) => r("jira", c, u),
+        requestBitbucket: (c, u) => r("bitbucket", c, u),
+      };
+    };
+  return ((ne.productFetchApi = a), ne);
+}
+var Ft;
+function mn() {
+  if (Ft) return O;
+  Ft = 1;
+  var e;
+  (Object.defineProperty(O, "__esModule", { value: !0 }),
+    (O.requestBitbucket = O.requestJira = O.requestConfluence = void 0));
+  const t = b();
+  return (
+    (e = (0, bn().productFetchApi)((0, t.getCallBridge)())),
+    (O.requestConfluence = e.requestConfluence),
+    (O.requestJira = e.requestJira),
+    (O.requestBitbucket = e.requestBitbucket),
+    O
+  );
+}
+var Te = {},
+  ie = {},
+  jt;
+function wn() {
+  if (jt) return ie;
+  ((jt = 1), Object.defineProperty(ie, "__esModule", { value: !0 }), (ie.showFlag = void 0));
+  const e = b(),
+    t = w(),
+    s = (0, e.getCallBridge)(),
+    i = (a) => {
+      var n;
+      if (!a.id) throw new t.BridgeAPIError('"id" must be defined in flag options');
+      const r = s("showFlag", { ...a, type: (n = a.type) !== null && n !== void 0 ? n : "info" });
+      return { close: async () => (await r, s("closeFlag", { id: a.id })) };
+    };
+  return ((ie.showFlag = i), ie);
+}
+var Dt;
+function En() {
+  return (
+    Dt ||
+      ((Dt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), (e.showFlag = void 0));
+        var t = wn();
+        Object.defineProperty(e, "showFlag", {
+          enumerable: !0,
+          get: function () {
+            return t.showFlag;
+          },
+        });
+      })(Te)),
+    Te
+  );
+}
+var qe = {},
+  At;
+function On() {
+  return (
+    At ||
+      ((At = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), P.__exportStar(Ar(), e));
+      })(qe)),
+    qe
+  );
+}
+var Me = {},
+  oe = {},
+  kt;
+function Sn() {
+  if (kt) return oe;
+  ((kt = 1), Object.defineProperty(oe, "__esModule", { value: !0 }), (oe.realtime = void 0));
+  const t = (0, b().getCallBridge)(),
+    s = (r, c, u) => t("publishRealtimeChannel", { channelName: r, eventPayload: c, options: u }),
+    i = (r, c, u) => t("subscribeRealtimeChannel", { channelName: r, onEvent: c, options: u }),
+    a = (r, c, u) =>
+      t("publishRealtimeChannel", { channelName: r, eventPayload: c, options: u, isGlobal: !0 }),
+    n = (r, c, u) =>
+      t("subscribeRealtimeChannel", { channelName: r, onEvent: c, options: u, isGlobal: !0 });
+  return ((oe.realtime = { publish: s, subscribe: i, publishGlobal: a, subscribeGlobal: n }), oe);
+}
+var Be = {},
+  Tt;
+function Pn() {
+  return (
+    Tt ||
+      ((Tt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.Bitbucket = e.Confluence = e.Jira = void 0),
+          (function (t) {
+            ((t.Board = "board"), (t.Issue = "issue"), (t.Project = "project"));
+          })(e.Jira || (e.Jira = {})),
+          (function (t) {
+            ((t.Content = "content"), (t.Space = "space"));
+          })(e.Confluence || (e.Confluence = {})),
+          (function (t) {
+            ((t.Repository = "repository"), (t.PullRequest = "pullRequest"));
+          })(e.Bitbucket || (e.Bitbucket = {})));
+      })(Be)),
+    Be
+  );
+}
+var qt;
+function Rn() {
+  return (
+    qt ||
+      ((qt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.Bitbucket = e.Confluence = e.Jira = e.realtime = void 0));
+        var t = Sn();
+        Object.defineProperty(e, "realtime", {
+          enumerable: !0,
+          get: function () {
+            return t.realtime;
+          },
+        });
+        var s = Pn();
+        (Object.defineProperty(e, "Jira", {
+          enumerable: !0,
+          get: function () {
+            return s.Jira;
+          },
+        }),
+          Object.defineProperty(e, "Confluence", {
+            enumerable: !0,
+            get: function () {
+              return s.Confluence;
+            },
+          }),
+          Object.defineProperty(e, "Bitbucket", {
+            enumerable: !0,
+            get: function () {
+              return s.Bitbucket;
+            },
+          }));
+      })(Me)),
+    Me
+  );
+}
+var S = {},
+  Mt;
+function In() {
+  if (Mt) return S;
+  ((Mt = 1),
+    Object.defineProperty(S, "__esModule", { value: !0 }),
+    (S.createTranslationFunction = S.getTranslations = S.resetTranslationsCache = void 0));
+  const e = jr(),
+    t = Tr(),
+    s = {
+      getI18nInfoConfig: async () => {
+        const c = await fetch(`./${e.I18N_BUNDLE_FOLDER_NAME}/${e.I18N_INFO_FILE_NAME}`);
+        if (!c.ok) throw new Error("Failed to get i18n info config: " + c.statusText);
+        return (await c.json()).config;
+      },
+      getTranslationResource: async (c) => {
+        const u = await fetch(`./${e.I18N_BUNDLE_FOLDER_NAME}/${c}.json`);
+        if (!u.ok) throw new Error(`Failed to get translation resource for locale: ${c}`);
+        return u.json();
+      },
+    },
+    i = new e.TranslationsGetter(s),
+    a = () => {
+      i.reset();
+    };
+  S.resetTranslationsCache = a;
+  const n = async (c = null, u = { fallback: !0 }) => {
+    let o = c;
+    return (o || (o = (await t.view.getContext()).locale), await i.getTranslations(o, u));
+  };
+  S.getTranslations = n;
+  const r = async (c = null) => {
+    let u = c;
+    u || (u = (await t.view.getContext()).locale);
+    const o = new e.Translator(u, i);
+    return (
+      await o.init(),
+      (l, d) => {
+        var f, _;
+        return (_ = (f = o.translate(l)) !== null && f !== void 0 ? f : d) !== null && _ !== void 0
+          ? _
+          : l;
+      }
+    );
+  };
+  return ((S.createTranslationFunction = r), S);
+}
+var Le = {},
+  ae = {},
+  F = {},
+  D = {},
+  he = {},
+  Bt;
+function Cn() {
+  if (Bt) return he;
+  ((Bt = 1), Object.defineProperty(he, "__esModule", { value: !0 }));
+  const e = R();
+  let t = class {
+    constructor(i) {
+      ((this._sdkKey = i),
+        (this._rawValues = null),
+        (this._values = null),
+        (this._source = "Uninitialized"),
+        (this._lcut = 0),
+        (this._receivedAt = 0),
+        (this._bootstrapMetadata = null),
+        (this._warnings = new Set()));
+    }
+    reset() {
+      ((this._values = null),
+        (this._rawValues = null),
+        (this._source = "Loading"),
+        (this._lcut = 0),
+        (this._receivedAt = 0),
+        (this._bootstrapMetadata = null));
+    }
+    finalize() {
+      this._values || (this._source = "NoValues");
+    }
+    getValues() {
+      return this._rawValues
+        ? (0, e._typedJsonParse)(this._rawValues, "has_updates", "EvaluationStoreValues")
+        : null;
+    }
+    setValues(i, a) {
+      var n;
+      if (!i) return !1;
+      const r = (0, e._typedJsonParse)(i.data, "has_updates", "EvaluationResponse");
+      return r == null
+        ? !1
+        : ((this._source = i.source),
+          r?.has_updates !== !0 ||
+            ((this._rawValues = i.data),
+            (this._lcut = r.time),
+            (this._receivedAt = i.receivedAt),
+            (this._values = r),
+            (this._bootstrapMetadata = this._extractBootstrapMetadata(i.source, r)),
+            i.source && r.user && this._setWarningState(a, r),
+            e.SDKFlags.setFlags(this._sdkKey, (n = r.sdk_flags) !== null && n !== void 0 ? n : {})),
+          !0);
+    }
+    getWarnings() {
+      if (this._warnings.size !== 0) return Array.from(this._warnings);
+    }
+    getGate(i) {
+      var a;
+      return this._getDetailedStoreResult(
+        (a = this._values) === null || a === void 0 ? void 0 : a.feature_gates,
+        i,
+      );
+    }
+    getConfig(i) {
+      var a;
+      return this._getDetailedStoreResult(
+        (a = this._values) === null || a === void 0 ? void 0 : a.dynamic_configs,
+        i,
+      );
+    }
+    getLayer(i) {
+      var a;
+      return this._getDetailedStoreResult(
+        (a = this._values) === null || a === void 0 ? void 0 : a.layer_configs,
+        i,
+      );
+    }
+    getParamStore(i) {
+      var a;
+      return this._getDetailedStoreResult(
+        (a = this._values) === null || a === void 0 ? void 0 : a.param_stores,
+        i,
+      );
+    }
+    getSource() {
+      return this._source;
+    }
+    getExposureMapping() {
+      var i;
+      return (i = this._values) === null || i === void 0 ? void 0 : i.exposures;
+    }
+    _extractBootstrapMetadata(i, a) {
+      if (i !== "Bootstrap") return null;
+      const n = {};
+      return (
+        a.user && (n.user = a.user),
+        a.sdkInfo && (n.generatorSDKInfo = a.sdkInfo),
+        (n.lcut = a.time),
+        n
+      );
+    }
+    _getDetailedStoreResult(i, a) {
+      let n = null;
+      return (
+        i && (n = i[a] ? i[a] : i[(0, e._DJB2)(a)]),
+        { result: n, details: this._getDetails(n == null) }
+      );
+    }
+    _setWarningState(i, a) {
+      var n, r;
+      const c = e.StableID.get(this._sdkKey);
+      if (
+        ((n = i.customIDs) === null || n === void 0 ? void 0 : n.stableID) !== c &&
+        ((!((r = i.customIDs) === null || r === void 0) && r.stableID) || c)
+      ) {
+        this._warnings.add("StableIDMismatch");
+        return;
+      }
+      if ("user" in a) {
+        const u = a.user;
+        (0, e._getFullUserHash)(i) !== (0, e._getFullUserHash)(u) &&
+          this._warnings.add("PartialUserMatch");
+      }
+    }
+    getCurrentSourceDetails() {
+      if (this._source === "Uninitialized" || this._source === "NoValues")
+        return { reason: this._source };
+      const i = { reason: this._source, lcut: this._lcut, receivedAt: this._receivedAt };
+      return (this._warnings.size > 0 && (i.warnings = Array.from(this._warnings)), i);
+    }
+    _getDetails(i) {
+      var a, n;
+      const r = this.getCurrentSourceDetails();
+      let c = r.reason;
+      const u = (a = r.warnings) !== null && a !== void 0 ? a : [];
+      (this._source === "Bootstrap" && u.length > 0 && (c = c + u[0]),
+        c !== "Uninitialized" &&
+          c !== "NoValues" &&
+          (c = `${c}:${i ? "Unrecognized" : "Recognized"}`));
+      const o =
+        this._source === "Bootstrap" && (n = this._bootstrapMetadata) !== null && n !== void 0
+          ? n
+          : void 0;
+      return (o && (r.bootstrapMetadata = o), Object.assign(Object.assign({}, r), { reason: c }));
+    }
+  };
+  return ((he.default = t), he);
+}
+var A = {},
+  se = {},
+  Lt;
+function Fn() {
+  if (Lt) return se;
+  ((Lt = 1),
+    Object.defineProperty(se, "__esModule", { value: !0 }),
+    (se._resolveDeltasResponse = void 0));
+  const e = R(),
+    t = 2;
+  function s(r, c) {
+    const u = (0, e._typedJsonParse)(c, "checksum", "DeltasEvaluationResponse");
+    if (!u) return { hadBadDeltaChecksum: !0 };
+    const o = i(r, u),
+      l = a(o),
+      d = (0, e._DJB2Object)(
+        {
+          feature_gates: l.feature_gates,
+          dynamic_configs: l.dynamic_configs,
+          layer_configs: l.layer_configs,
+        },
+        t,
+      );
+    return d === u.checksumV2
+      ? JSON.stringify(l)
+      : {
+          hadBadDeltaChecksum: !0,
+          badChecksum: d,
+          badMergedConfigs: l,
+          badFullResponse: u.deltas_full_response,
+        };
+  }
+  se._resolveDeltasResponse = s;
+  function i(r, c) {
+    return Object.assign(Object.assign(Object.assign({}, r), c), {
+      feature_gates: Object.assign(Object.assign({}, r.feature_gates), c.feature_gates),
+      layer_configs: Object.assign(Object.assign({}, r.layer_configs), c.layer_configs),
+      dynamic_configs: Object.assign(Object.assign({}, r.dynamic_configs), c.dynamic_configs),
+    });
+  }
+  function a(r) {
+    const c = r;
+    return (
+      n(r.deleted_gates, c.feature_gates),
+      delete c.deleted_gates,
+      n(r.deleted_configs, c.dynamic_configs),
+      delete c.deleted_configs,
+      n(r.deleted_layers, c.layer_configs),
+      delete c.deleted_layers,
+      c
+    );
+  }
+  function n(r, c) {
+    r?.forEach((u) => {
+      delete c[u];
+    });
+  }
+  return se;
+}
+var Ut;
+function qr() {
+  if (Ut) return A;
+  Ut = 1;
+  var e =
+    (A && A.__awaiter) ||
+    function (a, n, r, c) {
+      function u(o) {
+        return o instanceof r
+          ? o
+          : new r(function (l) {
+              l(o);
+            });
+      }
+      return new (r || (r = Promise))(function (o, l) {
+        function d(v) {
+          try {
+            _(c.next(v));
+          } catch (h) {
+            l(h);
+          }
+        }
+        function f(v) {
+          try {
+            _(c.throw(v));
+          } catch (h) {
+            l(h);
+          }
+        }
+        function _(v) {
+          v.done ? o(v.value) : u(v.value).then(d, f);
+        }
+        _((c = c.apply(a, n || [])).next());
+      });
+    };
+  Object.defineProperty(A, "__esModule", { value: !0 });
+  const t = R(),
+    s = Fn();
+  class i extends t.NetworkCore {
+    constructor(n, r) {
+      super(n, r);
+      const c = n?.networkConfig;
+      ((this._option = n),
+        (this._initializeUrlConfig = new t.UrlConfiguration(
+          t.Endpoint._initialize,
+          c?.initializeUrl,
+          c?.api,
+          c?.initializeFallbackUrls,
+        )));
+    }
+    fetchEvaluations(n, r, c, u, o) {
+      return e(this, void 0, void 0, function* () {
+        var l, d, f, _, v, h;
+        const g = r ? (0, t._typedJsonParse)(r, "has_updates", "InitializeResponse") : null;
+        let p = {
+          user: u,
+          hash:
+            (f =
+              (d = (l = this._option) === null || l === void 0 ? void 0 : l.networkConfig) ===
+                null || d === void 0
+                ? void 0
+                : d.initializeHashAlgorithm) !== null && f !== void 0
+              ? f
+              : "djb2",
+          deltasResponseRequested: !1,
+          full_checksum: null,
+        };
+        if (g?.has_updates) {
+          const y =
+            g?.hash_used !==
+            ((h =
+              (v = (_ = this._option) === null || _ === void 0 ? void 0 : _.networkConfig) ===
+                null || v === void 0
+                ? void 0
+                : v.initializeHashAlgorithm) !== null && h !== void 0
+              ? h
+              : "djb2");
+          p = Object.assign(Object.assign({}, p), {
+            sinceTime: o && !y ? g.time : 0,
+            previousDerivedFields: "derived_fields" in g && o ? g.derived_fields : {},
+            deltasResponseRequested: !0,
+            full_checksum: g.full_checksum,
+            partialUserMatchSinceTime: y ? 0 : g.time,
+          });
+        }
+        return this._fetchEvaluations(n, g, p, c);
+      });
+    }
+    _fetchEvaluations(n, r, c, u) {
+      return e(this, void 0, void 0, function* () {
+        var o, l;
+        const d = yield this.post({
+          sdkKey: n,
+          urlConfig: this._initializeUrlConfig,
+          data: c,
+          retries: 2,
+          isStatsigEncodable: !0,
+          priority: u,
+        });
+        if (d?.code === 204) return '{"has_updates": false}';
+        if (d?.code !== 200) return (o = d?.body) !== null && o !== void 0 ? o : null;
+        if (
+          r?.has_updates !== !0 ||
+          ((l = d.body) === null || l === void 0 ? void 0 : l.includes('"is_delta":true')) !== !0 ||
+          c.deltasResponseRequested !== !0
+        )
+          return d.body;
+        const f = (0, s._resolveDeltasResponse)(r, d.body);
+        return typeof f == "string"
+          ? f
+          : this._fetchEvaluations(
+              n,
+              r,
+              Object.assign(Object.assign(Object.assign({}, c), f), {
+                deltasResponseRequested: !1,
+              }),
+              u,
+            );
+      });
+    }
+  }
+  return ((A.default = i), A);
+}
+var ue = {},
+  Nt;
+function jn() {
+  if (Nt) return ue;
+  ((Nt = 1),
+    Object.defineProperty(ue, "__esModule", { value: !0 }),
+    (ue._makeParamStoreGetter = void 0));
+  const e = R(),
+    t = { disableExposureLog: !0 };
+  function s(l) {
+    return l == null || l.disableExposureLog === !1;
+  }
+  function i(l, d) {
+    return d != null && !(0, e._isTypeMatch)(l, d);
+  }
+  function a(l, d) {
+    return l.value;
+  }
+  function n(l, d, f) {
+    return l.getFeatureGate(d.gate_name, s(f) ? void 0 : t).value ? d.pass_value : d.fail_value;
+  }
+  function r(l, d, f, _) {
+    const h = l.getDynamicConfig(d.config_name, s(_) ? void 0 : t).get(d.param_name);
+    return i(h, f) ? f : h;
+  }
+  function c(l, d, f, _) {
+    const h = l.getExperiment(d.experiment_name, s(_) ? void 0 : t).get(d.param_name);
+    return i(h, f) ? f : h;
+  }
+  function u(l, d, f, _) {
+    const h = l.getLayer(d.layer_name, s(_) ? void 0 : t).get(d.param_name);
+    return i(h, f) ? f : h;
+  }
+  function o(l, d, f) {
+    return (_, v) => {
+      if (d == null) return v;
+      const h = d[_];
+      if (h == null || (v != null && (0, e._typeOf)(v) !== h.param_type)) return v;
+      switch (h.ref_type) {
+        case "static":
+          return a(h);
+        case "gate":
+          return n(l, h, f);
+        case "dynamic_config":
+          return r(l, h, v, f);
+        case "experiment":
+          return c(l, h, v, f);
+        case "layer":
+          return u(l, h, v, f);
+        default:
+          return v;
+      }
+    };
+  }
+  return ((ue._makeParamStoreGetter = o), ue);
+}
+var j = {},
+  xt;
+function Dn() {
+  if (xt) return j;
+  xt = 1;
+  var e =
+    (j && j.__awaiter) ||
+    function (a, n, r, c) {
+      function u(o) {
+        return o instanceof r
+          ? o
+          : new r(function (l) {
+              l(o);
+            });
+      }
+      return new (r || (r = Promise))(function (o, l) {
+        function d(v) {
+          try {
+            _(c.next(v));
+          } catch (h) {
+            l(h);
+          }
+        }
+        function f(v) {
+          try {
+            _(c.throw(v));
+          } catch (h) {
+            l(h);
+          }
+        }
+        function _(v) {
+          v.done ? o(v.value) : u(v.value).then(d, f);
+        }
+        _((c = c.apply(a, n || [])).next());
+      });
+    };
+  (Object.defineProperty(j, "__esModule", { value: !0 }),
+    (j.StatsigEvaluationsDataAdapter = void 0));
+  const t = R(),
+    s = qr();
+  let i = class extends t.DataAdapterCore {
+    constructor() {
+      (super("EvaluationsDataAdapter", "evaluations"),
+        (this._network = null),
+        (this._options = null));
+    }
+    attach(n, r, c) {
+      (super.attach(n, r, c),
+        c !== null && c instanceof s.default
+          ? (this._network = c)
+          : (this._network = new s.default(r ?? {})));
+    }
+    getDataAsync(n, r, c) {
+      return this._getDataAsyncImpl(n, (0, t._normalizeUser)(r, this._options), c);
+    }
+    prefetchData(n, r) {
+      return this._prefetchDataImpl(n, r);
+    }
+    setData(n) {
+      const r = (0, t._typedJsonParse)(n, "has_updates", "data");
+      r && "user" in r
+        ? super.setData(n, r.user)
+        : t.Log.error(
+            "StatsigUser not found. You may be using an older server SDK version. Please upgrade your SDK or use setDataLegacy.",
+          );
+    }
+    setDataLegacy(n, r) {
+      super.setData(n, r);
+    }
+    _fetchFromNetwork(n, r, c, u) {
+      return e(this, void 0, void 0, function* () {
+        var o;
+        const l = yield (o = this._network) === null || o === void 0
+          ? void 0
+          : o.fetchEvaluations(this._getSdkKey(), n, c?.priority, r, u);
+        return l ?? null;
+      });
+    }
+    _getCacheKey(n) {
+      var r;
+      const c = (0, t._getStorageKey)(
+        this._getSdkKey(),
+        n,
+        (r = this._options) === null || r === void 0 ? void 0 : r.customUserCacheKeyFunc,
+      );
+      return `${t.DataAdapterCachePrefix}.${this._cacheSuffix}.${c}`;
+    }
+    _isCachedResultValidFor204(n, r) {
+      return n.fullUserHash != null && n.fullUserHash === (0, t._getFullUserHash)(r);
+    }
+  };
+  return ((j.StatsigEvaluationsDataAdapter = i), j);
+}
+var Gt;
+function An() {
+  if (Gt) return D;
+  Gt = 1;
+  var e =
+    (D && D.__awaiter) ||
+    function (c, u, o, l) {
+      function d(f) {
+        return f instanceof o
+          ? f
+          : new o(function (_) {
+              _(f);
+            });
+      }
+      return new (o || (o = Promise))(function (f, _) {
+        function v(p) {
+          try {
+            g(l.next(p));
+          } catch (y) {
+            _(y);
+          }
+        }
+        function h(p) {
+          try {
+            g(l.throw(p));
+          } catch (y) {
+            _(y);
+          }
+        }
+        function g(p) {
+          p.done ? f(p.value) : d(p.value).then(v, h);
+        }
+        g((l = l.apply(c, u || [])).next());
+      });
+    };
+  Object.defineProperty(D, "__esModule", { value: !0 });
+  const t = R(),
+    s = Cn(),
+    i = qr(),
+    a = jn(),
+    n = Dn();
+  let r = class Ge extends t.StatsigClientBase {
+    static instance(u) {
+      const o = (0, t._getStatsigGlobal)().instance(u);
+      return o instanceof Ge
+        ? o
+        : (t.Log.warn(
+            (0, t._isServerEnv)()
+              ? "StatsigClient.instance is not supported in server environments"
+              : "Unable to find StatsigClient instance",
+          ),
+          new Ge(u ?? "", {}));
+    }
+    constructor(u, o, l = null) {
+      var d, f;
+      t.SDKType._setClientType(u, "javascript-client");
+      const _ = new i.default(l, (h) => {
+        this.$emt(h);
+      });
+      (super(
+        u,
+        (d = l?.dataAdapter) !== null && d !== void 0 ? d : new n.StatsigEvaluationsDataAdapter(),
+        _,
+        l,
+      ),
+        (this.getFeatureGate = this._memoize(
+          t.MemoPrefix._gate,
+          this._getFeatureGateImpl.bind(this),
+        )),
+        (this.getDynamicConfig = this._memoize(
+          t.MemoPrefix._dynamicConfig,
+          this._getDynamicConfigImpl.bind(this),
+        )),
+        (this.getExperiment = this._memoize(
+          t.MemoPrefix._experiment,
+          this._getExperimentImpl.bind(this),
+        )),
+        (this.getLayer = this._memoize(t.MemoPrefix._layer, this._getLayerImpl.bind(this))),
+        (this.getParameterStore = this._memoize(
+          t.MemoPrefix._paramStore,
+          this._getParameterStoreImpl.bind(this),
+        )),
+        (this._store = new s.default(u)),
+        (this._network = _),
+        (this._user = this._configureUser(o, l)),
+        (this._sdkInstanceID = (0, t.getUUID)()));
+      const v = (f = l?.plugins) !== null && f !== void 0 ? f : [];
+      for (const h of v) h.bind(this);
+    }
+    initializeSync(u) {
+      var o;
+      return this.loadingStatus !== "Uninitialized"
+        ? (0, t.createUpdateDetails)(!0, this._store.getSource(), -1, null, null, [
+            "MultipleInitializations",
+            ...((o = this._store.getWarnings()) !== null && o !== void 0 ? o : []),
+          ])
+        : (this._logger.start(), this.updateUserSync(this._user, u));
+    }
+    initializeAsync(u) {
+      return e(this, void 0, void 0, function* () {
+        return this._initializePromise
+          ? this._initializePromise
+          : ((this._initializePromise = this._initializeAsyncImpl(u)), this._initializePromise);
+      });
+    }
+    updateUserSync(u, o) {
+      const l = performance.now();
+      try {
+        return this._updateUserSyncImpl(u, o, l);
+      } catch (d) {
+        const f = d instanceof Error ? d : new Error(String(d));
+        return this._createErrorUpdateDetails(f, l);
+      }
+    }
+    _updateUserSyncImpl(u, o, l) {
+      var d;
+      const f = [...((d = this._store.getWarnings()) !== null && d !== void 0 ? d : [])];
+      this._resetForUser(u);
+      const _ = this.dataAdapter.getDataSync(this._user);
+      (_ == null && f.push("NoCachedValues"),
+        this._store.setValues(_, this._user),
+        this._finalizeUpdate(_));
+      const v = o?.disableBackgroundCacheRefresh;
+      return v === !0 || (v == null && _?.source === "Bootstrap")
+        ? (0, t.createUpdateDetails)(
+            !0,
+            this._store.getSource(),
+            performance.now() - l,
+            this._errorBoundary.getLastSeenErrorAndReset(),
+            this._network.getLastUsedInitUrlAndReset(),
+            f,
+          )
+        : (this._runPostUpdate(_ ?? null, this._user),
+          (0, t.createUpdateDetails)(
+            !0,
+            this._store.getSource(),
+            performance.now() - l,
+            this._errorBoundary.getLastSeenErrorAndReset(),
+            this._network.getLastUsedInitUrlAndReset(),
+            f,
+          ));
+    }
+    updateUserAsync(u, o) {
+      return e(this, void 0, void 0, function* () {
+        const l = performance.now();
+        try {
+          return yield this._updateUserAsyncImpl(u, o);
+        } catch (d) {
+          const f = d instanceof Error ? d : new Error(String(d));
+          return this._createErrorUpdateDetails(f, l);
+        }
+      });
+    }
+    _updateUserAsyncImpl(u, o) {
+      return e(this, void 0, void 0, function* () {
+        this._resetForUser(u);
+        const l = this._user;
+        t.Diagnostics._markInitOverallStart(this._sdkKey);
+        let d = this.dataAdapter.getDataSync(l);
+        if (
+          (this._store.setValues(d, this._user),
+          this._setStatus("Loading", d),
+          (d = yield this.dataAdapter.getDataAsync(d, l, o)),
+          l !== this._user)
+        )
+          return (0, t.createUpdateDetails)(
+            !1,
+            this._store.getSource(),
+            -1,
+            new Error("User changed during update"),
+            this._network.getLastUsedInitUrlAndReset(),
+          );
+        let f = !1;
+        (d != null &&
+          (t.Diagnostics._markInitProcessStart(this._sdkKey),
+          (f = this._store.setValues(d, this._user)),
+          t.Diagnostics._markInitProcessEnd(this._sdkKey, { success: f })),
+          this._finalizeUpdate(d),
+          f ||
+            (this._errorBoundary.attachErrorIfNoneExists(
+              t.UPDATE_DETAIL_ERROR_MESSAGES.NO_NETWORK_DATA,
+            ),
+            this.$emt({ name: "initialization_failure" })),
+          t.Diagnostics._markInitOverallEnd(
+            this._sdkKey,
+            f,
+            this._store.getCurrentSourceDetails(),
+          ));
+        const _ = t.Diagnostics._enqueueDiagnosticsEvent(
+          this._user,
+          this._logger,
+          this._sdkKey,
+          this._options,
+        );
+        return (0, t.createUpdateDetails)(
+          f,
+          this._store.getSource(),
+          _,
+          this._errorBoundary.getLastSeenErrorAndReset(),
+          this._network.getLastUsedInitUrlAndReset(),
+          this._store.getWarnings(),
+        );
+      });
+    }
+    getContext() {
+      return {
+        sdkKey: this._sdkKey,
+        options: this._options,
+        values: this._store.getValues(),
+        user: JSON.parse(JSON.stringify(this._user)),
+        errorBoundary: this._errorBoundary,
+        session: t.StatsigSession.get(this._sdkKey),
+        stableID: t.StableID.get(this._sdkKey),
+        sdkInstanceID: this._sdkInstanceID,
+      };
+    }
+    checkGate(u, o) {
+      return this.getFeatureGate(u, o).value;
+    }
+    logEvent(u, o, l) {
+      const d = typeof u == "string" ? { eventName: u, value: o, metadata: l } : u;
+      (this.$emt({ name: "log_event_called", event: d }),
+        this._logger.enqueue(
+          Object.assign(Object.assign({}, d), { user: this._user, time: Date.now() }),
+        ));
+    }
+    _primeReadyRipcord() {
+      this.$on("error", () => {
+        this.loadingStatus === "Loading" && this._finalizeUpdate(null);
+      });
+    }
+    _initializeAsyncImpl(u) {
+      return e(this, void 0, void 0, function* () {
+        return (
+          t.Storage.isReady() || (yield t.Storage.isReadyResolver()),
+          this._logger.start(),
+          this.updateUserAsync(this._user, u)
+        );
+      });
+    }
+    _createErrorUpdateDetails(u, o) {
+      var l;
+      return (0, t.createUpdateDetails)(
+        !1,
+        this._store.getSource(),
+        performance.now() - o,
+        u,
+        null,
+        [...((l = this._store.getWarnings()) !== null && l !== void 0 ? l : [])],
+      );
+    }
+    _finalizeUpdate(u) {
+      (this._store.finalize(), this._setStatus("Ready", u));
+    }
+    _runPostUpdate(u, o) {
+      this.dataAdapter.getDataAsync(u, o, { priority: "low" }).catch((l) => {
+        t.Log.error("An error occurred after update.", l);
+      });
+    }
+    _resetForUser(u) {
+      (this._logger.reset(),
+        this._store.reset(),
+        (this._user = this._configureUser(u, this._options)));
+    }
+    _configureUser(u, o) {
+      var l;
+      const d = (0, t._normalizeUser)(u, o),
+        f = (l = d.customIDs) === null || l === void 0 ? void 0 : l.stableID;
+      return (f && t.StableID.setOverride(f, this._sdkKey), d);
+    }
+    _getFeatureGateImpl(u, o) {
+      var l, d;
+      const { result: f, details: _ } = this._store.getGate(u),
+        v = (0, t._makeFeatureGate)(u, _, f),
+        h =
+          (d = (l = this.overrideAdapter) === null || l === void 0 ? void 0 : l.getGateOverride) ===
+            null || d === void 0
+            ? void 0
+            : d.call(l, v, this._user, o),
+        g = h ?? v;
+      return (
+        this._enqueueExposure(
+          u,
+          (0, t._createGateExposure)(this._user, g, this._store.getExposureMapping()),
+          o,
+        ),
+        this.$emt({ name: "gate_evaluation", gate: g }),
+        g
+      );
+    }
+    _getDynamicConfigImpl(u, o) {
+      var l, d;
+      const { result: f, details: _ } = this._store.getConfig(u),
+        v = (0, t._makeDynamicConfig)(u, _, f),
+        h =
+          (d =
+            (l = this.overrideAdapter) === null || l === void 0
+              ? void 0
+              : l.getDynamicConfigOverride) === null || d === void 0
+            ? void 0
+            : d.call(l, v, this._user, o),
+        g = h ?? v;
+      return (
+        this._enqueueExposure(
+          u,
+          (0, t._createConfigExposure)(this._user, g, this._store.getExposureMapping()),
+          o,
+        ),
+        this.$emt({ name: "dynamic_config_evaluation", dynamicConfig: g }),
+        g
+      );
+    }
+    _getExperimentImpl(u, o) {
+      var l, d, f, _;
+      const { result: v, details: h } = this._store.getConfig(u),
+        g = (0, t._makeExperiment)(u, h, v);
+      g.__evaluation != null &&
+        (g.__evaluation.secondary_exposures = (0, t._mapExposures)(
+          (d = (l = g.__evaluation) === null || l === void 0 ? void 0 : l.secondary_exposures) !==
+            null && d !== void 0
+            ? d
+            : [],
+          this._store.getExposureMapping(),
+        ));
+      const p =
+          (_ =
+            (f = this.overrideAdapter) === null || f === void 0
+              ? void 0
+              : f.getExperimentOverride) === null || _ === void 0
+            ? void 0
+            : _.call(f, g, this._user, o),
+        y = p ?? g;
+      return (
+        this._enqueueExposure(
+          u,
+          (0, t._createConfigExposure)(this._user, y, this._store.getExposureMapping()),
+          o,
+        ),
+        this.$emt({ name: "experiment_evaluation", experiment: y }),
+        y
+      );
+    }
+    _getLayerImpl(u, o) {
+      var l, d, f;
+      const { result: _, details: v } = this._store.getLayer(u),
+        h = (0, t._makeLayer)(u, v, _),
+        g =
+          (d =
+            (l = this.overrideAdapter) === null || l === void 0 ? void 0 : l.getLayerOverride) ===
+            null || d === void 0
+            ? void 0
+            : d.call(l, h, this._user, o);
+      o?.disableExposureLog && this._logger.incrementNonExposureCount(u);
+      const p = (0, t._mergeOverride)(
+        h,
+        g,
+        (f = g?.__value) !== null && f !== void 0 ? f : h.__value,
+        (y) => {
+          o?.disableExposureLog ||
+            this._enqueueExposure(
+              u,
+              (0, t._createLayerParameterExposure)(
+                this._user,
+                p,
+                y,
+                this._store.getExposureMapping(),
+              ),
+              o,
+            );
+        },
+      );
+      return (this.$emt({ name: "layer_evaluation", layer: p }), p);
+    }
+    _getParameterStoreImpl(u, o) {
+      var l, d;
+      const { result: f, details: _ } = this._store.getParamStore(u);
+      this._logger.incrementNonExposureCount(u);
+      const v = {
+          name: u,
+          details: _,
+          __configuration: f,
+          get: (0, a._makeParamStoreGetter)(this, f, o),
+        },
+        h =
+          (d =
+            (l = this.overrideAdapter) === null || l === void 0
+              ? void 0
+              : l.getParamStoreOverride) === null || d === void 0
+            ? void 0
+            : d.call(l, v, o);
+      return (
+        h != null &&
+          ((v.__configuration = h.config),
+          (v.details = h.details),
+          (v.get = (0, a._makeParamStoreGetter)(this, h.config, o))),
+        v
+      );
+    }
+  };
+  return ((D.default = r), D);
+}
+var zt;
+function kn() {
+  return (
+    zt ||
+      ((zt = 1),
+      (function (e) {
+        var t =
+            (F && F.__createBinding) ||
+            (Object.create
+              ? function (r, c, u, o) {
+                  o === void 0 && (o = u);
+                  var l = Object.getOwnPropertyDescriptor(c, u);
+                  ((!l || ("get" in l ? !c.__esModule : l.writable || l.configurable)) &&
+                    (l = {
+                      enumerable: !0,
+                      get: function () {
+                        return c[u];
+                      },
+                    }),
+                    Object.defineProperty(r, o, l));
+                }
+              : function (r, c, u, o) {
+                  (o === void 0 && (o = u), (r[o] = c[u]));
+                }),
+          s =
+            (F && F.__exportStar) ||
+            function (r, c) {
+              for (var u in r)
+                u !== "default" && !Object.prototype.hasOwnProperty.call(c, u) && t(c, r, u);
+            };
+        (Object.defineProperty(e, "__esModule", { value: !0 }), (e.StatsigClient = void 0));
+        const i = R(),
+          a = An();
+        ((e.StatsigClient = a.default), s(R(), e));
+        const n = Object.assign((0, i._getStatsigGlobal)(), { StatsigClient: a.default });
+        e.default = n;
+      })(F)),
+    F
+  );
+}
+var le = {},
+  ce = {},
+  Vt;
+function Tn() {
+  if (Vt) return ce;
+  ((Vt = 1),
+    Object.defineProperty(ce, "__esModule", { value: !0 }),
+    (ce.initFeatureFlags = void 0));
+  const e = b(),
+    t = w(),
+    s = be(),
+    i = 500,
+    a = 1e3 * 25,
+    n = (0, e.getCallBridge)(),
+    r = (u) => {
+      if (!u || !u.user)
+        throw new t.BridgeAPIError(
+          "Missing required parameters. Parameter user is required in the payload.",
+        );
+      if (Object.values(u).some((o) => typeof o == "function"))
+        throw new t.BridgeAPIError("Passing functions as part of the payload is not supported!");
+    },
+    c = (u) => (r(u), n("initFeatureFlags", { user: u.user }));
+  return (
+    (ce.initFeatureFlags = (0, s.withRateLimiter)(
+      c,
+      i,
+      a,
+      `Feature flags initialisation calls are rate limited at ${i}req/${a / 1e3}s`,
+    )),
+    ce
+  );
+}
+var Kt;
+function qn() {
+  if (Kt) return le;
+  ((Kt = 1),
+    Object.defineProperty(le, "__esModule", { value: !0 }),
+    (le.ForgeDataAdapter = void 0));
+  const e = Tn();
+  class t {
+    constructor() {
+      ((this.options = null), (this.environment = void 0), (this.cache = null));
+    }
+    async getDataAsync(i, a, n) {
+      var r;
+      if (i) return i;
+      this.environment = ((r = this.options) === null || r === void 0 ? void 0 : r.environment) || {
+        tier: "development",
+      };
+      const c = { ...a, statsigEnvironment: this.environment },
+        u = await (0, e.initFeatureFlags)({ user: c }),
+        o = {
+          source: "Network",
+          data: JSON.stringify(u),
+          receivedAt: Date.now(),
+          stableID: null,
+          fullUserHash: null,
+        };
+      return ((this.cache = o), o);
+    }
+    getDataSync(i) {
+      return this.cache;
+    }
+    async attach(i, a, n) {
+      this.options = a;
+    }
+    async prefetchData() {}
+    async setData(i) {}
+    async setDataLegacy(i) {}
+    async shutdown() {
+      ((this.options = null), (this.cache = null), (this.environment = void 0));
+    }
+  }
+  return ((le.ForgeDataAdapter = t), le);
+}
+var Ue = {},
+  Ht;
+function Mr() {
+  return (
+    Ht ||
+      ((Ht = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.FeatureFlagEventType = e.ExtensionEnvironment = void 0),
+          (function (s) {
+            ((s.DEVELOPMENT = "DEVELOPMENT"),
+              (s.STAGING = "STAGING"),
+              (s.PRODUCTION = "PRODUCTION"));
+          })(e.ExtensionEnvironment || (e.ExtensionEnvironment = {})));
+        var t;
+        ((function (s) {
+          s.USER_ACCESS = "USER_ACCESS";
+        })(t || (t = {})),
+          (function (s) {
+            s.CHECKFLAG = "checkFlag";
+          })(e.FeatureFlagEventType || (e.FeatureFlagEventType = {})));
+      })(Ue)),
+    Ue
+  );
+}
+var de = {},
+  Jt;
+function Mn() {
+  if (Jt) return de;
+  ((Jt = 1),
+    Object.defineProperty(de, "__esModule", { value: !0 }),
+    (de.trackFeatureFlagEvent = void 0));
+  const e = b(),
+    t = w(),
+    s = Mr(),
+    i = be(),
+    a = 500,
+    n = 1e3 * 25,
+    r = (0, e.getCallBridge)(),
+    c = (o) => {
+      if (!o || !o.type || !o.properties)
+        throw new t.BridgeAPIError(
+          "Missing required parameters. Parameter type, and properties are required in the payload.",
+        );
+      if (!(o.type.toUpperCase() in s.FeatureFlagEventType))
+        throw new t.BridgeAPIError("Event type is not supported");
+      if (Object.values(o).some((l) => typeof l == "function"))
+        throw new t.BridgeAPIError("Passing functions as part of the payload is not supported!");
+    },
+    u = (o) => (c(o), r("trackFeatureFlagEvent", o));
+  return (
+    (de.trackFeatureFlagEvent = (0, i.withRateLimiter)(
+      u,
+      a,
+      n,
+      `Feature flags calls are rate limited at ${a}req/${n / 1e3}s`,
+    )),
+    de
+  );
+}
+var Wt;
+function Bn() {
+  if (Wt) return ae;
+  ((Wt = 1),
+    Object.defineProperty(ae, "__esModule", { value: !0 }),
+    (ae.ForgeFeatureFlags = void 0));
+  const e = kn(),
+    t = qn(),
+    s = Mr(),
+    i = Mn();
+  class a {
+    constructor() {
+      ((this.initialized = !1),
+        (this.client = null),
+        (this.dataAdapter = null),
+        (this.eventProps = {}),
+        (this.CLIENT_KEY = "client-forge-internal-key"));
+    }
+    async initialize(r, c = {}) {
+      var u;
+      if (this.isInitialized()) return;
+      this.dataAdapter = new t.ForgeDataAdapter();
+      const o = {
+        environment: { tier: c.environment || "development" },
+        disableEvaluationMemoization: !1,
+        loggingEnabled: e.LoggingEnabledOption.disabled,
+        logLevel: e.LogLevel.None,
+        dataAdapter: this.dataAdapter,
+      };
+      ((this.eventProps.environment =
+        (u = o.environment) === null || u === void 0 ? void 0 : u.tier),
+        (this.client = new e.StatsigClient(this.CLIENT_KEY, this.convertUser(r), o)),
+        await this.client.initializeAsync(),
+        (this.initialized = !0));
+    }
+    checkFlag(r) {
+      if (!this.isInitialized() || !this.client)
+        throw (
+          this.sendCheckFlagEvent(r, !1),
+          new Error("ForgeFeatureFlags not initialized. Call initialize() first.")
+        );
+      return (this.sendCheckFlagEvent(r, !0), this.client.checkGate(r, { disableExposureLog: !0 }));
+    }
+    async shutdown() {
+      !this.isInitialized() ||
+        !this.client ||
+        (await this.client.shutdown(),
+        this.dataAdapter && (await this.dataAdapter.shutdown()),
+        (this.initialized = !1));
+    }
+    isInitialized() {
+      return this.initialized;
+    }
+    convertUser(r) {
+      return {
+        userID: r.userId,
+        custom: { ...(r.custom || {}), ...(r.attributes || {}) },
+        customIDs: r.identifiers || {},
+      };
+    }
+    sendCheckFlagEvent(r, c) {
+      const u = {
+        type: s.FeatureFlagEventType.CHECKFLAG,
+        properties: {
+          ...this.eventProps,
+          environment: this.eventProps.environment || "development",
+          name: r,
+          success: c,
+        },
+      };
+      (0, i.trackFeatureFlagEvent)(u);
+    }
+  }
+  return ((ae.ForgeFeatureFlags = a), ae);
+}
+var Xt;
+function Ln() {
+  return (
+    Xt ||
+      ((Xt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }), (e.ForgeFeatureFlags = void 0));
+        var t = Bn();
+        Object.defineProperty(e, "ForgeFeatureFlags", {
+          enumerable: !0,
+          get: function () {
+            return t.ForgeFeatureFlags;
+          },
+        });
+      })(Le)),
+    Le
+  );
+}
+var Yt;
+function Un() {
+  return (
+    Yt ||
+      ((Yt = 1),
+      (function (e) {
+        (Object.defineProperty(e, "__esModule", { value: !0 }),
+          (e.i18n = e.NavigationTarget = void 0));
+        const t = P;
+        var s = Jr();
+        (Object.defineProperty(e, "NavigationTarget", {
+          enumerable: !0,
+          get: function () {
+            return s.NavigationTarget;
+          },
+        }),
+          t.__exportStar(Xr(), e),
+          t.__exportStar(Qr(), e),
+          t.__exportStar(Tr(), e),
+          t.__exportStar(gn(), e),
+          t.__exportStar(yn(), e),
+          t.__exportStar(mn(), e),
+          t.__exportStar(En(), e),
+          t.__exportStar(On(), e),
+          t.__exportStar(Rn(), e),
+          (e.i18n = t.__importStar(In())),
+          t.__exportStar(Ln(), e));
+      })(we)),
+    we
+  );
+}
+var pe = Un();
+async function fe(e, t, s) {
+  await pe.showFlag({
+    id: `checklist-${Date.now()}`,
+    title: e,
+    type: s,
+    description: t,
+    isAutoDismiss: !0,
+  });
+}
+function Nn(e) {
+  return new Date(e).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: !1,
+  });
+}
+function Zt() {
+  return m.jsx("div", {
+    className: "loading-overlay",
+    children: m.jsx("div", { className: "loading-spinner" }),
+  });
+}
+function xn() {
+  const [e, t] = _e.useState({
+      checkList: "[]",
+      issueId: "",
+      updatedAt: new Date(),
+      updateDisplayName: "",
+      updateId: "",
+    }),
+    [s, i] = _e.useState(!0),
+    [a, n] = _e.useState(!1);
+  _e.useEffect(() => {
+    r();
+  }, []);
+  const r = async () => {
+      try {
+        const o = await pe.invoke("getCheckList");
+        t(o);
+      } catch {
+        await fe(
+          "Checklist Loading Error",
+          "Unable to load the checklist. Please try again later.",
+          "error",
+        );
+      } finally {
+        i(!1);
+      }
+    },
+    c = async (o) => {
+      try {
+        n(!0);
+        const l = await pe.invoke(o ? "updateWithOptimisticLocking" : "update", e);
+        l.error
+          ? l.concurrent
+            ? (await fe(
+                "Concurrent Modification Detected",
+                `User ${l.data?.updateDisplayName} has modified the checklist before you. Your changes could not be saved.`,
+                "error",
+              ),
+              await r())
+            : await fe(
+                "Update Failed",
+                l.message || "Unable to update the checklist. Please try again later.",
+                "error",
+              )
+          : l.data &&
+            (t(l.data),
+            await fe(
+              "Update Successful",
+              "The checklist has been successfully updated",
+              "success",
+            ));
+      } catch {
+        await fe(
+          "Update Error",
+          "An error occurred while updating the checklist. Please try again later.",
+          "error",
+        );
+      } finally {
+        n(!1);
+      }
+    },
+    u = (o) => {
+      const l = [...JSON.parse(e.checkList)];
+      ((l[o] = { ...l[o], done: !l[o].done }), t({ ...e, checkList: JSON.stringify(l) }));
+    };
+  return s
+    ? m.jsx("div", { className: "checklist-container", children: m.jsx(Zt, {}) })
+    : m.jsxs("div", {
+        className: "checklist-container",
+        children: [
+          a && m.jsx(Zt, {}),
+          m.jsxs("div", {
+            className: "checklist-header",
+            children: [
+              m.jsx("h2", { children: "Issue Checklist" }),
+              m.jsxs("div", {
+                className: "last-update",
+                children: ["Last updated by ", e.updateDisplayName, " on ", Nn(e.updatedAt)],
+              }),
+            ],
+          }),
+          m.jsx("div", {
+            className: "checklist",
+            children: JSON.parse(e.checkList).map((o, l) =>
+              m.jsxs(
+                "div",
+                {
+                  className: "checklist-item",
+                  children: [
+                    m.jsx("input", { type: "checkbox", checked: o.done, onChange: () => u(l) }),
+                    m.jsx("span", { children: o.label }),
+                  ],
+                },
+                l,
+              ),
+            ),
+          }),
+          m.jsxs("div", {
+            className: "buttons",
+            children: [
+              m.jsx("button", { onClick: () => c(!0), children: "Update with Locking" }),
+              m.jsx("button", { onClick: () => c(!1), children: "Update without Locking" }),
+            ],
+          }),
+        ],
+      });
+}
+const Gn = document.getElementById("root"),
+  zn = Lr.createRoot(Gn),
+  Qt = () => {
+    zn.render(m.jsx(xn, {}));
+  };
+pe.view.theme
+  .enable()
+  .then(() => {
+    Qt();
+  })
+  .catch((e) => {
+    (console.error(e.message), Qt());
+  });

@@ -58,10 +58,10 @@
     "@typescript-eslint/parser": "^8.46.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "knip": "^5.67.1",
+    "knip": "^5.68.0",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.9.3",
-    "vite": "^7.2.1"
+    "vite": "^7.2.2"
   },
   "overrides": {
     "esbuild": "npm:esbuild@0.25.0",
