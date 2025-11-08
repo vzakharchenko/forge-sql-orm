@@ -11,10 +11,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/vzakharchenko/forge-sql-orm/badge.svg?branch=master)](https://coveralls.io/github/vzakharchenko/forge-sql-orm?branch=master)
 [![DeepScan grade](https://deepscan.io/api/teams/26652/projects/29272/branches/940614/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=26652&pid=29272&bid=940614)
 
-
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [Drizzle ORM](https://orm.drizzle.team) and provides advanced capabilities for working with relational databases inside Forge.
 
 ## Key Features
+
 - ✅ **Custom Drizzle Driver** for direct integration with @forge/sql
 - ✅ **Local Cache System (Level 1)** for in-memory query optimization within single resolver invocation scope
 - ✅ **Global Cache System (Level 2)** with cross-invocation caching, automatic cache invalidation and context-aware operations (using [@forge/kvs](https://developer.atlassian.com/platform/forge/storage-reference/storage-api-custom-entities/) )
@@ -37,6 +37,7 @@
 ## Table of Contents
 
 ### 🚀 Getting Started
+
 - [Key Features](#key-features)
 - [Usage Approaches](#usage-approaches)
 - [Installation](#installation)
@@ -44,16 +45,19 @@
 - [Quick Start](#quick-start)
 
 ### 📖 Core Features
+
 - [Field Name Collision Prevention](#field-name-collision-prevention-in-complex-queries)
 - [Drizzle Usage with forge-sql-orm](#drizzle-usage-with-forge-sql-orm)
 - [Direct Drizzle Usage with Custom Driver](#direct-drizzle-usage-with-custom-driver)
 
 ### 🗄️ Database Operations
+
 - [Fetch Data](#fetch-data)
 - [Modify Operations](#modify-operations)
 - [SQL Utilities](#sql-utilities)
 
 ### ⚡ Caching System
+
 - [Setting Up Caching with @forge/kvs](#setting-up-caching-with-forgekvs-optional)
 - [Global Cache System (Level 2)](#global-cache-system-level-2)
 - [Cache Context Operations](#cache-context-operations)
@@ -62,6 +66,7 @@
 - [Manual Cache Management](#manual-cache-management)
 
 ### 🔒 Advanced Features
+
 - [Optimistic Locking](#optimistic-locking)
 - [Query Analysis and Performance Optimization](#query-analysis-and-performance-optimization)
 - [Automatic Error Analysis](#automatic-error-analysis) - Automatic timeout and OOM error detection with execution plans
@@ -69,12 +74,14 @@
 - [Date and Time Types](#date-and-time-types)
 
 ### 🛠️ Development Tools
+
 - [CLI Commands](#cli-commands) | [CLI Documentation](forge-sql-orm-cli/README.md)
 - [Web Triggers for Migrations](#web-triggers-for-migrations)
 - [Step-by-Step Migration Workflow](#step-by-step-migration-workflow)
 - [Drop Migrations](#drop-migrations)
 
 ### 📚 Examples
+
 - [Simple Example](examples/forge-sql-orm-example-simple)
 - [Drizzle Driver Example](examples/forge-sql-orm-example-drizzle-driver-simple)
 - [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking)
@@ -85,17 +92,20 @@
 - [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching capabilities with performance monitoring
 
 ### 📚 Reference
+
 - [ForgeSqlOrmOptions](#forgesqlormoptions)
 - [Migration Guide](#migration-guide)
 
 ## 🚀 Quick Navigation
 
 **New to Forge-SQL-ORM?** Start here:
+
 - [Quick Start](#quick-start) - Get up and running in 5 minutes
 - [Installation](#installation) - Complete setup guide
 - [Basic Usage Examples](#fetch-data) - Simple query examples
 
 **Looking for specific features?**
+
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation persistent caching
 - [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory invocation caching
 - [Optimistic Locking](#optimistic-locking) - Data consistency
@@ -103,6 +113,7 @@
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
 
 **Looking for practical examples?**
+
 - [Simple Example](examples/forge-sql-orm-example-simple) - Basic ORM usage
 - [Optimistic Locking Example](examples/forge-sql-orm-example-optimistic-locking) - Real-world conflict handling
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker) - Complex relationships
@@ -111,24 +122,27 @@
 
 ## Usage Approaches
 
-
 ### 1. Full Forge-SQL-ORM Usage
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 const forgeSQL = new ForgeSQL();
 ```
+
 Best for: Advanced features like optimistic locking, automatic versioning, and automatic field name collision prevention in complex queries.
 
 ### 2. Direct Drizzle Usage
+
 ```typescript
 import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver } from "forge-sql-orm";
 const db = drizzle(forgeDriver);
 ```
+
 Best for: Simple Modify operations without optimistic locking. Note that you need to manually patch drizzle `patchDbWithSelectAliased` for select fields to prevent field name collisions in Atlassian Forge SQL.
 
-
 ### 3. Local Cache Optimization
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 const forgeSQL = new ForgeSQL();
@@ -136,28 +150,28 @@ const forgeSQL = new ForgeSQL();
 // Optimize repeated queries within a single invocation
 await forgeSQL.executeWithLocalContext(async () => {
   // Multiple queries here will benefit from local caching
-  const users = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
+  const users = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
   // This query will use local cache (no database call)
-  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
+  const cachedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
   // Using new methods for better performance
-  const usersFrom = await forgeSQL.selectFrom(users)
-    .where(eq(users.active, true));
-  
+  const usersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
   // This will use local cache (no database call)
-  const cachedUsersFrom = await forgeSQL.selectFrom(users)
-    .where(eq(users.active, true));
-  
+  const cachedUsersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
   // Raw SQL with local caching
-  const rawUsers = await forgeSQL.execute(
-    "SELECT id, name FROM users WHERE active = ?", 
-    [true]
-  );
+  const rawUsers = await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [true]);
 });
 ```
+
 Best for: Performance optimization of repeated queries within resolvers or single invocation contexts.
 
 ## Field Name Collision Prevention in Complex Queries
@@ -167,6 +181,7 @@ When working with complex queries involving multiple tables (joins, inner joins,
 Forge-SQL-ORM provides two ways to handle this:
 
 ### Using Forge-SQL-ORM
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 
@@ -174,12 +189,13 @@ const forgeSQL = new ForgeSQL();
 
 // Automatic field name collision prevention
 await forgeSQL
-  .select({user: users, order: orders})
+  .select({ user: users, order: orders })
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
 ```
 
 ### Using Direct Drizzle
+
 ```typescript
 import { drizzle } from "drizzle-orm/mysql-proxy";
 import { forgeDriver, patchDbWithSelectAliased } from "forge-sql-orm";
@@ -188,17 +204,17 @@ const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 
 // Manual field name collision prevention
 await db
-  .selectAliased({user: users, order: orders})
+  .selectAliased({ user: users, order: orders })
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
 ```
 
 ### Important Notes
+
 - This is a specific behavior of Atlassian Forge SQL, not Drizzle ORM
 - For complex queries involving multiple tables, it's recommended to always specify select fields and avoid using `select()` without field selection
 - The solution automatically creates unique aliases for each field by prefixing them with the table name
 - This ensures that fields with the same name from different tables remain distinct in the query results
-
 
 ## Installation
 
@@ -207,16 +223,35 @@ Forge-SQL-ORM is designed to work with @forge/sql and requires some additional s
 ✅ Step 1: Install Dependencies
 
 **Basic installation (without caching):**
+
 ```sh
 npm install forge-sql-orm @forge/sql drizzle-orm -S
 ```
 
 **With caching support:**
+
 ```sh
 npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm -S
 ```
 
+**⚠️ Important for UI-Kit projects:**
+
+If you're installing `forge-sql-orm` in a UI-Kit project (projects using `@forge/react`), you may encounter peer dependency conflicts with `@types/react`. This is due to a conflict between `@types/react@18` (required by `@forge/react`) and `@types/react@19` (optional peer dependency from `drizzle-orm` via `bun-types`).
+
+To resolve this, use the `--legacy-peer-deps` flag:
+
+```sh
+# Basic installation for UI-Kit projects
+npm install forge-sql-orm @forge/sql drizzle-orm -S --legacy-peer-deps
+
+# With caching support for UI-Kit projects
+npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm -S --legacy-peer-deps
+```
+
+**Note:** The `--legacy-peer-deps` flag tells npm to ignore peer dependency conflicts. This is safe in this case because `bun-types` is an optional peer dependency and doesn't affect the functionality of `forge-sql-orm` in Forge environments.
+
 This will:
+
 - Install Forge-SQL-ORM (the ORM for @forge/sql)
 - Install @forge/sql, the Forge database layer
 - Install @forge/kvs, the Forge Key-Value Store for caching (optional, only needed for caching features)
@@ -227,6 +262,7 @@ This will:
 ## Quick Start
 
 ### 1. Basic Setup
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 
@@ -238,44 +274,49 @@ const users = await forgeSQL.select().from(users);
 ```
 
 ### 2. With Caching (Optional)
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 
 // Initialize with caching
 const forgeSQL = new ForgeSQL({
   cacheEntityName: "cache",
-  cacheTTL: 300
+  cacheTTL: 300,
 });
 
 // Cached query
-const users = await forgeSQL.selectCacheable({ id: users.id, name: users.name })
-  .from(users).where(eq(users.active, true));
+const users = await forgeSQL
+  .selectCacheable({ id: users.id, name: users.name })
+  .from(users)
+  .where(eq(users.active, true));
 ```
 
 ### 3. Local Cache Optimization
+
 ```typescript
 // Optimize repeated queries within a single invocation
 await forgeSQL.executeWithLocalContext(async () => {
-  const users = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
-  // This query will use local cache (no database call)
-  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
-  // Using new methods for better performance
-  const usersFrom = await forgeSQL.selectFrom(users)
+  const users = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
     .where(eq(users.active, true));
-  
+
+  // This query will use local cache (no database call)
+  const cachedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
+  // Using new methods for better performance
+  const usersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
   // Raw SQL with local caching
-  const rawUsers = await forgeSQL.execute(
-    "SELECT id, name FROM users WHERE active = ?", 
-    [true]
-  );
+  const rawUsers = await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [true]);
 });
 ```
 
 ### 4. Resolver Performance Monitoring
+
 ```typescript
 // Resolver with performance monitoring
 resolver.define("fetch", async (req: Request) => {
@@ -284,20 +325,23 @@ resolver.define("fetch", async (req: Request) => {
       async () => {
         // Resolver logic with multiple queries
         const users = await forgeSQL.selectFrom(demoUsers);
-        const orders = await forgeSQL.selectFrom(demoOrders)
+        const orders = await forgeSQL
+          .selectFrom(demoOrders)
           .where(eq(demoOrders.userId, demoUsers.id));
         return { users, orders };
       },
       async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
         const threshold = 500; // ms baseline for this resolver
-        
+
         if (totalDbExecutionTime > threshold * 1.5) {
-          console.warn(`[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+          console.warn(
+            `[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`,
+          );
           await printQueriesWithPlan(); // Optionally log or capture diagnostics for further analysis
         } else if (totalDbExecutionTime > threshold) {
           console.debug(`[Performance Debug fetch] High DB time: ${totalDbExecutionTime} ms`);
         }
-      }
+      },
     );
   } catch (e) {
     const error = e?.cause?.debug?.sqlMessage ?? e?.cause;
@@ -308,6 +352,7 @@ resolver.define("fetch", async (req: Request) => {
 ```
 
 ### 5. Next Steps
+
 - [Full Installation Guide](#installation) - Complete setup instructions
 - [Core Features](#core-features) - Learn about key capabilities
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation caching features
@@ -343,48 +388,44 @@ const db = forgeSQL.getDrizzleQueryBuilder();
 const users = await db.select().from(users);
 
 // Using new methods for enhanced functionality
-const usersFrom = await forgeSQL.selectFrom(users)
-  .where(eq(users.active, true));
+const usersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
 
-const usersDistinct = await forgeSQL.selectDistinctFrom(users)
-  .where(eq(users.active, true));
+const usersDistinct = await forgeSQL.selectDistinctFrom(users).where(eq(users.active, true));
 
-const usersCacheable = await forgeSQL.selectCacheableFrom(users)
-  .where(eq(users.active, true));
+const usersCacheable = await forgeSQL.selectCacheableFrom(users).where(eq(users.active, true));
 
 // Raw SQL execution
-const rawUsers = await forgeSQL.execute(
-  "SELECT * FROM users WHERE active = ?", 
-  [true]
-);
+const rawUsers = await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]);
 
 // Raw SQL with caching
 // ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const cachedRawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM `users` WHERE active = ?", 
-  [true], 
-  300
+  "SELECT * FROM `users` WHERE active = ?",
+  [true],
+  300,
 );
 
 // Raw SQL with execution metadata and performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
   async () => {
     const users = await forgeSQL.selectFrom(usersTable);
-    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    const orders = await forgeSQL
+      .selectFrom(ordersTable)
+      .where(eq(ordersTable.userId, usersTable.id));
     return { users, orders };
   },
   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
     const threshold = 500; // ms baseline for this resolver
-    
+
     if (totalDbExecutionTime > threshold * 1.5) {
       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
       await printQueriesWithPlan(); // Analyze and print query execution plans
     } else if (totalDbExecutionTime > threshold) {
       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
     }
-    
+
     console.log(`DB response size: ${totalResponseSize} bytes`);
-  }
+  },
 );
 
 // DDL operations for schema modifications
@@ -403,25 +444,25 @@ await forgeSQL.executeDDLActions(async () => {
     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
     WHERE AVG_LATENCY > 1000000
   `);
-  
+
   // Execute complex analysis queries in DDL context
   const performanceData = await forgeSQL.execute(`
     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
   `);
-  
+
   return { slowQueries, performanceData };
 });
 
 // Common Table Expressions (CTEs)
 const userStats = await forgeSQL
   .with(
-    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
-    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as("activeUsers"),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, "completed")).as("completedOrders"),
   )
   .select({
     totalActiveUsers: sql`COUNT(au.id)`,
-    totalCompletedOrders: sql`COUNT(co.id)`
+    totalCompletedOrders: sql`COUNT(co.id)`,
   })
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
@@ -460,7 +501,7 @@ await forgeSQL.executeWithCacheContext(async () => {
   await db.updateWithCacheContext(users)...;
   await db.deleteWithCacheContext(users)...;
   // invoke without cache
-   const users = await db.selectAliasedCacheable(getTableColumns(users)).from(users);  
+   const users = await db.selectAliasedCacheable(getTableColumns(users)).from(users);
   // Cache is cleared only once at the end for all affected tables
 });
 
@@ -476,15 +517,15 @@ const usersCacheable = await forgeSQL.selectCacheableFrom(users)
 
 // Raw SQL execution
 const rawUsers = await forgeSQL.execute(
-  "SELECT * FROM users WHERE active = ?", 
+  "SELECT * FROM users WHERE active = ?",
   [true]
 );
 
 // Raw SQL with caching
 // ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const cachedRawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM `users` WHERE active = ?", 
-  [true], 
+  "SELECT * FROM `users` WHERE active = ?",
+  [true],
   300
 );
 
@@ -497,14 +538,14 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
   },
   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
     const threshold = 500; // ms baseline for this resolver
-    
+
     if (totalDbExecutionTime > threshold * 1.5) {
       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
       await printQueriesWithPlan(); // Analyze and print query execution plans
     } else if (totalDbExecutionTime > threshold) {
       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
     }
-    
+
     console.log(`DB response size: ${totalResponseSize} bytes`);
   }
 );
@@ -519,6 +560,7 @@ The caching system is optional and only needed if you want to use cache-related 
 To use caching, you need to use Forge-SQL-ORM methods that support cache management:
 
 **Methods that perform cache eviction after execution and in cache context (batch eviction):**
+
 - `forgeSQL.insertAndEvictCache()`
 - `forgeSQL.updateAndEvictCache()`
 - `forgeSQL.deleteAndEvictCache()`
@@ -528,6 +570,7 @@ To use caching, you need to use Forge-SQL-ORM methods that support cache managem
 - `forgeSQL.getDrizzleQueryBuilder().deleteAndEvictCache()`
 
 **Methods that participate in cache context only (batch eviction):**
+
 - All methods except the default Drizzle methods:
   - `forgeSQL.insert()`
   - `forgeSQL.update()`
@@ -538,17 +581,20 @@ To use caching, you need to use Forge-SQL-ORM methods that support cache managem
   - `forgeSQL.getDrizzleQueryBuilder().deleteWithCacheContext()`
 
 **Methods do not do evict cache, better do not use with cache feature:**
-  - `forgeSQL.getDrizzleQueryBuilder().insert()`
-  - `forgeSQL.getDrizzleQueryBuilder().update()`
-  - `forgeSQL.getDrizzleQueryBuilder().delete()`
+
+- `forgeSQL.getDrizzleQueryBuilder().insert()`
+- `forgeSQL.getDrizzleQueryBuilder().update()`
+- `forgeSQL.getDrizzleQueryBuilder().delete()`
 
 **Cacheable methods:**
-  - `forgeSQL.selectCacheable()`
-  - `forgeSQL.selectDistinctCacheable()`
-  - `forgeSQL.getDrizzleQueryBuilder().selectAliasedCacheable()`
-  - `forgeSQL.getDrizzleQueryBuilder().selectAliasedDistinctCacheable()`
+
+- `forgeSQL.selectCacheable()`
+- `forgeSQL.selectDistinctCacheable()`
+- `forgeSQL.getDrizzleQueryBuilder().selectAliasedCacheable()`
+- `forgeSQL.getDrizzleQueryBuilder().selectAliasedDistinctCacheable()`
 
 **Cache context example:**
+
 ```typescript
 await forgeSQL.executeWithCacheContext(async () => {
   // These methods participate in batch cache clearing
@@ -558,7 +604,6 @@ await forgeSQL.executeWithCacheContext(async () => {
   // Cache is cleared only once at the end for all affected tables
 });
 ```
-
 
 The diagram below shows the lifecycle of a cacheable query in Forge-SQL-ORM:
 
@@ -570,7 +615,6 @@ The diagram below shows the lifecycle of a cacheable query in Forge-SQL-ORM:
 4. Fresh result is stored in @forge/kvs with TTL and returned to the caller.
 
 ![img.png](img/umlCache1.png)
-
 
 The diagram below shows how Evict Cache works in Forge-SQL-ORM:
 
@@ -605,13 +649,13 @@ The diagram below shows how Cache Context works:
 
 ![img.png](img/umlCacheEvictCacheContext1.png)
 
-
 ### Important Considerations
 
 **@forge/kvs Limits:**
 Please review the [official @forge/kvs quotas and limits](https://developer.atlassian.com/platform/forge/platform-quotas-and-limits/#kvs-and-custom-entity-store-quotas) before implementing caching.
 
 **Caching Guidelines:**
+
 - Don't cache everything - be selective about what to cache
 - Don't cache simple and fast queries - sometimes direct query is faster than cache
 - Consider data size and frequency of changes
@@ -619,6 +663,7 @@ Please review the [official @forge/kvs quotas and limits](https://developer.atla
 - Use appropriate TTL values
 
 **⚠️ Important Cache Limitations:**
+
 - **Table names starting with `a_`**: Tables whose names start with `a_` (case-insensitive) are automatically ignored in cache operations. KVS Cache will not work with such tables, and they will be excluded from cache invalidation and cache key generation.
 
 ### Step 1: Install Dependencies
@@ -657,17 +702,17 @@ modules:
     - key: clearCache
       handler: index.clearCache
 ```
+
 ```typescript
 // Example usage in your Forge app
 import { clearCacheSchedulerTrigger } from "forge-sql-orm";
 
 export const clearCache = () => {
-  return clearCacheSchedulerTrigger({ 
+  return clearCacheSchedulerTrigger({
     cacheEntityName: "cache",
   });
 };
 ```
-
 
 ### Step 3: Configure ORM Options
 
@@ -685,6 +730,7 @@ const forgeSQL = new ForgeSQL(options);
 ```
 
 **Important Notes:**
+
 - The `cacheEntityName` must exactly match the `name` in your manifest storage entities
 - The entity attributes (`sql`, `expiration`, `data`) are required for proper cache functionality
 - Indexes on `sql` and `expiration` improve cache lookup performance
@@ -696,11 +742,14 @@ const forgeSQL = new ForgeSQL(options);
 **Basic setup (without caching):**
 
 **package.json:**
+
 ```shell
 npm install forge-sql-orm @forge/sql drizzle-orm -S
+# For UI-Kit projects, use: npm install forge-sql-orm @forge/sql drizzle-orm -S --legacy-peer-deps
 ```
 
 **manifest.yml:**
+
 ```yaml
 modules:
   sql:
@@ -709,6 +758,7 @@ modules:
 ```
 
 **index.ts:**
+
 ```typescript
 import ForgeSQL from "forge-sql-orm";
 
@@ -718,17 +768,18 @@ const forgeSQL = new ForgeSQL();
 await forgeSQL.insert(Users, [userData]);
 // Use versioned operations without caching
 await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
-const users = await forgeSQL.select({id: Users.id});
-
-
+const users = await forgeSQL.select({ id: Users.id });
 ```
 
 **With caching support:**
+
 ```shell
 npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm -S
+# For UI-Kit projects, use: npm install forge-sql-orm @forge/sql @forge/kvs drizzle-orm -S --legacy-peer-deps
 ```
 
 **manifest.yml:**
+
 ```yaml
 modules:
   scheduledTrigger:
@@ -762,21 +813,23 @@ modules:
 import ForgeSQL from "forge-sql-orm";
 
 const forgeSQL = new ForgeSQL({
-    cacheEntityName: "cache"
+  cacheEntityName: "cache",
 });
 
-import {clearCacheSchedulerTrigger} from "forge-sql-orm";
-import {getTableColumns} from "drizzle-orm";
+import { clearCacheSchedulerTrigger } from "forge-sql-orm";
+import { getTableColumns } from "drizzle-orm";
 
 export const clearCache = () => {
-    return clearCacheSchedulerTrigger({
-        cacheEntityName: "cache",
-    });
+  return clearCacheSchedulerTrigger({
+    cacheEntityName: "cache",
+  });
 };
 
-
 // Now you can use caching features
-const usersData = await forgeSQL.selectCacheable(getTableColumns(users)).from(users).where(eq(users.active, true))
+const usersData = await forgeSQL
+  .selectCacheable(getTableColumns(users))
+  .from(users)
+  .where(eq(users.active, true));
 
 // simple insert
 await forgeSQL.insertAndEvictCache(users, [userData]);
@@ -785,159 +838,194 @@ await forgeSQL.modifyWithVersioningAndEvictCache().insert(users, [userData]);
 
 // use Cache Context
 const data = await forgeSQL.executeWithCacheContextAndReturnValue(async () => {
-    // after insert mark users to evict
-    await forgeSQL.insert(users, [userData]);
-       // after insertAndEvictCache mark orders to evict
-    await forgeSQL.insertAndEvictCache(orders, [order1, order2]);
-    // execute query and put result to local cache
-    await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
-        .from(users)
-        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
-    // use local cache without @forge/kvs and @forge/sql
-    return await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
-        .from(users)
-        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
-})
+  // after insert mark users to evict
+  await forgeSQL.insert(users, [userData]);
+  // after insertAndEvictCache mark orders to evict
+  await forgeSQL.insertAndEvictCache(orders, [order1, order2]);
+  // execute query and put result to local cache
+  await forgeSQL
+    .selectCacheable({
+      userId: users.id,
+      userName: users.name,
+      orderId: orders.id,
+      orderName: orders.name,
+    })
+    .from(users)
+    .innerJoin(orders, eq(orders.userId, users.id))
+    .where(eq(users.active, true));
+  // use local cache without @forge/kvs and @forge/sql
+  return await forgeSQL
+    .selectCacheable({
+      userId: users.id,
+      userName: users.name,
+      orderId: orders.id,
+      orderName: orders.name,
+    })
+    .from(users)
+    .innerJoin(orders, eq(orders.userId, users.id))
+    .where(eq(users.active, true));
+});
 // execute query and put result to kvs cache
-await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
-        .from(users)
-        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
+await forgeSQL
+  .selectCacheable({
+    userId: users.id,
+    userName: users.name,
+    orderId: orders.id,
+    orderName: orders.name,
+  })
+  .from(users)
+  .innerJoin(orders, eq(orders.userId, users.id))
+  .where(eq(users.active, true));
 
 // get result from @foge/kvs cache without real @forge/sql call
-await forgeSQL.selectCacheable({userId: users.id, userName: users.name, orderId: orders.id, orderName: orders.name})
-        .from(users)
-        .innerJoin(orders, eq(orders.userId, users.id)).where(eq(users.active, true))
+await forgeSQL
+  .selectCacheable({
+    userId: users.id,
+    userName: users.name,
+    orderId: orders.id,
+    orderName: orders.name,
+  })
+  .from(users)
+  .innerJoin(orders, eq(orders.userId, users.id))
+  .where(eq(users.active, true));
 
 // use Local Cache for performance optimization
 const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
-    // First query - hits database and caches result
-    const users = await forgeSQL.select({id: users.id, name: users.name})
-        .from(users).where(eq(users.active, true));
-    
-    // Second query - uses local cache (no database call)
-    const cachedUsers = await forgeSQL.select({id: users.id, name: users.name})
-        .from(users).where(eq(users.active, true));
-    
-    // Using new methods for better performance
-    const usersFrom = await forgeSQL.selectFrom(users)
-        .where(eq(users.active, true));
-    
-    // This will use local cache (no database call)
-    const cachedUsersFrom = await forgeSQL.selectFrom(users)
-        .where(eq(users.active, true));
-    
-    // Raw SQL with local caching
-    const rawUsers = await forgeSQL.execute(
-        "SELECT id, name FROM users WHERE active = ?", 
-        [true]
-    );
-    
-    // Insert operation - evicts local cache
-    await forgeSQL.insert(users).values({name: 'New User', active: true});
-    
-    // Third query - hits database again and caches new result
-    const updatedUsers = await forgeSQL.select({id: users.id, name: users.name})
-        .from(users).where(eq(users.active, true));
-    
-    return { users, cachedUsers, updatedUsers, usersFrom, cachedUsersFrom, rawUsers };
-});
+  // First query - hits database and caches result
+  const users = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
 
+  // Second query - uses local cache (no database call)
+  const cachedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
+  // Using new methods for better performance
+  const usersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
+  // This will use local cache (no database call)
+  const cachedUsersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
+  // Raw SQL with local caching
+  const rawUsers = await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [true]);
+
+  // Insert operation - evicts local cache
+  await forgeSQL.insert(users).values({ name: "New User", active: true });
+
+  // Third query - hits database again and caches new result
+  const updatedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
+  return { users, cachedUsers, updatedUsers, usersFrom, cachedUsersFrom, rawUsers };
+});
 ```
 
 ## Choosing the Right Method - ForgeSQL ORM
 
 ### When to Use Each Approach
 
-| Method | Use Case | Versioning | Cache Management |
-|--------|----------|------------|------------------|
-| `modifyWithVersioningAndEvictCache()` | High-concurrency scenarios with Cache support| ✅ Yes | ✅ Yes |
-| `modifyWithVersioning()` | High-concurrency scenarios | ✅ Yes | Cache Context |
-| `insertAndEvictCache()` | Simple inserts | ❌ No | ✅ Yes |
-| `updateAndEvictCache()` | Simple updates | ❌ No | ✅ Yes |
-| `deleteAndEvictCache()` | Simple deletes | ❌ No | ✅ Yes |
-| `insert/update/delete` | Basic Drizzle operations | ❌ No | Cache Context |
-| `selectFrom()` | All-column queries with field aliasing | ❌ No | Local Cache |
-| `selectDistinctFrom()` | Distinct all-column queries with field aliasing | ❌ No | Local Cache |
-| `selectCacheableFrom()` | All-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
-| `selectDistinctCacheableFrom()` | Distinct all-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
-| `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
-| `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
-| `executeDDL()` | DDL operations (CREATE, ALTER, DROP, etc.) | ❌ No | No Caching |
-| `executeDDLActions()` | Execute regular SQL queries in DDL operation context | ❌ No | No Caching |
-| `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
-
+| Method                                | Use Case                                                    | Versioning | Cache Management     |
+| ------------------------------------- | ----------------------------------------------------------- | ---------- | -------------------- |
+| `modifyWithVersioningAndEvictCache()` | High-concurrency scenarios with Cache support               | ✅ Yes     | ✅ Yes               |
+| `modifyWithVersioning()`              | High-concurrency scenarios                                  | ✅ Yes     | Cache Context        |
+| `insertAndEvictCache()`               | Simple inserts                                              | ❌ No      | ✅ Yes               |
+| `updateAndEvictCache()`               | Simple updates                                              | ❌ No      | ✅ Yes               |
+| `deleteAndEvictCache()`               | Simple deletes                                              | ❌ No      | ✅ Yes               |
+| `insert/update/delete`                | Basic Drizzle operations                                    | ❌ No      | Cache Context        |
+| `selectFrom()`                        | All-column queries with field aliasing                      | ❌ No      | Local Cache          |
+| `selectDistinctFrom()`                | Distinct all-column queries with field aliasing             | ❌ No      | Local Cache          |
+| `selectCacheableFrom()`               | All-column queries with field aliasing and caching          | ❌ No      | Local + Global Cache |
+| `selectDistinctCacheableFrom()`       | Distinct all-column queries with field aliasing and caching | ❌ No      | Local + Global Cache |
+| `execute()`                           | Raw SQL queries with local caching                          | ❌ No      | Local Cache          |
+| `executeCacheable()`                  | Raw SQL queries with local and global caching               | ❌ No      | Local + Global Cache |
+| `executeDDL()`                        | DDL operations (CREATE, ALTER, DROP, etc.)                  | ❌ No      | No Caching           |
+| `executeDDLActions()`                 | Execute regular SQL queries in DDL operation context        | ❌ No      | No Caching           |
+| `with()`                              | Common Table Expressions (CTEs)                             | ❌ No      | Local Cache          |
 
 ## Choosing the Right Method - Direct Drizzle
 
 ### When to Use Each Approach
 
-| Method | Use Case | Versioning | Cache Management |
-|--------|----------|------------|------------------|
-| `insertWithCacheContext/insertWithCacheContext/updateWithCacheContext` | Basic Drizzle operations | ❌ No | Cache Context |
-| `insertAndEvictCache()` | Simple inserts without conflicts | ❌ No | ✅ Yes |
-| `updateAndEvictCache()` | Simple updates without conflicts | ❌ No | ✅ Yes |
-| `deleteAndEvictCache()` | Simple deletes without conflicts | ❌ No | ✅ Yes |
-| `insert/update/delete` | Basic Drizzle operations | ❌ No | ❌ No |
-| `selectFrom()` | All-column queries with field aliasing | ❌ No | Local Cache |
-| `selectDistinctFrom()` | Distinct all-column queries with field aliasing | ❌ No | Local Cache |
-| `selectCacheableFrom()` | All-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
-| `selectDistinctCacheableFrom()` | Distinct all-column queries with field aliasing and caching | ❌ No | Local + Global Cache |
-| `execute()` | Raw SQL queries with local caching | ❌ No | Local Cache |
-| `executeCacheable()` | Raw SQL queries with local and global caching | ❌ No | Local + Global Cache |
-| `executeWithMetadata()` | Raw SQL queries with execution metrics capture | ❌ No | Local Cache |
-| `executeDDL()` | DDL operations (CREATE, ALTER, DROP, etc.) | ❌ No | No Caching |
-| `executeDDLActions()` | Execute regular SQL queries in DDL operation context | ❌ No | No Caching |
-| `with()` | Common Table Expressions (CTEs) | ❌ No | Local Cache |
-where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
+| Method                                                                 | Use Case                                                    | Versioning | Cache Management     |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------- | ---------- | -------------------- |
+| `insertWithCacheContext/insertWithCacheContext/updateWithCacheContext` | Basic Drizzle operations                                    | ❌ No      | Cache Context        |
+| `insertAndEvictCache()`                                                | Simple inserts without conflicts                            | ❌ No      | ✅ Yes               |
+| `updateAndEvictCache()`                                                | Simple updates without conflicts                            | ❌ No      | ✅ Yes               |
+| `deleteAndEvictCache()`                                                | Simple deletes without conflicts                            | ❌ No      | ✅ Yes               |
+| `insert/update/delete`                                                 | Basic Drizzle operations                                    | ❌ No      | ❌ No                |
+| `selectFrom()`                                                         | All-column queries with field aliasing                      | ❌ No      | Local Cache          |
+| `selectDistinctFrom()`                                                 | Distinct all-column queries with field aliasing             | ❌ No      | Local Cache          |
+| `selectCacheableFrom()`                                                | All-column queries with field aliasing and caching          | ❌ No      | Local + Global Cache |
+| `selectDistinctCacheableFrom()`                                        | Distinct all-column queries with field aliasing and caching | ❌ No      | Local + Global Cache |
+| `execute()`                                                            | Raw SQL queries with local caching                          | ❌ No      | Local Cache          |
+| `executeCacheable()`                                                   | Raw SQL queries with local and global caching               | ❌ No      | Local + Global Cache |
+| `executeWithMetadata()`                                                | Raw SQL queries with execution metrics capture              | ❌ No      | Local Cache          |
+| `executeDDL()`                                                         | DDL operations (CREATE, ALTER, DROP, etc.)                  | ❌ No      | No Caching           |
+| `executeDDLActions()`                                                  | Execute regular SQL queries in DDL operation context        | ❌ No      | No Caching           |
+| `with()`                                                               | Common Table Expressions (CTEs)                             | ❌ No      | Local Cache          |
 
+where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
 ## Step-by-Step Migration Workflow
 
-1. **Generate initial schema from an existing database**
+1. **Install CLI and setup scripts**
 
-   ```sh
-   npx forge-sql-orm-cli generate:model --dbName testDb --output ./database/schema
+   ```bash
+   npm install forge-sql-orm-cli -D
+   npm pkg set scripts.models:create="forge-sql-orm-cli generate:model --output src/entities --saveEnv"
+   npm pkg set scripts.migration:create="forge-sql-orm-cli migrations:create --force --output src/migration --entitiesPath src/entities"
+   npm pkg set scripts.migration:update="forge-sql-orm-cli migrations:update --entitiesPath src/entities --output src/migration"
    ```
 
    _(This is done only once when setting up the project)_
 
-2. **Create the first migration**
+2. **Generate initial schema from an existing database**
 
    ```sh
-   npx forge-sql-orm-cli migrations:create --dbName testDb --entitiesPath ./database/schema --output ./database/migration
+   npm run models:create
+   ```
+
+   _(This will prompt for database credentials on first run and save them to `.env` file)_
+
+3. **Create the first migration**
+
+   ```sh
+   npm run migration:create
    ```
 
    _(This initializes the database migration structure, also done once)_
 
-3. **Deploy to Forge and verify that migrations work**
-
+4. **Deploy to Forge and verify that migrations work**
    - Deploy your **Forge app** with migrations.
    - Run migrations using a **Forge web trigger** or **Forge scheduler**.
 
-4. **Modify the database (e.g., add a new column, index, etc.)**
-
+5. **Modify the database (e.g., add a new column, index, etc.)**
    - Use **DbSchema** or manually alter the database schema.
 
-5. **Update the migration**
+6. **Update the migration**
 
    ```sh
-   npx forge-sql-orm-cli migrations:update --dbName testDb --entitiesPath ./database/schema --output ./database/migration
+   npm run migration:update
    ```
 
    - ⚠️ **Do NOT update schema before this step!**
    - If schema is updated first, the migration will be empty!
 
-6. **Deploy to Forge and verify that the migration runs without issues**
-
+7. **Deploy to Forge and verify that the migration runs without issues**
    - Run the updated migration on Forge.
 
-7. **Update the schema**
+8. **Update the schema**
 
    ```sh
-   npx forge-sql-orm-cli generate:model --dbName testDb --output ./database/schema
+   npm run models:create
    ```
 
-8. **Repeat steps 4-7 as needed**
+9. **Repeat steps 5-8 as needed**
 
 **⚠️ WARNING:**
 
@@ -947,6 +1035,7 @@ where Cache context - allows you to batch cache invalidation events and bypass c
 ## Drop Migrations
 
 The Drop Migrations feature allows you to completely reset your database schema in Atlassian Forge SQL. This is useful when you need to:
+
 - Start fresh with a new schema
 - Reset all tables and their data
 - Clear migration history
@@ -955,6 +1044,7 @@ The Drop Migrations feature allows you to completely reset your database schema 
 ### Important Requirements
 
 Before using Drop Migrations, ensure that:
+
 1. Your local schema exactly matches the current database schema deployed in Atlassian Forge SQL
 2. You have a backup of your data if needed
 3. You understand that this operation will delete all tables and data
@@ -962,16 +1052,21 @@ Before using Drop Migrations, ensure that:
 ### Usage
 
 1. First, ensure your local schema matches the deployed database:
+
    ```bash
-   npx forge-sql-orm-cli generate:model --output ./database/schema
+   npm run models:create
    ```
 
 2. Generate the drop migration:
+
    ```bash
-   npx forge-sql-orm-cli migrations:drop --entitiesPath ./database/schema --output ./database/migration
+   npm run migration:drop
    ```
 
+   _(Add this script to your package.json: `npm pkg set scripts.migration:drop="forge-sql-orm-cli migrations:drop --entitiesPath src/entities --output src/migration"`)_
+
 3. Deploy and run the migration in your Forge app:
+
    ```js
    import migrationRunner from "./database/migration";
    import { MigrationRunner } from "@forge/sql/out/migration";
@@ -983,13 +1078,14 @@ Before using Drop Migrations, ensure that:
 
 4. After dropping all tables, you can create a new migration to recreate the schema:
    ```bash
-   npx forge-sql-orm-cli migrations:create --entitiesPath ./database/schema --output ./database/migration --force
+   npm run migration:create
    ```
-   The `--force` parameter is required here because we're creating a new migration after dropping all tables.
+   The `--force` parameter is already included in the script to allow creating migrations after dropping all tables.
 
 ### Example Migration Output
 
 The generated drop migration will look like this:
+
 ```js
 import { MigrationRunner } from "@forge/sql/out/migration";
 
@@ -1017,31 +1113,36 @@ export default (migrationRunner: MigrationRunner): MigrationRunner => {
 
 When working with date and time fields in your models, you should use the custom types provided by Forge-SQL-ORM to ensure proper handling of date/time values. This is necessary because Forge SQL has specific format requirements for date/time values:
 
-| Date type | Required Format | Example |
-|-----------|----------------|---------|
-| DATE | YYYY-MM-DD | 2024-09-19 |
-| TIME | HH:MM:SS[.fraction] | 06:40:34 |
+| Date type | Required Format                | Example                    |
+| --------- | ------------------------------ | -------------------------- |
+| DATE      | YYYY-MM-DD                     | 2024-09-19                 |
+| TIME      | HH:MM:SS[.fraction]            | 06:40:34                   |
 | TIMESTAMP | YYYY-MM-DD HH:MM:SS[.fraction] | 2024-09-19 06:40:34.999999 |
 
 ```typescript
 // ❌ Don't use standard Drizzle date/time types
-export const testEntityTimeStampVersion = mysqlTable('test_entity', {
-  id: int('id').primaryKey().autoincrement(),
-  time_stamp: timestamp('times_tamp').notNull(),
-  date_time: datetime('date_time').notNull(),
-  time: time('time').notNull(),
-  date: date('date').notNull(),
+export const testEntityTimeStampVersion = mysqlTable("test_entity", {
+  id: int("id").primaryKey().autoincrement(),
+  time_stamp: timestamp("times_tamp").notNull(),
+  date_time: datetime("date_time").notNull(),
+  time: time("time").notNull(),
+  date: date("date").notNull(),
 });
 
 // ✅ Use Forge-SQL-ORM custom types instead
-import { forgeDateTimeString, forgeDateString, forgeTimestampString, forgeTimeString } from 'forge-sql-orm'
+import {
+  forgeDateTimeString,
+  forgeDateString,
+  forgeTimestampString,
+  forgeTimeString,
+} from "forge-sql-orm";
 
-export const testEntityTimeStampVersion = mysqlTable('test_entity', {
-  id: int('id').primaryKey().autoincrement(),
-  time_stamp: forgeTimestampString('times_tamp').notNull(),
-  date_time: forgeDateTimeString('date_time').notNull(),
-  time: forgeTimeString('time').notNull(),
-  date: forgeDateString('date').notNull(),
+export const testEntityTimeStampVersion = mysqlTable("test_entity", {
+  id: int("id").primaryKey().autoincrement(),
+  time_stamp: forgeTimestampString("times_tamp").notNull(),
+  date_time: forgeDateTimeString("date_time").notNull(),
+  time: forgeTimeString("time").notNull(),
+  date: forgeDateString("date").notNull(),
 });
 ```
 
@@ -1057,6 +1158,7 @@ const timestamp = moment().format("YYYY-MM-DDTHH:mm:ss.SSS");
 ```
 
 Our custom types provide:
+
 - Automatic conversion between JavaScript Date objects and Forge SQL's required string formats
 - Consistent date/time handling across your application
 - Type safety for date/time fields
@@ -1072,9 +1174,6 @@ Our custom types provide:
 
 Each type ensures that the data is properly formatted according to Forge SQL's requirements while providing a clean, type-safe interface for your application code.
 
-
-
-
 # Connection to ORM
 
 ```js
@@ -1082,7 +1181,8 @@ import ForgeSQL from "forge-sql-orm";
 
 const forgeSQL = new ForgeSQL();
 ```
-or 
+
+or
 
 ```typescript
 import { drizzle } from "drizzle-orm/mysql-proxy";
@@ -1101,71 +1201,47 @@ const users = await db.select().from(users);
 
 ```js
 // Using forgeSQL.select()
-const user = await forgeSQL
-    .select({user: users})
-    .from(users);
+const user = await forgeSQL.select({ user: users }).from(users);
 
 // Using forgeSQL.selectDistinct()
-const user = await forgeSQL
-    .selectDistinct({user: users})
-    .from(users);
+const user = await forgeSQL.selectDistinct({ user: users }).from(users);
 
 // Using forgeSQL.selectCacheable()
-const user = await forgeSQL
-    .selectCacheable({user: users})
-    .from(users);
+const user = await forgeSQL.selectCacheable({ user: users }).from(users);
 
 // Using forgeSQL.selectFrom() - Select all columns with field aliasing
-const user = await forgeSQL
-    .selectFrom(users)
-    .where(eq(users.id, 1));
+const user = await forgeSQL.selectFrom(users).where(eq(users.id, 1));
 
 // Using forgeSQL.selectDistinctFrom() - Select distinct all columns with field aliasing
-const user = await forgeSQL
-    .selectDistinctFrom(users)
-    .where(eq(users.id, 1));
+const user = await forgeSQL.selectDistinctFrom(users).where(eq(users.id, 1));
 
 // Using forgeSQL.selectCacheableFrom() - Select all columns with field aliasing and caching
-const user = await forgeSQL
-    .selectCacheableFrom(users)
-    .where(eq(users.id, 1));
+const user = await forgeSQL.selectCacheableFrom(users).where(eq(users.id, 1));
 
 // Using forgeSQL.selectDistinctCacheableFrom() - Select distinct all columns with field aliasing and caching
-const user = await forgeSQL
-    .selectDistinctCacheableFrom(users)
-    .where(eq(users.id, 1));
+const user = await forgeSQL.selectDistinctCacheableFrom(users).where(eq(users.id, 1));
 
 // Using forgeSQL.execute() - Execute raw SQL with local caching
-const user = await forgeSQL
-    .execute("SELECT * FROM users WHERE id = ?", [1]);
+const user = await forgeSQL.execute("SELECT * FROM users WHERE id = ?", [1]);
 
 // Using forgeSQL.executeCacheable() - Execute raw SQL with local and global caching
 // ⚠️ IMPORTANT: When using executeCacheable(), all table names in SQL queries must be wrapped with backticks (`)
 // Example: SELECT * FROM `users` WHERE id = ? (NOT: SELECT * FROM users WHERE id = ?)
-const user = await forgeSQL
-    .executeCacheable("SELECT * FROM `users` WHERE id = ?", [1], 300);
+const user = await forgeSQL.executeCacheable("SELECT * FROM `users` WHERE id = ?", [1], 300);
 
 // Using forgeSQL.getDrizzleQueryBuilder()
-const user = await forgeSQL
-  .getDrizzleQueryBuilder()
-  .select().from(Users)
-  .where(eq(Users.id, 1));
+const user = await forgeSQL.getDrizzleQueryBuilder().select().from(Users).where(eq(Users.id, 1));
 
 // OR using direct drizzle with custom driver
 const db = drizzle(forgeDriver);
-const user = await db
-  .select().from(Users)
-  .where(eq(Users.id, 1));
+const user = await db.select().from(Users).where(eq(Users.id, 1));
 // Returns: { id: 1, name: "John Doe" }
 
 // Using executeQueryOnlyOne for single result with error handling
 const user = await forgeSQL
   .fetch()
   .executeQueryOnlyOne(
-    forgeSQL
-      .getDrizzleQueryBuilder()
-      .select().from(Users)
-      .where(eq(Users.id, 1))
+    forgeSQL.getDrizzleQueryBuilder().select().from(Users).where(eq(Users.id, 1)),
   );
 // Returns: { id: 1, name: "John Doe" }
 // Throws error if multiple records found
@@ -1177,26 +1253,29 @@ const usersAlias = alias(Users, "u");
 const result = await forgeSQL
   .getDrizzleQueryBuilder()
   .select({
-    userId: sql<string>`${usersAlias.id} as \`userId\``,
-    userName: sql<string>`${usersAlias.name} as \`userName\``
-  }).from(usersAlias);
+    userId: sql < string > `${usersAlias.id} as \`userId\``,
+    userName: sql < string > `${usersAlias.name} as \`userName\``,
+  })
+  .from(usersAlias);
 
 // OR with direct drizzle
 const db = drizzle(forgeDriver);
 const result = await db
   .select({
-    userId: sql<string>`${usersAlias.id} as \`userId\``,
-    userName: sql<string>`${usersAlias.name} as \`userName\``
-  }).from(usersAlias);
+    userId: sql < string > `${usersAlias.id} as \`userId\``,
+    userName: sql < string > `${usersAlias.name} as \`userName\``,
+  })
+  .from(usersAlias);
 // Returns: { userId: 1, userName: "John Doe" }
 ```
 
 ### Complex Queries
+
 ```js
 // Using joins with automatic field name collision prevention
 // With forgeSQL
 const orderWithUser = await forgeSQL
-  .select({user: users, order: orders})
+  .select({ user: users, order: orders })
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
 
@@ -1215,12 +1294,12 @@ const orderWithUser = await forgeSQL
 // Using with() for Common Table Expressions (CTEs)
 const userStats = await forgeSQL
   .with(
-    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
-    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as("activeUsers"),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, "completed")).as("completedOrders"),
   )
   .select({
     totalActiveUsers: sql`COUNT(au.id)`,
-    totalCompletedOrders: sql`COUNT(co.id)`
+    totalCompletedOrders: sql`COUNT(co.id)`,
   })
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
@@ -1228,33 +1307,30 @@ const userStats = await forgeSQL
 // OR with direct drizzle
 const db = patchDbWithSelectAliased(drizzle(forgeDriver));
 const orderWithUser = await db
-  .selectAliased({user: users, order: orders})
+  .selectAliased({ user: users, order: orders })
   .from(orders)
   .innerJoin(users, eq(orders.userId, users.id));
-// Returns: { 
-//   user_id: 1, 
+// Returns: {
+//   user_id: 1,
 //   user_name: "John Doe",
 //   order_id: 1,
 //   order_product: "Product 1"
 // }
 
 // Using distinct with aliases
-const uniqueUsers = await db
-  .selectAliasedDistinct({user: users})
-  .from(users);
+const uniqueUsers = await db.selectAliasedDistinct({ user: users }).from(users);
 // Returns unique users with aliased fields
 
 // Using executeQueryOnlyOne for unique results
-const userStats = await forgeSQL
-  .fetch()
-  .executeQueryOnlyOne(
-    forgeSQL
-      .getDrizzleQueryBuilder()
-      .select({
-        totalUsers: sql`COUNT(*) as \`totalUsers\``,
-        uniqueNames: sql`COUNT(DISTINCT name) as \`uniqueNames\``
-      }).from(Users)
-  );
+const userStats = await forgeSQL.fetch().executeQueryOnlyOne(
+  forgeSQL
+    .getDrizzleQueryBuilder()
+    .select({
+      totalUsers: sql`COUNT(*) as \`totalUsers\``,
+      uniqueNames: sql`COUNT(DISTINCT name) as \`uniqueNames\``,
+    })
+    .from(Users),
+);
 // Returns: { totalUsers: 100, uniqueNames: 80 }
 // Throws error if multiple records found
 ```
@@ -1286,14 +1362,14 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
   },
   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
     const threshold = 500; // ms baseline for this resolver
-    
+
     if (totalDbExecutionTime > threshold * 1.5) {
       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
       await printQueriesWithPlan(); // Analyze and print query execution plans
     } else if (totalDbExecutionTime > threshold) {
       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
     }
-    
+
     console.log(`DB response size: ${totalResponseSize} bytes`);
   }
 );
@@ -1308,7 +1384,7 @@ await forgeSQL.executeDDL(`
 `);
 
 await forgeSQL.executeDDL(sql`
-  ALTER TABLE users 
+  ALTER TABLE users
   ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 `);
 
@@ -1319,23 +1395,23 @@ await forgeSQL.executeDDL("DROP TABLE IF EXISTS old_users");
 await forgeSQL.executeDDLActions(async () => {
   // Execute regular SQL queries in DDL context for performance monitoring
   const slowQueries = await forgeSQL.execute(`
-    SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
+    SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY
     WHERE AVG_LATENCY > 1000000
   `);
-  
+
   // Execute complex analysis queries in DDL context
   const performanceData = await forgeSQL.execute(`
     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
   `);
-  
+
   return { slowQueries, performanceData };
 });
 
 // Using execute() with complex queries
 const userStats = await forgeSQL
   .execute(`
-    SELECT 
+    SELECT
       u.id,
       u.name,
       COUNT(o.id) as order_count,
@@ -1360,13 +1436,10 @@ These operations work like standard Drizzle methods but participate in cache con
 await forgeSQL.insert(Users).values({ id: 1, name: "Smith" });
 
 // Basic update (participates in cache context when used within executeWithCacheContext)
-await forgeSQL.update(Users)
-  .set({ name: "Smith Updated" })
-  .where(eq(Users.id, 1));
+await forgeSQL.update(Users).set({ name: "Smith Updated" }).where(eq(Users.id, 1));
 
 // Basic delete (participates in cache context when used within executeWithCacheContext)
-await forgeSQL.delete(Users)
-  .where(eq(Users.id, 1));
+await forgeSQL.delete(Users).where(eq(Users.id, 1));
 ```
 
 ### 2. Non-Versioned Operations with Cache Management
@@ -1378,13 +1451,10 @@ These operations don't use optimistic locking but provide cache invalidation:
 await forgeSQL.insertAndEvictCache(Users).values({ id: 1, name: "Smith" });
 
 // Update without versioning but with cache invalidation
-await forgeSQL.updateAndEvictCache(Users)
-  .set({ name: "Smith Updated" })
-  .where(eq(Users.id, 1));
+await forgeSQL.updateAndEvictCache(Users).set({ name: "Smith Updated" }).where(eq(Users.id, 1));
 
 // Delete without versioning but with cache invalidation
-await forgeSQL.deleteAndEvictCache(Users)
-  .where(eq(Users.id, 1));
+await forgeSQL.deleteAndEvictCache(Users).where(eq(Users.id, 1));
 ```
 
 ### 3. Versioned Operations with Cache Management (Recommended)
@@ -1393,16 +1463,20 @@ These operations use optimistic locking and automatic cache invalidation:
 
 ```js
 // Insert with versioning and cache management
-const userId = await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [{ id: 1, name: "Smith" }]);
+const userId = await forgeSQL
+  .modifyWithVersioningAndEvictCache()
+  .insert(Users, [{ id: 1, name: "Smith" }]);
 
 // Bulk insert with versioning
 await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [
-    { id: 2, name: "Smith" },
-    { id: 3, name: "Vasyl" },
-  ]);
+  { id: 2, name: "Smith" },
+  { id: 3, name: "Vasyl" },
+]);
 
 // Update by ID with optimistic locking and cache invalidation
-await forgeSQL.modifyWithVersioningAndEvictCache().updateById({ id: 1, name: "Smith Updated" }, Users);
+await forgeSQL
+  .modifyWithVersioningAndEvictCache()
+  .updateById({ id: 1, name: "Smith Updated" }, Users);
 
 // Delete by ID with versioning and cache invalidation
 await forgeSQL.modifyWithVersioningAndEvictCache().deleteById(1, Users);
@@ -1446,18 +1520,16 @@ await forgeSQL.modifyWithVersioning().deleteById(1, Users);
 import { nextVal } from "forge-sql-orm";
 
 const user = {
-  id: nextVal('user_id_seq'),
+  id: nextVal("user_id_seq"),
   name: "user test",
-  organization_id: 1
+  organization_id: 1,
 };
 const id = await forgeSQL.modifyWithVersioning().insert(appUser, [user]);
 
 // Update with custom WHERE condition
-await forgeSQL.modifyWithVersioning().updateFields(
-    { name: "New Name", age: 35 },
-  Users,
-  eq(Users.email, "smith@example.com")
-);
+await forgeSQL
+  .modifyWithVersioning()
+  .updateFields({ name: "New Name", age: 35 }, Users, eq(Users.email, "smith@example.com"));
 
 // Insert with duplicate handling
 await forgeSQL.modifyWithVersioning().insert(
@@ -1466,7 +1538,7 @@ await forgeSQL.modifyWithVersioning().insert(
     { id: 4, name: "Smith" },
     { id: 4, name: "Vasyl" },
   ],
-  true
+  true,
 );
 ```
 
@@ -1488,19 +1560,21 @@ const result = await forgeSQL
   .offset(formatLimitOffset(350000));
 
 // The generated SQL will be:
-// SELECT * FROM order_item 
-// ORDER BY created_at ASC 
-// LIMIT 10 
+// SELECT * FROM order_item
+// ORDER BY created_at ASC
+// LIMIT 10
 // OFFSET 350000
 ```
 
 **Important Notes:**
+
 - The function performs type checking to prevent SQL injection
 - It throws an error if the input is not a valid number
 - Use this function instead of direct parameter binding for LIMIT and OFFSET clauses
 - The function is specifically designed to work with Atlassian Forge SQL's limitations
 
 **Security Considerations:**
+
 - The function includes validation to ensure the input is a valid number
 - This prevents SQL injection by ensuring only numeric values are inserted
 - Always use this function instead of string concatenation for LIMIT and OFFSET values
@@ -1534,9 +1608,9 @@ const options = {
       tableName: "users",
       versionField: {
         fieldName: "updatedAt",
-      }
-    }
-  }
+      },
+    },
+  },
 };
 
 const forgeSQL = new ForgeSQL(options);
@@ -1558,7 +1632,6 @@ The caching system leverages Forge's Custom entity store to provide:
 // Key: "CachedQuery_8d74bdd9d85064b72fb2ee072ca948e5"
 // Value: { data: [...], expiration: 1234567890, sql: "select * from 1" }
 ```
-
 
 ### Cache Context Operations
 
@@ -1620,72 +1693,78 @@ Local cache is an in-memory caching layer that operates within a single resolver
 // Execute operations within a local cache context
 await forgeSQL.executeWithLocalContext(async () => {
   // First call - executes query and caches result
-  const users = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
+  const users = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
   // Second call - gets result from local cache (no database query)
-  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
+  const cachedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
   // Using new selectFrom methods with local caching
-  const usersFrom = await forgeSQL.selectFrom(users)
-    .where(eq(users.active, true));
-  
+  const usersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
   // This will use local cache (no database call)
-  const cachedUsersFrom = await forgeSQL.selectFrom(users)
-    .where(eq(users.active, true));
-  
+  const cachedUsersFrom = await forgeSQL.selectFrom(users).where(eq(users.active, true));
+
   // Using execute() with local caching
-  const rawUsers = await forgeSQL.execute(
-    "SELECT id, name FROM users WHERE active = ?", 
-    [true]
-  );
-  
+  const rawUsers = await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [true]);
+
   // This will use local cache (no database call)
-  const cachedRawUsers = await forgeSQL.execute(
-    "SELECT id, name FROM users WHERE active = ?", 
-    [true]
-  );
-  
+  const cachedRawUsers = await forgeSQL.execute("SELECT id, name FROM users WHERE active = ?", [
+    true,
+  ]);
+
   // Raw SQL with execution metadata and performance monitoring
   const usersWithMetadata = await forgeSQL.executeWithMetadata(
     async () => {
       const users = await forgeSQL.selectFrom(usersTable);
-      const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+      const orders = await forgeSQL
+        .selectFrom(ordersTable)
+        .where(eq(ordersTable.userId, usersTable.id));
       return { users, orders };
     },
     (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
       const threshold = 500; // ms baseline for this resolver
-      
+
       if (totalDbExecutionTime > threshold * 1.5) {
         console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
         await printQueriesWithPlan(); // Analyze and print query execution plans
       } else if (totalDbExecutionTime > threshold) {
         console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
       }
-      
+
       console.log(`DB response size: ${totalResponseSize} bytes`);
-    }
+    },
   );
-  
+
   // Insert operation - evicts local cache for users table
-  await forgeSQL.insert(users).values({ name: 'New User', active: true });
-  
+  await forgeSQL.insert(users).values({ name: "New User", active: true });
+
   // Third call - executes query again and caches new result
-  const updatedUsers = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
+  const updatedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
 });
 
 // Execute with return value
 const result = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
   // First call - executes query and caches result
-  const users = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
+  const users = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
   // Second call - gets result from local cache (no database query)
-  const cachedUsers = await forgeSQL.select({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
+  const cachedUsers = await forgeSQL
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.active, true));
+
   return { users, cachedUsers };
 });
 ```
@@ -1697,57 +1776,57 @@ const result = await forgeSQL.executeWithLocalCacheContextAndReturnValue(async (
 const userResolver = async (req) => {
   return await forgeSQL.executeWithLocalCacheContextAndReturnValue(async () => {
     // Get user details using selectFrom (all columns with field aliasing)
-    const user = await forgeSQL.selectFrom(users)
-      .where(eq(users.id, args.userId));
-    
+    const user = await forgeSQL.selectFrom(users).where(eq(users.id, args.userId));
+
     // Get user's orders using selectCacheableFrom (with caching)
-    const orders = await forgeSQL.selectCacheableFrom(orders)
-      .where(eq(orders.userId, args.userId));
-    
+    const orders = await forgeSQL.selectCacheableFrom(orders).where(eq(orders.userId, args.userId));
+
     // Get user's profile using raw SQL with execute()
     const profile = await forgeSQL.execute(
-      "SELECT id, bio, avatar FROM profiles WHERE user_id = ?", 
-      [args.userId]
+      "SELECT id, bio, avatar FROM profiles WHERE user_id = ?",
+      [args.userId],
     );
-    
+
     // Get user statistics using complex raw SQL
-    const stats = await forgeSQL.execute(`
+    const stats = await forgeSQL.execute(
+      `
       SELECT 
         COUNT(o.id) as total_orders,
         SUM(o.amount) as total_spent,
         AVG(o.amount) as avg_order_value
       FROM orders o 
       WHERE o.user_id = ? AND o.status = 'completed'
-    `, [args.userId]);
-    
+    `,
+      [args.userId],
+    );
+
     // If any of these queries are repeated within the same resolver,
     // they will use the local cache instead of hitting the database
-    
+
     return {
       ...user[0],
       orders,
       profile: profile[0],
-      stats: stats[0]
+      stats: stats[0],
     };
   });
 };
 ```
 
-
 #### Local Cache (Level 1) vs Global Cache (Level 2)
 
-| Feature | Local Cache (Level 1) | Global Cache (Level 2) |
-|---------|----------------------|------------------------|
-| **Storage** | In-memory (Node.js process) | Persistent (KVS Custom Entities) |
-| **Scope** | Single forge invocation | Cross-invocation (between calls) |
-| **Persistence** | No (cleared on invocation end) | Yes (survives app redeploy) |
-| **Performance** | Very fast (memory access) | Fast (KVS optimized storage) |
-| **Memory Usage** | Low (invocation-scoped) | Higher (persistent storage) |
-| **Use Case** | Invocation optimization | Cross-invocation data sharing |
-| **Configuration** | None required | Requires KVS setup |
-| **TTL Support** | No (invocation-scoped) | Yes (automatic expiration) |
-| **Cache Eviction** | Automatic on DML operations | Manual or scheduled cleanup |
-| **Best For** | Repeated queries in single invocation | Frequently accessed data across invocations |
+| Feature            | Local Cache (Level 1)                 | Global Cache (Level 2)                      |
+| ------------------ | ------------------------------------- | ------------------------------------------- |
+| **Storage**        | In-memory (Node.js process)           | Persistent (KVS Custom Entities)            |
+| **Scope**          | Single forge invocation               | Cross-invocation (between calls)            |
+| **Persistence**    | No (cleared on invocation end)        | Yes (survives app redeploy)                 |
+| **Performance**    | Very fast (memory access)             | Fast (KVS optimized storage)                |
+| **Memory Usage**   | Low (invocation-scoped)               | Higher (persistent storage)                 |
+| **Use Case**       | Invocation optimization               | Cross-invocation data sharing               |
+| **Configuration**  | None required                         | Requires KVS setup                          |
+| **TTL Support**    | No (invocation-scoped)                | Yes (automatic expiration)                  |
+| **Cache Eviction** | Automatic on DML operations           | Manual or scheduled cleanup                 |
+| **Best For**       | Repeated queries in single invocation | Frequently accessed data across invocations |
 
 #### Integration with Global Cache (Level 2)
 
@@ -1760,19 +1839,20 @@ await forgeSQL.executeWithLocalContext(async () => {
   // 1. Local cache (Level 1 - in-memory)
   // 2. Global cache (Level 2 - KVS)
   // 3. Database query
-  const users = await forgeSQL.selectCacheable({ id: users.id, name: users.name })
-    .from(users).where(eq(users.active, true));
-  
-  // Using new methods with multi-level caching
-  const usersFrom = await forgeSQL.selectCacheableFrom(users)
+  const users = await forgeSQL
+    .selectCacheable({ id: users.id, name: users.name })
+    .from(users)
     .where(eq(users.active, true));
-  
+
+  // Using new methods with multi-level caching
+  const usersFrom = await forgeSQL.selectCacheableFrom(users).where(eq(users.active, true));
+
   // Raw SQL with multi-level caching
   // ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
   const rawUsers = await forgeSQL.executeCacheable(
-    "SELECT id, name FROM `users` WHERE active = ?", 
-    [true], 
-    300 // TTL in seconds
+    "SELECT id, name FROM `users` WHERE active = ?",
+    [true],
+    300, // TTL in seconds
   );
 });
 ```
@@ -1796,26 +1876,26 @@ The diagram below shows how local cache works in Forge-SQL-ORM:
 // Execute queries with caching
 const users = await forgeSQL.modifyWithVersioningAndEvictCache().executeQuery(
   forgeSQL.select().from(Users).where(eq(Users.active, true)),
-  600 // Custom TTL in seconds
+  600, // Custom TTL in seconds
 );
 
 // Execute single result queries with caching
-const user = await forgeSQL.modifyWithVersioningAndEvictCache().executeQueryOnlyOne(
-  forgeSQL.select().from(Users).where(eq(Users.id, 1))
-);
+const user = await forgeSQL
+  .modifyWithVersioningAndEvictCache()
+  .executeQueryOnlyOne(forgeSQL.select().from(Users).where(eq(Users.id, 1)));
 
 // Execute raw SQL with caching
 const results = await forgeSQL.modifyWithVersioningAndEvictCache().executeRawSQL(
   "SELECT * FROM users WHERE active = ?",
   [true],
-  300 // TTL in seconds
+  300, // TTL in seconds
 );
 
 // Using new methods for cache-aware operations
-const usersFrom = await forgeSQL.selectCacheableFrom(Users)
-  .where(eq(Users.active, true));
+const usersFrom = await forgeSQL.selectCacheableFrom(Users).where(eq(Users.active, true));
 
-const usersDistinct = await forgeSQL.selectDistinctCacheableFrom(Users)
+const usersDistinct = await forgeSQL
+  .selectDistinctCacheableFrom(Users)
   .where(eq(Users.active, true));
 
 // Raw SQL with local and global caching
@@ -1823,18 +1903,18 @@ const usersDistinct = await forgeSQL.selectDistinctCacheableFrom(Users)
 const rawUsers = await forgeSQL.executeCacheable(
   "SELECT * FROM `users` WHERE active = ?",
   [true],
-  300 // TTL in seconds
+  300, // TTL in seconds
 );
 
 // Using with() for Common Table Expressions with caching
 const userStats = await forgeSQL
   .with(
-    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
-    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as("activeUsers"),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, "completed")).as("completedOrders"),
   )
   .select({
     totalActiveUsers: sql`COUNT(au.id)`,
-    totalCompletedOrders: sql`COUNT(co.id)`
+    totalCompletedOrders: sql`COUNT(co.id)`,
   })
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
@@ -1843,21 +1923,23 @@ const userStats = await forgeSQL
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
   async () => {
     const users = await forgeSQL.selectFrom(usersTable);
-    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    const orders = await forgeSQL
+      .selectFrom(ordersTable)
+      .where(eq(ordersTable.userId, usersTable.id));
     return { users, orders };
   },
   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
     const threshold = 500; // ms baseline for this resolver
-    
+
     if (totalDbExecutionTime > threshold * 1.5) {
       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
       await printQueriesWithPlan(); // Analyze and print query execution plans
     } else if (totalDbExecutionTime > threshold) {
       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
     }
-    
+
     console.log(`DB response size: ${totalResponseSize} bytes`);
-  }
+  },
 );
 ```
 
@@ -1893,9 +1975,9 @@ const options = {
       tableName: "users",
       versionField: {
         fieldName: "updatedAt",
-      }
-    }
-  }
+      },
+    },
+  },
 };
 
 const forgeSQL = new ForgeSQL(options);
@@ -1906,24 +1988,26 @@ const forgeSQL = new ForgeSQL(options);
 ```typescript
 // The version field will be automatically handled
 await forgeSQL.modifyWithVersioning().updateById(
-  { 
-    id: 1, 
+  {
+    id: 1,
     name: "Updated Name",
-    updatedAt: new Date() // Will be automatically set if not provided
-  }, 
-  Users
+    updatedAt: new Date(), // Will be automatically set if not provided
+  },
+  Users,
 );
 ```
+
 or with cache support
+
 ```typescript
 // The version field will be automatically handled
 await forgeSQL.modifyWithVersioningAndEvictCache().updateById(
-  { 
-    id: 1, 
+  {
+    id: 1,
     name: "Updated Name",
-    updatedAt: new Date() // Will be automatically set if not provided
-  }, 
-  Users
+    updatedAt: new Date(), // Will be automatically set if not provided
+  },
+  Users,
 );
 ```
 
@@ -1931,16 +2015,16 @@ await forgeSQL.modifyWithVersioningAndEvictCache().updateById(
 
 The `ForgeSqlOrmOptions` object allows customization of ORM behavior:
 
-| Option                     | Type      | Description                                                                                                                                                                                                                     |
-| -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `logRawSqlQuery`           | `boolean` | Enables logging of raw SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`.                                                                                         |
-| `logCache`                 | `boolean` | Enables logging of cache operations (hits, misses, evictions) in the Atlassian Forge Developer Console. Useful for debugging caching issues. Defaults to `false`.                                                               |
+| Option                     | Type      | Description                                                                                                                                                                                                                                                                    |
+| -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `logRawSqlQuery`           | `boolean` | Enables logging of raw SQL queries in the Atlassian Forge Developer Console. Useful for debugging and monitoring. Defaults to `false`.                                                                                                                                         |
+| `logCache`                 | `boolean` | Enables logging of cache operations (hits, misses, evictions) in the Atlassian Forge Developer Console. Useful for debugging caching issues. Defaults to `false`.                                                                                                              |
 | `disableOptimisticLocking` | `boolean` | Disables optimistic locking. When set to `true`, no additional condition (e.g., a version check) is added during record updates, which can improve performance. However, this may lead to conflicts when multiple transactions attempt to update the same record concurrently. |
-| `additionalMetadata`       | `object`  | Allows adding custom metadata to all entities. This is useful for tracking common fields across all tables (e.g., `createdAt`, `updatedAt`, `createdBy`, etc.). The metadata will be automatically added to all generated entities. |
-| `cacheEntityName`          | `string`  | KVS Custom entity name for cache storage. Must match the `name` in your `manifest.yml` storage entities configuration. Required for caching functionality. Defaults to `"cache"`.                                                                                                                         |
-| `cacheTTL`                 | `number`  | Default cache TTL in seconds. Defaults to `120` (2 minutes).                                                                                                                                                                   |
-| `cacheWrapTable`           | `boolean` | Whether to wrap table names with backticks in cache keys. Defaults to `true`.                                                                                                                                                  |
-| `hints`                    | `object`  | SQL hints for query optimization. Optional configuration for advanced query tuning.                                                                                                                                             |
+| `additionalMetadata`       | `object`  | Allows adding custom metadata to all entities. This is useful for tracking common fields across all tables (e.g., `createdAt`, `updatedAt`, `createdBy`, etc.). The metadata will be automatically added to all generated entities.                                            |
+| `cacheEntityName`          | `string`  | KVS Custom entity name for cache storage. Must match the `name` in your `manifest.yml` storage entities configuration. Required for caching functionality. Defaults to `"cache"`.                                                                                              |
+| `cacheTTL`                 | `number`  | Default cache TTL in seconds. Defaults to `120` (2 minutes).                                                                                                                                                                                                                   |
+| `cacheWrapTable`           | `boolean` | Whether to wrap table names with backticks in cache keys. Defaults to `true`.                                                                                                                                                                                                  |
+| `hints`                    | `object`  | SQL hints for query optimization. Optional configuration for advanced query tuning.                                                                                                                                                                                            |
 
 ## CLI Commands
 
@@ -1959,22 +2043,38 @@ The CLI tool provides the following main commands:
 
 ### Installation
 
+The CLI tool must be installed as a local dependency and used via npm scripts in your `package.json`:
+
 ```bash
-npm install -g forge-sql-orm-cli
+npm install forge-sql-orm-cli -D
+```
+
+### Setup npm Scripts
+
+Add the following scripts to your `package.json`:
+
+```bash
+npm pkg set scripts.models:create="forge-sql-orm-cli generate:model --output src/entities --saveEnv"
+npm pkg set scripts.migration:create="forge-sql-orm-cli migrations:create --force --output src/migration --entitiesPath src/entities"
+npm pkg set scripts.migration:update="forge-sql-orm-cli migrations:update --entitiesPath src/entities --output src/migration"
 ```
 
 ### Basic Usage
 
+After setting up the scripts, use them via npm:
+
 ```bash
 # Generate models from database
-forge-sql-orm-cli generate:model --dbName myapp --output ./database/entities
+npm run models:create
 
 # Create migration
-forge-sql-orm-cli migrations:create --dbName myapp --entitiesPath ./database/entities
+npm run migration:create
 
 # Update migration
-forge-sql-orm-cli migrations:update --dbName myapp --entitiesPath ./database/entities
+npm run migration:update
 ```
+
+**Note:** The CLI tool is designed to work as a local dependency through npm scripts. Configuration is saved to `.env` file using the `--saveEnv` flag, so you only need to provide database credentials once.
 
 For detailed information about all available options and advanced usage, see the [Full CLI Documentation](forge-sql-orm-cli/README.md).
 
@@ -1985,7 +2085,8 @@ Forge-SQL-ORM provides web triggers for managing database migrations in Atlassia
 ### 1. Apply Migrations Trigger
 
 This trigger allows you to apply database migrations through a web endpoint. It's useful for:
-- Manually triggering migrations 
+
+- Manually triggering migrations
 - Running migrations as part of your deployment process
 - Testing migrations in different environments
 
@@ -2000,22 +2101,23 @@ export const handlerMigration = async () => {
 ```
 
 Configure in `manifest.yml`:
+
 ```yaml
-  webtrigger:
-     - key: invoke-schema-migration
-       function: runSchemaMigration
-       security:
-          egress:
-             allowDataEgress: false
-             allowedResponses:
-                - statusCode: 200
-                  body: '{"body": "Migrations successfully executed"}'
-  sql:
-     - key: main
-       engine: mysql
-  function:
-     - key: runSchemaMigration
-       handler: index.handlerMigration
+webtrigger:
+  - key: invoke-schema-migration
+    function: runSchemaMigration
+    security:
+      egress:
+        allowDataEgress: false
+        allowedResponses:
+          - statusCode: 200
+            body: '{"body": "Migrations successfully executed"}'
+sql:
+  - key: main
+    engine: mysql
+function:
+  - key: runSchemaMigration
+    handler: index.handlerMigration
 ```
 
 ### 2. Drop Migrations Trigger
@@ -2023,11 +2125,12 @@ Configure in `manifest.yml`:
 ⚠️ **WARNING**: This trigger will permanently delete all data in the specified tables and clear the migrations history. This operation cannot be undone!
 
 This trigger allows you to completely reset your database schema. It's useful for:
+
 - Development environments where you need to start fresh
 - Testing scenarios requiring a clean database
 - Resetting the database before applying new migrations
 
-**Important**: The trigger will  drop all tables including migration.
+**Important**: The trigger will drop all tables including migration.
 
 ```typescript
 // Example usage in your Forge app
@@ -2039,16 +2142,17 @@ export const dropMigrations = () => {
 ```
 
 Configure in `manifest.yml`:
+
 ```yaml
-  webtrigger:
-     - key: drop-schema-migration
-       function: dropMigrations
-  sql:
-     - key: main
-       engine: mysql
-  function:
-     - key: dropMigrations
-       handler: index.dropMigrations
+webtrigger:
+  - key: drop-schema-migration
+    function: dropMigrations
+sql:
+  - key: main
+    engine: mysql
+function:
+  - key: dropMigrations
+    handler: index.dropMigrations
 ```
 
 ### 3. Fetch Schema Trigger
@@ -2056,12 +2160,14 @@ Configure in `manifest.yml`:
 ⚠️ **DEVELOPMENT ONLY**: This trigger is designed for development environments only and should not be used in production.
 
 This trigger retrieves the current database schema from Atlassian Forge SQL and generates SQL statements that can be used to recreate the database structure. It's useful for:
+
 - Development environment setup
 - Schema documentation
 - Database structure verification
 - Creating backup scripts
 
 **Security Considerations**:
+
 - This trigger exposes your database structure
 - It temporarily disables foreign key checks
 - It may expose sensitive table names and structures
@@ -2077,19 +2183,21 @@ export const fetchSchema = async () => {
 ```
 
 Configure in `manifest.yml`:
+
 ```yaml
-  webtrigger:
-     - key: fetch-schema
-       function: fetchSchema
-  sql:
-     - key: main
-       engine: mysql
-  function:
-     - key: fetchSchema
-       handler: index.fetchSchema
+webtrigger:
+  - key: fetch-schema
+    function: fetchSchema
+sql:
+  - key: main
+    engine: mysql
+function:
+  - key: fetchSchema
+    handler: index.fetchSchema
 ```
 
 The response will contain SQL statements like:
+
 ```sql
 SET foreign_key_checks = 0;
 CREATE TABLE IF NOT EXISTS users (...);
@@ -2100,6 +2208,7 @@ SET foreign_key_checks = 1;
 ### 4. Clear Cache Scheduler Trigger
 
 This trigger automatically cleans up expired cache entries based on their TTL (Time To Live). It's useful for:
+
 - Automatic cache maintenance
 - Preventing cache storage from growing indefinitely
 - Ensuring optimal cache performance
@@ -2110,24 +2219,26 @@ This trigger automatically cleans up expired cache entries based on their TTL (T
 import { clearCacheSchedulerTrigger } from "forge-sql-orm";
 
 export const clearCache = () => {
-  return clearCacheSchedulerTrigger({ 
+  return clearCacheSchedulerTrigger({
     cacheEntityName: "cache",
   });
 };
 ```
 
 Configure in `manifest.yml`:
+
 ```yaml
-  scheduledTrigger:
-    - key: clear-cache-trigger
-      function: clearCache
-      interval: fiveMinute
-  function:
-    - key: clearCache
-      handler: index.clearCache
+scheduledTrigger:
+  - key: clear-cache-trigger
+    function: clearCache
+    interval: fiveMinute
+function:
+  - key: clearCache
+    handler: index.clearCache
 ```
 
 **Available Intervals**:
+
 - `fiveMinute` - Every 5 minutes
 - `hour` - Every hour
 - `day` - Every day
@@ -2148,14 +2259,15 @@ export const slowQueryTrigger = () =>
 ```
 
 Configure in `manifest.yml`:
+
 ```yaml
-  scheduledTrigger:
-    - key: slow-query-trigger
-      function: slowQueryTrigger
-      interval: hour
-  function:
-    - key: slowQueryTrigger
-      handler: index.slowQueryTrigger
+scheduledTrigger:
+  - key: slow-query-trigger
+    function: slowQueryTrigger
+    interval: hour
+function:
+  - key: slowQueryTrigger
+    handler: index.slowQueryTrigger
 ```
 
 > **💡 Note**: For complete documentation, examples, and configuration options, see the [Slow Query Monitoring](#slow-query-monitoring) section.
@@ -2163,15 +2275,17 @@ Configure in `manifest.yml`:
 ### Important Notes
 
 **Security Considerations**:
-   - The drop migrations trigger should be restricted to development environments
-   - The fetch schema trigger should only be used in development
-   - Consider implementing additional authentication for these endpoints
+
+- The drop migrations trigger should be restricted to development environments
+- The fetch schema trigger should only be used in development
+- Consider implementing additional authentication for these endpoints
 
 **Best Practices**:
-   - Always backup your data before using the drop migrations trigger
-   - Test migrations in a development environment first
-   - Use these triggers as part of your deployment pipeline
-   - Monitor the execution logs in the Forge Developer Console
+
+- Always backup your data before using the drop migrations trigger
+- Test migrations in a development environment first
+- Use these triggers as part of your deployment pipeline
+- Monitor the execution logs in the Forge Developer Console
 
 ## Query Analysis and Performance Optimization
 
@@ -2182,6 +2296,7 @@ Forge-SQL-ORM provides comprehensive query analysis tools to help you optimize y
 ### About Atlassian's Built-in Analysis Tools
 
 Atlassian provides comprehensive query analysis tools in the development console, including:
+
 - Basic query performance metrics
 - Slow query tracking (queries over 500ms)
 - Basic execution statistics
@@ -2281,8 +2396,8 @@ modules:
   scheduledTrigger:
     - key: slow-query-trigger
       function: slowQueryTrigger
-      interval: hour  # Run every hour
-  
+      interval: hour # Run every hour
+
   function:
     - key: slowQueryTrigger
       handler: index.slowQueryTrigger
@@ -2290,10 +2405,10 @@ modules:
 
 #### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `hours` | `number` | `1` | Number of hours to look back for slow queries |
-| `timeout` | `number` | `3000` | Timeout in milliseconds for the diagnostic query execution |
+| Option    | Type     | Default | Description                                                |
+| --------- | -------- | ------- | ---------------------------------------------------------- |
+| `hours`   | `number` | `1`     | Number of hours to look back for slow queries              |
+| `timeout` | `number` | `3000`  | Timeout in milliseconds for the diagnostic query execution |
 
 #### Example Console Output
 
@@ -2374,58 +2489,56 @@ const analyzeForgeSql = forgeSQL.analyze();
 
 // Analyze a Drizzle query
 const plan = await analyzeForgeSql.explain(
-  forgeSQL.select({
-    table1: testEntityJoin1,
-    table2: { name: testEntityJoin2.name, email: testEntityJoin2.email },
-    count: rawSql<number>`COUNT(*)`,
-    table3: {
-      table12: testEntityJoin1.name,
-      table22: testEntityJoin2.email,
-      table32: testEntity.id
-    },
-  })
-  .from(testEntityJoin1)
-  .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id))
+  forgeSQL
+    .select({
+      table1: testEntityJoin1,
+      table2: { name: testEntityJoin2.name, email: testEntityJoin2.email },
+      count: rawSql<number>`COUNT(*)`,
+      table3: {
+        table12: testEntityJoin1.name,
+        table22: testEntityJoin2.email,
+        table32: testEntity.id,
+      },
+    })
+    .from(testEntityJoin1)
+    .innerJoin(testEntityJoin2, eq(testEntityJoin1.id, testEntityJoin2.id)),
 );
 
 // Analyze a raw SQL query
-const rawPlan = await analyzeForgeSql.explainRaw(
-  "SELECT * FROM users WHERE id = ?",
-  [1]
-);
+const rawPlan = await analyzeForgeSql.explainRaw("SELECT * FROM users WHERE id = ?", [1]);
 
 // Analyze new methods
 const usersFromPlan = await analyzeForgeSql.explain(
-  forgeSQL.selectFrom(users).where(eq(users.active, true))
+  forgeSQL.selectFrom(users).where(eq(users.active, true)),
 );
 
 const usersCacheablePlan = await analyzeForgeSql.explain(
-  forgeSQL.selectCacheableFrom(users).where(eq(users.active, true))
+  forgeSQL.selectCacheableFrom(users).where(eq(users.active, true)),
 );
 
 // Analyze Common Table Expressions (CTEs)
 const ctePlan = await analyzeForgeSql.explain(
   forgeSQL
     .with(
-      forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
-      forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+      forgeSQL.selectFrom(users).where(eq(users.active, true)).as("activeUsers"),
+      forgeSQL.selectFrom(orders).where(eq(orders.status, "completed")).as("completedOrders"),
     )
     .select({
       totalActiveUsers: sql`COUNT(au.id)`,
-      totalCompletedOrders: sql`COUNT(co.id)`
+      totalCompletedOrders: sql`COUNT(co.id)`,
     })
     .from(sql`activeUsers au`)
-    .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`))
+    .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`)),
 );
 ```
 
 This analysis provides insights into:
+
 - How the database executes your query
 - Which indexes are being used
 - Estimated vs actual row counts
 - Resource usage at each step
 - Performance optimization opportunities
-
 
 ## Migration Guide
 
@@ -2436,18 +2549,20 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
 #### 1. Method Renaming (BREAKING CHANGES)
 
 **Removed Methods:**
+
 - `forgeSQL.modify()` → **REMOVED** (use `forgeSQL.modifyWithVersioning()`)
 - `forgeSQL.crud()` → **REMOVED** (use `forgeSQL.modifyWithVersioning()`)
 
 **Migration Steps:**
 
 1. **Replace `modify()` calls:**
+
    ```typescript
    // ❌ Old (2.0.x) - NO LONGER WORKS
    await forgeSQL.modify().insert(Users, [userData]);
    await forgeSQL.modify().updateById(updateData, Users);
    await forgeSQL.modify().deleteById(1, Users);
-   
+
    // ✅ New (2.1.x) - REQUIRED
    await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
    await forgeSQL.modifyWithVersioning().updateById(updateData, Users);
@@ -2455,12 +2570,13 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
    ```
 
 2. **Replace `crud()` calls:**
+
    ```typescript
    // ❌ Old (2.0.x) - NO LONGER WORKS
    await forgeSQL.crud().insert(Users, [userData]);
    await forgeSQL.crud().updateById(updateData, Users);
    await forgeSQL.crud().deleteById(1, Users);
-   
+
    // ✅ New (2.1.x) - REQUIRED
    await forgeSQL.modifyWithVersioning().insert(Users, [userData]);
    await forgeSQL.modifyWithVersioning().updateById(updateData, Users);
@@ -2470,8 +2586,9 @@ This section covers the breaking changes introduced in version 2.1.x and how to 
 #### 2. New API Methods
 
 **New Methods Available:**
+
 - `forgeSQL.insert()` - Basic Drizzle operations
-- `forgeSQL.update()` - Basic Drizzle operations  
+- `forgeSQL.update()` - Basic Drizzle operations
 - `forgeSQL.delete()` - Basic Drizzle operations
 - `forgeSQL.insertAndEvictCache()` - Basic Drizzle operations with evict cache after execution
 - `forgeSQL.updateAndEvictCache()` - Basic Drizzle operations with evict cache after execution
@@ -2499,47 +2616,43 @@ await forgeSQL.insert(Users).values(userData);
 await forgeSQL.modifyWithVersioningAndEvictCache().insert(Users, [userData]);
 
 // ✅ New query methods for better performance
-const users = await forgeSQL.selectFrom(Users)
-  .where(eq(Users.active, true));
+const users = await forgeSQL.selectFrom(Users).where(eq(Users.active, true));
 
-const usersDistinct = await forgeSQL.selectDistinctFrom(Users)
-  .where(eq(Users.active, true));
+const usersDistinct = await forgeSQL.selectDistinctFrom(Users).where(eq(Users.active, true));
 
-const usersCacheable = await forgeSQL.selectCacheableFrom(Users)
-  .where(eq(Users.active, true));
+const usersCacheable = await forgeSQL.selectCacheableFrom(Users).where(eq(Users.active, true));
 
 // ✅ Raw SQL execution with caching
-const rawUsers = await forgeSQL.execute(
-  "SELECT * FROM users WHERE active = ?", 
-  [true]
-);
+const rawUsers = await forgeSQL.execute("SELECT * FROM users WHERE active = ?", [true]);
 
 // ⚠️ IMPORTANT: When using executeCacheable(), all table names must be wrapped with backticks (`)
 const cachedRawUsers = await forgeSQL.executeCacheable(
-  "SELECT * FROM `users` WHERE active = ?", 
-  [true], 
-  300
+  "SELECT * FROM `users` WHERE active = ?",
+  [true],
+  300,
 );
 
 // ✅ Raw SQL execution with metadata capture and performance monitoring
 const usersWithMetadata = await forgeSQL.executeWithMetadata(
   async () => {
     const users = await forgeSQL.selectFrom(usersTable);
-    const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
+    const orders = await forgeSQL
+      .selectFrom(ordersTable)
+      .where(eq(ordersTable.userId, usersTable.id));
     return { users, orders };
   },
   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
     const threshold = 500; // ms baseline for this resolver
-    
+
     if (totalDbExecutionTime > threshold * 1.5) {
       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
       await printQueriesWithPlan(); // Analyze and print query execution plans
     } else if (totalDbExecutionTime > threshold) {
       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
     }
-    
+
     console.log(`DB response size: ${totalResponseSize} bytes`);
-  }
+  },
 );
 
 // ✅ DDL operations for schema modifications
@@ -2563,25 +2676,25 @@ await forgeSQL.executeDDLActions(async () => {
     SELECT * FROM INFORMATION_SCHEMA.STATEMENTS_SUMMARY 
     WHERE AVG_LATENCY > 1000000
   `);
-  
+
   // Execute complex analysis queries in DDL context
   const performanceData = await forgeSQL.execute(`
     SELECT * FROM INFORMATION_SCHEMA.CLUSTER_STATEMENTS_SUMMARY_HISTORY
     WHERE SUMMARY_END_TIME > DATE_SUB(NOW(), INTERVAL 1 HOUR)
   `);
-  
+
   return { slowQueries, performanceData };
 });
 
 // ✅ Common Table Expressions (CTEs)
 const userStats = await forgeSQL
   .with(
-    forgeSQL.selectFrom(users).where(eq(users.active, true)).as('activeUsers'),
-    forgeSQL.selectFrom(orders).where(eq(orders.status, 'completed')).as('completedOrders')
+    forgeSQL.selectFrom(users).where(eq(users.active, true)).as("activeUsers"),
+    forgeSQL.selectFrom(orders).where(eq(orders.status, "completed")).as("completedOrders"),
   )
   .select({
     totalActiveUsers: sql`COUNT(au.id)`,
-    totalCompletedOrders: sql`COUNT(co.id)`
+    totalCompletedOrders: sql`COUNT(co.id)`,
   })
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
@@ -2595,7 +2708,7 @@ You can use a simple find-and-replace to migrate your code:
 # Replace modify() calls
 find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/forgeSQL\.modify()/forgeSQL.modifyWithVersioning()/g'
 
-# Replace crud() calls  
+# Replace crud() calls
 find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/forgeSQL\.crud()/forgeSQL.modifyWithVersioning()/g'
 ```
 
@@ -2607,5 +2720,6 @@ find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/forgeSQL\.crud()/forgeSQL.
 - ✅ **Migration Required**: You must update your code to use the new methods
 
 ## License
+
 This project is licensed under the **MIT License**.  
 Feel free to use it for commercial and personal projects.

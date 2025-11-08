@@ -8,8 +8,6 @@
 [![forge-sql-orm CI](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml/badge.svg)](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml)
 [[![DeepScan grade](https://deepscan.io/api/teams/26652/projects/29272/branches/940614/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=26652&pid=29272&bid=940614)
 
-
-
 A command-line interface tool for managing Atlassian Forge SQL migrations and model generation with Drizzle ORM integration.
 
 ## About
@@ -26,9 +24,27 @@ A command-line interface tool for managing Atlassian Forge SQL migrations and mo
 
 ## Installation
 
+The CLI tool must be installed as a local development dependency and used via npm scripts:
+
 ```bash
-npm install -g forge-sql-orm-cli
+npm install forge-sql-orm-cli -D
 ```
+
+# Basic installation for UI-Kit projects
+
+npm install forge-sql-orm-cli -D --legacy-peer-deps
+
+### Setup npm Scripts
+
+Add the following scripts to your `package.json`:
+
+```bash
+npm pkg set scripts.models:create="forge-sql-orm-cli generate:model --output src/entities --saveEnv"
+npm pkg set scripts.migration:create="forge-sql-orm-cli migrations:create --force --output src/migration --entitiesPath src/entities"
+npm pkg set scripts.migration:update="forge-sql-orm-cli migrations:update --entitiesPath src/entities --output src/migration"
+```
+
+**Note:** The CLI tool is designed to work as a local dependency through npm scripts. Configuration is saved to `.env` file using the `--saveEnv` flag, so you only need to provide database credentials once.
 
 ## Available Commands
 
@@ -41,6 +57,7 @@ forge-sql-orm-cli generate:model [options]
 ```
 
 Options:
+
 - `--saveEnv` - Save the configuration to a `.env` file
 - `--host` - Database host (default: localhost)
 - `--port` - Database port (default: 3306)
@@ -51,6 +68,7 @@ Options:
 - `--versionField` - Name of the version field (default: version)
 
 The generated models will include:
+
 - Drizzle table definitions compatible with Atlassian Forge SQL
 - TypeScript types for your database schema
 - Version metadata for tracking schema changes
@@ -64,6 +82,7 @@ forge-sql-orm-cli migrations:create [options]
 ```
 
 Options:
+
 - `--saveEnv` - Save the configuration to a `.env` file
 - `--host` - Database host (default: localhost)
 - `--port` - Database port (default: 3306)
@@ -83,6 +102,7 @@ forge-sql-orm-cli migrations:update [options]
 ```
 
 Options:
+
 - `--saveEnv` - Save the configuration to a `.env` file
 - `--host` - Database host (default: localhost)
 - `--port` - Database port (default: 3306)
@@ -101,6 +121,7 @@ forge-sql-orm-cli migrations:drop [options]
 ```
 
 Options:
+
 - `--saveEnv` - Save the configuration to a `.env` file
 - `--host` - Database host (default: localhost)
 - `--port` - Database port (default: 3306)
@@ -137,6 +158,7 @@ This CLI tool is designed to work seamlessly with Atlassian Forge SQL and Drizzl
 ## Environment Variables
 
 The CLI supports loading configuration from environment variables. You can either:
+
 1. Use the `--saveEnv` flag to save your configuration to a `.env` file
 2. Create a `.env` file manually with the following variables:
 
@@ -153,26 +175,40 @@ FORGE_SQL_ORM_VERSION_FIELD=version
 
 ## Examples
 
+### Setup
+
+First, install the CLI and setup npm scripts:
+
+```bash
+npm install forge-sql-orm-cli -D
+npm pkg set scripts.models:create="forge-sql-orm-cli generate:model --output src/entities --saveEnv"
+npm pkg set scripts.migration:create="forge-sql-orm-cli migrations:create --force --output src/migration --entitiesPath src/entities"
+npm pkg set scripts.migration:update="forge-sql-orm-cli migrations:update --entitiesPath src/entities --output src/migration"
+npm pkg set scripts.migration:drop="forge-sql-orm-cli migrations:drop --entitiesPath src/entities --output src/migration"
+```
+
 ### Generate Drizzle Models for Atlassian Forge SQL
 
 ```bash
-forge-sql-orm-cli generate:model --host localhost --port 3306 --user root --password secret --dbName myapp --output ./database/entities --saveEnv
+npm run models:create
 ```
+
+On first run, you'll be prompted for database credentials (host, port, user, password, dbName). These will be saved to `.env` file for subsequent runs.
 
 This will generate Drizzle table definitions and TypeScript types compatible with Atlassian Forge SQL in the specified output directory.
 
 ### Create Atlassian Forge SQL Migration
 
 ```bash
-forge-sql-orm-cli migrations:create --host localhost --port 3306 --user root --password secret --dbName myapp --output ./database/migration --entitiesPath ./database/entities --saveEnv
+npm run migration:create
 ```
 
-This will create a new Atlassian Forge SQL migration file with SQL statements to update your database schema.
+This will create a new Atlassian Forge SQL migration file with SQL statements to update your database schema. The `--force` flag allows overwriting existing migrations.
 
 ### Update Atlassian Forge SQL Migration
 
 ```bash
-forge-sql-orm-cli migrations:update --host localhost --port 3306 --user root --password secret --dbName myapp --output ./database/migration --entitiesPath ./database/entities --saveEnv
+npm run migration:update
 ```
 
 This will update an existing migration with the latest schema changes for Atlassian Forge SQL.
@@ -180,7 +216,7 @@ This will update an existing migration with the latest schema changes for Atlass
 ### Drop Tables with Atlassian Forge SQL Migration
 
 ```bash
-forge-sql-orm-cli migrations:drop --host localhost --port 3306 --user root --password secret --dbName myapp --output ./database/migration --entitiesPath ./database/entities --saveEnv
+npm run migration:drop
 ```
 
 This will create a migration to drop specified tables from your Atlassian Forge SQL database.
