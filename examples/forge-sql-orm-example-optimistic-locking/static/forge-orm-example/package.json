@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "@atlaskit/button": "^23.5.4",
+    "@atlaskit/button": "^23.6.0",
     "@atlaskit/css-reset": "^7.3.8",
     "@atlaskit/dynamic-table": "^18.3.4",
     "@atlaskit/tabs": "^18.2.3",
