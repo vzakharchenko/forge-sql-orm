@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "@atlaskit/css-reset": "^7.3.8",
-    "@atlaskit/dynamic-table": "^18.3.4",
-    "@forge/bridge": "^5.7.0",
+    "@atlaskit/css-reset": "^7.3.9",
+    "@atlaskit/dynamic-table": "^18.3.5",
+    "@forge/bridge": "^5.8.0",
     "mobx": "6.15.0",
     "mobx-react": "9.2.1",
     "react": "^18.3.1",

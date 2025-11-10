@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "@atlaskit/css-reset": "^7.3.8",
-    "@forge/bridge": "^5.7.0",
+    "@atlaskit/css-reset": "^7.3.9",
+    "@forge/bridge": "^5.8.0",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
