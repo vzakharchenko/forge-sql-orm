@@ -44,7 +44,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vitest": "^0.5.4",
     "husky": "^9.1.7",
-    "knip": "^5.68.0",
+    "knip": "^5.69.0",
     "patch-package": "^8.0.1",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
