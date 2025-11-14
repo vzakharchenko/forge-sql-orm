@@ -44,7 +44,7 @@
   "dependencies": {
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
-    "drizzle-kit": "^0.31.6",
+    "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
     "forge-sql-orm": "^2.1.12",
     "inquirer": "^12.11.1",

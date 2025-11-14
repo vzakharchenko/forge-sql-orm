@@ -22,6 +22,6 @@ export const defaultConfig: KnipConfig = {
 const config: KnipConfig = {
   ...defaultConfig,
   project: ["src/**/*.ts"],
-  ignoreDependencies: ["uuid", "globals", "patch-package"],
+  ignoreDependencies: ["uuid", "globals", "patch-package", "vite"],
 };
 export default config;

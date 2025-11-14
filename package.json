@@ -2,15 +2,7 @@
   "name": "forge-sql-orm",
   "version": "2.1.12",
   "description": "Drizzle ORM integration for Atlassian @forge/sql. Provides a custom driver, schema migration, two levels of caching (local and global via @forge/kvs), optimistic locking, and query analysis.",
-  "main": "dist/ForgeSQLORM.js",
-  "module": "dist/ForgeSQLORM.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    "types": "./dist/index.d.ts",
-    "require": "./dist/ForgeSQLORM.js",
-    "import": "./dist/ForgeSQLORM.mjs",
-    "default": "./dist/ForgeSQLORM.mjs"
-  },
+  "main": "dist/index.js",
   "homepage": "https://github.com/vzakharchenko/forge-sql-orm#readme",
   "bugs": {
     "url": "https://github.com/vzakharchenko/forge-sql-orm/issues"
@@ -37,8 +29,8 @@
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
-    "@vitest/coverage-v8": "^4.0.8",
-    "@vitest/ui": "^4.0.8",
+    "@vitest/coverage-v8": "^4.0.9",
+    "@vitest/ui": "^4.0.9",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -50,8 +42,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "uuid": "^13.0.0",
-    "vite": "^7.2.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.9"
   },
   "license": "MIT",
   "author": "Vasyl Zakharchenko",
@@ -64,8 +55,8 @@
     "format": "prettier --write src examples __tests__",
     "format:check": "prettier --write src examples __tests__ --check",
     "clean": "rm -rf dist",
-    "build": "npm run clean && vite build && npm run build:types",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build": "npm run clean && npm run build:types",
+    "build:types": "tsc",
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
     "generate:models": "ts-node scripts/generate-models.ts",
