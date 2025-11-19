@@ -1847,18 +1847,6 @@ button {
 ._1ygbd0i9:focus-visible {
   outline: solid var(--ds-border-width-focused, 2px) var(--ds-border-focused, #4688ec);
 }
-._11c81o8v {
-  font: var(
-    --ds-font-body-small,
-    normal 400 11px/1pc ui-sans-serif,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Ubuntu,
-    "Helvetica Neue",
-    sans-serif
-  );
-}
 ._18u010v4 {
   margin-left: var(--ds-space-negative-300, -24px);
 }
@@ -2377,6 +2365,18 @@ button {
 }
 ._80om73ad {
   cursor: default;
+}
+._11c81o8v {
+  font: var(
+    --ds-font-body-small,
+    normal 400 11px/1pc ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Ubuntu,
+    "Helvetica Neue",
+    sans-serif
+  );
 }
 ._11c81u0j {
   font: var(
