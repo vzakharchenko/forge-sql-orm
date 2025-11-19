@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       lib: {
         entry: {
           cli: path.resolve("src/cli.ts"),
-          forgeSqlOrmCLI: path.resolve("src/forgeSqlOrmCLI.ts")
+          forgeSqlOrmCLI: path.resolve("src/forgeSqlOrmCLI.mts")
         },
         formats: ["cjs", "es"],
       },
