@@ -7,13 +7,13 @@
     "@forge/resolver": "1.7.1",
     "@forge/sql": "^3.0.10",
     "drizzle-orm": "^0.44.7",
-    "forge-sql-orm": "2.1.12"
+    "forge-sql-orm": "2.1.13"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "drizzle-kit": "^0.31.7",
     "forge-sql-orm-cli": "file:../../forge-sql-orm-cli",
-    "knip": "^5.70.0",
+    "knip": "^5.70.1",
     "mysql2": "^3.15.3",
     "typescript": "^5.9.3"
   },

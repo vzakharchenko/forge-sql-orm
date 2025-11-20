@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-DF0sTAq9.js",
+      "./body-DECm2tHf.js",
       "./react-dom-vendor-B_rzBOmK.js",
       "./client-core-vendor-XcWlv0SX.js",
       "./lodash-vendor-DGqookgi.js",
@@ -16131,7 +16131,7 @@ var JO = {
         action: "clicked",
         componentName: "button",
         packageName: "@atlaskit/button",
-        packageVersion: "23.6.0",
+        packageVersion: "0.0.0-development",
         analyticsData: n,
       }),
       ge = b.useCallback(
@@ -16427,7 +16427,7 @@ var Ds = {
   v1 = {
     componentName: "pagination",
     packageName: "@atlaskit/pagination",
-    packageVersion: "16.1.16",
+    packageVersion: "0.0.0-development",
   };
 function Bd(e) {
   var t = e.chevronDirection,
@@ -19931,14 +19931,14 @@ var tk = function (t) {
         action: "sorted",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.3.5",
+        packageVersion: "0.0.0-development",
       }),
       Ue = pi({
         fn: $,
         action: "ranked",
         componentName: "dynamicTable",
         packageName: "@atlaskit/dynamic-table",
-        packageVersion: "18.3.5",
+        packageVersion: "0.0.0-development",
       });
     b.useEffect(
       function () {
@@ -20056,7 +20056,7 @@ var tk = function (t) {
   },
   rk = b.lazy(function () {
     return ly(
-      () => import("./body-DF0sTAq9.js"),
+      () => import("./body-DECm2tHf.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
