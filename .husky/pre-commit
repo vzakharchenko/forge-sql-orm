@@ -14,6 +14,9 @@ npm run knip || { echo '❌ Dependency check failed.'; exit 1; }
 echo '➡️ lint check'
 npm run lint || { echo '❌ lint check failed.'; exit 1; }
 
+echo '➡️ run tests check'
+npm run test || { echo '❌ tests check failed.'; exit 1; }
+
 echo '🔍 Running forge-sql-orm-cli resources checks...'
 pushd forge-sql-orm-cli > /dev/null
 
