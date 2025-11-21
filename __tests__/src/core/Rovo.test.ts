@@ -3,7 +3,6 @@ import { sql, Result } from "@forge/sql";
 import { Rovo } from "../../../src/core/Rovo";
 import { ForgeSqlOperation, ForgeSqlOrmOptions } from "../../../src/core/ForgeSQLQueryBuilder";
 import { mysqlTable, varchar, int } from "drizzle-orm/mysql-core";
-import { getTableName } from "drizzle-orm/table";
 
 // Mock test table
 const testTable = mysqlTable("test_users", {
