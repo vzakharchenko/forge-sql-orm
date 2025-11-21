@@ -503,26 +503,90 @@ export class Rovo implements RovoIntegration {
       throw new Error("Table Name is required. Please provide a valid Table Name.");
     }
 
-    const normalizeSqlString = (sql: string): string => {
-      return sql
-        .replace(/[\n\r\t]+/g, " ")
-        .replace(/\s+/g, " ")
-        .replace(/\s*;$/, "")
-        .trim();
-    };
-    let normalized = normalizeSqlString(query.trim());
-    const upper = normalized.toUpperCase();
-
-    // Validate query type
-    if (!upper.startsWith("SELECT")) {
+    // Quick validation: check if query starts with SELECT (case-insensitive)
+    // This allows us to fail fast for non-SELECT queries before normalization
+    const trimmedQuery = query.trim();
+    const quickUpper = trimmedQuery.toUpperCase();
+    if (!quickUpper.startsWith("SELECT")) {
       throw new Error(
         "Only SELECT queries are allowed. Data modification operations (INSERT, UPDATE, DELETE, etc.) are not permitted.",
       );
     }
 
+    /**
+     * Normalizes SQL query using AST parsing and stringification.
+     * This approach is safer than regex-based normalization as it:
+     * - Avoids regex backtracking vulnerabilities
+     * - Preserves SQL semantics correctly
+     * - Handles complex SQL structures properly
+     *
+     * @param sql - SQL query string to normalize (must be a valid SELECT query)
+     * @returns Normalized SQL string
+     * @throws Error if parsing fails or query is invalid
+     */
+    const normalizeSqlString = (sql: string): string => {
+      try {
+        const parser = new Parser();
+        // Parse SQL to AST
+        const ast = parser.astify(sql.trim());
+        // Validate it's a SELECT query before normalizing
+        if (Array.isArray(ast)) {
+          if (ast.length !== 1 || ast[0].type !== "select") {
+            throw new Error(
+              "Only a single SELECT query is allowed. Multiple statements or non-SELECT statements are not permitted.",
+            );
+          }
+        } else if (ast && ast.type !== "select") {
+          throw new Error("Only SELECT queries are allowed.");
+        }
+        // Convert AST back to SQL (this normalizes formatting)
+        const normalized = parser.sqlify(Array.isArray(ast) ? ast[0] : ast);
+        // Remove trailing semicolon and trim
+        return normalized.replace(/;?\s*$/, "").trim();
+      } catch (error: any) {
+        // If it's a validation error we threw, re-throw it
+        if (
+          error.message &&
+          (error.message.includes("Only") || error.message.includes("single SELECT"))
+        ) {
+          throw error;
+        }
+        // For parsing errors, wrap them in a more user-friendly message
+        // Check if error is already wrapped to avoid double wrapping
+        if (error.message && error.message.includes("SQL parsing error")) {
+          throw error;
+        }
+        throw new Error(
+          `SQL parsing error: ${error.message || "Invalid SQL syntax"}. Please check your query syntax.`,
+        );
+      }
+    };
+    let normalized: string;
+    try {
+      normalized = normalizeSqlString(trimmedQuery);
+    } catch (error: any) {
+      // Re-throw validation errors as-is
+      if (
+        error.message &&
+        (error.message.includes("Only") || error.message.includes("single SELECT"))
+      ) {
+        throw error;
+      }
+      // Check if error is already wrapped to avoid double wrapping
+      if (error.message && error.message.includes("SQL parsing error")) {
+        throw error;
+      }
+      // For other errors, wrap them
+      throw new Error(
+        `SQL parsing error: ${error.message || "Invalid SQL syntax"}. Please check your query syntax.`,
+      );
+    }
+
     const upperTableName = tableName.toUpperCase();
     // Validate table name
-    if (!upper.includes(`FROM ${upperTableName}`)) {
+    // sqlify may add backticks, so we check for both formats: FROM table_name and FROM `table_name`
+    const tableNamePattern = new RegExp(`FROM\\s+[\`]?${upperTableName}[\`]?`, "i");
+    if (!tableNamePattern.test(normalized)) {
       throw new Error(
         "Queries must target the '" +
           upperTableName +
