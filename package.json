@@ -77,7 +77,8 @@
     "@forge/kvs": "^1.0.8"
   },
   "dependencies": {
-    "luxon": "^3.7.2"
+    "luxon": "^3.7.2",
+    "node-sql-parser": "^5.3.13"
   },
   "lint-staged": {
     "*.{ts,tsx,css,scss,md}": [

@@ -1,4 +1,4 @@
-import { UpdateQueryResponse } from "@forge/sql";
+import { Result, UpdateQueryResponse } from "@forge/sql";
 import { SqlParameters } from "@forge/sql/out/sql-statement";
 import {
   AnyMySqlSelectQueryBuilder,
@@ -56,6 +56,7 @@ import { SQLWrapper } from "drizzle-orm/sql/sql";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 import type { WithBuilder } from "drizzle-orm/mysql-core/subquery";
 import { WithSubquery } from "drizzle-orm/subquery";
+import { MySqlColumn } from "drizzle-orm/mysql-core";
 
 /**
  * Core interface for ForgeSQL operations.
@@ -120,6 +121,35 @@ export interface ForgeSqlOperation extends QueryBuilderForgeSql {
    * @returns {ForgeSQLCacheOperations} Interface for executing versioned SQL operations with cache management
    */
   modifyWithVersioningAndEvictCache(): ForgeSQLCacheOperations;
+
+  /**
+   * Provides access to Rovo integration - a secure pattern for natural-language analytics.
+   *
+   * Rovo enables secure execution of dynamic SQL queries with comprehensive security validations:
+   * - Only SELECT queries are allowed
+   * - Queries are restricted to a single table
+   * - JOINs, subqueries, and window functions are blocked
+   * - Row-Level Security (RLS) support for data isolation
+   *
+   * @returns {RovoIntegration} Rovo integration instance for secure dynamic queries
+   *
+   * @example
+   * ```typescript
+   * const rovo = forgeSQL.rovo();
+   * const settings = await rovo.rovoSettingBuilder(usersTable, accountId)
+   *   .useRLS()
+   *   .addRlsColumn(usersTable.id)
+   *   .addRlsWherePart((alias) => `${alias}.id = '${accountId}'`)
+   *   .finish()
+   *   .build();
+   *
+   * const result = await rovo.dynamicIsolatedQuery(
+   *   "SELECT id, name FROM users WHERE status = 'active'",
+   *   settings
+   * );
+   * ```
+   */
+  rovo(): RovoIntegration;
 }
 
 /**
@@ -996,6 +1026,175 @@ export interface SchemaSqlForgeSql {
    * @throws Error if the update operation fails
    */
   executeRawUpdateSQL(query: string, params?: unknown[]): Promise<UpdateQueryResponse>;
+}
+
+/**
+ * Interface for Rovo integration settings.
+ * Defines configuration for secure dynamic SQL query execution.
+ *
+ * @interface RovoIntegrationSetting
+ */
+export interface RovoIntegrationSetting {
+  /**
+   * Gets the account ID of the active user.
+   *
+   * @returns {string} The account ID of the active user
+   */
+  getActiveUser(): string;
+
+  /**
+   * Gets the context parameters for query substitution.
+   *
+   * @returns {Record<string, string>} Map of parameter names to their values
+   */
+  getParameters(): Record<string, string>;
+
+  /**
+   * Gets the name of the table to query.
+   *
+   * @returns {string} The table name
+   */
+  getTableName(): string;
+
+  /**
+   * Checks if Row-Level Security is enabled.
+   *
+   * @returns {boolean} True if RLS is enabled, false otherwise
+   */
+  isUseRLS(): boolean;
+
+  /**
+   * Generates the WHERE clause for Row-Level Security filtering.
+   *
+   * @param {string} alias - The table alias to use in the WHERE clause
+   * @returns {string} SQL WHERE clause condition for RLS filtering
+   */
+  userScopeWhere(alias: string): string;
+
+  /**
+   * Gets the list of field names required for RLS validation.
+   *
+   * @returns {string[]} Array of field names that must be present in SELECT clause for RLS
+   */
+  userScopeFields(): string[];
+}
+
+/**
+ * Interface for configuring Row-Level Security (RLS) settings.
+ * Provides a fluent API for setting up RLS conditions, required columns, and WHERE clauses.
+ *
+ * @interface RlsSettings
+ */
+export interface RlsSettings {
+  /**
+   * Sets a conditional function to determine if RLS should be applied.
+   *
+   * @param {() => Promise<boolean>} condition - Async function that returns true if RLS should be enabled
+   * @returns {RlsSettings} This builder instance for method chaining
+   */
+  addRlsCondition(condition: () => Promise<boolean>): RlsSettings;
+
+  /**
+   * Adds a column name that must be present in the SELECT clause for RLS validation.
+   *
+   * @param {string} columnName - The name of the column to require
+   * @returns {RlsSettings} This builder instance for method chaining
+   */
+  addRlsColumnName(columnName: string): RlsSettings;
+
+  /**
+   * Adds a Drizzle column that must be present in the SELECT clause for RLS validation.
+   *
+   * @param {MySqlColumn} column - The Drizzle column object
+   * @returns {RlsSettings} This builder instance for method chaining
+   */
+  addRlsColumn(columnName: MySqlColumn): RlsSettings;
+
+  /**
+   * Sets the WHERE clause function for RLS filtering.
+   *
+   * @param {(alias: string) => string} wherePart - Function that generates WHERE clause
+   * @returns {RlsSettings} This builder instance for method chaining
+   */
+  addRlsWherePart(wherePart: (alias: string) => string): RlsSettings;
+
+  /**
+   * Finishes RLS configuration and returns to the settings builder.
+   *
+   * @returns {RovoIntegrationSettingCreator} The parent settings builder
+   */
+  finish(): RovoIntegrationSettingCreator;
+}
+
+/**
+ * Interface for building Rovo integration settings.
+ * Provides a fluent API for configuring query settings including context parameters and RLS.
+ *
+ * @interface RovoIntegrationSettingCreator
+ */
+export interface RovoIntegrationSettingCreator {
+  /**
+   * Adds a context parameter for query substitution.
+   *
+   * @param {string} parameterName - The parameter name to replace in the query
+   * @param {string} value - The value to substitute for the parameter
+   * @returns {RovoIntegrationSettingCreator} This builder instance for method chaining
+   */
+  addContextParameter(parameterName: string, value: string): RovoIntegrationSettingCreator;
+
+  /**
+   * Enables Row-Level Security (RLS) for the query.
+   *
+   * @returns {RlsSettings} RLS settings builder for configuring security options
+   */
+  useRLS(): RlsSettings;
+
+  /**
+   * Builds and returns the RovoIntegrationSetting instance.
+   *
+   * @returns {Promise<RovoIntegrationSetting>} The configured RovoIntegrationSetting instance
+   */
+  build(): Promise<RovoIntegrationSetting>;
+}
+
+/**
+ * Interface for Rovo integration - a secure pattern for natural-language analytics.
+ *
+ * Rovo provides secure execution of dynamic SQL queries with comprehensive security validations.
+ *
+ * @interface RovoIntegration
+ */
+export interface RovoIntegration {
+  /**
+   * Creates a settings builder for Rovo queries using a raw table name.
+   *
+   * @param {string} tableName - The name of the table to query
+   * @param {string} accountId - The account ID of the active user
+   * @returns {RovoIntegrationSettingCreator} Builder for configuring Rovo query settings
+   */
+  rovoRawSettingBuilder(tableName: string, accountId: string): RovoIntegrationSettingCreator;
+
+  /**
+   * Creates a settings builder for Rovo queries using a Drizzle table object.
+   *
+   * @param {AnyMySqlTable} table - The Drizzle table object
+   * @param {string} accountId - The account ID of the active user
+   * @returns {RovoIntegrationSettingCreator} Builder for configuring Rovo query settings
+   */
+  rovoSettingBuilder(table: AnyMySqlTable, accountId: string): RovoIntegrationSettingCreator;
+
+  /**
+   * Executes a dynamic SQL query with comprehensive security validations.
+   *
+   * @param {string} dynamicSql - The SQL query to execute (must be a SELECT statement)
+   * @param {RovoIntegrationSetting} settings - Configuration settings for the query
+   * @returns {Promise<Result<unknown>>} Query execution result with metadata
+   * @throws {Error} If the query violates security restrictions
+   */
+  dynamicIsolatedQuery(
+    dynamicSql: string,
+    settings: RovoIntegrationSetting,
+  ): Promise<Result<unknown>>;
 }
 
 /**

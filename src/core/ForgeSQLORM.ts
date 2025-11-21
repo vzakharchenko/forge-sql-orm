@@ -5,6 +5,7 @@ import {
   ForgeSqlOrmOptions,
   SchemaAnalyzeForgeSql,
   SchemaSqlForgeSql,
+  RovoIntegration,
 } from "./ForgeSQLQueryBuilder";
 import { ForgeSQLSelectOperations } from "./ForgeSQLSelectOperations";
 import {
@@ -41,6 +42,7 @@ import { WithSubquery } from "drizzle-orm/subquery";
 import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
 import { operationTypeQueryContext } from "../utils/requestTypeContextUtils";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
+import { Rovo } from "./Rovo";
 
 /**
  * Implementation of ForgeSQLORM that uses Drizzle ORM for query building.
@@ -827,6 +829,37 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
   with(...queries: WithSubquery[]) {
     return this.drizzle.with(...queries);
   }
+
+  /**
+   * Provides access to Rovo integration - a secure pattern for natural-language analytics.
+   *
+   * Rovo enables secure execution of dynamic SQL queries with comprehensive security validations:
+   * - Only SELECT queries are allowed
+   * - Queries are restricted to a single table
+   * - JOINs, subqueries, and window functions are blocked
+   * - Row-Level Security (RLS) support for data isolation
+   *
+   * @returns {RovoIntegration} Rovo integration instance for secure dynamic queries
+   *
+   * @example
+   * ```typescript
+   * const rovo = forgeSQL.rovo();
+   * const settings = await rovo.rovoSettingBuilder(usersTable, accountId)
+   *   .useRLS()
+   *   .addRlsColumn(usersTable.id)
+   *   .addRlsWherePart((alias) => `${alias}.id = '${accountId}'`)
+   *   .finish()
+   *   .build();
+   *
+   * const result = await rovo.dynamicIsolatedQuery(
+   *   "SELECT id, name FROM users WHERE status = 'active'",
+   *   settings
+   * );
+   * ```
+   */
+  rovo(): RovoIntegration {
+    return new Rovo(this);
+  }
 }
 
 /**
@@ -1389,6 +1422,37 @@ class ForgeSQLORM implements ForgeSqlOperation {
    */
   with(...queries: WithSubquery[]) {
     return this.ormInstance.getDrizzleQueryBuilder().with(...queries);
+  }
+
+  /**
+   * Provides access to Rovo integration - a secure pattern for natural-language analytics.
+   *
+   * Rovo enables secure execution of dynamic SQL queries with comprehensive security validations:
+   * - Only SELECT queries are allowed
+   * - Queries are restricted to a single table
+   * - JOINs, subqueries, and window functions are blocked
+   * - Row-Level Security (RLS) support for data isolation
+   *
+   * @returns {RovoIntegration} Rovo integration instance for secure dynamic queries
+   *
+   * @example
+   * ```typescript
+   * const rovo = forgeSQL.rovo();
+   * const settings = await rovo.rovoSettingBuilder(usersTable, accountId)
+   *   .useRLS()
+   *   .addRlsColumn(usersTable.id)
+   *   .addRlsWherePart((alias) => `${alias}.id = '${accountId}'`)
+   *   .finish()
+   *   .build();
+   *
+   * const result = await rovo.dynamicIsolatedQuery(
+   *   "SELECT id, name FROM users WHERE status = 'active'",
+   *   settings
+   * );
+   * ```
+   */
+  rovo(): RovoIntegration {
+    return this.ormInstance.rovo();
   }
 }
 

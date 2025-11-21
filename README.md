@@ -33,6 +33,7 @@
 - ✅ **Ready-to-use Migration Triggers** Built-in web triggers for applying migrations, dropping tables (development-only), and fetching schema (development-only) with proper error handling and security controls
 - ✅ **Optimistic Locking** Ensures data consistency by preventing conflicts when multiple users update the same record
 - ✅ **Query Plan Analysis**: Detailed execution plan analysis and optimization insights
+- ✅ **Rovo Integration** Secure pattern for natural-language analytics with comprehensive security validations, Row-Level Security (RLS) support, and dynamic SQL query execution
 
 ## Table of Contents
 
@@ -68,6 +69,7 @@
 ### 🔒 Advanced Features
 
 - [Optimistic Locking](#optimistic-locking)
+- [Rovo Integration](#rovo-integration) - Secure pattern for natural-language analytics with dynamic SQL queries
 - [Query Analysis and Performance Optimization](#query-analysis-and-performance-optimization)
 - [Automatic Error Analysis](#automatic-error-analysis) - Automatic timeout and OOM error detection with execution plans
 - [Slow Query Monitoring](#slow-query-monitoring) - Scheduled monitoring of slow queries with execution plans
@@ -90,6 +92,7 @@
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker)
 - [Checklist Example](examples/forge-sql-orm-example-checklist)
 - [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching capabilities with performance monitoring
+- [Rovo Integration Example](https://github.com/vzakharchenko/Forge-Secure-Notes-for-Jira) - Real-world Rovo AI agent implementation with secure natural-language analytics
 
 ### 📚 Reference
 
@@ -109,6 +112,7 @@
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation persistent caching
 - [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory invocation caching
 - [Optimistic Locking](#optimistic-locking) - Data consistency
+- [Rovo Integration](#rovo-integration) - Secure natural-language analytics
 - [Migration Tools](#web-triggers-for-migrations) - Database migrations
 - [Query Analysis](#query-analysis-and-performance-optimization) - Performance optimization
 
@@ -119,6 +123,7 @@
 - [Organization Tracker Example](examples/forge-sql-orm-example-org-tracker) - Complex relationships
 - [Checklist Example](examples/forge-sql-orm-example-checklist) - Jira integration
 - [Cache Example](examples/forge-sql-orm-example-cache) - Advanced caching capabilities
+- [Rovo Integration Example](https://github.com/vzakharchenko/Forge-Secure-Notes-for-Jira) - Real-world Rovo AI agent with secure analytics
 
 ## Usage Approaches
 
@@ -351,12 +356,33 @@ resolver.define("fetch", async (req: Request) => {
 });
 ```
 
-### 5. Next Steps
+### 5. Rovo Integration (Secure Analytics)
+
+```typescript
+// Secure dynamic SQL queries for natural-language analytics
+const rovo = forgeSQL.rovo();
+const settings = await rovo
+  .rovoSettingBuilder(usersTable, accountId)
+  .addContextParameter(":currentUserId", accountId)
+  .useRLS()
+  .addRlsColumn(usersTable.id)
+  .addRlsWherePart((alias) => `${alias}.${usersTable.id.name} = '${accountId}'`)
+  .finish()
+  .build();
+
+const result = await rovo.dynamicIsolatedQuery(
+  "SELECT id, name FROM users WHERE status = 'active' AND userId = :currentUserId",
+  settings,
+);
+```
+
+### 6. Next Steps
 
 - [Full Installation Guide](#installation) - Complete setup instructions
 - [Core Features](#core-features) - Learn about key capabilities
 - [Global Cache System (Level 2)](#global-cache-system-level-2) - Cross-invocation caching features
 - [Local Cache System (Level 1)](#local-cache-operations-level-1) - In-memory caching features
+- [Rovo Integration](#rovo-integration) - Secure natural-language analytics
 - [API Reference](#reference) - Complete API documentation
 
 ## Drizzle Usage with forge-sql-orm
@@ -466,6 +492,22 @@ const userStats = await forgeSQL
   })
   .from(sql`activeUsers au`)
   .leftJoin(sql`completedOrders co`, eq(sql`au.id`, sql`co.userId`));
+
+// Rovo Integration for secure dynamic SQL queries
+const rovo = forgeSQL.rovo();
+const settings = await rovo
+  .rovoSettingBuilder(usersTable, accountId)
+  .addContextParameter(":currentUserId", accountId)
+  .useRLS()
+  .addRlsColumn(usersTable.id)
+  .addRlsWherePart((alias) => `${alias}.${usersTable.id.name} = '${accountId}'`)
+  .finish()
+  .build();
+
+const rovoResult = await rovo.dynamicIsolatedQuery(
+  "SELECT id, name FROM users WHERE status = 'active' AND userId = :currentUserId",
+  settings,
+);
 ```
 
 This approach gives you direct access to all Drizzle ORM features while still using the @forge/sql backend with enhanced caching and versioning capabilities.
@@ -2009,6 +2051,223 @@ await forgeSQL.modifyWithVersioningAndEvictCache().updateById(
   },
   Users,
 );
+```
+
+## Rovo Integration
+
+[↑ Back to Top](#table-of-contents)
+
+Rovo is a secure pattern for natural-language analytics in Forge apps. It enables safe execution of dynamic SQL queries with comprehensive security validations, making it ideal for AI-powered analytics features where users can query data using natural language.
+
+**📖 Real-World Example**: See [Forge-Secure-Notes-for-Jira](https://github.com/vzakharchenko/Forge-Secure-Notes-for-Jira) for a complete implementation of Rovo AI agent with secure natural-language analytics.
+
+### Key Features
+
+- **Security-First Design**: Multiple layers of security validations to prevent SQL injection and unauthorized data access
+- **Single Table Isolation**: Queries are restricted to a single table to prevent cross-table data access
+- **Row-Level Security (RLS)**: Built-in support for data isolation based on user context
+- **Comprehensive Validation**: Blocks JOINs, subqueries, window functions, and other potentially unsafe operations
+- **Post-Execution Validation**: Verifies query results to ensure security fields are present and come from the correct table
+- **Type-Safe Configuration**: Uses Drizzle ORM table objects for type-safe column references
+
+### Security Validations
+
+Rovo performs multiple security checks before and after query execution:
+
+1. **Query Type Validation**: Only SELECT queries are allowed
+2. **Table Restriction**: Queries must target only the specified table
+3. **JOIN Detection**: JOINs are blocked using EXPLAIN analysis
+4. **Subquery Detection**: Scalar subqueries in SELECT columns are blocked
+5. **Window Function Detection**: Window functions are blocked for security
+6. **Execution Plan Validation**: Verifies that only the expected table is accessed
+7. **RLS Field Validation**: Ensures required security fields are present in results
+8. **Post-Execution Validation**: Verifies all fields come from the correct table
+
+### Basic Usage
+
+```typescript
+import ForgeSQL from "forge-sql-orm";
+
+const forgeSQL = new ForgeSQL();
+
+// Get Rovo instance
+const rovo = forgeSQL.rovo();
+
+// Create settings builder using Drizzle table object
+const settings = await rovo
+  .rovoSettingBuilder(usersTable, accountId)
+  .addContextParameter(":currentUserId", accountId)
+  .useRLS()
+  .addRlsColumn(usersTable.id)
+  .addRlsWherePart((alias) => `${alias}.${usersTable.id.name} = '${accountId}'`)
+  .finish()
+  .build();
+
+// Execute dynamic SQL query
+const result = await rovo.dynamicIsolatedQuery(
+  "SELECT id, name FROM users WHERE status = 'active' AND userId = :currentUserId",
+  settings,
+);
+
+console.log(result.rows); // Query results
+console.log(result.metadata); // Query metadata
+```
+
+### Row-Level Security (RLS) Configuration
+
+RLS allows you to filter data based on user context, ensuring users can only access their own data:
+
+```typescript
+const rovo = forgeSQL.rovo();
+
+// Configure RLS with conditional activation and multiple security fields
+const settings = await rovo
+  .rovoSettingBuilder(securityNotesTable, accountId)
+  .addContextParameter(":currentUserId", accountId)
+  .addContextParameter(":currentProjectKey", projectKey)
+  .addContextParameter(":currentIssueKey", issueKey)
+  .useRLS()
+  .addRlsCondition(async () => {
+    // Conditionally enable RLS based on user role
+    const userService = getUserService();
+    return !(await userService.isAdmin()); // Only apply RLS for non-admin users
+  })
+  .addRlsColumn(securityNotesTable.createdBy) // Required field for RLS validation
+  .addRlsColumn(securityNotesTable.targetUserId) // Additional security field
+  .addRlsWherePart(
+    (alias) =>
+      `${alias}.${securityNotesTable.createdBy.name} = '${accountId}' OR ${alias}.${securityNotesTable.targetUserId.name} = '${accountId}'`,
+  ) // RLS filter with OR condition
+  .finish()
+  .build();
+
+// The query will automatically be wrapped with RLS filtering:
+// SELECT * FROM (original_query) AS t WHERE (t.createdBy = 'accountId' OR t.targetUserId = 'accountId')
+```
+
+### Context Parameters
+
+You can use context parameters for query substitution. Parameters use the `:parameterName` format (colon prefix, not double braces):
+
+```typescript
+const rovo = forgeSQL.rovo();
+
+const settings = await rovo
+  .rovoSettingBuilder(usersTable, accountId)
+  .addContextParameter(":currentUserId", accountId)
+  .addContextParameter(":projectKey", "PROJ-123")
+  .addContextParameter(":status", "active")
+  .useRLS()
+  .addRlsColumn(usersTable.id)
+  .addRlsWherePart((alias) => `${alias}.${usersTable.userId.name} = '${accountId}'`)
+  .finish()
+  .build();
+
+// In the SQL query, parameters are replaced:
+const result = await rovo.dynamicIsolatedQuery(
+  "SELECT * FROM users WHERE projectKey = :projectKey AND status = :status AND userId = :currentUserId",
+  settings,
+);
+// Becomes: SELECT * FROM users WHERE projectKey = 'PROJ-123' AND status = 'active' AND userId = 'accountId'
+```
+
+### Using Raw Table Names
+
+You can use `rovoRawSettingBuilder` with raw table name string:
+
+```typescript
+const rovo = forgeSQL.rovo();
+
+// Using rovoRawSettingBuilder with raw table name
+const settings = await rovo
+  .rovoRawSettingBuilder("users", accountId)
+  .addContextParameter(":currentUserId", accountId)
+  .useRLS()
+  .addRlsColumnName("id")
+  .addRlsWherePart((alias) => `${alias}.id = '${accountId}'`)
+  .finish()
+  .build();
+
+const result = await rovo.dynamicIsolatedQuery(
+  "SELECT id, name FROM users WHERE status = 'active' AND userId = :currentUserId",
+  settings,
+);
+```
+
+### Security Restrictions
+
+Rovo blocks the following operations for security:
+
+- **Data Modification**: Only SELECT queries are allowed
+- **JOINs**: JOIN operations are detected and blocked
+- **Subqueries**: Scalar subqueries in SELECT columns are blocked
+- **Window Functions**: Window functions (e.g., `COUNT(*) OVER(...)`) are blocked
+- **Multiple Tables**: Queries referencing multiple tables are blocked
+- **Table Aliases**: Post-execution validation ensures fields come from the correct table
+
+### Error Handling
+
+Rovo provides detailed error messages when security violations are detected:
+
+```typescript
+try {
+  const result = await rovo.dynamicIsolatedQuery(
+    "SELECT * FROM users u JOIN orders o ON u.id = o.userId",
+    settings,
+  );
+} catch (error) {
+  // Error: "Security violation: JOIN operations are not allowed..."
+  console.error(error.message);
+}
+```
+
+### Example: Real-World Function Implementation
+
+> **💡 Full Example**: See the complete implementation in [Forge-Secure-Notes-for-Jira](https://github.com/vzakharchenko/Forge-Secure-Notes-for-Jira) repository.
+
+```typescript
+import ForgeSQL from "forge-sql-orm";
+import { Result } from "@forge/sql";
+
+const FORGE_SQL_ORM = new ForgeSQL();
+
+export async function runSecurityNotesQuery(
+  event: {
+    sql: string;
+    context: {
+      jira: {
+        issueKey: string;
+        projectKey: string;
+      };
+    };
+  },
+  context: { principal: { accountId: string } },
+): Promise<Result<unknown>> {
+  const rovoIntegration = FORGE_SQL_ORM.rovo();
+  const accountId = context.principal.accountId;
+
+  const settings = await rovoIntegration
+    .rovoSettingBuilder(securityNotesTable, accountId)
+    .addContextParameter(":currentUserId", accountId)
+    .addContextParameter(":currentProjectKey", event.context?.jira?.projectKey ?? "")
+    .addContextParameter(":currentIssueKey", event.context?.jira?.issueKey ?? "")
+    .useRLS()
+    .addRlsCondition(async () => {
+      // Conditionally disable RLS for admin users
+      const userService = getUserService();
+      return !(await userService.isAdmin());
+    })
+    .addRlsColumn(securityNotesTable.createdBy)
+    .addRlsColumn(securityNotesTable.targetUserId)
+    .addRlsWherePart(
+      (alias: string) =>
+        `${alias}.${securityNotesTable.createdBy.name} = '${accountId}' OR ${alias}.${securityNotesTable.targetUserId.name} = '${accountId}'`,
+    )
+    .finish()
+    .build();
+
+  return await rovoIntegration.dynamicIsolatedQuery(event.sql, settings);
+}
 ```
 
 ## ForgeSqlOrmOptions
