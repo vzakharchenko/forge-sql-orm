@@ -507,7 +507,7 @@ export class Rovo implements RovoIntegration {
       return sql
         .replace(/[\n\r\t]+/g, " ")
         .replace(/\s+/g, " ")
-        .replace(/\s*;\s*$/, "")
+        .replace(/\s*;$/, "")
         .trim();
     };
     let normalized = normalizeSqlString(query.trim());
