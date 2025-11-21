@@ -858,7 +858,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * ```
    */
   rovo(): RovoIntegration {
-    return new Rovo(this);
+    return new Rovo(this, this.options);
   }
 }
 

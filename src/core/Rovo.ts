@@ -1,5 +1,6 @@
 import {
   ForgeSqlOperation,
+  ForgeSqlOrmOptions,
   RlsSettings,
   RovoIntegration,
   RovoIntegrationSetting,
@@ -324,14 +325,16 @@ class RovoIntegrationSettingCreatorImpl implements RovoIntegrationSettingCreator
  */
 export class Rovo implements RovoIntegration {
   private readonly forgeOperations: ForgeSqlOperation;
-
+  private readonly options: ForgeSqlOrmOptions;
   /**
    * Creates a new Rovo instance.
    *
    * @param {ForgeSqlOperation} forgeSqlOperations - The ForgeSQL operations instance for query analysis
+   * @param options - Configuration options for the ORM
    */
-  constructor(forgeSqlOperations: ForgeSqlOperation) {
+  constructor(forgeSqlOperations: ForgeSqlOperation, options: ForgeSqlOrmOptions) {
     this.forgeOperations = forgeSqlOperations;
+    this.options = options;
   }
 
   /**
@@ -541,8 +544,8 @@ export class Rovo implements RovoIntegration {
         }
         // Convert AST back to SQL (this normalizes formatting)
         const normalized = parser.sqlify(Array.isArray(ast) ? ast[0] : ast);
-        // Remove trailing semicolon and trim
-        return normalized.replace(/;?\s*$/, "").trim();
+        // trim
+        return normalized.trim();
       } catch (error: any) {
         // If it's a validation error we threw, re-throw it
         if (
@@ -706,6 +709,10 @@ export class Rovo implements RovoIntegration {
                      ) AS t
             WHERE (${settings.userScopeWhere("t")})
         `;
+    }
+    if (this.options.logRawSqlQuery) {
+      // eslint-disable-next-line no-console
+      console.debug("Rovo query: " + normalized);
     }
     const result = await sql.executeRaw(normalized);
 

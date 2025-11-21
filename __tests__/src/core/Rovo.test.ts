@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { sql, Result } from "@forge/sql";
 import { Rovo } from "../../../src/core/Rovo";
-import { ForgeSqlOperation } from "../../../src/core/ForgeSQLQueryBuilder";
+import { ForgeSqlOperation, ForgeSqlOrmOptions } from "../../../src/core/ForgeSQLQueryBuilder";
 import { mysqlTable, varchar, int } from "drizzle-orm/mysql-core";
 import { getTableName } from "drizzle-orm/table";
 
@@ -34,11 +34,15 @@ const createMockForgeOperations = (): ForgeSqlOperation => {
 describe("Rovo", () => {
   let rovo: Rovo;
   let mockForgeOperations: ForgeSqlOperation;
+  let mockOptions: ForgeSqlOrmOptions;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockForgeOperations = createMockForgeOperations();
-    rovo = new Rovo(mockForgeOperations);
+    mockOptions = {
+      logRawSqlQuery: false,
+    };
+    rovo = new Rovo(mockForgeOperations, mockOptions);
   });
 
   describe("rovoRawSettingBuilder", () => {
@@ -308,7 +312,7 @@ describe("Rovo", () => {
         ({
           explainRaw: explainRawMock,
         }) as any;
-      const testRovo = new Rovo(testForgeOperations);
+      const testRovo = new Rovo(testForgeOperations, mockOptions);
 
       const settings = await testRovo.rovoRawSettingBuilder("test_users", "account-123").build();
 
@@ -336,7 +340,7 @@ describe("Rovo", () => {
         ({
           explainRaw: explainRawMock,
         }) as any;
-      const testRovo = new Rovo(testForgeOperations);
+      const testRovo = new Rovo(testForgeOperations, mockOptions);
 
       const settings = await testRovo.rovoRawSettingBuilder("test_users", "account-123").build();
 
@@ -564,7 +568,7 @@ describe("Rovo", () => {
         ({
           explainRaw: explainRawMock,
         }) as any;
-      const testRovo = new Rovo(testForgeOperations);
+      const testRovo = new Rovo(testForgeOperations, mockOptions);
 
       const settings = await testRovo.rovoRawSettingBuilder("test_users", "account-123").build();
 
