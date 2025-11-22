@@ -21,6 +21,7 @@
     "drizzle-driver",
     "drizzle-custom-driver",
     "orm",
+    "rovo",
     "database"
   ],
   "devDependencies": {
