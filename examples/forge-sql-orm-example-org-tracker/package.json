@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "@forge/resolver": "1.7.1",
-    "@forge/sql": "^3.0.10",
+    "@forge/sql": "^3.0.11",
     "drizzle-orm": "^0.44.7",
     "forge-sql-orm": "^2.1.14"
   },

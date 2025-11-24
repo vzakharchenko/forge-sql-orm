@@ -4,7 +4,7 @@
   "description": "",
   "dependencies": {
     "@atlaskit/css-reset": "^7.3.9",
-    "@forge/bridge": "^5.8.0",
+    "@forge/bridge": "^5.9.0",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
