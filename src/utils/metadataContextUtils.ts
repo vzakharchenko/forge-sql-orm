@@ -11,16 +11,17 @@ type Statistic = { query: string; params: unknown[]; metadata: ForgeSQLMetadata 
 export type QueryPlanMode = "TopSlowest" | "SummaryTable";
 
 export type MetadataQueryOptions = {
-  mode: QueryPlanMode;
-  summaryTableWindowTime: number;
-  topQueries: number;
+  mode?: QueryPlanMode;
+  summaryTableWindowTime?: number;
+  topQueries?: number;
+  showSlowestPlans?: boolean;
 };
 
 export type MetadataQueryContext = {
   totalDbExecutionTime: number;
   totalResponseSize: number;
   beginTime: Date;
-  options?: Partial<MetadataQueryOptions>;
+  options?: MetadataQueryOptions;
   statistics: Statistic[];
   printQueriesWithPlan: () => Promise<void>;
   forgeSQLORM: ForgeSqlOperation;
@@ -32,11 +33,12 @@ export const metadataQueryContext = new AsyncLocalStorage<MetadataQueryContext>(
  * Creates default options for metadata query context.
  * @returns Default options object
  */
-function createDefaultOptions(): MetadataQueryOptions {
+function createDefaultOptions(): Required<MetadataQueryOptions> {
   return {
     mode: "TopSlowest",
     topQueries: 1,
     summaryTableWindowTime: DEFAULT_WINDOW_SIZE,
+    showSlowestPlans: true,
   };
 }
 
@@ -45,12 +47,13 @@ function createDefaultOptions(): MetadataQueryOptions {
  * @param options - Optional partial options to merge
  * @returns Complete options object with all fields set
  */
-function mergeOptionsWithDefaults(options?: Partial<MetadataQueryOptions>): MetadataQueryOptions {
+function mergeOptionsWithDefaults(options?: MetadataQueryOptions): Required<MetadataQueryOptions> {
   const defaults = createDefaultOptions();
   return {
     mode: options?.mode ?? defaults.mode,
     topQueries: options?.topQueries ?? defaults.topQueries,
     summaryTableWindowTime: options?.summaryTableWindowTime ?? defaults.summaryTableWindowTime,
+    showSlowestPlans: options?.showSlowestPlans ?? defaults.showSlowestPlans,
   };
 }
 
@@ -101,7 +104,7 @@ function formatExplainPlan(planRows: ExplainAnalyzeRow[]): string {
  */
 async function printPlansUsingSummaryTables(
   context: MetadataQueryContext,
-  options: MetadataQueryOptions,
+  options: Required<MetadataQueryOptions>,
 ): Promise<boolean> {
   const timeDiff = Date.now() - context.beginTime.getTime();
 
@@ -128,21 +131,26 @@ async function printPlansUsingSummaryTables(
  */
 async function printTopQueriesPlans(
   context: MetadataQueryContext,
-  options: MetadataQueryOptions,
+  options: Required<MetadataQueryOptions>,
 ): Promise<void> {
   const topQueries = context.statistics
     .sort((a, b) => b.metadata.dbExecutionTime - a.metadata.dbExecutionTime)
     .slice(0, options.topQueries);
 
   for (const query of topQueries) {
-    const explainAnalyzeRows = await context.forgeSQLORM
-      .analyze()
-      .explainAnalyzeRaw(query.query, query.params);
-    const formattedPlan = formatExplainPlan(explainAnalyzeRows);
-    // eslint-disable-next-line no-console
-    console.warn(
-      `SQL: ${query.query} | Time: ${query.metadata.dbExecutionTime} ms\n Plan:\n${formattedPlan}`,
-    );
+    if (options.showSlowestPlans) {
+      const explainAnalyzeRows = await context.forgeSQLORM
+        .analyze()
+        .explainAnalyzeRaw(query.query, query.params);
+      const formattedPlan = formatExplainPlan(explainAnalyzeRows);
+      // eslint-disable-next-line no-console
+      console.warn(
+        `SQL: ${query.query} | Time: ${query.metadata.dbExecutionTime} ms\n Plan:\n${formattedPlan}`,
+      );
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(`SQL: ${query.query} | Time: ${query.metadata.dbExecutionTime} ms`);
+    }
   }
 }
 

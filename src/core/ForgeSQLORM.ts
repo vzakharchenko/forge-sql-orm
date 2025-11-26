@@ -135,6 +135,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @param options.mode - Query plan printing mode: 'TopSlowest' (default) or 'SummaryTable'
    * @param options.summaryTableWindowTime - Time window in milliseconds for summary table queries (default: 15000ms). Only used when mode is 'SummaryTable'
    * @param options.topQueries - Number of top slowest queries to analyze when mode is 'TopSlowest' (default: 1)
+   * @param options.showSlowestPlans - Whether to show execution plans for slowest queries in TopSlowest mode (default: true)
    * @returns Promise with the query result
    *
    * @example
@@ -946,6 +947,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @param options.mode - Query plan printing mode: 'TopSlowest' (default) or 'SummaryTable'
    * @param options.summaryTableWindowTime - Time window in milliseconds for summary table queries (default: 15000ms). Only used when mode is 'SummaryTable'
    * @param options.topQueries - Number of top slowest queries to analyze when mode is 'TopSlowest' (default: 1)
+   * @param options.showSlowestPlans - Whether to show execution plans for slowest queries in TopSlowest mode (default: true)
    * @returns Promise with the query result
    *
    * @example

@@ -114,6 +114,7 @@ describe("metadataContextUtils", () => {
         mode: "TopSlowest",
         topQueries: 1,
         summaryTableWindowTime: 15000,
+        showSlowestPlans: true,
       });
     });
 
@@ -127,6 +128,7 @@ describe("metadataContextUtils", () => {
         mode: "SummaryTable",
         topQueries: 3,
         summaryTableWindowTime: 15000,
+        showSlowestPlans: true,
       });
     });
 
@@ -258,6 +260,67 @@ describe("metadataContextUtils", () => {
       const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
       expect(warnCall).toContain("1 | TableReader");
     });
+
+    it("should handle execution plan with missing id and operatorInfo", async () => {
+      const planWithoutIdAndOperator: ExplainAnalyzeRow[] = [
+        {
+          task: "root",
+          estRows: 1000,
+          actRows: 1000,
+        },
+      ];
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue(planWithoutIdAndOperator);
+      await saveMetaDataToContext("SELECT * FROM users", [], mockMetadata1);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("task:root");
+      expect(warnCall).toContain("estRows:1000, actRows:1000");
+      // Should not contain id or operatorInfo since they are missing
+      expect(warnCall).not.toContain("1 |");
+      expect(warnCall).not.toContain("TableReader");
+    });
+
+    it("should not show execution plans when showSlowestPlans is false", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      await saveMetaDataToContext("SELECT * FROM users", [], mockMetadata1);
+
+      await mockContext.printQueriesWithPlan();
+
+      // Should not call explainAnalyzeRaw
+      expect(mockAnalyze.explainAnalyzeRaw).not.toHaveBeenCalled();
+      // Should only print SQL and time
+      expect(consoleWarnSpy).toHaveBeenCalledWith("SQL: SELECT * FROM users | Time: 200 ms");
+    });
+
+    it("should show execution plans when showSlowestPlans is true (default)", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: true,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([
+        {
+          id: "1",
+          operatorInfo: "TableReader",
+        },
+      ]);
+      await saveMetaDataToContext("SELECT * FROM users", [], mockMetadata1);
+
+      await mockContext.printQueriesWithPlan();
+
+      // Should call explainAnalyzeRaw
+      expect(mockAnalyze.explainAnalyzeRaw).toHaveBeenCalled();
+      // Should print SQL, time, and plan
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SQL: SELECT * FROM users | Time: 200 ms");
+      expect(warnCall).toContain("Plan:");
+    });
   });
 
   describe("printQueriesWithPlan - SummaryTable mode", () => {
@@ -387,17 +450,27 @@ describe("metadataContextUtils", () => {
       expect(mockContext.options?.summaryTableWindowTime).toBe(15000);
     });
 
+    it("should use default showSlowestPlans when undefined", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+      };
+      await saveMetaDataToContext("SELECT 1", [], mockMetadata);
+      expect(mockContext.options?.showSlowestPlans).toBe(true);
+    });
+
     it("should preserve provided values", async () => {
       mockContext.options = {
         mode: "SummaryTable",
         topQueries: 5,
         summaryTableWindowTime: 20000,
+        showSlowestPlans: false,
       };
       await saveMetaDataToContext("SELECT 1", [], mockMetadata);
       expect(mockContext.options).toEqual({
         mode: "SummaryTable",
         topQueries: 5,
         summaryTableWindowTime: 20000,
+        showSlowestPlans: false,
       });
     });
   });

@@ -2703,6 +2703,7 @@ The `printQueriesWithPlan` function supports two modes, configurable via the opt
 **1. TopSlowest Mode (default)**: Prints execution plans for the slowest queries from the current resolver invocation
 
 ```typescript
+// Full configuration example
 const result = await forgeSQL.executeWithMetadata(
   async () => {
     const users = await forgeSQL.selectFrom(usersTable);
@@ -2710,15 +2711,65 @@ const result = await forgeSQL.executeWithMetadata(
   },
   async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
     if (totalDbExecutionTime > 1000) {
-      await printQueriesWithPlan(); // Will print top 3 slowest queries
+      await printQueriesWithPlan(); // Will print top 3 slowest queries with execution plans
     }
   },
   {
     mode: "TopSlowest", // Print top slowest queries (default)
     topQueries: 3, // Number of top slowest queries to analyze (default: 1)
+    showSlowestPlans: true, // Show execution plans (default: true)
   },
 );
+
+// Minimal configuration - only specify what you need
+const result2 = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    return users;
+  },
+  async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    if (totalDbExecutionTime > 1000) {
+      await printQueriesWithPlan(); // Will print top 3 slowest queries (all other options use defaults)
+    }
+  },
+  {
+    topQueries: 3, // Only specify topQueries, mode and showSlowestPlans use defaults
+  },
+);
+
+// Disable execution plans - only show SQL and execution time
+const result3 = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    return users;
+  },
+  async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    if (totalDbExecutionTime > 1000) {
+      await printQueriesWithPlan(); // Will print SQL and time only, no execution plans
+    }
+  },
+  {
+    showSlowestPlans: false, // Disable execution plan printing
+  },
+);
+
+// Use all defaults - pass empty object or omit options parameter
+const result4 = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    return users;
+  },
+  async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    if (totalDbExecutionTime > 1000) {
+      await printQueriesWithPlan(); // Uses all defaults: TopSlowest mode, topQueries: 1, showSlowestPlans: true
+    }
+  },
+  {}, // Empty object - all options use defaults
+);
 ```
+
+<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
+read_file
 
 **2. SummaryTable Mode**: Uses `CLUSTER_STATEMENTS_SUMMARY` for query analysis
 
@@ -2742,11 +2793,33 @@ const result = await forgeSQL.executeWithMetadata(
 
 #### Configuration Options
 
+All options are **optional**. If not specified, default values are used. You can pass only the options you need to customize.
+
 | Option                   | Type                             | Default        | Description                                                                                                                                                                                   |
 | ------------------------ | -------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mode`                   | `'TopSlowest' \| 'SummaryTable'` | `'TopSlowest'` | Query plan printing mode. `'TopSlowest'` prints execution plans for the slowest queries from the current resolver. `'SummaryTable'` uses `CLUSTER_STATEMENTS_SUMMARY` when within time window |
 | `summaryTableWindowTime` | `number`                         | `15000`        | Time window in milliseconds for summary table queries. Only used when `mode` is `'SummaryTable'`                                                                                              |
 | `topQueries`             | `number`                         | `1`            | Number of top slowest queries to analyze when `mode` is `'TopSlowest'`                                                                                                                        |
+| `showSlowestPlans`       | `boolean`                        | `true`         | Whether to show execution plans for slowest queries in TopSlowest mode. If `false`, only SQL and execution time are printed                                                                   |
+
+**Examples:**
+
+```typescript
+// Use all defaults - omit options or pass empty object
+await forgeSQL.executeWithMetadata(queryFn, onMetadataFn); // or { }
+
+// Customize only what you need
+await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { topQueries: 3 });
+await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { mode: "SummaryTable" });
+await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { showSlowestPlans: false });
+
+// Combine multiple options
+await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, {
+  mode: "TopSlowest",
+  topQueries: 5,
+  showSlowestPlans: false,
+});
+```
 
 #### How It Works
 
@@ -2754,6 +2827,7 @@ const result = await forgeSQL.executeWithMetadata(
    - Collects all queries executed within the resolver
    - Sorts them by execution time (slowest first)
    - Prints execution plans for the top N queries (configurable via `topQueries`)
+   - If `showSlowestPlans` is `false`, only prints SQL and execution time without plans
    - Works immediately after query execution
 
 2. **SummaryTable Mode**:
