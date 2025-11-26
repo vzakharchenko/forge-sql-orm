@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-rZ54dySn.js",
+      "./body-kEzaVwHq.js",
       "./react-dom-vendor-B_rzBOmK.js",
       "./client-core-vendor-D5B_tUbY.js",
       "./lodash-vendor-htvpa8uV.js",
@@ -2204,17 +2204,9 @@ function Lb() {
           import.meta.url,
         ),
         o = new URL(document.referrer).origin,
-        i = `${o}/forge-apps/adf-renderer`;
-      window.addEventListener("load", () => {
-        setTimeout(() => {
-          ((document.documentElement.style.height = "auto"), (document.body.style.height = "auto"));
-        }, 200);
-      });
-      const c = n || `forge-adf-renderer-iframe-${(0, e.v4)()}`;
-      return {
-        id: c,
-        src: i,
-        onLoad: () => {
+        i = `${o}/forge-apps/adf-renderer`,
+        c = n || `forge-adf-renderer-iframe-${(0, e.v4)()}`,
+        s = () => {
           var u, l;
           const d = document.getElementById(c),
             p = {
@@ -2236,8 +2228,13 @@ function Lb() {
             d || "",
           ),
             (l = d?.contentWindow) === null || l === void 0 || l.postMessage(p, o));
-        },
-      };
+        };
+      return (
+        setTimeout(() => {
+          ((document.documentElement.style.height = "auto"), (document.body.style.height = "auto"));
+        }, 200),
+        { id: c, src: i, onLoad: s }
+      );
     };
   return ((In.createAdfRendererIframeProps = t), In);
 }
@@ -21371,7 +21368,7 @@ var Tx = function (t) {
   },
   Mx = m.lazy(function () {
     return sp(
-      () => import("./body-rZ54dySn.js"),
+      () => import("./body-kEzaVwHq.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );

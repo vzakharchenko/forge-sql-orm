@@ -2175,17 +2175,9 @@ function Vi() {
           import.meta.url,
         ),
         o = new URL(document.referrer).origin,
-        t = `${o}/forge-apps/adf-renderer`;
-      window.addEventListener("load", () => {
-        setTimeout(() => {
-          ((document.documentElement.style.height = "auto"), (document.body.style.height = "auto"));
-        }, 200);
-      });
-      const l = s || `forge-adf-renderer-iframe-${(0, e.v4)()}`;
-      return {
-        id: l,
-        src: t,
-        onLoad: () => {
+        t = `${o}/forge-apps/adf-renderer`,
+        l = s || `forge-adf-renderer-iframe-${(0, e.v4)()}`,
+        c = () => {
           var i, u;
           const f = document.getElementById(l),
             _ = {
@@ -2207,8 +2199,13 @@ function Vi() {
             f || "",
           ),
             (u = f?.contentWindow) === null || u === void 0 || u.postMessage(_, o));
-        },
-      };
+        };
+      return (
+        setTimeout(() => {
+          ((document.documentElement.style.height = "auto"), (document.body.style.height = "auto"));
+        }, 200),
+        { id: l, src: t, onLoad: c }
+      );
     };
   return ((ce.createAdfRendererIframeProps = r), ce);
 }

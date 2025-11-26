@@ -3,7 +3,7 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      "./body-DVIOb930.js",
+      "./body-Nty2Whm8.js",
       "./react-dom-vendor-B_rzBOmK.js",
       "./client-core-vendor-D5B_tUbY.js",
       "./lodash-vendor-htvpa8uV.js",
@@ -2204,17 +2204,9 @@ function t_() {
           import.meta.url,
         ),
         a = new URL(document.referrer).origin,
-        o = `${a}/forge-apps/adf-renderer`;
-      window.addEventListener("load", () => {
-        setTimeout(() => {
-          ((document.documentElement.style.height = "auto"), (document.body.style.height = "auto"));
-        }, 200);
-      });
-      const s = n || `forge-adf-renderer-iframe-${(0, e.v4)()}`;
-      return {
-        id: s,
-        src: o,
-        onLoad: () => {
+        o = `${a}/forge-apps/adf-renderer`,
+        s = n || `forge-adf-renderer-iframe-${(0, e.v4)()}`,
+        u = () => {
           var c, l;
           const d = document.getElementById(s),
             p = {
@@ -2236,8 +2228,13 @@ function t_() {
             d || "",
           ),
             (l = d?.contentWindow) === null || l === void 0 || l.postMessage(p, a));
-        },
-      };
+        };
+      return (
+        setTimeout(() => {
+          ((document.documentElement.style.height = "auto"), (document.body.style.height = "auto"));
+        }, 200),
+        { id: s, src: o, onLoad: u }
+      );
     };
   return ((yn.createAdfRendererIframeProps = t), yn);
 }
@@ -17033,7 +17030,7 @@ var TS = function (t) {
   },
   MS = m.lazy(function () {
     return Dv(
-      () => import("./body-DVIOb930.js"),
+      () => import("./body-Nty2Whm8.js"),
       __vite__mapDeps([0, 1, 2, 3, 4]),
       import.meta.url,
     );
