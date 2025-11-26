@@ -3,6 +3,7 @@ import { ForgeSQLMetadata } from "./forgeDriver";
 import { ForgeSqlOperation } from "../core/ForgeSQLQueryBuilder";
 import { ExplainAnalyzeRow } from "../core/SystemTables";
 import { printQueriesWithPlan } from "./sqlUtils";
+import { Parser } from "node-sql-parser";
 
 const DEFAULT_WINDOW_SIZE = 15 * 1000;
 
@@ -15,6 +16,7 @@ export type MetadataQueryOptions = {
   summaryTableWindowTime?: number;
   topQueries?: number;
   showSlowestPlans?: boolean;
+  normalizeQuery?: boolean;
 };
 
 export type MetadataQueryContext = {
@@ -39,6 +41,7 @@ function createDefaultOptions(): Required<MetadataQueryOptions> {
     topQueries: 1,
     summaryTableWindowTime: DEFAULT_WINDOW_SIZE,
     showSlowestPlans: true,
+    normalizeQuery: true,
   };
 }
 
@@ -54,7 +57,66 @@ function mergeOptionsWithDefaults(options?: MetadataQueryOptions): Required<Meta
     topQueries: options?.topQueries ?? defaults.topQueries,
     summaryTableWindowTime: options?.summaryTableWindowTime ?? defaults.summaryTableWindowTime,
     showSlowestPlans: options?.showSlowestPlans ?? defaults.showSlowestPlans,
+    normalizeQuery: options?.normalizeQuery ?? defaults.normalizeQuery,
   };
+}
+
+/**
+ * Normalizes SQL query using regex fallback by replacing parameter values with placeholders.
+ * Replaces string literals, numeric values, and boolean values with '?' for logging.
+ * @param sql - SQL query string to normalize
+ * @returns Normalized SQL string with parameters replaced by '?'
+ */
+function normalizeSqlForLoggingRegex(sql: string): string {
+  let normalized = sql;
+
+  // Replace string literals (single quotes) - handles escaped quotes
+  normalized = normalized.replace(/'([^'\\]|\\.)*'/g, "?");
+
+  // Replace string literals (double quotes) - handles escaped quotes
+  normalized = normalized.replace(/"([^"\\]|\\.)*"/g, "?");
+
+  // Replace numeric literals (integers and decimals)
+  // Match numbers that appear after operators, parentheses, or whitespace
+  normalized = normalized.replace(/([\s(,=<>!+-]|^)(-?\d+\.?\d*)(?=[\s),;]|$)/g, "$1?");
+
+  // Replace boolean literals
+  normalized = normalized.replace(/\b(true|false)\b/gi, "?");
+
+  // Replace NULL values (but be careful not to replace in identifiers)
+  normalized = normalized.replace(/\bNULL\b/gi, "?");
+
+  return normalized;
+}
+
+/**
+ * Normalizes SQL query by replacing parameter values with placeholders.
+ * First attempts to use node-sql-parser for structure normalization, then applies regex for value replacement.
+ * Falls back to regex-based normalization if parsing fails.
+ * @param sql - SQL query string to normalize
+ * @returns Normalized SQL string with parameters replaced by '?'
+ */
+function normalizeSqlForLogging(sql: string): string {
+  try {
+    const parser = new Parser();
+    const ast = parser.astify(sql.trim());
+
+    // Convert AST back to SQL (this normalizes structure and formatting)
+    const normalized = parser.sqlify(Array.isArray(ast) ? ast[0] : ast);
+
+    // Apply regex-based value replacement to the normalized SQL
+    // This handles the case where sqlify might preserve some literal values
+    let result = normalizeSqlForLoggingRegex(normalized.trim());
+
+    // Remove backticks added by sqlify for cleaner logging (optional - can be removed if backticks are preferred)
+    result = result.replace(/`/g, "");
+
+    return result;
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
+    // If parsing fails, fall back to regex-based normalization
+    return normalizeSqlForLoggingRegex(sql);
+  }
 }
 
 /**
@@ -138,6 +200,9 @@ async function printTopQueriesPlans(
     .slice(0, options.topQueries);
 
   for (const query of topQueries) {
+    const normalizedQuery = options.normalizeQuery
+      ? normalizeSqlForLogging(query.query)
+      : query.query;
     if (options.showSlowestPlans) {
       const explainAnalyzeRows = await context.forgeSQLORM
         .analyze()
@@ -145,11 +210,11 @@ async function printTopQueriesPlans(
       const formattedPlan = formatExplainPlan(explainAnalyzeRows);
       // eslint-disable-next-line no-console
       console.warn(
-        `SQL: ${query.query} | Time: ${query.metadata.dbExecutionTime} ms\n Plan:\n${formattedPlan}`,
+        `SQL: ${normalizedQuery} | Time: ${query.metadata.dbExecutionTime} ms\n Plan:\n${formattedPlan}`,
       );
     } else {
       // eslint-disable-next-line no-console
-      console.warn(`SQL: ${query.query} | Time: ${query.metadata.dbExecutionTime} ms`);
+      console.warn(`SQL: ${normalizedQuery} | Time: ${query.metadata.dbExecutionTime} ms`);
     }
   }
 }

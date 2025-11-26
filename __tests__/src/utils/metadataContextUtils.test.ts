@@ -115,6 +115,7 @@ describe("metadataContextUtils", () => {
         topQueries: 1,
         summaryTableWindowTime: 15000,
         showSlowestPlans: true,
+        normalizeQuery: true,
       });
     });
 
@@ -129,6 +130,7 @@ describe("metadataContextUtils", () => {
         topQueries: 3,
         summaryTableWindowTime: 15000,
         showSlowestPlans: true,
+        normalizeQuery: true,
       });
     });
 
@@ -471,6 +473,7 @@ describe("metadataContextUtils", () => {
         topQueries: 5,
         summaryTableWindowTime: 20000,
         showSlowestPlans: false,
+        normalizeQuery: true,
       });
     });
   });
@@ -500,6 +503,188 @@ describe("metadataContextUtils", () => {
       expect(mockContext.statistics).toHaveLength(3);
       expect(mockContext.totalDbExecutionTime).toBe(600);
       expect(mockContext.totalResponseSize).toBe(6144);
+    });
+  });
+
+  describe("SQL normalization for logging", () => {
+    const mockMetadata: ForgeSQLMetadata = {
+      dbExecutionTime: 100,
+      responseSize: 1024,
+      fields: [],
+    };
+
+    it("should normalize SQL with string literals", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext("SELECT * FROM users WHERE name = 'John'", [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SELECT * FROM users WHERE name = ?");
+      expect(warnCall).not.toContain("John");
+    });
+
+    it("should normalize SQL with numeric literals", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext("SELECT sleep(4) FROM users WHERE id = 123", [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SELECT sleep(?) FROM users WHERE id = ?");
+      expect(warnCall).not.toContain("4");
+      expect(warnCall).not.toContain("123");
+    });
+
+    it("should normalize SQL with boolean literals", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext("SELECT * FROM users WHERE active = true", [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SELECT * FROM users WHERE active = ?");
+      expect(warnCall).not.toContain("true");
+    });
+
+    it("should normalize SQL with NULL values", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext("SELECT * FROM users WHERE deleted_at IS NULL", [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SELECT * FROM users WHERE deleted_at IS ?");
+    });
+
+    it("should normalize SQL with multiple parameter types", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext(
+        "SELECT * FROM users WHERE name = 'John' AND age = 25 AND active = true AND deleted_at IS NULL",
+        [],
+        mockMetadata,
+      );
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain(
+        "SELECT * FROM users WHERE name = ? AND age = ? AND active = ? AND deleted_at IS ?",
+      );
+      expect(warnCall).not.toContain("John");
+      expect(warnCall).not.toContain("25");
+      expect(warnCall).not.toContain("true");
+    });
+
+    it("should normalize SQL with double-quoted strings", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext('SELECT * FROM users WHERE name = "John"', [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SELECT * FROM users WHERE name = ?");
+      expect(warnCall).not.toContain("John");
+    });
+
+    it("should normalize SQL with decimal numbers", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      await saveMetaDataToContext("SELECT * FROM products WHERE price = 19.99", [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      expect(warnCall).toContain("SELECT * FROM products WHERE price = ?");
+      expect(warnCall).not.toContain("19.99");
+    });
+
+    it("should fall back to regex normalization when parser fails", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      // Use invalid SQL that will cause parser to fail
+      // This will trigger fallback to regex normalization
+      await saveMetaDataToContext(
+        "SELECT * FROM users WHERE name = 'John' AND invalid syntax",
+        [],
+        mockMetadata,
+      );
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      // Should still normalize using regex fallback
+      expect(warnCall).toContain("SELECT * FROM users WHERE name = ?");
+      expect(warnCall).not.toContain("John");
+    });
+
+    it("should not normalize SQL when normalizeQuery is false", async () => {
+      mockContext.options = {
+        mode: "TopSlowest",
+        topQueries: 1,
+        showSlowestPlans: false,
+        normalizeQuery: false,
+      };
+      mockAnalyze.explainAnalyzeRaw.mockResolvedValue([]);
+
+      const originalQuery = "SELECT * FROM users WHERE name = 'John' AND id = 123";
+      await saveMetaDataToContext(originalQuery, [], mockMetadata);
+
+      await mockContext.printQueriesWithPlan();
+
+      const warnCall = consoleWarnSpy.mock.calls[0][0] as string;
+      // Should contain original query with parameters
+      expect(warnCall).toContain(originalQuery);
+      expect(warnCall).toContain("John");
+      expect(warnCall).toContain("123");
+      // Should not contain normalized version
+      expect(warnCall).not.toContain("name = ?");
     });
   });
 });

@@ -2801,6 +2801,7 @@ All options are **optional**. If not specified, default values are used. You can
 | `summaryTableWindowTime` | `number`                         | `15000`        | Time window in milliseconds for summary table queries. Only used when `mode` is `'SummaryTable'`                                                                                              |
 | `topQueries`             | `number`                         | `1`            | Number of top slowest queries to analyze when `mode` is `'TopSlowest'`                                                                                                                        |
 | `showSlowestPlans`       | `boolean`                        | `true`         | Whether to show execution plans for slowest queries in TopSlowest mode. If `false`, only SQL and execution time are printed                                                                   |
+| `normalizeQuery`         | `boolean`                        | `true`         | Whether to normalize SQL queries by replacing parameter values with `?` placeholders. Set to `false` to disable normalization if it causes issues with complex queries                        |
 
 **Examples:**
 
@@ -2812,12 +2813,14 @@ await forgeSQL.executeWithMetadata(queryFn, onMetadataFn); // or { }
 await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { topQueries: 3 });
 await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { mode: "SummaryTable" });
 await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { showSlowestPlans: false });
+await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, { normalizeQuery: false }); // Disable query normalization
 
 // Combine multiple options
 await forgeSQL.executeWithMetadata(queryFn, onMetadataFn, {
   mode: "TopSlowest",
   topQueries: 5,
   showSlowestPlans: false,
+  normalizeQuery: true, // Enable query normalization (default)
 });
 ```
 
