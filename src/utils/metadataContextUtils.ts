@@ -64,26 +64,39 @@ function mergeOptionsWithDefaults(options?: MetadataQueryOptions): Required<Meta
 /**
  * Normalizes SQL query using regex fallback by replacing parameter values with placeholders.
  * Replaces string literals, numeric values, and boolean values with '?' for logging.
+ *
+ * Note: This is a fallback function used when node-sql-parser fails.
+ * It uses simple, safe regex patterns to avoid ReDoS (Regular Expression Denial of Service) vulnerabilities.
+ * For proper handling of escaped quotes and complex SQL, use the main normalizeSqlForLogging function
+ * which uses node-sql-parser.
+ *
  * @param sql - SQL query string to normalize
  * @returns Normalized SQL string with parameters replaced by '?'
  */
 function normalizeSqlForLoggingRegex(sql: string): string {
   let normalized = sql;
 
-  // Replace string literals (single quotes) - handles escaped quotes
-  normalized = normalized.replace(/'([^'\\]|\\.)*'/g, "?");
+  // Replace string literals (single quotes) - using simple greedy match
+  // This avoids catastrophic backtracking by using a simple [^']* pattern
+  // Note: This does not handle SQL-style escaped quotes (doubled quotes: '')
+  // For proper handling, use the main normalizeSqlForLogging function with node-sql-parser
+  normalized = normalized.replace(/'[^']*'/g, "?");
 
-  // Replace string literals (double quotes) - handles escaped quotes
-  normalized = normalized.replace(/"([^"\\]|\\.)*"/g, "?");
+  // Replace string literals (double quotes) - using simple greedy match
+  // Same safety considerations as above
+  normalized = normalized.replace(/"[^"]*"/g, "?");
 
-  // Replace numeric literals (integers and decimals)
-  // Match numbers that appear after operators, parentheses, or whitespace
-  normalized = normalized.replace(/([\s(,=<>!+-]|^)(-?\d+\.?\d*)(?=[\s),;]|$)/g, "$1?");
+  // Replace numeric literals - simplified pattern to avoid backtracking
+  // Match: optional minus, digits, optional decimal point and more digits
+  // Using word boundaries (\b) for safety - avoids complex lookahead/lookbehind
+  normalized = normalized.replace(/\b-?\d+\.?\d*\b/g, "?");
 
-  // Replace boolean literals
+  // Replace boolean literals - safe pattern with word boundaries
+  // Simple alternation with word boundaries - no nested quantifiers
   normalized = normalized.replace(/\b(true|false)\b/gi, "?");
 
   // Replace NULL values (but be careful not to replace in identifiers)
+  // Simple word boundary match - safe from backtracking
   normalized = normalized.replace(/\bNULL\b/gi, "?");
 
   return normalized;
