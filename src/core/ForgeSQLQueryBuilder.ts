@@ -57,6 +57,7 @@ import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 import type { WithBuilder } from "drizzle-orm/mysql-core/subquery";
 import { WithSubquery } from "drizzle-orm/subquery";
 import { MySqlColumn } from "drizzle-orm/mysql-core";
+import { MetadataQueryOptions } from "../utils/metadataContextUtils";
 
 /**
  * Core interface for ForgeSQL operations.
@@ -585,7 +586,13 @@ export interface QueryBuilderForgeSql {
    * @param onMetadata - Callback function that receives aggregated execution metadata
    * @param onMetadata.totalDbExecutionTime - Total database execution time across all operations in the query function (in milliseconds)
    * @param onMetadata.totalResponseSize - Total response size across all operations (in bytes)
-   * @param onMetadata.printQueries - Function to analyze and print query execution plans from CLUSTER_STATEMENTS_SUMMARY
+   * @param onMetadata.printQueriesWithPlan - Function to analyze and print query execution plans. Supports two modes:
+   *   - TopSlowest: Prints execution plans for the slowest queries from the current resolver (default)
+   *   - SummaryTable: Uses CLUSTER_STATEMENTS_SUMMARY if within time window
+   * @param options - Optional configuration for query plan printing behavior
+   * @param options.mode - Query plan printing mode: 'TopSlowest' (default) or 'SummaryTable'
+   * @param options.summaryTableWindowTime - Time window in milliseconds for summary table queries (default: 15000ms). Only used when mode is 'SummaryTable'
+   * @param options.topQueries - Number of top slowest queries to analyze when mode is 'TopSlowest' (default: 1)
    * @returns Promise with the query result
    *
    * @example
@@ -597,12 +604,12 @@ export interface QueryBuilderForgeSql {
    *     const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
    *     return { users, orders };
    *   },
-   *   (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
    *     const threshold = 500; // ms baseline for this resolver
    *
    *     if (totalDbExecutionTime > threshold * 1.5) {
    *       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
-   *       await printQueries(); // Analyze and print query execution plans
+   *       await printQueriesWithPlan(); // Analyze and print query execution plans
    *     } else if (totalDbExecutionTime > threshold) {
    *       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
    *     }
@@ -655,6 +662,7 @@ export interface QueryBuilderForgeSql {
       totalResponseSize: number,
       printQueriesWithPlan: () => Promise<void>,
     ) => Promise<void> | void,
+    options?: MetadataQueryOptions,
   ): Promise<T>;
   /**
    * Executes a raw SQL query with local cache support.

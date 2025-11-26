@@ -77,14 +77,22 @@ function inlineParams(sql: string, params: unknown[]): string {
 }
 
 /**
- * Processes DDL query results and saves metadata.
+ * Processes DDL query results and saves metadata to the execution context.
  *
+ * @param query - The SQL query string
+ * @param params - Query parameters
+ * @param method - Execution method ("all" or "execute")
  * @param result - The DDL query result
  * @returns Processed result for Drizzle ORM
  */
-async function processDDLResult(method: QueryMethod, result: any): Promise<ForgeDriverResult> {
+async function processDDLResult(
+  query: string,
+  params: unknown[],
+  method: QueryMethod,
+  result: any,
+): Promise<ForgeDriverResult> {
   if (result.metadata) {
-    await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
+    await saveMetaDataToContext(query, params, result.metadata as ForgeSQLMetadata);
   }
 
   if (!result?.rows) {
@@ -109,13 +117,16 @@ async function processDDLResult(method: QueryMethod, result: any): Promise<Forge
 }
 
 /**
- * Processes execute method results (UPDATE, INSERT, DELETE).
+ * Processes execute method results (UPDATE, INSERT, DELETE) and saves metadata to the execution context.
  *
- * @param query - The SQL query
- * @param params - Query parameters
+ * @param query - The SQL query string
+ * @param params - Query parameters (may be undefined)
  * @returns Processed result for Drizzle ORM
  */
-async function processExecuteMethod(query: string, params: unknown[]): Promise<ForgeDriverResult> {
+async function processExecuteMethod(
+  query: string,
+  params: unknown[] | undefined,
+): Promise<ForgeDriverResult> {
   const sqlStatement = sql.prepare<UpdateQueryResponse>(query);
 
   if (params) {
@@ -123,7 +134,7 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
   }
 
   const result = await withTimeout(sqlStatement.execute(), timeoutMessage, timeoutMs);
-  await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
+  await saveMetaDataToContext(query, params ?? [], result.metadata as ForgeSQLMetadata);
   if (!result.rows) {
     return { rows: [[]] };
   }
@@ -132,13 +143,16 @@ async function processExecuteMethod(query: string, params: unknown[]): Promise<F
 }
 
 /**
- * Processes all method results (SELECT queries).
+ * Processes all method results (SELECT queries) and saves metadata to the execution context.
  *
- * @param query - The SQL query
- * @param params - Query parameters
+ * @param query - The SQL query string
+ * @param params - Query parameters (may be undefined)
  * @returns Processed result for Drizzle ORM
  */
-async function processAllMethod(query: string, params: unknown[]): Promise<ForgeDriverResult> {
+async function processAllMethod(
+  query: string,
+  params: unknown[] | undefined,
+): Promise<ForgeDriverResult> {
   const sqlStatement = await sql.prepare<unknown>(query);
 
   if (params) {
@@ -146,7 +160,7 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
   }
 
   const result = await withTimeout(sqlStatement.execute(), timeoutMessage, timeoutMs);
-  await saveMetaDataToContext(result.metadata as ForgeSQLMetadata);
+  await saveMetaDataToContext(query, params ?? [], result.metadata as ForgeSQLMetadata);
 
   if (!result.rows) {
     return { rows: [] };
@@ -160,9 +174,10 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
 /**
  * Main Forge SQL driver function for Drizzle ORM integration.
  * Handles DDL operations, execute operations (UPDATE/INSERT/DELETE), and select operations.
+ * Automatically saves query execution metadata to the context for performance monitoring.
  *
  * @param query - The SQL query to execute
- * @param params - Query parameters
+ * @param params - Query parameters (may be undefined or empty array)
  * @param method - Execution method ("all" for SELECT, "execute" for UPDATE/INSERT/DELETE)
  * @returns Promise with query results compatible with Drizzle ORM
  *
@@ -182,25 +197,25 @@ async function processAllMethod(query: string, params: unknown[]): Promise<Forge
  */
 export const forgeDriver = async (
   query: string,
-  params: unknown[],
+  params: unknown[] | undefined,
   method: QueryMethod,
 ): Promise<ForgeDriverResult> => {
   const operationType = await getOperationType();
   // Handle DDL operations
   if (operationType === "DDL") {
     const result = await withTimeout(
-      sql.executeDDL(inlineParams(query, params)),
+      sql.executeDDL(inlineParams(query, params ?? [])),
       timeoutMessage,
       timeoutMs,
     );
-    return await processDDLResult(method, result);
+    return await processDDLResult(query, params ?? [], method, result);
   }
 
   // Handle execute method (UPDATE, INSERT, DELETE)
   if (method === "execute") {
-    return await processExecuteMethod(query, params ?? []);
+    return await processExecuteMethod(query, params);
   }
 
   // Handle all method (SELECT)
-  return await processAllMethod(query, params ?? []);
+  return await processAllMethod(query, params);
 };

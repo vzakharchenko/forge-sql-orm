@@ -10,7 +10,6 @@
 [![forge-sql-orm CI](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml/badge.svg)](https://github.com/vzakharchenko/forge-sql-orm/actions/workflows/node.js.yml)
 [![Coverage Status](https://coveralls.io/repos/github/vzakharchenko/forge-sql-orm/badge.svg?branch=master)](https://coveralls.io/github/vzakharchenko/forge-sql-orm?branch=master)
 [![DeepScan grade](https://deepscan.io/api/teams/26652/projects/29272/branches/940614/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=26652&pid=29272&bid=940614)
-[![Socket Badge](https://badge.socket.dev/npm/package/forge-sql-orm/latest)](https://badge.socket.dev/npm/package/forge-sql-orm/latest)
 [![Snyk Vulnerabilities](https://snyk.io/test/github/vzakharchenko/forge-sql-orm/badge.svg)](https://snyk.io/test/github/vzakharchenko/forge-sql-orm)
 
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [Drizzle ORM](https://orm.drizzle.team) and provides advanced capabilities for working with relational databases inside Forge.
@@ -24,7 +23,7 @@
 - ✅ **Type-Safe Query Building**: Write SQL queries with full TypeScript support
 - ✅ **Supports complex SQL queries** with joins and filtering using Drizzle ORM
 - ✅ **Advanced Query Methods**: `selectFrom()`, `selectDistinctFrom()`, `selectCacheableFrom()`, `selectDistinctCacheableFrom()` for all-column queries with field aliasing
-- ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and query analysis capabilities with performance monitoring
+- ✅ **Query Execution with Metadata**: `executeWithMetadata()` method for capturing detailed execution metrics including database execution time, response size, and query analysis capabilities with performance monitoring. Supports two modes for query plan printing: TopSlowest mode (default) and SummaryTable mode
 - ✅ **Raw SQL Execution**: `execute()`, `executeCacheable()`, `executeDDL()`, and `executeDDLActions()` methods for direct SQL queries with local and global caching
 - ✅ **Common Table Expressions (CTEs)**: `with()` method for complex queries with subqueries
 - ✅ **Schema migration support**, allowing automatic schema evolution
@@ -349,6 +348,11 @@ resolver.define("fetch", async (req: Request) => {
           console.debug(`[Performance Debug fetch] High DB time: ${totalDbExecutionTime} ms`);
         }
       },
+      {
+        // Optional: Configure query plan printing behavior
+        mode: "TopSlowest", // Print top slowest queries (default)
+        topQueries: 3, // Print top 3 slowest queries
+      },
     );
   } catch (e) {
     const error = e?.cause?.debug?.sqlMessage ?? e?.cause;
@@ -357,6 +361,19 @@ resolver.define("fetch", async (req: Request) => {
   }
 });
 ```
+
+**Query Plan Printing Options:**
+
+The `printQueriesWithPlan` function supports two modes:
+
+1. **TopSlowest Mode (default)**: Prints execution plans for the slowest queries from the current resolver invocation
+   - `mode`: Set to `'TopSlowest'` (default)
+   - `topQueries`: Number of top slowest queries to analyze (default: 1)
+
+2. **SummaryTable Mode**: Uses `CLUSTER_STATEMENTS_SUMMARY` for query analysis
+   - `mode`: Set to `'SummaryTable'`
+   - `summaryTableWindowTime`: Time window in milliseconds (default: 15000ms)
+   - Only works if queries are executed within the specified time window
 
 ### 5. Rovo Integration (Secure Analytics)
 
@@ -453,6 +470,11 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
     }
 
     console.log(`DB response size: ${totalResponseSize} bytes`);
+  },
+  {
+    // Optional: Configure query plan printing
+    mode: "TopSlowest", // Print top slowest queries (default)
+    topQueries: 2, // Print top 2 slowest queries
   },
 );
 
@@ -591,7 +613,12 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
     }
 
     console.log(`DB response size: ${totalResponseSize} bytes`);
-  }
+  },
+  {
+    // Optional: Configure query plan printing
+    mode: 'TopSlowest', // Print top slowest queries (default)
+    topQueries: 1, // Print top slowest query
+  },
 );
 ```
 
@@ -995,23 +1022,23 @@ const optimizedData = await forgeSQL.executeWithLocalCacheContextAndReturnValue(
 
 ### When to Use Each Approach
 
-| Method                                                                 | Use Case                                                    | Versioning | Cache Management     |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------- | ---------- | -------------------- |
-| `insertWithCacheContext/insertWithCacheContext/updateWithCacheContext` | Basic Drizzle operations                                    | ❌ No      | Cache Context        |
-| `insertAndEvictCache()`                                                | Simple inserts without conflicts                            | ❌ No      | ✅ Yes               |
-| `updateAndEvictCache()`                                                | Simple updates without conflicts                            | ❌ No      | ✅ Yes               |
-| `deleteAndEvictCache()`                                                | Simple deletes without conflicts                            | ❌ No      | ✅ Yes               |
-| `insert/update/delete`                                                 | Basic Drizzle operations                                    | ❌ No      | ❌ No                |
-| `selectFrom()`                                                         | All-column queries with field aliasing                      | ❌ No      | Local Cache          |
-| `selectDistinctFrom()`                                                 | Distinct all-column queries with field aliasing             | ❌ No      | Local Cache          |
-| `selectCacheableFrom()`                                                | All-column queries with field aliasing and caching          | ❌ No      | Local + Global Cache |
-| `selectDistinctCacheableFrom()`                                        | Distinct all-column queries with field aliasing and caching | ❌ No      | Local + Global Cache |
-| `execute()`                                                            | Raw SQL queries with local caching                          | ❌ No      | Local Cache          |
-| `executeCacheable()`                                                   | Raw SQL queries with local and global caching               | ❌ No      | Local + Global Cache |
-| `executeWithMetadata()`                                                | Raw SQL queries with execution metrics capture              | ❌ No      | Local Cache          |
-| `executeDDL()`                                                         | DDL operations (CREATE, ALTER, DROP, etc.)                  | ❌ No      | No Caching           |
-| `executeDDLActions()`                                                  | Execute regular SQL queries in DDL operation context        | ❌ No      | No Caching           |
-| `with()`                                                               | Common Table Expressions (CTEs)                             | ❌ No      | Local Cache          |
+| Method                                                                 | Use Case                                                                                                               | Versioning | Cache Management     |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------- | -------------------- |
+| `insertWithCacheContext/insertWithCacheContext/updateWithCacheContext` | Basic Drizzle operations                                                                                               | ❌ No      | Cache Context        |
+| `insertAndEvictCache()`                                                | Simple inserts without conflicts                                                                                       | ❌ No      | ✅ Yes               |
+| `updateAndEvictCache()`                                                | Simple updates without conflicts                                                                                       | ❌ No      | ✅ Yes               |
+| `deleteAndEvictCache()`                                                | Simple deletes without conflicts                                                                                       | ❌ No      | ✅ Yes               |
+| `insert/update/delete`                                                 | Basic Drizzle operations                                                                                               | ❌ No      | ❌ No                |
+| `selectFrom()`                                                         | All-column queries with field aliasing                                                                                 | ❌ No      | Local Cache          |
+| `selectDistinctFrom()`                                                 | Distinct all-column queries with field aliasing                                                                        | ❌ No      | Local Cache          |
+| `selectCacheableFrom()`                                                | All-column queries with field aliasing and caching                                                                     | ❌ No      | Local + Global Cache |
+| `selectDistinctCacheableFrom()`                                        | Distinct all-column queries with field aliasing and caching                                                            | ❌ No      | Local + Global Cache |
+| `execute()`                                                            | Raw SQL queries with local caching                                                                                     | ❌ No      | Local Cache          |
+| `executeCacheable()`                                                   | Raw SQL queries with local and global caching                                                                          | ❌ No      | Local + Global Cache |
+| `executeWithMetadata()`                                                | Resolver-level profiling with execution metrics and configurable query plan printing (TopSlowest or SummaryTable mode) | ❌ No      | Local Cache          |
+| `executeDDL()`                                                         | DDL operations (CREATE, ALTER, DROP, etc.)                                                                             | ❌ No      | No Caching           |
+| `executeDDLActions()`                                                  | Execute regular SQL queries in DDL operation context                                                                   | ❌ No      | No Caching           |
+| `with()`                                                               | Common Table Expressions (CTEs)                                                                                        | ❌ No      | Local Cache          |
 
 where Cache context - allows you to batch cache invalidation events and bypass cache reads for affected tables.
 
@@ -1415,7 +1442,12 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
     }
 
     console.log(`DB response size: ${totalResponseSize} bytes`);
-  }
+  },
+  {
+    // Optional: Configure query plan printing
+    mode: 'TopSlowest', // Print top slowest queries (default)
+    topQueries: 1, // Print top slowest query
+  },
 );
 
 // Using executeDDL() for DDL operations (CREATE, ALTER, DROP, etc.)
@@ -1783,6 +1815,11 @@ await forgeSQL.executeWithLocalContext(async () => {
 
       console.log(`DB response size: ${totalResponseSize} bytes`);
     },
+    {
+      // Optional: Configure query plan printing
+      topQueries: 1, // Print top slowest query (default)
+      mode: "TopSlowest", // Print top slowest queries (default)
+    },
   );
 
   // Insert operation - evicts local cache for users table
@@ -1983,6 +2020,11 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
     }
 
     console.log(`DB response size: ${totalResponseSize} bytes`);
+  },
+  {
+    // Optional: Configure query plan printing
+    mode: "TopSlowest", // Print top slowest queries (default)
+    topQueries: 1, // Print top slowest query
   },
 );
 ```
@@ -2624,6 +2666,150 @@ The error analysis mechanism:
 
 > **💡 Tip**: The automatic error analysis only triggers for timeout and OOM errors. Other errors are logged normally without plan analysis.
 
+### Resolver-Level Performance Monitoring
+
+The `executeWithMetadata()` method provides resolver-level profiling with configurable query plan printing. It aggregates metrics across all database operations within a resolver and supports two modes for query plan analysis.
+
+#### Basic Usage
+
+```typescript
+const result = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    const orders = await forgeSQL
+      .selectFrom(ordersTable)
+      .where(eq(ordersTable.userId, usersTable.id));
+    return { users, orders };
+  },
+  async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    const threshold = 500; // ms baseline for this resolver
+
+    if (totalDbExecutionTime > threshold * 1.5) {
+      console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
+      await printQueriesWithPlan(); // Analyze and print query execution plans
+    } else if (totalDbExecutionTime > threshold) {
+      console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+    }
+
+    console.log(`DB response size: ${totalResponseSize} bytes`);
+  },
+);
+```
+
+#### Query Plan Printing Options
+
+The `printQueriesWithPlan` function supports two modes, configurable via the optional `options` parameter:
+
+**1. TopSlowest Mode (default)**: Prints execution plans for the slowest queries from the current resolver invocation
+
+```typescript
+const result = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    return users;
+  },
+  async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    if (totalDbExecutionTime > 1000) {
+      await printQueriesWithPlan(); // Will print top 3 slowest queries
+    }
+  },
+  {
+    mode: "TopSlowest", // Print top slowest queries (default)
+    topQueries: 3, // Number of top slowest queries to analyze (default: 1)
+  },
+);
+```
+
+**2. SummaryTable Mode**: Uses `CLUSTER_STATEMENTS_SUMMARY` for query analysis
+
+```typescript
+const result = await forgeSQL.executeWithMetadata(
+  async () => {
+    const users = await forgeSQL.selectFrom(usersTable);
+    return users;
+  },
+  async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+    if (totalDbExecutionTime > 1000) {
+      await printQueriesWithPlan(); // Will use CLUSTER_STATEMENTS_SUMMARY if within time window
+    }
+  },
+  {
+    mode: "SummaryTable", // Use SummaryTable mode
+    summaryTableWindowTime: 10000, // Time window in milliseconds (default: 15000ms)
+  },
+);
+```
+
+#### Configuration Options
+
+| Option                   | Type                             | Default        | Description                                                                                                                                                                                   |
+| ------------------------ | -------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`                   | `'TopSlowest' \| 'SummaryTable'` | `'TopSlowest'` | Query plan printing mode. `'TopSlowest'` prints execution plans for the slowest queries from the current resolver. `'SummaryTable'` uses `CLUSTER_STATEMENTS_SUMMARY` when within time window |
+| `summaryTableWindowTime` | `number`                         | `15000`        | Time window in milliseconds for summary table queries. Only used when `mode` is `'SummaryTable'`                                                                                              |
+| `topQueries`             | `number`                         | `1`            | Number of top slowest queries to analyze when `mode` is `'TopSlowest'`                                                                                                                        |
+
+#### How It Works
+
+1. **TopSlowest Mode** (default):
+   - Collects all queries executed within the resolver
+   - Sorts them by execution time (slowest first)
+   - Prints execution plans for the top N queries (configurable via `topQueries`)
+   - Works immediately after query execution
+
+2. **SummaryTable Mode**:
+   - Attempts to use `CLUSTER_STATEMENTS_SUMMARY` for query analysis
+   - Only works if queries are executed within the specified time window (`summaryTableWindowTime`)
+   - If the time window expires, falls back to TopSlowest mode
+   - Provides aggregated statistics from TiDB's system tables
+
+#### Example: Real-World Resolver
+
+```typescript
+resolver.define("fetch", async (req: Request) => {
+  try {
+    return await forgeSQL.executeWithMetadata(
+      async () => {
+        const users = await forgeSQL.selectFrom(demoUsers);
+        const orders = await forgeSQL
+          .selectFrom(demoOrders)
+          .where(eq(demoOrders.userId, demoUsers.id));
+        return { users, orders };
+      },
+      async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+        const threshold = 500; // ms baseline for this resolver
+
+        if (totalDbExecutionTime > threshold * 1.5) {
+          console.warn(
+            `[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`,
+          );
+          await printQueriesWithPlan(); // Analyze and print query execution plans
+        } else if (totalDbExecutionTime > threshold) {
+          console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
+        }
+      },
+      {
+        mode: "TopSlowest", // Print top slowest queries (default)
+        topQueries: 2, // Print top 2 slowest queries
+      },
+    );
+  } catch (e) {
+    const error = e?.cause?.debug?.sqlMessage ?? e?.cause;
+    console.error(error, e);
+    throw error;
+  }
+});
+```
+
+#### Benefits
+
+- **Resolver-Level Profiling**: Aggregates metrics across all database operations in a resolver
+- **Configurable Analysis**: Choose between TopSlowest mode or SummaryTable mode
+- **Automatic Plan Formatting**: Execution plans are formatted in a readable format
+- **Performance Thresholds**: Set custom thresholds for performance warnings
+- **Zero Configuration**: Works out of the box with sensible defaults
+
+> **💡 Tip**: When multiple resolvers are running concurrently, their query data may also appear in `printQueriesWithPlan()` analysis when using SummaryTable mode, as it queries the global `CLUSTER_STATEMENTS_SUMMARY` table.
+
 ### Slow Query Monitoring
 
 Forge-SQL-ORM provides a scheduler trigger (`slowQuerySchedulerTrigger`) that automatically monitors and analyzes slow queries on an hourly basis. This trigger queries TiDB's slow query log system table and provides detailed performance information including SQL query text, memory usage, execution time, and execution plans.
@@ -2913,6 +3099,11 @@ const usersWithMetadata = await forgeSQL.executeWithMetadata(
     }
 
     console.log(`DB response size: ${totalResponseSize} bytes`);
+  },
+  {
+    // Optional: Configure query plan printing
+    mode: "TopSlowest", // Print top slowest queries (default)
+    topQueries: 1, // Print top slowest query
   },
 );
 

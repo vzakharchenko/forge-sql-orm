@@ -39,7 +39,11 @@ import { cacheApplicationContext, localCacheApplicationContext } from "../utils/
 import { clearTablesCache } from "../utils/cacheUtils";
 import { SQLWrapper } from "drizzle-orm/sql/sql";
 import { WithSubquery } from "drizzle-orm/subquery";
-import { getLastestMetadata, metadataQueryContext } from "../utils/metadataContextUtils";
+import {
+  getLastestMetadata,
+  metadataQueryContext,
+  MetadataQueryOptions,
+} from "../utils/metadataContextUtils";
 import { operationTypeQueryContext } from "../utils/requestTypeContextUtils";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 import { Rovo } from "./Rovo";
@@ -124,7 +128,13 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * @param onMetadata - Callback function that receives aggregated execution metadata
    * @param onMetadata.totalDbExecutionTime - Total database execution time across all operations in the query function (in milliseconds)
    * @param onMetadata.totalResponseSize - Total response size across all operations (in bytes)
-   * @param onMetadata.printQueries - Function to analyze and print query execution plans from CLUSTER_STATEMENTS_SUMMARY
+   * @param onMetadata.printQueriesWithPlan - Function to analyze and print query execution plans. Supports two modes:
+   *   - TopSlowest: Prints execution plans for the slowest queries from the current resolver (default)
+   *   - SummaryTable: Uses CLUSTER_STATEMENTS_SUMMARY if within time window
+   * @param options - Optional configuration for query plan printing behavior
+   * @param options.mode - Query plan printing mode: 'TopSlowest' (default) or 'SummaryTable'
+   * @param options.summaryTableWindowTime - Time window in milliseconds for summary table queries (default: 15000ms). Only used when mode is 'SummaryTable'
+   * @param options.topQueries - Number of top slowest queries to analyze when mode is 'TopSlowest' (default: 1)
    * @returns Promise with the query result
    *
    * @example
@@ -136,12 +146,12 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *     const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
    *     return { users, orders };
    *   },
-   *   (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
    *     const threshold = 500; // ms baseline for this resolver
    *
    *     if (totalDbExecutionTime > threshold * 1.5) {
    *       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
-   *       await printQueries(); // Analyze and print query execution plans
+   *       await printQueriesWithPlan(); // Analyze and print query execution plans
    *     } else if (totalDbExecutionTime > threshold) {
    *       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
    *     }
@@ -164,12 +174,12 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    *           .where(eq(demoOrders.userId, demoUsers.id));
    *         return { users, orders };
    *       },
-   *       async (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *       async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
    *         const threshold = 500; // ms baseline for this resolver
    *
    *         if (totalDbExecutionTime > threshold * 1.5) {
    *           console.warn(`[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
-   *           await printQueries(); // Optionally log or capture diagnostics for further analysis
+   *           await printQueriesWithPlan(); // Optionally log or capture diagnostics for further analysis
    *         } else if (totalDbExecutionTime > threshold) {
    *           console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
    *         }
@@ -185,7 +195,47 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
    * });
    * ```
    *
-   * @note **Important**: When multiple resolvers are running concurrently, their query data may also appear in `printQueries()` analysis, as it queries the global `CLUSTER_STATEMENTS_SUMMARY` table.
+   * @example
+   * ```typescript
+   * // Using TopSlowest mode with custom topQueries
+   * const result = await forgeSQL.executeWithMetadata(
+   *   async () => {
+   *     const users = await forgeSQL.selectFrom(usersTable);
+   *     return users;
+   *   },
+   *   async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+   *     if (totalDbExecutionTime > 1000) {
+   *       await printQueriesWithPlan(); // Will print top 3 slowest queries
+   *     }
+   *   },
+   *   {
+   *     mode: 'TopSlowest', // Print top slowest queries (default)
+   *     topQueries: 3, // Print top 3 slowest queries
+   *   }
+   * );
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Using SummaryTable mode for query analysis
+   * const result = await forgeSQL.executeWithMetadata(
+   *   async () => {
+   *     const users = await forgeSQL.selectFrom(usersTable);
+   *     return users;
+   *   },
+   *   async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
+   *     if (totalDbExecutionTime > 1000) {
+   *       await printQueriesWithPlan(); // Will use CLUSTER_STATEMENTS_SUMMARY if within time window
+   *     }
+   *   },
+   *   {
+   *     mode: 'SummaryTable', // Use summary tables mode
+   *     summaryTableWindowTime: 10000, // 10 second window
+   *   }
+   * );
+   * ```
+   *
+   * @note **Important**: When multiple resolvers are running concurrently, their query data may also appear in `printQueriesWithPlan()` analysis, as it queries the global `CLUSTER_STATEMENTS_SUMMARY` table.
    */
   async executeWithMetadata<T>(
     query: () => Promise<T>,
@@ -194,6 +244,7 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
       totalResponseSize: number,
       printQueriesWithPlan: () => Promise<void>,
     ) => Promise<void> | void,
+    options?: MetadataQueryOptions,
   ): Promise<T> {
     return metadataQueryContext.run(
       {
@@ -204,6 +255,8 @@ class ForgeSQLORMImpl implements ForgeSqlOperation {
         printQueriesWithPlan: async () => {
           return;
         },
+        options: options,
+        statistics: [],
       },
       async () => {
         const result = await query();
@@ -886,7 +939,13 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * @param onMetadata - Callback function that receives aggregated execution metadata
    * @param onMetadata.totalDbExecutionTime - Total database execution time across all operations in the query function (in milliseconds)
    * @param onMetadata.totalResponseSize - Total response size across all operations (in bytes)
-   * @param onMetadata.printQueries - Function to analyze and print query execution plans from CLUSTER_STATEMENTS_SUMMARY
+   * @param onMetadata.printQueriesWithPlan - Function to analyze and print query execution plans. Supports two modes:
+   *   - TopSlowest: Prints execution plans for the slowest queries from the current resolver (default)
+   *   - SummaryTable: Uses CLUSTER_STATEMENTS_SUMMARY if within time window
+   * @param options - Optional configuration for query plan printing behavior
+   * @param options.mode - Query plan printing mode: 'TopSlowest' (default) or 'SummaryTable'
+   * @param options.summaryTableWindowTime - Time window in milliseconds for summary table queries (default: 15000ms). Only used when mode is 'SummaryTable'
+   * @param options.topQueries - Number of top slowest queries to analyze when mode is 'TopSlowest' (default: 1)
    * @returns Promise with the query result
    *
    * @example
@@ -898,12 +957,12 @@ class ForgeSQLORM implements ForgeSqlOperation {
    *     const orders = await forgeSQL.selectFrom(ordersTable).where(eq(ordersTable.userId, usersTable.id));
    *     return { users, orders };
    *   },
-   *   (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *   (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
    *     const threshold = 500; // ms baseline for this resolver
    *
    *     if (totalDbExecutionTime > threshold * 1.5) {
    *       console.warn(`[Performance Warning] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
-   *       await printQueries(); // Analyze and print query execution plans
+   *       await printQueriesWithPlan(); // Analyze and print query execution plans
    *     } else if (totalDbExecutionTime > threshold) {
    *       console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
    *     }
@@ -926,12 +985,12 @@ class ForgeSQLORM implements ForgeSqlOperation {
    *           .where(eq(demoOrders.userId, demoUsers.id));
    *         return { users, orders };
    *       },
-   *       async (totalDbExecutionTime, totalResponseSize, printQueries) => {
+   *       async (totalDbExecutionTime, totalResponseSize, printQueriesWithPlan) => {
    *         const threshold = 500; // ms baseline for this resolver
    *
    *         if (totalDbExecutionTime > threshold * 1.5) {
    *           console.warn(`[Performance Warning fetch] Resolver exceeded DB time: ${totalDbExecutionTime} ms`);
-   *           await printQueries(); // Optionally log or capture diagnostics for further analysis
+   *           await printQueriesWithPlan(); // Optionally log or capture diagnostics for further analysis
    *         } else if (totalDbExecutionTime > threshold) {
    *           console.debug(`[Performance Debug] High DB time: ${totalDbExecutionTime} ms`);
    *         }
@@ -947,7 +1006,7 @@ class ForgeSQLORM implements ForgeSqlOperation {
    * });
    * ```
    *
-   * @note **Important**: When multiple resolvers are running concurrently, their query data may also appear in `printQueries()` analysis, as it queries the global `CLUSTER_STATEMENTS_SUMMARY` table.
+   * @note **Important**: When multiple resolvers are running concurrently, their query data may also appear in `printQueriesWithPlan()` analysis, as it queries the global `CLUSTER_STATEMENTS_SUMMARY` table.
    */
   async executeWithMetadata<T>(
     query: () => Promise<T>,
@@ -956,8 +1015,9 @@ class ForgeSQLORM implements ForgeSqlOperation {
       totalResponseSize: number,
       printQueriesWithPlan: () => Promise<void>,
     ) => Promise<void> | void,
+    options?: MetadataQueryOptions,
   ): Promise<T> {
-    return this.ormInstance.executeWithMetadata(query, onMetadata);
+    return this.ormInstance.executeWithMetadata(query, onMetadata, options);
   }
 
   selectCacheable<TSelection extends SelectedFields>(
