@@ -1812,7 +1812,7 @@ function Hg() {
       f = v.length * 32,
       h = "0123456789abcdef";
     for (let _ = 0; _ < f; _ += 8) {
-      const b = (v[_ >> 5] >>> _ % 32) & 255,
+      const b = (v[_ >> 5] >>> (_ % 32)) & 255,
         y = parseInt(h.charAt((b >>> 4) & 15) + h.charAt(b & 15), 16);
       g.push(y);
     }
@@ -1822,7 +1822,7 @@ function Hg() {
     return (((v + 64) >>> 9) << 4) + 14 + 1;
   }
   function n(v, g) {
-    ((v[g >> 5] |= 128 << g % 32), (v[r(g) - 1] = g));
+    ((v[g >> 5] |= 128 << (g % 32)), (v[r(g) - 1] = g));
     let f = 1732584193,
       h = -271733879,
       _ = -1732584194,
@@ -1907,7 +1907,7 @@ function Hg() {
     if (v.length === 0) return [];
     const g = v.length * 8,
       f = new Uint32Array(r(g));
-    for (let h = 0; h < g; h += 8) f[h >> 5] |= (v[h / 8] & 255) << h % 32;
+    for (let h = 0; h < g; h += 8) f[h >> 5] |= (v[h / 8] & 255) << (h % 32);
     return f;
   }
   function a(v, g) {
@@ -11711,7 +11711,6 @@ function va(e, t, r, n, i, a, o, s, u) {
       S = n,
       k = y;
     h;
-
   )
     switch (((g = b), (b = Le()))) {
       case 40:
@@ -11895,7 +11894,6 @@ var D0 = function (t, r, n) {
       for (
         var r = t.value, n = t.parent, i = t.column === n.column && t.line === n.line;
         n.type !== "rule";
-
       )
         if (((n = n.parent), !n)) return;
       if (!(t.props.length === 1 && r.charCodeAt(0) !== 58 && !Td.get(n)) && !i) {
@@ -17231,9 +17229,9 @@ function H(e) {
   throw new Error(
     typeof e == "number"
       ? "[MobX] minified error nr: " +
-        e +
-        (r.length ? " " + r.map(String).join(",") : "") +
-        ". Find the full error at: https://github.com/mobxjs/mobx/blob/main/packages/mobx/src/errors.ts"
+          e +
+          (r.length ? " " + r.map(String).join(",") : "") +
+          ". Find the full error at: https://github.com/mobxjs/mobx/blob/main/packages/mobx/src/errors.ts"
       : "[MobX] " + e,
   );
 }
@@ -19607,7 +19605,6 @@ var Ok = {},
             for (
               var a = Sk(n), o = new Map(), s = !1, u = Tr(i.data_.keys()), c;
               !(c = u()).done;
-
             ) {
               var l = c.value;
               if (!a.has(l)) {

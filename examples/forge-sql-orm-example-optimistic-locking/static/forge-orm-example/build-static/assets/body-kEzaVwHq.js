@@ -2602,7 +2602,6 @@ function co(e) {
         for (
           var C = A.droppableId, T = I.getEntry({ droppableId: C });
           T !== null && T.isDropDisabled;
-
         ) {
           var L = T,
             K = L.parentDroppableId;

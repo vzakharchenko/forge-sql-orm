@@ -1812,7 +1812,7 @@ function Cb() {
       f = v.length * 32,
       h = "0123456789abcdef";
     for (let b = 0; b < f; b += 8) {
-      const _ = (v[b >> 5] >>> b % 32) & 255,
+      const _ = (v[b >> 5] >>> (b % 32)) & 255,
         y = parseInt(h.charAt((_ >>> 4) & 15) + h.charAt(_ & 15), 16);
       g.push(y);
     }
@@ -1822,7 +1822,7 @@ function Cb() {
     return (((v + 64) >>> 9) << 4) + 14 + 1;
   }
   function n(v, g) {
-    ((v[g >> 5] |= 128 << g % 32), (v[r(g) - 1] = g));
+    ((v[g >> 5] |= 128 << (g % 32)), (v[r(g) - 1] = g));
     let f = 1732584193,
       h = -271733879,
       b = -1732584194,
@@ -1907,7 +1907,7 @@ function Cb() {
     if (v.length === 0) return [];
     const g = v.length * 8,
       f = new Uint32Array(r(g));
-    for (let h = 0; h < g; h += 8) f[h >> 5] |= (v[h / 8] & 255) << h % 32;
+    for (let h = 0; h < g; h += 8) f[h >> 5] |= (v[h / 8] & 255) << (h % 32);
     return f;
   }
   function o(v, g) {
@@ -4205,9 +4205,9 @@ function W(e) {
   throw new Error(
     typeof e == "number"
       ? "[MobX] minified error nr: " +
-        e +
-        (r.length ? " " + r.map(String).join(",") : "") +
-        ". Find the full error at: https://github.com/mobxjs/mobx/blob/main/packages/mobx/src/errors.ts"
+          e +
+          (r.length ? " " + r.map(String).join(",") : "") +
+          ". Find the full error at: https://github.com/mobxjs/mobx/blob/main/packages/mobx/src/errors.ts"
       : "[MobX] " + e,
   );
 }
@@ -6581,7 +6581,6 @@ var ey = {},
             for (
               var o = ty(n), i = new Map(), c = !1, s = Hr(a.data_.keys()), u;
               !(u = s()).done;
-
             ) {
               var l = u.value;
               if (!o.has(l)) {
@@ -16049,7 +16048,6 @@ function Io(e, t, r, n, a, o, i, c, s) {
       S = n,
       x = y;
     h;
-
   )
     switch (((g = _), (_ = Ke()))) {
       case 40:
@@ -16233,7 +16231,6 @@ var Tk = function (t, r, n) {
       for (
         var r = t.value, n = t.parent, a = t.column === n.column && t.line === n.line;
         n.type !== "rule";
-
       )
         if (((n = n.parent), !n)) return;
       if (!(t.props.length === 1 && r.charCodeAt(0) !== 58 && !Cf.get(n)) && !a) {

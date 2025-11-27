@@ -1782,7 +1782,7 @@ function Di() {
       _ = d.length * 32,
       v = "0123456789abcdef";
     for (let g = 0; g < _; g += 8) {
-      const y = (d[g >> 5] >>> g % 32) & 255,
+      const y = (d[g >> 5] >>> (g % 32)) & 255,
         m = parseInt(v.charAt((y >>> 4) & 15) + v.charAt(y & 15), 16);
       p.push(m);
     }
@@ -1792,7 +1792,7 @@ function Di() {
     return (((d + 64) >>> 9) << 4) + 14 + 1;
   }
   function s(d, p) {
-    ((d[p >> 5] |= 128 << p % 32), (d[o(p) - 1] = p));
+    ((d[p >> 5] |= 128 << (p % 32)), (d[o(p) - 1] = p));
     let _ = 1732584193,
       v = -271733879,
       g = -1732584194,
@@ -1877,7 +1877,7 @@ function Di() {
     if (d.length === 0) return [];
     const p = d.length * 8,
       _ = new Uint32Array(o(p));
-    for (let v = 0; v < p; v += 8) _[v >> 5] |= (d[v / 8] & 255) << v % 32;
+    for (let v = 0; v < p; v += 8) _[v >> 5] |= (d[v / 8] & 255) << (v % 32);
     return _;
   }
   function a(d, p) {

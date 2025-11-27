@@ -149,9 +149,8 @@ describe("cacheUtils", () => {
 
     it("should return undefined when cache context contains table", async () => {
       const { getFromCache } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(true);
 
       const result = await getFromCache(mockQuery, defaultOptions);
@@ -161,9 +160,8 @@ describe("cacheUtils", () => {
 
     it("should return cached data when valid and not expired", async () => {
       const { getFromCache } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockCacheData = {
@@ -185,9 +183,8 @@ describe("cacheUtils", () => {
 
     it("should return undefined when cache is expired", async () => {
       const { getFromCache } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockCacheData = {
@@ -209,9 +206,8 @@ describe("cacheUtils", () => {
 
     it("should return undefined when cache get fails", async () => {
       const { getFromCache } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       mockKvs.entity.mockReturnValue({
@@ -229,9 +225,8 @@ describe("cacheUtils", () => {
   describe("extractBacktickedValues (via setCacheResult/getFromCache)", () => {
     it("should extract single table name from backticks", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -261,9 +256,8 @@ describe("cacheUtils", () => {
 
     it("should extract multiple table names and sort them", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -293,9 +287,8 @@ describe("cacheUtils", () => {
 
     it("should ignore tables starting with a_", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -325,9 +318,8 @@ describe("cacheUtils", () => {
 
     it("should handle case-insensitive filtering of a_ tables", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -357,9 +349,8 @@ describe("cacheUtils", () => {
 
     it("should return empty string when no backticked values found", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -389,9 +380,8 @@ describe("cacheUtils", () => {
 
     it("should match extracted values in getFromCache", async () => {
       const { getFromCache } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const queryWithMultipleTables = {
@@ -432,9 +422,8 @@ describe("cacheUtils", () => {
 
     it("should skip cache when table is in cache context", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(true);
 
       const testData = { id: 1, name: "John" };
@@ -446,9 +435,8 @@ describe("cacheUtils", () => {
 
     it("should store data in cache successfully when not in context", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -476,9 +464,8 @@ describe("cacheUtils", () => {
 
     it("should handle cache set errors gracefully", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -498,9 +485,8 @@ describe("cacheUtils", () => {
 
     it("should use custom entity field names", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const options = {
@@ -856,9 +842,8 @@ describe("cacheUtils", () => {
   describe("error handling", () => {
     it("should handle cache get errors gracefully", async () => {
       const { getFromCache } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       mockKvs.entity.mockReturnValue({
@@ -874,9 +859,8 @@ describe("cacheUtils", () => {
 
     it("should handle cache set errors gracefully", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       const mockTransact = {
@@ -988,12 +972,10 @@ describe("cacheUtils", () => {
 
   describe("integration scenarios", () => {
     it("should handle complete cache workflow", async () => {
-      const { getFromCache, setCacheResult, clearCache } = await import(
-        "../../../src/utils/cacheUtils"
-      );
-      const { isTableContainsTableInCacheContext } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { getFromCache, setCacheResult, clearCache } =
+        await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
       (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
 
       // Test setCacheResult

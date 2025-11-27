@@ -907,7 +907,6 @@ function Nc() {
             i = l.length - 1,
             o = u.length - 1;
           1 <= i && 0 <= o && l[i] !== u[o];
-
         )
           o--;
         for (; 1 <= i && 0 <= o; i--, o--)
@@ -1279,7 +1278,6 @@ function Nc() {
             gr.innerHTML = "<svg>" + t.valueOf().toString() + "</svg>",
             t = gr.firstChild;
           e.firstChild;
-
         )
           e.removeChild(e.firstChild);
         for (; t.firstChild; ) e.appendChild(t.firstChild);
@@ -1765,7 +1763,6 @@ function Nc() {
     for (
       var n = e.suspendedLanes, r = e.pingedLanes, l = e.expirationTimes, u = e.pendingLanes;
       0 < u;
-
     ) {
       var i = 31 - Je(u),
         o = 1 << i,
@@ -5904,7 +5901,6 @@ Error generating stack: ` +
                       r = n,
                       n = t.child;
                     n !== null;
-
                   )
                     ((u = n),
                       (e = r),
@@ -6084,7 +6080,6 @@ Error generating stack: ` +
                   g !== u || (r !== 0 && g.nodeType !== 3) || (s = i + r),
                   g.nodeType === 3 && (i += g.nodeValue.length),
                   (k = g.firstChild) !== null;
-
               )
                 ((v = g), (g = k));
               for (;;) {
@@ -6224,7 +6219,6 @@ Error generating stack: ` +
       for (
         e.sibling.return = e.return, e = e.sibling;
         e.tag !== 5 && e.tag !== 6 && e.tag !== 18;
-
       ) {
         if (e.flags & 2 || e.child === null || e.tag === 4) continue e;
         ((e.child.return = e), (e = e.child));
@@ -7049,7 +7043,6 @@ Error generating stack: ` +
     for (
       t &= ~li, t &= ~cl, e.suspendedLanes |= t, e.pingedLanes &= ~t, e = e.expirationTimes;
       0 < t;
-
     ) {
       var n = 31 - Je(t),
         r = 1 << n;
@@ -7702,7 +7695,6 @@ Error generating stack: ` +
                   n = qo(t, null, r, n),
                   t.child = n;
                 n;
-
               )
                 ((n.flags = (n.flags & -3) | 4096), (n = n.sibling));
           else {

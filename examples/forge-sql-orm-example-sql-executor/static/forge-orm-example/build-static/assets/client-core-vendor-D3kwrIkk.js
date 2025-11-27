@@ -1028,8 +1028,8 @@ function et() {
         let _ = Math.random() * 16;
         return (
           y > 0
-            ? ((_ = (y + _) % 16 | 0), (y = Math.floor(y / 16)))
-            : ((_ = (c + _) % 16 | 0), (c = Math.floor(c / 16))),
+            ? ((_ = ((y + _) % 16) | 0), (y = Math.floor(y / 16)))
+            : ((_ = ((c + _) % 16) | 0), (c = Math.floor(c / 16))),
           (f === "x" ? _ : (_ & 7) | 8).toString(16)
         );
       },

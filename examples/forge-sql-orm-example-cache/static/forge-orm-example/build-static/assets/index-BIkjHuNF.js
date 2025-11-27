@@ -1783,7 +1783,7 @@ function qi() {
       h = d.length * 32,
       g = "0123456789abcdef";
     for (let v = 0; v < h; v += 8) {
-      const y = (d[v >> 5] >>> v % 32) & 255,
+      const y = (d[v >> 5] >>> (v % 32)) & 255,
         b = parseInt(g.charAt((y >>> 4) & 15) + g.charAt(y & 15), 16);
       p.push(b);
     }
@@ -1793,7 +1793,7 @@ function qi() {
     return (((d + 64) >>> 9) << 4) + 14 + 1;
   }
   function s(d, p) {
-    ((d[p >> 5] |= 128 << p % 32), (d[a(p) - 1] = p));
+    ((d[p >> 5] |= 128 << (p % 32)), (d[a(p) - 1] = p));
     let h = 1732584193,
       g = -271733879,
       v = -1732584194,
@@ -1878,7 +1878,7 @@ function qi() {
     if (d.length === 0) return [];
     const p = d.length * 8,
       h = new Uint32Array(a(p));
-    for (let g = 0; g < p; g += 8) h[g >> 5] |= (d[g / 8] & 255) << g % 32;
+    for (let g = 0; g < p; g += 8) h[g >> 5] |= (d[g / 8] & 255) << (g % 32);
     return h;
   }
   function o(d, p) {

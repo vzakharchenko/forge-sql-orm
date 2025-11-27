@@ -193,9 +193,8 @@ describe("ForgeSQL Local Cache", () => {
     });
 
     it("should evict local cache on insert operations", async () => {
-      const { localCacheApplicationContext, evictLocalCacheQuery } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { localCacheApplicationContext, evictLocalCacheQuery } =
+        await import("../../../src/utils/cacheContextUtils");
 
       // Mock local cache context
       const mockContext = { cache: {} };
@@ -222,9 +221,8 @@ describe("ForgeSQL Local Cache", () => {
     });
 
     it("should evict local cache on update operations", async () => {
-      const { localCacheApplicationContext, evictLocalCacheQuery } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { localCacheApplicationContext, evictLocalCacheQuery } =
+        await import("../../../src/utils/cacheContextUtils");
 
       // Mock local cache context
       const mockContext = { cache: {} };
@@ -248,9 +246,8 @@ describe("ForgeSQL Local Cache", () => {
     });
 
     it("should evict local cache on delete operations", async () => {
-      const { localCacheApplicationContext, evictLocalCacheQuery } = await import(
-        "../../../src/utils/cacheContextUtils"
-      );
+      const { localCacheApplicationContext, evictLocalCacheQuery } =
+        await import("../../../src/utils/cacheContextUtils");
 
       // Mock local cache context
       const mockContext = { cache: {} };

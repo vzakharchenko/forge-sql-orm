@@ -1031,8 +1031,8 @@ function sn() {
         let d = Math.random() * 16;
         return (
           m > 0
-            ? ((d = (m + d) % 16 | 0), (m = Math.floor(m / 16)))
-            : ((d = (c + d) % 16 | 0), (c = Math.floor(c / 16))),
+            ? ((d = ((m + d) % 16) | 0), (m = Math.floor(m / 16)))
+            : ((d = ((c + d) % 16) | 0), (c = Math.floor(c / 16))),
           (v === "x" ? d : (d & 7) | 8).toString(16)
         );
       },
@@ -3797,8 +3797,8 @@ function dn() {
         let d = Math.random() * 16;
         return (
           m > 0
-            ? ((d = (m + d) % 16 | 0), (m = Math.floor(m / 16)))
-            : ((d = (c + d) % 16 | 0), (c = Math.floor(c / 16))),
+            ? ((d = ((m + d) % 16) | 0), (m = Math.floor(m / 16)))
+            : ((d = ((c + d) % 16) | 0), (c = Math.floor(c / 16))),
           (v === "x" ? d : (d & 7) | 8).toString(16)
         );
       },
