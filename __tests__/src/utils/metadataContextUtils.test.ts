@@ -4,7 +4,6 @@ import {
   getLastestMetadata,
   metadataQueryContext,
   MetadataQueryContext,
-  MetadataQueryOptions,
 } from "../../../src/utils/metadataContextUtils";
 import { ForgeSQLMetadata } from "../../../src/utils/forgeDriver";
 import { ForgeSqlOperation } from "../../../src/core/ForgeSQLQueryBuilder";
