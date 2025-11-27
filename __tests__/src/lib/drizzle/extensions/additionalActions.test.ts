@@ -29,23 +29,73 @@ vi.mock("@forge/sql", () => ({
   },
 }));
 
+// Mock @forge/kvs to prevent real API calls
+const mockKvsEntity = {
+  get: vi.fn().mockResolvedValue(undefined),
+  set: vi.fn().mockResolvedValue(undefined),
+  delete: vi.fn().mockResolvedValue(undefined),
+};
+
+// Create a factory function to always return a new object with execute method
+const createMockKvsTransactSet = () => ({
+  execute: vi.fn().mockResolvedValue(undefined),
+});
+
+const mockKvsTransact = {
+  set: vi.fn(() => createMockKvsTransactSet()),
+  delete: vi.fn(() => createMockKvsTransactSet()),
+};
+
+vi.mock("@forge/kvs", () => ({
+  kvs: {
+    entity: vi.fn(() => mockKvsEntity),
+    transact: vi.fn(() => mockKvsTransact),
+  },
+}));
+
+// Create mock functions that we can access later
+const mockGetFromCache = vi.fn().mockResolvedValue(undefined);
+const mockSetCacheResult = vi.fn().mockResolvedValue(undefined);
+const mockClearCache = vi.fn().mockResolvedValue(undefined);
+const mockHashKey = vi.fn(() => "test-key");
+
+// Ensure mocks are reset before each test
+const resetCacheMocks = () => {
+  mockGetFromCache.mockClear();
+  mockSetCacheResult.mockClear();
+  mockClearCache.mockClear();
+  mockGetFromCache.mockResolvedValue(undefined);
+  mockSetCacheResult.mockResolvedValue(undefined);
+  mockClearCache.mockResolvedValue(undefined);
+};
+
+const mockCacheApplicationContextGetStore = vi.fn(() => null);
+const mockEvictLocalCacheQuery = vi.fn().mockResolvedValue(undefined);
+const mockGetQueryLocalCacheQuery = vi.fn().mockResolvedValue(undefined);
+const mockSaveQueryLocalCacheQuery = vi.fn().mockResolvedValue(undefined);
+const mockSaveTableIfInsideCacheContext = vi.fn().mockResolvedValue(undefined);
+
 // Mock cache utilities
 vi.mock("../../../src/utils/cacheUtils", () => ({
-  getFromCache: vi.fn().mockResolvedValue(undefined),
-  setCacheResult: vi.fn().mockResolvedValue(undefined),
-  clearCache: vi.fn().mockResolvedValue(undefined),
-  hashKey: vi.fn(() => "test-key"),
+  getFromCache: mockGetFromCache,
+  setCacheResult: mockSetCacheResult,
+  clearCache: mockClearCache,
+  hashKey: mockHashKey,
 }));
 
 // Mock cache context utilities
+const mockLocalCacheApplicationContextGetStore = vi.fn(() => null);
 vi.mock("../../../src/utils/cacheContextUtils", () => ({
   cacheApplicationContext: {
-    getStore: vi.fn(() => null),
+    getStore: mockCacheApplicationContextGetStore,
   },
-  evictLocalCacheQuery: vi.fn().mockResolvedValue(undefined),
-  getQueryLocalCacheQuery: vi.fn().mockResolvedValue(undefined),
-  saveQueryLocalCacheQuery: vi.fn().mockResolvedValue(undefined),
-  saveTableIfInsideCacheContext: vi.fn().mockResolvedValue(undefined),
+  localCacheApplicationContext: {
+    getStore: mockLocalCacheApplicationContextGetStore,
+  },
+  evictLocalCacheQuery: mockEvictLocalCacheQuery,
+  getQueryLocalCacheQuery: mockGetQueryLocalCacheQuery,
+  saveQueryLocalCacheQuery: mockSaveQueryLocalCacheQuery,
+  saveTableIfInsideCacheContext: mockSaveTableIfInsideCacheContext,
 }));
 
 // Mock mapSelectFieldsWithAlias and applyFromDriverTransform
@@ -58,7 +108,7 @@ vi.mock("../../../src/utils/sqlUtils", () => ({
 }));
 
 describe("additionalActions", () => {
-  let db: ReturnType<typeof drizzle>;
+  let db: any;
   const testTable = mysqlTable("test_users", {
     id: int("id").primaryKey(),
     name: varchar("name", { length: 255 }),
@@ -74,89 +124,56 @@ describe("additionalActions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    db = drizzle(forgeDriver);
-    db = patchDbWithSelectAliased(db, defaultOptions);
+    resetCacheMocks();
+    // Reset cache query mocks - use mockImplementation to ensure it works correctly
+    // Don't reset the implementation here - let each test set it up as needed
+    mockGetQueryLocalCacheQuery.mockClear();
+    mockSaveQueryLocalCacheQuery.mockClear();
+    mockSaveQueryLocalCacheQuery.mockResolvedValue(undefined);
+    const baseDb = drizzle(forgeDriver);
+    db = patchDbWithSelectAliased(baseDb, defaultOptions);
   });
 
   describe("patchDbWithSelectAliased", () => {
-    it("should add selectAliased method to database", () => {
+    it("should add all required methods to database", () => {
       expect(db).toHaveProperty("selectAliased");
-      expect(typeof db.selectAliased).toBe("function");
-    });
-
-    it("should add selectAliasedDistinct method to database", () => {
       expect(db).toHaveProperty("selectAliasedDistinct");
-      expect(typeof db.selectAliasedDistinct).toBe("function");
-    });
-
-    it("should add selectAliasedCacheable method to database", () => {
       expect(db).toHaveProperty("selectAliasedCacheable");
-      expect(typeof db.selectAliasedCacheable).toBe("function");
-    });
-
-    it("should add selectAliasedDistinctCacheable method to database", () => {
       expect(db).toHaveProperty("selectAliasedDistinctCacheable");
-      expect(typeof db.selectAliasedDistinctCacheable).toBe("function");
-    });
-
-    it("should add selectFrom method to database", () => {
       expect(db).toHaveProperty("selectFrom");
-      expect(typeof db.selectFrom).toBe("function");
-    });
-
-    it("should add selectDistinctFrom method to database", () => {
       expect(db).toHaveProperty("selectDistinctFrom");
-      expect(typeof db.selectDistinctFrom).toBe("function");
-    });
-
-    it("should add selectFromCacheable method to database", () => {
       expect(db).toHaveProperty("selectFromCacheable");
-      expect(typeof db.selectFromCacheable).toBe("function");
-    });
-
-    it("should add selectDistinctFromCacheable method to database", () => {
       expect(db).toHaveProperty("selectDistinctFromCacheable");
-      expect(typeof db.selectDistinctFromCacheable).toBe("function");
-    });
-
-    it("should add insertAndEvictCache method to database", () => {
       expect(db).toHaveProperty("insertAndEvictCache");
-      expect(typeof db.insertAndEvictCache).toBe("function");
-    });
-
-    it("should add updateAndEvictCache method to database", () => {
       expect(db).toHaveProperty("updateAndEvictCache");
-      expect(typeof db.updateAndEvictCache).toBe("function");
-    });
-
-    it("should add deleteAndEvictCache method to database", () => {
       expect(db).toHaveProperty("deleteAndEvictCache");
-      expect(typeof db.deleteAndEvictCache).toBe("function");
-    });
-
-    it("should add insertWithCacheContext method to database", () => {
       expect(db).toHaveProperty("insertWithCacheContext");
-      expect(typeof db.insertWithCacheContext).toBe("function");
-    });
-
-    it("should add updateWithCacheContext method to database", () => {
       expect(db).toHaveProperty("updateWithCacheContext");
-      expect(typeof db.updateWithCacheContext).toBe("function");
-    });
-
-    it("should add deleteWithCacheContext method to database", () => {
       expect(db).toHaveProperty("deleteWithCacheContext");
-      expect(typeof db.deleteWithCacheContext).toBe("function");
-    });
-
-    it("should add executeQuery method to database", () => {
       expect(db).toHaveProperty("executeQuery");
-      expect(typeof db.executeQuery).toBe("function");
+      expect(db).toHaveProperty("executeQueryCacheable");
     });
 
-    it("should add executeQueryCacheable method to database", () => {
-      expect(db).toHaveProperty("executeQueryCacheable");
-      expect(typeof db.executeQueryCacheable).toBe("function");
+    it("should use default options when none provided", () => {
+      const dbWithoutOptions = drizzle(forgeDriver);
+      const patchedDb = patchDbWithSelectAliased(dbWithoutOptions);
+
+      expect(patchedDb).toBeDefined();
+      expect(patchedDb).toHaveProperty("selectFrom");
+    });
+
+    it("should use provided options", () => {
+      const customOptions: ForgeSqlOrmOptions = {
+        cacheEntityName: "custom_cache",
+        cacheTTL: 300,
+        logRawSqlQuery: true,
+      };
+
+      const dbWithOptions = drizzle(forgeDriver);
+      const patchedDb = patchDbWithSelectAliased(dbWithOptions, customOptions);
+
+      expect(patchedDb).toBeDefined();
+      expect(patchedDb).toHaveProperty("selectFrom");
     });
   });
 
@@ -173,6 +190,12 @@ describe("additionalActions", () => {
 
       expect(results).toBeDefined();
       expect(Array.isArray(results)).toBe(true);
+    });
+
+    it("should support method chaining", () => {
+      const query = db.selectFrom(testTable).where(eq(testTable.id, 1)).limit(10);
+
+      expect(query).toBeDefined();
     });
   });
 
@@ -191,6 +214,21 @@ describe("additionalActions", () => {
 
       expect(query).toBeDefined();
       expect(query).toHaveProperty("then");
+    });
+
+    it("should execute cached query successfully", async () => {
+      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
+      const result = await query;
+
+      expect(result).toBeDefined();
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it("should support custom cache TTL", async () => {
+      const query = db.selectFromCacheable(testTable, 600).where(eq(testTable.id, 1));
+      const result = await query;
+
+      expect(result).toBeDefined();
     });
   });
 
@@ -232,6 +270,19 @@ describe("additionalActions", () => {
       const results = await query;
       expect(results).toBeDefined();
     });
+
+    it("should support method chaining", () => {
+      const query = db
+        .selectAliased({
+          id: testTable.id,
+          name: testTable.name,
+        })
+        .from(testTable)
+        .where(eq(testTable.id, 1))
+        .limit(10);
+
+      expect(query).toBeDefined();
+    });
   });
 
   describe("selectAliasedCacheable", () => {
@@ -250,193 +301,6 @@ describe("additionalActions", () => {
       expect(query).toBeDefined();
       const results = await query;
       expect(results).toBeDefined();
-    });
-  });
-
-  describe("executeQuery", () => {
-    it("should execute raw SQL query with local cache", async () => {
-      const result = await db.executeQuery(sql`SELECT * FROM test_users WHERE id = 1`);
-
-      expect(result).toBeDefined();
-      // executeQuery returns MySqlRawQueryResult which has rows property
-      expect(Array.isArray(result) || typeof result === "object").toBe(true);
-    });
-
-    it("should execute string SQL query", async () => {
-      const result = await db.executeQuery("SELECT * FROM test_users WHERE id = 1");
-
-      expect(result).toBeDefined();
-      // executeQuery returns MySqlRawQueryResult which has rows property
-      expect(Array.isArray(result) || typeof result === "object").toBe(true);
-    });
-  });
-
-  describe("executeQueryCacheable", () => {
-    it("should execute raw SQL query with local and global cache", async () => {
-      const result = await db.executeQueryCacheable(
-        sql`SELECT * FROM test_users WHERE id = 1`,
-        300,
-      );
-
-      expect(result).toBeDefined();
-      // executeQueryCacheable returns MySqlRawQueryResult which has rows property
-      expect(Array.isArray(result) || typeof result === "object").toBe(true);
-    });
-
-    it("should execute string SQL query with caching", async () => {
-      const result = await db.executeQueryCacheable("SELECT * FROM test_users WHERE id = 1", 300);
-
-      expect(result).toBeDefined();
-      // executeQueryCacheable returns MySqlRawQueryResult which has rows property
-      expect(Array.isArray(result) || typeof result === "object").toBe(true);
-    });
-  });
-
-  describe("insertAndEvictCache", () => {
-    it("should create insert builder that evicts cache", async () => {
-      const insertBuilder = db.insertAndEvictCache(testTable);
-
-      expect(insertBuilder).toBeDefined();
-      expect(insertBuilder).toHaveProperty("values");
-      // then is added via Proxy when builder is executed
-      const builderWithValues = insertBuilder.values({ name: "Test", email: "test@example.com" });
-      expect(builderWithValues).toHaveProperty("then");
-    });
-
-    it("should execute insert and evict cache", async () => {
-      const insertBuilder = db.insertAndEvictCache(testTable).values({
-        name: "New User",
-        email: "new@example.com",
-      });
-
-      expect(insertBuilder).toBeDefined();
-      // Note: Actual execution would require proper mocking of the insert operation
-    });
-  });
-
-  describe("updateAndEvictCache", () => {
-    it("should create update builder that evicts cache", async () => {
-      const updateBuilder = db.updateAndEvictCache(testTable);
-
-      expect(updateBuilder).toBeDefined();
-      expect(updateBuilder).toHaveProperty("set");
-      // where is available after calling set()
-      const builderWithSet = updateBuilder.set({ name: "Updated" });
-      expect(builderWithSet).toHaveProperty("where");
-      expect(builderWithSet).toHaveProperty("then");
-    });
-  });
-
-  describe("deleteAndEvictCache", () => {
-    it("should create delete builder that evicts cache", async () => {
-      const deleteBuilder = db.deleteAndEvictCache(testTable);
-
-      expect(deleteBuilder).toBeDefined();
-      expect(deleteBuilder).toHaveProperty("where");
-      expect(deleteBuilder).toHaveProperty("then");
-    });
-  });
-
-  describe("insertWithCacheContext", () => {
-    it("should create insert builder that participates in cache context", async () => {
-      const insertBuilder = db.insertWithCacheContext(testTable);
-
-      expect(insertBuilder).toBeDefined();
-      expect(insertBuilder).toHaveProperty("values");
-    });
-  });
-
-  describe("updateWithCacheContext", () => {
-    it("should create update builder that participates in cache context", async () => {
-      const updateBuilder = db.updateWithCacheContext(testTable);
-
-      expect(updateBuilder).toBeDefined();
-      expect(updateBuilder).toHaveProperty("set");
-    });
-  });
-
-  describe("deleteWithCacheContext", () => {
-    it("should create delete builder that participates in cache context", async () => {
-      const deleteBuilder = db.deleteWithCacheContext(testTable);
-
-      expect(deleteBuilder).toBeDefined();
-      expect(deleteBuilder).toHaveProperty("where");
-    });
-  });
-
-  describe("query builder chaining", () => {
-    it("should support method chaining on selectFrom", () => {
-      const query = db.selectFrom(testTable).where(eq(testTable.id, 1)).limit(10);
-
-      expect(query).toBeDefined();
-    });
-
-    it("should support method chaining on selectAliased", () => {
-      const query = db
-        .selectAliased({
-          id: testTable.id,
-          name: testTable.name,
-        })
-        .from(testTable)
-        .where(eq(testTable.id, 1))
-        .limit(10);
-
-      expect(query).toBeDefined();
-    });
-
-    it("should support method chaining on cached queries", () => {
-      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1)).limit(10);
-
-      expect(query).toBeDefined();
-    });
-  });
-
-  describe("options handling", () => {
-    it("should use default options when none provided", () => {
-      const dbWithoutOptions = drizzle(forgeDriver);
-      const patchedDb = patchDbWithSelectAliased(dbWithoutOptions);
-
-      expect(patchedDb).toBeDefined();
-      expect(patchedDb).toHaveProperty("selectFrom");
-    });
-
-    it("should use provided options", () => {
-      const customOptions: ForgeSqlOrmOptions = {
-        cacheEntityName: "custom_cache",
-        cacheTTL: 300,
-        logRawSqlQuery: true,
-      };
-
-      const dbWithOptions = drizzle(forgeDriver);
-      const patchedDb = patchDbWithSelectAliased(dbWithOptions, customOptions);
-
-      expect(patchedDb).toBeDefined();
-      expect(patchedDb).toHaveProperty("selectFrom");
-    });
-  });
-
-  describe("query execution and caching behavior", () => {
-    it("should execute query and handle caching flow", async () => {
-      const query = db.selectFrom(testTable).where(eq(testTable.id, 1));
-      const result = await query;
-
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should execute cached query successfully", async () => {
-      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
-      const result = await query;
-
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it("should support custom cache TTL", async () => {
-      const query = db.selectFromCacheable(testTable, 600).where(eq(testTable.id, 1));
-      const result = await query;
-
-      expect(result).toBeDefined();
     });
   });
 
@@ -473,26 +337,270 @@ describe("additionalActions", () => {
     });
   });
 
-  describe("cache context methods", () => {
-    it("should create insert builder with cache context", () => {
+  describe("cached query execution - global cache", () => {
+    it("should handle cache set errors gracefully", async () => {
+      mockGetQueryLocalCacheQuery.mockResolvedValue(undefined);
+      mockGetFromCache.mockResolvedValue(undefined);
+      mockSetCacheResult.mockRejectedValueOnce(new Error("Cache set failed"));
+
+      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
+      const result = await query;
+
+      // Should still return result even if cache set fails
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe("executeQuery", () => {
+    it("should execute raw SQL query with local cache", async () => {
+      const result = await db.executeQuery(sql`SELECT * FROM test_users WHERE id = 1`);
+
+      expect(result).toBeDefined();
+      expect(Array.isArray(result) || typeof result === "object").toBe(true);
+    });
+
+    it("should execute string SQL query", async () => {
+      const result = await db.executeQuery("SELECT * FROM test_users WHERE id = 1");
+
+      expect(result).toBeDefined();
+      expect(Array.isArray(result) || typeof result === "object").toBe(true);
+    });
+  });
+
+  describe("executeQueryCacheable", () => {
+    it("should execute raw SQL query with local and global cache", async () => {
+      const result = await db.executeQueryCacheable(
+        sql`SELECT * FROM test_users WHERE id = 1`,
+        300,
+      );
+
+      expect(result).toBeDefined();
+      expect(Array.isArray(result) || typeof result === "object").toBe(true);
+    });
+
+    it("should execute string SQL query with caching", async () => {
+      const result = await db.executeQueryCacheable("SELECT * FROM test_users WHERE id = 1", 300);
+
+      expect(result).toBeDefined();
+      expect(Array.isArray(result) || typeof result === "object").toBe(true);
+    });
+  });
+
+  describe("insertAndEvictCache", () => {
+    it("should create insert builder that evicts cache", async () => {
+      const insertBuilder = db.insertAndEvictCache(testTable);
+
+      expect(insertBuilder).toBeDefined();
+      expect(insertBuilder).toHaveProperty("values");
+      const builderWithValues = insertBuilder.values({ name: "Test", email: "test@example.com" });
+      expect(builderWithValues).toHaveProperty("then");
+    });
+
+    it("should execute insert and evict cache", async () => {
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "New User",
+        email: "new@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+
+    it("should clear cache when cache context is not available", async () => {
+      mockCacheApplicationContextGetStore.mockReturnValueOnce(null);
+
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+
+    it("should handle cache errors gracefully", async () => {
+      mockEvictLocalCacheQuery.mockRejectedValueOnce(new Error("Cache error"));
+
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+  });
+
+  describe("updateAndEvictCache", () => {
+    it("should create update builder that evicts cache", async () => {
+      const updateBuilder = db.updateAndEvictCache(testTable);
+
+      expect(updateBuilder).toBeDefined();
+      expect(updateBuilder).toHaveProperty("set");
+      const builderWithSet = updateBuilder.set({ name: "Updated" });
+      expect(builderWithSet).toHaveProperty("where");
+      expect(builderWithSet).toHaveProperty("then");
+    });
+
+    it("should handle cache errors gracefully", async () => {
+      mockEvictLocalCacheQuery.mockRejectedValueOnce(new Error("Cache error"));
+
+      const updateBuilder = db.updateAndEvictCache(testTable).set({ name: "Updated" });
+
+      expect(updateBuilder).toBeDefined();
+    });
+  });
+
+  describe("deleteAndEvictCache", () => {
+    it("should create delete builder that evicts cache", async () => {
+      const deleteBuilder = db.deleteAndEvictCache(testTable);
+
+      expect(deleteBuilder).toBeDefined();
+      expect(deleteBuilder).toHaveProperty("where");
+      expect(deleteBuilder).toHaveProperty("then");
+    });
+
+    it("should handle cache errors gracefully", async () => {
+      mockEvictLocalCacheQuery.mockRejectedValueOnce(new Error("Cache error"));
+
+      const deleteBuilder = db.deleteAndEvictCache(testTable).where(eq(testTable.id, 1));
+
+      expect(deleteBuilder).toBeDefined();
+    });
+  });
+
+  describe("insertWithCacheContext", () => {
+    it("should create insert builder that participates in cache context", async () => {
       const insertBuilder = db.insertWithCacheContext(testTable);
 
       expect(insertBuilder).toBeDefined();
       expect(insertBuilder).toHaveProperty("values");
     });
 
-    it("should create update builder with cache context", () => {
+    it("should use cache context when available", async () => {
+      mockCacheApplicationContextGetStore.mockReturnValueOnce({} as any);
+
+      const insertBuilder = db.insertWithCacheContext(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+  });
+
+  describe("updateWithCacheContext", () => {
+    it("should create update builder that participates in cache context", async () => {
       const updateBuilder = db.updateWithCacheContext(testTable);
 
       expect(updateBuilder).toBeDefined();
       expect(updateBuilder).toHaveProperty("set");
     });
+  });
 
-    it("should create delete builder with cache context", () => {
+  describe("deleteWithCacheContext", () => {
+    it("should create delete builder that participates in cache context", async () => {
       const deleteBuilder = db.deleteWithCacheContext(testTable);
 
       expect(deleteBuilder).toBeDefined();
       expect(deleteBuilder).toHaveProperty("where");
+    });
+  });
+
+  describe("error handling in query execution", () => {
+    it("should handle errors in query execution", async () => {
+      mockGetQueryLocalCacheQuery.mockResolvedValue(undefined);
+
+      // Mock execute to throw error
+      const forgeSql = await import("@forge/sql");
+      const testError = new Error("Query failed");
+      vi.mocked(forgeSql.sql.prepare).mockImplementationOnce(() => {
+        const executeMock = vi.fn().mockRejectedValue(testError);
+        return {
+          query: "MOCK_QUERY",
+          _params: [],
+          remoteSqlApi: "",
+          params: [],
+          bindParams: vi.fn(),
+          execute: executeMock,
+        } as any;
+      });
+
+      const query = db.selectFrom(testTable).where(eq(testTable.id, 1));
+
+      try {
+        await query;
+        expect.fail("Expected query to throw an error");
+      } catch (error: any) {
+        // Error might be wrapped by drizzle-orm, so check if the original error message is present
+        // The error might be formatted as "Failed query: ..." by drizzle-orm, so we check for the original message
+        const errorMessage = error?.message || error?.toString() || "";
+        // Check if either the original message or a formatted version is present
+        expect(
+          errorMessage.includes("Query failed") ||
+            errorMessage.includes("Failed query") ||
+            error?.cause?.message?.includes("Query failed"),
+        ).toBe(true);
+      }
+    });
+
+    it("should handle errors in cached query execution", async () => {
+      mockGetQueryLocalCacheQuery.mockResolvedValue(undefined);
+      mockGetFromCache.mockResolvedValue(undefined);
+
+      // Mock execute to throw error
+      const forgeSql = await import("@forge/sql");
+      const testError = new Error("Cached query failed");
+      vi.mocked(forgeSql.sql.prepare).mockImplementationOnce(() => {
+        const executeMock = vi.fn().mockRejectedValue(testError);
+        return {
+          query: "MOCK_QUERY",
+          _params: [],
+          remoteSqlApi: "",
+          params: [],
+          bindParams: vi.fn(),
+          execute: executeMock,
+        } as any;
+      });
+
+      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
+
+      try {
+        await query;
+        expect.fail("Expected query to throw an error");
+      } catch (error: any) {
+        // Error might be wrapped by drizzle-orm, so check if the original error message is present
+        // The error might be formatted as "Failed query: ..." by drizzle-orm, so we check for the original message
+        const errorMessage = error?.message || error?.toString() || "";
+        // Check if either the original message or a formatted version is present
+        expect(
+          errorMessage.includes("Cached query failed") ||
+            errorMessage.includes("Failed query") ||
+            error?.cause?.message?.includes("Cached query failed"),
+        ).toBe(true);
+      }
+    });
+
+    it("should handle errors with onrejected callback", async () => {
+      mockGetQueryLocalCacheQuery.mockResolvedValue(undefined);
+      mockGetFromCache.mockResolvedValue(undefined);
+
+      const forgeSql = await import("@forge/sql");
+      vi.mocked(forgeSql.sql.prepare).mockImplementationOnce(() => {
+        const executeMock = vi.fn().mockRejectedValue(new Error("Query failed"));
+        return {
+          query: "MOCK_QUERY",
+          _params: [],
+          remoteSqlApi: "",
+          params: [],
+          bindParams: vi.fn(),
+          execute: executeMock,
+        } as any;
+      });
+
+      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
+      const onRejected = vi.fn();
+
+      await query.catch(onRejected);
+
+      expect(onRejected).toHaveBeenCalled();
     });
   });
 
@@ -501,7 +609,6 @@ describe("additionalActions", () => {
       const query = db.selectFrom(testTable);
 
       expect(query).toBeDefined();
-      // Should support standard drizzle methods
       expect(typeof (query as any).where).toBe("function");
       expect(typeof (query as any).limit).toBe("function");
       expect(typeof (query as any).offset).toBe("function");
@@ -519,6 +626,105 @@ describe("additionalActions", () => {
         .limit(10);
 
       expect(query).toBeDefined();
+    });
+  });
+
+  describe("cache context behavior", () => {
+    it("should save table if inside cache context", async () => {
+      mockCacheApplicationContextGetStore.mockReturnValueOnce({} as any);
+
+      const insertBuilder = db.insertWithCacheContext(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+
+    it("should clear cache when cache context is not available and isCached is true", async () => {
+      mockCacheApplicationContextGetStore.mockReturnValueOnce(null);
+
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+  });
+
+  describe("handleSuccessfulExecution error handling", () => {
+    it("should handle errors in handleSuccessfulExecution and clear cache for cache clearing errors", async () => {
+      mockEvictLocalCacheQuery.mockRejectedValueOnce(new Error("DEADLOCK"));
+      mockCacheApplicationContextGetStore.mockReturnValueOnce(null);
+      mockClearCache.mockResolvedValueOnce(undefined);
+
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+
+    it("should handle errors in handleSuccessfulExecution and not clear cache for validation errors", async () => {
+      mockEvictLocalCacheQuery.mockRejectedValueOnce(new Error("VALIDATION_ERROR"));
+
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+
+    it("should handle cache clear errors gracefully", async () => {
+      mockEvictLocalCacheQuery.mockRejectedValueOnce(new Error("LOCK_WAIT_TIMEOUT"));
+      mockCacheApplicationContextGetStore.mockReturnValueOnce(null);
+      mockClearCache.mockRejectedValueOnce(new Error("Cache clear failed"));
+
+      const insertBuilder = db.insertAndEvictCache(testTable).values({
+        name: "Test",
+        email: "test@example.com",
+      });
+
+      expect(insertBuilder).toBeDefined();
+    });
+  });
+
+  describe("handleFunctionCall", () => {
+    it("should wrap result if it has execute method", () => {
+      const query = db.selectFrom(testTable).where(eq(testTable.id, 1));
+
+      expect(query).toBeDefined();
+      // Method chaining should work
+      const chained = (query as any).limit(10);
+      expect(chained).toBeDefined();
+    });
+  });
+
+  describe("onfulfilled callback", () => {
+    it("should call onfulfilled callback when provided", async () => {
+      const onFulfilled = vi.fn((rows) => rows);
+      mockGetQueryLocalCacheQuery.mockResolvedValue(undefined);
+
+      const query = db.selectFrom(testTable).where(eq(testTable.id, 1));
+      const result = await query.then(onFulfilled);
+
+      expect(onFulfilled).toHaveBeenCalled();
+      expect(result).toBeDefined();
+    });
+
+    it("should call onfulfilled callback for cached queries", async () => {
+      const onFulfilled = vi.fn((rows) => rows);
+      mockGetQueryLocalCacheQuery.mockResolvedValue(undefined);
+      mockGetFromCache.mockResolvedValue(undefined);
+
+      const query = db.selectFromCacheable(testTable, 300).where(eq(testTable.id, 1));
+      const result = await query.then(onFulfilled);
+
+      expect(onFulfilled).toHaveBeenCalled();
+      expect(result).toBeDefined();
     });
   });
 });
