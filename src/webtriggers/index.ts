@@ -4,6 +4,7 @@ export * from "./fetchSchemaWebTrigger";
 export * from "./dropTablesMigrationWebTrigger";
 export * from "./clearCacheSchedulerTrigger";
 export * from "./slowQuerySchedulerTrigger";
+export * from "./topSlowestStatementLastHourTrigger";
 
 export interface TriggerResponse<BODY> {
   body?: BODY;
