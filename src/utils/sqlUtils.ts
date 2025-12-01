@@ -333,16 +333,105 @@ function processForeignKeys(
 }
 
 /**
+ * Extracts symbols from table schema.
+ * @param table - The table schema
+ * @returns Object containing relevant symbols
+ */
+function extractTableSymbols(table: AnyMySqlTable) {
+  const symbols = Object.getOwnPropertySymbols(table);
+  return {
+    nameSymbol: symbols.find((s) => s.toString().includes("Name")),
+    columnsSymbol: symbols.find((s) => s.toString().includes("Columns")),
+    foreignKeysSymbol: symbols.find((s) => s.toString().includes("ForeignKeys)")),
+    extraSymbol: symbols.find((s) => s.toString().includes("ExtraConfigBuilder")),
+  };
+}
+
+/**
+ * Maps builder to appropriate array based on its type.
+ * @param builder - The builder object
+ * @param builders - The builders object containing all arrays
+ * @returns True if builder was added to a specific array, false otherwise
+ */
+function addBuilderToTypedArray(
+  builder: any,
+  builders: {
+    indexes: AnyIndexBuilder[];
+    checks: CheckBuilder[];
+    primaryKeys: PrimaryKeyBuilder[];
+    uniqueConstraints: UniqueConstraintBuilder[];
+  },
+): boolean {
+  if (!builder?.constructor) {
+    return false;
+  }
+
+  const builderName = builder.constructor.name.toLowerCase();
+  const builderMap = {
+    indexbuilder: builders.indexes,
+    checkbuilder: builders.checks,
+    primarykeybuilder: builders.primaryKeys,
+    uniqueconstraintbuilder: builders.uniqueConstraints,
+  };
+
+  for (const [type, array] of Object.entries(builderMap)) {
+    if (builderName.includes(type)) {
+      array.push(builder);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Processes extra configuration builders and adds them to the builders object.
+ * @param table - The table schema
+ * @param extraSymbol - The extra symbol from table
+ * @param builders - The builders object to populate
+ */
+function processExtraConfigBuilders(
+  table: AnyMySqlTable,
+  extraSymbol: symbol | undefined,
+  builders: {
+    indexes: AnyIndexBuilder[];
+    checks: CheckBuilder[];
+    foreignKeys: ForeignKeyBuilder[];
+    primaryKeys: PrimaryKeyBuilder[];
+    uniqueConstraints: UniqueConstraintBuilder[];
+    extras: any[];
+  },
+): void {
+  if (!extraSymbol) {
+    return;
+  }
+
+  // @ts-ignore
+  const extraConfigBuilder = table[extraSymbol];
+  if (!extraConfigBuilder || typeof extraConfigBuilder !== "function") {
+    return;
+  }
+
+  const configBuilderData = extraConfigBuilder(table);
+  if (!configBuilderData) {
+    return;
+  }
+
+  const configBuilders = extractConfigBuilders(configBuilderData);
+
+  for (const builder of configBuilders) {
+    addBuilderToTypedArray(builder, builders);
+    builders.extras.push(builder);
+  }
+}
+
+/**
  * Extracts table metadata from the schema.
  * @param {AnyMySqlTable} table - The table schema
  * @returns {MetadataInfo} Object containing table metadata
  */
 export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
-  const symbols = Object.getOwnPropertySymbols(table);
-  const nameSymbol = symbols.find((s) => s.toString().includes("Name"));
-  const columnsSymbol = symbols.find((s) => s.toString().includes("Columns"));
-  const foreignKeysSymbol = symbols.find((s) => s.toString().includes("ForeignKeys)"));
-  const extraSymbol = symbols.find((s) => s.toString().includes("ExtraConfigBuilder"));
+  const { nameSymbol, columnsSymbol, foreignKeysSymbol, extraSymbol } = extractTableSymbols(table);
 
   // Initialize builders arrays
   const builders = {
@@ -358,47 +447,7 @@ export function getTableMetadata(table: AnyMySqlTable): MetadataInfo {
   builders.foreignKeys = processForeignKeys(table, foreignKeysSymbol, extraSymbol);
 
   // Process extra configuration if available
-  if (extraSymbol) {
-    // @ts-ignore
-    const extraConfigBuilder = table[extraSymbol];
-    if (extraConfigBuilder && typeof extraConfigBuilder === "function") {
-      const configBuilderData = extraConfigBuilder(table);
-      if (configBuilderData) {
-        // Convert configBuilderData to array if it's an object
-        const configBuilders = Array.isArray(configBuilderData)
-          ? configBuilderData
-          : Object.values(configBuilderData).map(
-              (item) => (item as ConfigBuilderData).value ?? item,
-            );
-
-        // Process each builder
-        for (const builder of configBuilders) {
-          if (!builder?.constructor) continue;
-
-          const builderName = builder.constructor.name.toLowerCase();
-
-          // Map builder types to their corresponding arrays
-          const builderMap = {
-            indexbuilder: builders.indexes,
-            checkbuilder: builders.checks,
-            primarykeybuilder: builders.primaryKeys,
-            uniqueconstraintbuilder: builders.uniqueConstraints,
-          };
-
-          // Add builder to appropriate array if it matches any type
-          for (const [type, array] of Object.entries(builderMap)) {
-            if (builderName.includes(type)) {
-              array.push(builder);
-              break;
-            }
-          }
-
-          // Always add to extras array
-          builders.extras.push(builder);
-        }
-      }
-    }
-  }
+  processExtraConfigBuilders(table, extraSymbol, builders);
 
   return {
     tableName: nameSymbol ? (table as any)[nameSymbol] : "",
@@ -849,5 +898,5 @@ export function withTidbHint<
 >(column: AnyMySqlColumn<TPartial>): AnyMySqlColumn<TPartial> {
   // We lie a bit to TypeScript here: at runtime this is a new SQL fragment,
   // but returning TExpr keeps the column type info in downstream inference.
-  return sql`/*+ SET_VAR(tidb_session_alias=${sql.raw(`${SESSION_ALIAS_NAME_ORM}`)}) */ ${column}` as unknown as AnyMySqlColumn<TPartial>;
+  return sql`/*+ SET_VAR(tidb_session_alias=${sql.raw(SESSION_ALIAS_NAME_ORM)}) */ ${column}` as unknown as AnyMySqlColumn<TPartial>;
 }
