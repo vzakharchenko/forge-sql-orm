@@ -566,23 +566,32 @@ function createFinallyHandler(receiver: any): (onfinally: any) => Promise<any> {
 }
 
 /**
- * Creates a then handler for cached or non-cached queries
+ * Creates a then handler for cached queries
  */
-function createThenHandler(
+function createCachedThenHandler(
   target: any,
-  useCache: boolean,
   options: ForgeSqlOrmOptions,
   cacheTtl: number | undefined,
   selections: any,
   aliasMap: any,
 ): (onfulfilled?: any, onrejected?: any) => Promise<any> {
   return (onfulfilled?: any, onrejected?: any) => {
-    if (useCache) {
-      const ttl = cacheTtl ?? options.cacheTTL ?? 120;
-      return handleCachedQuery(target, options, ttl, selections, aliasMap, onfulfilled, onrejected);
-    } else {
-      return handleNonCachedQuery(target, options, selections, aliasMap, onfulfilled, onrejected);
-    }
+    const ttl = cacheTtl ?? options.cacheTTL ?? 120;
+    return handleCachedQuery(target, options, ttl, selections, aliasMap, onfulfilled, onrejected);
+  };
+}
+
+/**
+ * Creates a then handler for non-cached queries
+ */
+function createNonCachedThenHandler(
+  target: any,
+  options: ForgeSqlOrmOptions,
+  selections: any,
+  aliasMap: any,
+): (onfulfilled?: any, onrejected?: any) => Promise<any> {
+  return (onfulfilled?: any, onrejected?: any) => {
+    return handleNonCachedQuery(target, options, selections, aliasMap, onfulfilled, onrejected);
   };
 }
 
@@ -647,7 +656,9 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
         }
 
         if (prop === "then") {
-          return createThenHandler(target, useCache, options, cacheTtl, selections, aliasMap);
+          return useCache
+            ? createCachedThenHandler(target, options, cacheTtl, selections, aliasMap)
+            : createNonCachedThenHandler(target, options, selections, aliasMap);
         }
 
         if (prop === "catch") {

@@ -168,8 +168,6 @@ class RovoIntegrationSettingCreatorImpl implements RovoIntegrationSettingCreator
    * ```
    */
   useRLS(): RlsSettings {
-    // Store reference to parent builder for use in nested class
-    const parentBuilder = this;
     /**
      * Internal implementation of RlsSettings interface.
      * Provides fluent API for configuring Row-Level Security settings.
@@ -181,7 +179,7 @@ class RovoIntegrationSettingCreatorImpl implements RovoIntegrationSettingCreator
       private isUseRlsConditionalSettings: () => Promise<boolean> = async () => true;
       private rlsFieldsSettings: string[] = [];
       private wherePartSettings: (alias: string) => string = () => "";
-
+      constructor(private readonly parent: RovoIntegrationSettingCreatorImpl) {}
       /**
        * Sets a conditional function to determine if RLS should be applied.
        *
@@ -256,13 +254,13 @@ class RovoIntegrationSettingCreatorImpl implements RovoIntegrationSettingCreator
        * @returns {RovoIntegrationSettingCreator} The parent settings builder
        */
       finish(): RovoIntegrationSettingCreator {
-        parentBuilder.isUseRls = true;
-        this.rlsFieldsSettings.forEach((columnName) => parentBuilder.rlsFields.push(columnName));
-        parentBuilder.wherePart = this.wherePartSettings;
-        parentBuilder.isUseRlsConditional = this.isUseRlsConditionalSettings;
-        return parentBuilder;
+        this.parent.isUseRls = true;
+        this.rlsFieldsSettings.forEach((columnName) => this.parent.rlsFields.push(columnName));
+        this.parent.wherePart = this.wherePartSettings;
+        this.parent.isUseRlsConditional = this.isUseRlsConditionalSettings;
+        return this.parent;
       }
-    })();
+    })(this);
   }
 
   /**
