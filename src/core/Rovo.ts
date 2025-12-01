@@ -434,7 +434,7 @@ export class Rovo implements RovoIntegration {
   private hasScalarSubquery(node: any): boolean {
     if (!node) return false;
 
-    if (node.type === "subquery" || (node.ast && node.ast.type === "select")) {
+    if (node.type === "subquery" || node.ast?.type === "select") {
       return true;
     }
 
@@ -511,7 +511,7 @@ export class Rovo implements RovoIntegration {
    * Validates basic input parameters
    */
   private validateInputs(query: string, tableName: string): string {
-    if (!query || !query.trim()) {
+    if (!query?.trim()) {
       throw new Error("SQL query is required. Please provide a valid SELECT query.");
     }
     if (!tableName) {

@@ -545,36 +545,69 @@ export function mapSelectFieldsWithAlias<TSelection extends SelectedFields>(
   }
   const aliasMap: AliasColumnMap = {};
   const selections: any = {};
-  for (let i = 0; i < Object.entries(fields).length; i++) {
-    const [name, fields1] = Object.entries(fields)[i];
+  for (const [name, fields1] of Object.entries(fields)) {
     mapSelectAllFieldsToAlias(selections, name, name, fields1, aliasMap);
   }
   return { selections, aliasMap };
 }
 
-function getAliasFromDrizzleAlias(value: unknown): string | undefined {
-  const isSQL =
-    value !== null && typeof value === "object" && isSQLWrapper(value) && "queryChunks" in value;
-  if (isSQL) {
-    const sql = value as SQL;
-    const queryChunks = sql.queryChunks;
-    if (queryChunks.length > 3) {
-      const aliasNameChunk = queryChunks[queryChunks.length - 2];
-      if (isSQLWrapper(aliasNameChunk) && "queryChunks" in aliasNameChunk) {
-        const aliasNameChunkSql = aliasNameChunk as SQL;
-        if (aliasNameChunkSql.queryChunks?.length === 1 && aliasNameChunkSql.queryChunks[0]) {
-          const queryChunksStringChunc = aliasNameChunkSql.queryChunks[0];
-          if ("value" in queryChunksStringChunc) {
-            const values = (queryChunksStringChunc as StringChunk).value;
-            if (values && values.length === 1) {
-              return values[0];
-            }
-          }
-        }
-      }
-    }
+/**
+ * Checks if value is a SQL object with queryChunks
+ */
+function isSQLValue(value: unknown): value is SQL {
+  return (
+    value !== null && typeof value === "object" && isSQLWrapper(value) && "queryChunks" in value
+  );
+}
+
+/**
+ * Extracts the alias name chunk from query chunks if it exists and is a SQL object
+ */
+function getAliasNameChunk(queryChunks: any[]): SQL | undefined {
+  if (queryChunks.length <= 3) {
+    return undefined;
   }
+
+  const aliasNameChunk = queryChunks[queryChunks.length - 2];
+  if (isSQLWrapper(aliasNameChunk) && "queryChunks" in aliasNameChunk) {
+    return aliasNameChunk as SQL;
+  }
+
   return undefined;
+}
+
+/**
+ * Extracts string value from a SQL chunk if it contains a single string value
+ */
+function extractStringValueFromChunk(chunk: SQL): string | undefined {
+  if (chunk.queryChunks?.length !== 1 || !chunk.queryChunks[0]) {
+    return undefined;
+  }
+
+  const stringChunk = chunk.queryChunks[0];
+  if (!("value" in stringChunk)) {
+    return undefined;
+  }
+
+  const values = (stringChunk as StringChunk).value;
+  if (values?.length === 1) {
+    return values[0];
+  }
+
+  return undefined;
+}
+
+function getAliasFromDrizzleAlias(value: unknown): string | undefined {
+  if (!isSQLValue(value)) {
+    return undefined;
+  }
+
+  const aliasNameChunk = getAliasNameChunk(value.queryChunks);
+  if (!aliasNameChunk) {
+    return undefined;
+  }
+
+  return extractStringValueFromChunk(aliasNameChunk);
 }
 
 function transformValue(

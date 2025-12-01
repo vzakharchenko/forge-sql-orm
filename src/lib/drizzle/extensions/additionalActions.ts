@@ -551,7 +551,7 @@ async function handleNonCachedQuery(
  * Creates a catch handler for Promise-like objects
  */
 function createCatchHandler(receiver: any): (onrejected: any) => Promise<any> {
-  return (onrejected: any) => (receiver as any).then(undefined, onrejected);
+  return (onrejected: any) => receiver.then(undefined, onrejected);
 }
 
 /**

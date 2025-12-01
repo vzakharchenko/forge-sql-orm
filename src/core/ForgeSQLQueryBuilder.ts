@@ -6,6 +6,7 @@ import {
   customType,
   MySqlSelectBuilder,
   MySqlTable,
+  MySqlColumn,
 } from "drizzle-orm/mysql-core";
 import {
   MySqlSelectDynamic,
@@ -56,7 +57,6 @@ import { SQLWrapper } from "drizzle-orm/sql/sql";
 import type { MySqlQueryResultKind } from "drizzle-orm/mysql-core/session";
 import type { WithBuilder } from "drizzle-orm/mysql-core/subquery";
 import { WithSubquery } from "drizzle-orm/subquery";
-import { MySqlColumn } from "drizzle-orm/mysql-core";
 import { MetadataQueryOptions } from "../utils/metadataContextUtils";
 
 /**
