@@ -12,6 +12,10 @@
 [![DeepScan grade](https://deepscan.io/api/teams/26652/projects/29272/branches/940614/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=26652&pid=29272&bid=940614)
 [![Snyk Vulnerabilities](https://snyk.io/test/github/vzakharchenko/forge-sql-orm/badge.svg)](https://snyk.io/test/github/vzakharchenko/forge-sql-orm)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vzakharchenko_forge-sql-orm&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vzakharchenko_forge-sql-orm)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=vzakharchenko_forge-sql-orm&metric=bugs)](https://sonarcloud.io/summary/new_code?id=vzakharchenko_forge-sql-orm)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=vzakharchenko_forge-sql-orm&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=vzakharchenko_forge-sql-orm)
+
 **Forge-SQL-ORM** is an ORM designed for working with [@forge/sql](https://developer.atlassian.com/platform/forge/storage-reference/sql-tutorial/) in **Atlassian Forge**. It is built on top of [Drizzle ORM](https://orm.drizzle.team) and provides advanced capabilities for working with relational databases inside Forge.
 
 ## Key Features
