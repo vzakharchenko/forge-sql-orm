@@ -8,6 +8,7 @@ import { getTableMetadata } from "forge-sql-orm";
 import { AnyIndexBuilder } from "drizzle-orm/mysql-core/indexes";
 import { ForeignKeyBuilder } from "drizzle-orm/mysql-core/foreign-keys";
 import { UniqueConstraintBuilder } from "drizzle-orm/mysql-core/unique-constraint";
+import { v4 as uuid } from "uuid";
 
 interface DrizzleColumn {
   type: string;
@@ -15,6 +16,7 @@ interface DrizzleColumn {
   autoincrement?: boolean;
   columnType?: any;
   name: string;
+  default?: string;
   getSQLType: () => string;
 }
 
@@ -71,26 +73,208 @@ interface DatabaseSchema {
   [tableName: string]: TableSchema;
 }
 
+type PreMigrationNotNull = {
+  tableName: string;
+  dbTable: TableSchema;
+  colName: string;
+  type: string;
+  migrationType: "NEW_FIELD_NOT_NULL" | "MODIFY_NOT_NULL" | "INLINE";
+  defaultValue: string;
+};
+
+function buildDefault(preMigration: PreMigrationNotNull): string {
+  const def = preMigration.defaultValue;
+  const type = preMigration.type.toLowerCase();
+
+  // No default defined
+  if (def === undefined || def === null) {
+    return "";
+  }
+
+  // Empty string default → DEFAULT ''
+  if (def === "") {
+    return `''`;
+  }
+
+  // Types that must be quoted
+  const stringTypes = new Set([
+    "char",
+    "varchar",
+    "text",
+    "tinytext",
+    "mediumtext",
+    "longtext",
+    "enum",
+    "set",
+    "binary",
+    "varbinary",
+    "blob",
+  ]);
+
+  // Numeric types that accept numeric literals
+  const numericTypes = new Set([
+    "tinyint",
+    "smallint",
+    "mediumint",
+    "int",
+    "bigint",
+    "decimal",
+    "float",
+    "double",
+    "bit",
+  ]);
+
+  // Check if default value is a numeric literal
+  const isNumericLiteral = /^[+-]?\d+(\.\d+)?$/.test(def);
+
+  // Numeric types → DEFAULT 123 (no quotes)
+  if (numericTypes.has(type) && isNumericLiteral) {
+    return `${def}`;
+  }
+
+  // String types → DEFAULT 'value'
+  if (stringTypes.has(type)) {
+    // Double escape single quotes
+    const escaped = def.replace(/'/g, "''");
+    return `'${escaped}'`;
+  }
+
+  // Other types: treat default as an expression
+  // e.g. DEFAULT CURRENT_TIMESTAMP, DEFAULT (uuid()), DEFAULT now()
+  return `${def}`;
+}
+
+/**
+ * Generates warning message for missing default value
+ */
+function generateWarningMessage(tableName: string, colName: string, version: number): string {
+  return (
+    `⚠️  WARNING: Field \`${tableName}\`.\`${colName}\` requires a default value for existing NULL records.\n` +
+    `   Action required in migration file: migrationV${version}.ts\n` +
+    `   Find the line with: UPDATE \`${tableName}\` SET \`${colName}\` = ?\n` +
+    `   Replace '?' with an actual value (e.g., '' for strings, 0 for numbers, '1970-01-01' for dates)\n` +
+    `   OR remove this migration if it's not needed.`
+  );
+}
+
+/**
+ * Handles warning for missing default value
+ */
+function handleMissingDefaultValue(
+  preMigration: PreMigrationNotNull,
+  version: number,
+  migrationLineList: string[],
+): void {
+  const warningMsg = generateWarningMessage(preMigration.tableName, preMigration.colName, version);
+  console.warn(warningMsg);
+  migrationLineList.push(`console.error(${JSON.stringify(warningMsg)});`);
+}
+
+/**
+ * Gets the default value for UPDATE statement
+ */
+function getUpdateDefaultValue(preMigration: PreMigrationNotNull, defaultValue: string): string {
+  return defaultValue === "?" ? defaultValue : buildDefault(preMigration);
+}
+
+/**
+ * Generates UPDATE statement for existing NULL records
+ */
+function generateUpdateStatement(preMigration: PreMigrationNotNull, defaultValue: string): string {
+  const updateValue = getUpdateDefaultValue(preMigration, defaultValue);
+  return `UPDATE \`${preMigration.tableName}\` SET \`${preMigration.colName}\` = ${updateValue} WHERE \`${preMigration.colName}\` IS NULL`;
+}
+
 /**
  * Generates a migration file using the provided SQL statements.
  * @param createStatements - Array of SQL statements.
  * @param version - Migration version number.
  * @returns TypeScript migration file content.
  */
-function generateMigrationFile(createStatements: string[], version: number): string {
+function generateMigrationFile(
+  createStatements: {
+    changes: { change: string; premigrationId?: string }[];
+    preMigrations: Record<string, PreMigrationNotNull>;
+  },
+  version: number,
+): string {
   const versionPrefix = `v${version}_MIGRATION`;
+  const migrationLineList: string[] = [];
 
-  // Clean each SQL statement and generate migration lines with .enqueue()
-  const migrationLines = createStatements
-    .map((stmt, index) => `        .enqueue("${versionPrefix}${index}", "${stmt}")`)
-    .join("\n");
+  createStatements.changes.forEach((change, index) => {
+    if (!change.premigrationId) {
+      // Regular change without pre-migration
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}", "${change.change}")`,
+      );
+      return;
+    }
 
-  // Migration template
+    const preMigration = createStatements.preMigrations[change.premigrationId];
+    if (!preMigration) {
+      // Pre-migration ID exists but pre-migration not found
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}", "${change.change}")`,
+      );
+      return;
+    }
+
+    const defaultValue =
+      preMigration.defaultValue === undefined || preMigration.defaultValue === null
+        ? "?"
+        : preMigration.defaultValue;
+    const needsWarning = defaultValue === "?";
+
+    if (preMigration.migrationType === "NEW_FIELD_NOT_NULL") {
+      // Step 1: Add column as NULL
+      const addColumnStatement = change.change.replace("NOT NULL", "NULL");
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}_NULLABLE", "${addColumnStatement}");`,
+      );
+
+      // Step 2: Warning if default value is missing
+      if (needsWarning) {
+        handleMissingDefaultValue(preMigration, version, migrationLineList);
+      }
+
+      // Step 3: Update existing NULL records
+      const updateStatement = generateUpdateStatement(preMigration, defaultValue);
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}_UPDATE_EXISTS_RECORDS", "${updateStatement}");`,
+      );
+
+      // Step 4: Modify column to NOT NULL
+      const defaultClause = defaultValue === "?" ? "" : ` DEFAULT ${buildDefault(preMigration)}`;
+      const modifyStatement = `ALTER TABLE \`${preMigration.tableName}\` MODIFY COLUMN IF EXISTS \`${preMigration.colName}\` ${preMigration.type} NOT NULL${defaultClause};`;
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}", "${modifyStatement}");`,
+      );
+    } else if (preMigration.migrationType === "MODIFY_NOT_NULL") {
+      // Step 1: Warning if default value is missing
+      if (needsWarning) {
+        handleMissingDefaultValue(preMigration, version, migrationLineList);
+      }
+
+      // Step 2: Update existing NULL records
+      const updateStatement = generateUpdateStatement(preMigration, defaultValue);
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}_UPDATE_EXISTS_RECORDS", "${updateStatement}")`,
+      );
+
+      // Step 3: Apply the MODIFY statement
+      migrationLineList.push(
+        `\nmigrationRunner.enqueue("${versionPrefix}${index}", "${change.change}")`,
+      );
+    }
+  });
+
+  const migrationLines = migrationLineList.join("\n");
+
   return `import { MigrationRunner } from "@forge/sql/out/migration";
 
-export default (migrationRunner: MigrationRunner): MigrationRunner => {
-    return migrationRunner
+export default (migrationRunner: MigrationRunner): MigrationRunner => { 
 ${migrationLines};
+return migrationRunner;
 };`;
 }
 
@@ -102,14 +286,26 @@ ${migrationLines};
  * @returns Array of SQL statements that don't exist in previous migration
  */
 function filterWithPreviousMigration(
-  newStatements: string[],
+  newStatements: {
+    changes: { change: string; premigrationId?: string }[];
+    preMigrations: Record<string, PreMigrationNotNull>;
+  },
   prevVersion: number,
   outputDir: string,
-): string[] {
+): {
+  changes: { change: string; premigrationId?: string }[];
+  preMigrations: Record<string, PreMigrationNotNull>;
+} {
   const prevMigrationPath = path.join(outputDir, `migrationV${prevVersion}.ts`);
 
   if (!fs.existsSync(prevMigrationPath)) {
-    return newStatements.map((s) => s.replace(/\s+/g, " "));
+    return {
+      changes: newStatements.changes.map((s) => ({
+        change: s.change.replace(/\s+/g, " "),
+        premigrationId: s.premigrationId,
+      })),
+      preMigrations: newStatements.preMigrations,
+    };
   }
 
   // Read previous migration file
@@ -125,9 +321,12 @@ function filterWithPreviousMigration(
     });
 
   // Filter out statements that already exist in previous migration
-  return newStatements
-    .filter((s) => !prevStatements.includes(s.replace(/\s+/g, " ")))
-    .map((s) => s.replace(/\s+/g, " "));
+  return {
+    preMigrations: newStatements.preMigrations,
+    changes: newStatements.changes
+      .filter((s) => !prevStatements.includes(s.change.replace(/\s+/g, " ")))
+      .map((s) => ({ change: s.change.replace(/\s+/g, " "), premigrationId: s.premigrationId })),
+  };
 }
 
 /**
@@ -152,23 +351,26 @@ function saveMigrationFiles(migrationCode: string, version: number, outputDir: s
   // Write the migration count file
   fs.writeFileSync(migrationCountPath, `export const MIGRATION_VERSION = ${version};`);
 
-  // Generate the migration index file
+  // Generate the migration index file with static imports
+  const importLines: string[] = [];
+  const callLines: string[] = [];
+
+  for (let i = 1; i <= version; i++) {
+    importLines.push(`import migrationV${i} from "./migrationV${i}";`);
+    callLines.push(`  migrationV${i}(migrationRunner);`);
+  }
+
   const indexFileContent = `import { MigrationRunner } from "@forge/sql/out/migration";
-import { MIGRATION_VERSION } from "./migrationCount";
+${importLines.join("\n")}
 
 export type MigrationType = (
   migrationRunner: MigrationRunner,
 ) => MigrationRunner;
 
-export default async (
+export default (
   migrationRunner: MigrationRunner,
-): Promise<MigrationRunner> => {
-  for (let i = 1; i <= MIGRATION_VERSION; i++) {
-    const migrations = (await import(\`./migrationV\${i}\`)) as {
-      default: MigrationType;
-    };
-    migrations.default(migrationRunner);
-  }
+): MigrationRunner => {
+${callLines.join("\n")}
   return migrationRunner;
 };`;
 
@@ -218,7 +420,7 @@ async function getDatabaseSchema(
   // Get columns
   const [columns] = await connection.execute<DatabaseColumn[]>(
     `
-    SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, EXTRA
+    SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, EXTRA, COLUMN_DEFAULT
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_SCHEMA = ?
   `,
@@ -366,9 +568,12 @@ function generateSchemaChanges(
   drizzleSchema: DrizzleSchema,
   dbSchema: DatabaseSchema,
   schemaModule: Record<string, any>,
-): string[] {
-  const changes: string[] = [];
-
+): {
+  changes: { change: string; premigrationId?: string }[];
+  preMigrations: Record<string, PreMigrationNotNull>;
+} {
+  const changes: { change: string; premigrationId?: string }[] = [];
+  const preMigrations: Record<string, PreMigrationNotNull> = {};
   // First check existing tables in database
   for (const [tableName, dbTable] of Object.entries(dbSchema)) {
     const drizzleColumns = drizzleSchema[tableName];
@@ -384,7 +589,7 @@ function generateSchemaChanges(
         })
         .join(",\n  ");
 
-      changes.push(`CREATE TABLE if not exists \`${tableName}\` (\n  ${columns}\n);`);
+      changes.push({ change: `CREATE TABLE if not exists \`${tableName}\` (\n  ${columns}\n);` });
 
       // Create indexes for new table
       for (const [indexName, dbIndex] of Object.entries(dbTable.indexes)) {
@@ -406,16 +611,16 @@ function generateSchemaChanges(
         // Create index
         const columns = dbIndex.columns.map((col) => `\`${col}\``).join(", ");
         const unique = dbIndex.unique ? "UNIQUE " : "";
-        changes.push(
-          `CREATE  ${unique}INDEX if not exists  \`${indexName}\` ON \`${tableName}\` (${columns});`,
-        );
+        changes.push({
+          change: `CREATE  ${unique}INDEX if not exists  \`${indexName}\` ON \`${tableName}\` (${columns});`,
+        });
       }
 
       // Create foreign keys for new table
       for (const [fkName, dbFK] of Object.entries(dbTable.foreignKeys)) {
-        changes.push(
-          `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`,
-        );
+        changes.push({
+          change: `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`,
+        });
       }
       continue;
     }
@@ -428,20 +633,97 @@ function generateSchemaChanges(
         // Column exists in database but not in schema - create it
         const type = dbCol.COLUMN_TYPE;
         const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
-        changes.push(`ALTER TABLE \`${tableName}\` ADD COLUMN IF NOT EXISTS \`${colName}\` ${type} ${nullable};`);
+        let premigrationId = nullable === "NOT NULL" ? uuid() : undefined;
+        const defaultValue = dbCol.COLUMN_DEFAULT;
+        if (nullable === "NOT NULL") {
+          premigrationId = uuid();
+          preMigrations[premigrationId] = {
+            tableName,
+            dbTable,
+            colName,
+            type,
+            migrationType: "NEW_FIELD_NOT_NULL",
+            defaultValue,
+          };
+        }
+        changes.push({
+          change: `ALTER TABLE \`${tableName}\` ADD COLUMN IF NOT EXISTS \`${colName}\` ${type} ${nullable} ${
+            defaultValue === undefined || defaultValue === null
+              ? ""
+              : `DEFAULT ${buildDefault({
+                  tableName,
+                  dbTable,
+                  colName,
+                  type,
+                  migrationType: "INLINE",
+                  defaultValue: defaultValue,
+                })}`
+          };`,
+          premigrationId,
+        });
         continue;
       }
 
-      // Check for type changes
+      // Check for column changes (type, nullability, or default value)
       const normalizedDbType = normalizeMySQLType(dbCol.COLUMN_TYPE);
       const normalizedDrizzleType = normalizeMySQLType(drizzleCol.getSQLType());
+      const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
+      const dbIsNotNull = nullable === "NOT NULL";
+      const drizzleIsNotNull = drizzleCol.notNull;
 
-      if (normalizedDbType !== normalizedDrizzleType) {
+      // Check if type has changed
+      const typeChanged = normalizedDbType !== normalizedDrizzleType;
+
+      // Check if nullability has changed
+      const nullabilityChanged = dbIsNotNull !== drizzleIsNotNull;
+
+      // Check if default value has changed
+      const hasDrizzleDefault = drizzleCol.default !== null && drizzleCol.default !== undefined;
+      const hasDbDefault = dbCol.COLUMN_DEFAULT !== null && dbCol.COLUMN_DEFAULT !== undefined;
+      const defaultChanged =
+        hasDrizzleDefault && hasDbDefault && drizzleCol.default !== dbCol.COLUMN_DEFAULT;
+
+      // Column needs modification if any of these changed
+      if (typeChanged || nullabilityChanged || defaultChanged) {
         const type = dbCol.COLUMN_TYPE; // Use database type as source of truth
-        const nullable = dbCol.IS_NULLABLE === "YES" ? "NULL" : "NOT NULL";
-        changes.push(
-          `ALTER TABLE \`${tableName}\` MODIFY COLUMN \`${colName}\` IF EXISTS ${type} ${nullable};`,
-        );
+        const defaultValue = dbCol.COLUMN_DEFAULT;
+
+        // Determine if we need a pre-migration for NOT NULL constraint
+        let premigrationId: string | undefined = undefined;
+        if (dbIsNotNull && !drizzleIsNotNull) {
+          // Changing from NULL to NOT NULL - need pre-migration
+          premigrationId = uuid();
+          preMigrations[premigrationId] = {
+            tableName,
+            dbTable,
+            colName,
+            type,
+            migrationType: "MODIFY_NOT_NULL",
+            defaultValue: defaultValue,
+          };
+        }
+
+        // Build DEFAULT clause if default value exists
+        let defaultClause = "";
+        if (defaultValue !== undefined && defaultValue !== null) {
+          const defaultValueObj: PreMigrationNotNull = {
+            tableName,
+            dbTable,
+            colName,
+            type,
+            migrationType: "INLINE",
+            defaultValue: defaultValue,
+          };
+          defaultClause = ` DEFAULT ${buildDefault(defaultValueObj)}`;
+        }
+
+        // Generate MODIFY COLUMN statement
+        const modifyStatement = `ALTER TABLE \`${tableName}\` MODIFY COLUMN IF EXISTS \`${colName}\` ${type} ${nullable}${defaultClause};`;
+
+        changes.push({
+          change: modifyStatement,
+          premigrationId,
+        });
       }
     }
 
@@ -482,9 +764,9 @@ function generateSchemaChanges(
           // Index exists in database but not in schema - create it
           const columns = dbIndex.columns.map((col) => `\`${col}\``).join(", ");
           const unique = dbIndex.unique ? "UNIQUE " : "";
-          changes.push(
-            `CREATE ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`,
-          );
+          changes.push({
+            change: `CREATE ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`,
+          });
           continue;
         }
 
@@ -496,12 +778,12 @@ function generateSchemaChanges(
           dbIndex.unique !== drizzleIndex instanceof UniqueConstraintBuilder
         ) {
           // Drop and recreate index using database values
-          changes.push(`DROP INDEX \`${indexName}\` ON \`${tableName}\`;`);
+          changes.push({ change: `DROP INDEX \`${indexName}\` ON \`${tableName}\`;` });
           const columns = dbIndex.columns.map((col) => `\`${col}\``).join(", ");
           const unique = dbIndex.unique ? "UNIQUE " : "";
-          changes.push(
-            `CREATE  ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`,
-          );
+          changes.push({
+            change: `CREATE  ${unique}INDEX if not exists \`${indexName}\` ON \`${tableName}\` (${columns});`,
+          });
         }
       }
 
@@ -516,9 +798,9 @@ function generateSchemaChanges(
 
         if (!drizzleFK) {
           // Foreign key exists in database but not in schema - drop it
-          changes.push(
-            `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`,
-          );
+          changes.push({
+            change: `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${fkName}\` FOREIGN KEY (\`${dbFK.column}\`) REFERENCES \`${dbFK.referencedTable}\` (\`${dbFK.referencedColumn}\`);`,
+          });
           continue;
         }
       }
@@ -539,7 +821,9 @@ function generateSchemaChanges(
           if (drizzleForeignKey) {
             const fkName = getForeignKeyName(drizzleForeignKey);
             if (fkName) {
-              changes.push(`ALTER TABLE \`${tableName}\` DROP FOREIGN KEY  \`${fkName}\`;`);
+              changes.push({
+                change: `ALTER TABLE \`${tableName}\` DROP FOREIGN KEY  \`${fkName}\`;`,
+              });
             } else {
               // @ts-ignore
               const columns = drizzleForeignKey.columns;
@@ -556,7 +840,7 @@ function generateSchemaChanges(
     }
   }
 
-  return changes;
+  return { changes, preMigrations };
 }
 
 /**
@@ -618,6 +902,7 @@ export const updateMigration = async (options: any) => {
               autoincrement: (column as any).autoincrement,
               columnType: column.columnType,
               name: column.name,
+              default: metadata.columns.email.hasDefault ? String(column.default) : undefined,
               getSQLType: () => column.getSQLType(),
             };
           });
@@ -638,7 +923,7 @@ export const updateMigration = async (options: any) => {
         options.output,
       );
 
-      if (createStatements.length) {
+      if (createStatements.changes.length) {
         // Generate migration file content
         const migrationFile = generateMigrationFile(createStatements, version);
 
