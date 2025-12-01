@@ -59,10 +59,10 @@
     "@typescript-eslint/parser": "^8.48.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "knip": "^5.70.2",
+    "knip": "^5.71.0",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.9.3",
-    "vite": "^7.2.4"
+    "vite": "^7.2.6"
   },
   "lint-staged": {
     "*.{ts,tsx,css,scss,md}": [
