@@ -180,12 +180,7 @@ function getUpdateDefaultValue(preMigration: PreMigrationNotNull, defaultValue: 
 /**
  * Generates UPDATE statement for existing NULL records
  */
-function generateUpdateStatement(
-  preMigration: PreMigrationNotNull,
-  versionPrefix: string,
-  index: number,
-  defaultValue: string,
-): string {
+function generateUpdateStatement(preMigration: PreMigrationNotNull, defaultValue: string): string {
   const updateValue = getUpdateDefaultValue(preMigration, defaultValue);
   return `UPDATE \`${preMigration.tableName}\` SET \`${preMigration.colName}\` = ${updateValue} WHERE \`${preMigration.colName}\` IS NULL`;
 }
@@ -243,12 +238,7 @@ function generateMigrationFile(
       }
 
       // Step 3: Update existing NULL records
-      const updateStatement = generateUpdateStatement(
-        preMigration,
-        versionPrefix,
-        index,
-        defaultValue,
-      );
+      const updateStatement = generateUpdateStatement(preMigration, defaultValue);
       migrationLineList.push(
         `\nmigrationRunner.enqueue("${versionPrefix}${index}_UPDATE_EXISTS_RECORDS", "${updateStatement}");`,
       );
@@ -266,12 +256,7 @@ function generateMigrationFile(
       }
 
       // Step 2: Update existing NULL records
-      const updateStatement = generateUpdateStatement(
-        preMigration,
-        versionPrefix,
-        index,
-        defaultValue,
-      );
+      const updateStatement = generateUpdateStatement(preMigration, defaultValue);
       migrationLineList.push(
         `\nmigrationRunner.enqueue("${versionPrefix}${index}_UPDATE_EXISTS_RECORDS", "${updateStatement}")`,
       );
@@ -364,7 +349,7 @@ function saveMigrationFiles(migrationCode: string, version: number, outputDir: s
   fs.writeFileSync(migrationFilePath, migrationCode);
 
   // Write the migration count file
-  //fs.writeFileSync(migrationCountPath, `export const MIGRATION_VERSION = ${version};`);
+  fs.writeFileSync(migrationCountPath, `export const MIGRATION_VERSION = ${version};`);
 
   // Generate the migration index file with static imports
   const importLines: string[] = [];
