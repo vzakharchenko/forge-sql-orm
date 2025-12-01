@@ -374,9 +374,7 @@ export class Rovo implements RovoIntegration {
    * @param items - Array of nodes or single node
    * @param tables - Accumulator array for table names
    */
-  private extractTablesFromItems(items: any[], tables: string[]): void;
-  private extractTablesFromItems(items: any, tables: string[]): void;
-  private extractTablesFromItems(items: any | any[], tables: string[]): void {
+  private extractTablesFromItems(items: any, tables: string[]): void {
     if (Array.isArray(items)) {
       items.forEach((item: any) => {
         tables.push(...this.extractTables(item));
