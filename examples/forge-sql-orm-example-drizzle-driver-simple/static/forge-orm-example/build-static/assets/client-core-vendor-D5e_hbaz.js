@@ -3763,7 +3763,7 @@ function at() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigMetadataProvider = e.SDK_VERSION = void 0),
-          (e.SDK_VERSION = "3.30.0"));
+          (e.SDK_VERSION = "3.30.1"));
         let m = { sdkVersion: e.SDK_VERSION, sdkType: "js-mono" };
         e.StatsigMetadataProvider = {
           get: () => m,
@@ -5631,4 +5631,4 @@ function Wi() {
   );
 }
 var no = Wi();
-export { xi as a, Wi as b, ot as c, Hi as g, Qi as r, no as s };
+export { Hi as a, Wi as b, ot as c, xi as g, Qi as r, no as s };
