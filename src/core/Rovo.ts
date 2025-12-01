@@ -362,7 +362,7 @@ export class Rovo implements RovoIntegration {
         );
       }
       return ast[0];
-    } else if (ast && ast.type === "select") {
+    } else if (ast?.type === "select") {
       return ast;
     } else {
       throw new Error("Only SELECT queries are allowed.");
@@ -556,7 +556,7 @@ export class Rovo implements RovoIntegration {
       ) {
         throw error;
       }
-      if (error.message && error.message.includes("SQL parsing error")) {
+      if (error.message?.includes("SQL parsing error")) {
         throw error;
       }
       throw new Error(
@@ -753,7 +753,7 @@ export class Rovo implements RovoIntegration {
       ) {
         throw error;
       }
-      if (error.message && error.message.includes("SQL parsing error")) {
+      if (error.message?.includes("SQL parsing error")) {
         throw error;
       }
       throw new Error(

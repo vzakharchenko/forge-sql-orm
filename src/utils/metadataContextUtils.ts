@@ -133,6 +133,55 @@ function normalizeSqlForLogging(sql: string): string {
 }
 
 /**
+ * Formats row information (estRows, actRows) into a string.
+ * @param row - ExplainAnalyzeRow object
+ * @returns Formatted row info string or null if no row info available
+ */
+function formatRowInfo(row: ExplainAnalyzeRow): string | null {
+  const rowInfo: string[] = [];
+  if (row.estRows) rowInfo.push(`estRows:${row.estRows}`);
+  if (row.actRows) rowInfo.push(`actRows:${row.actRows}`);
+  return rowInfo.length > 0 ? `[${rowInfo.join(", ")}]` : null;
+}
+
+/**
+ * Formats resource information (memory, disk) into a string.
+ * @param row - ExplainAnalyzeRow object
+ * @returns Formatted resource info string or null if no resource info available
+ */
+function formatResourceInfo(row: ExplainAnalyzeRow): string | null {
+  const resourceInfo: string[] = [];
+  if (row.memory) resourceInfo.push(`memory:${row.memory}`);
+  if (row.disk) resourceInfo.push(`disk:${row.disk}`);
+  return resourceInfo.length > 0 ? `(${resourceInfo.join(", ")})` : null;
+}
+
+/**
+ * Formats a single execution plan row into a string.
+ * @param row - ExplainAnalyzeRow object
+ * @returns Formatted string representation of the row
+ */
+function formatPlanRow(row: ExplainAnalyzeRow): string {
+  const parts: string[] = [];
+
+  if (row.id) parts.push(row.id);
+  if (row.task) parts.push(`task:${row.task}`);
+  if (row.operatorInfo) parts.push(row.operatorInfo);
+
+  const rowInfo = formatRowInfo(row);
+  if (rowInfo) parts.push(rowInfo);
+
+  if (row.executionInfo) parts.push(`execution info:${row.executionInfo}`);
+
+  const resourceInfo = formatResourceInfo(row);
+  if (resourceInfo) parts.push(resourceInfo);
+
+  if (row.accessObject) parts.push(`access object:${row.accessObject}`);
+
+  return parts.join(" | ");
+}
+
+/**
  * Formats an execution plan array into a readable string representation.
  * @param planRows - Array of ExplainAnalyzeRow objects representing the execution plan
  * @returns Formatted string representation of the execution plan
@@ -142,33 +191,7 @@ function formatExplainPlan(planRows: ExplainAnalyzeRow[]): string {
     return "No execution plan available";
   }
 
-  const lines: string[] = [];
-
-  for (const row of planRows) {
-    const parts: string[] = [];
-
-    if (row.id) parts.push(row.id);
-    if (row.task) parts.push(`task:${row.task}`);
-    if (row.operatorInfo) parts.push(row.operatorInfo);
-
-    const rowInfo: string[] = [];
-    if (row.estRows) rowInfo.push(`estRows:${row.estRows}`);
-    if (row.actRows) rowInfo.push(`actRows:${row.actRows}`);
-    if (rowInfo.length > 0) parts.push(`[${rowInfo.join(", ")}]`);
-
-    if (row.executionInfo) parts.push(`execution info:${row.executionInfo}`);
-
-    const resourceInfo: string[] = [];
-    if (row.memory) resourceInfo.push(`memory:${row.memory}`);
-    if (row.disk) resourceInfo.push(`disk:${row.disk}`);
-    if (resourceInfo.length > 0) parts.push(`(${resourceInfo.join(", ")})`);
-
-    if (row.accessObject) parts.push(`access object:${row.accessObject}`);
-
-    lines.push(parts.join(" | "));
-  }
-
-  return lines.join("\n");
+  return planRows.map(formatPlanRow).join("\n");
 }
 
 /**
@@ -209,7 +232,7 @@ async function printTopQueriesPlans(
   options: Required<MetadataQueryOptions>,
 ): Promise<void> {
   const topQueries = context.statistics
-    .sort((a, b) => b.metadata.dbExecutionTime - a.metadata.dbExecutionTime)
+    .toSorted((a, b) => b.metadata.dbExecutionTime - a.metadata.dbExecutionTime)
     .slice(0, options.topQueries);
 
   for (const query of topQueries) {

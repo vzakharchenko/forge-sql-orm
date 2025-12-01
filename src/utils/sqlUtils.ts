@@ -348,18 +348,6 @@ function extractTableSymbols(table: AnyMySqlTable) {
 }
 
 /**
- * Converts config builder data to an array of builders.
- * @param configBuilderData - The config builder data (array or object)
- * @returns Array of builder objects
- */
-function convertConfigBuildersToArray(configBuilderData: any): any[] {
-  if (Array.isArray(configBuilderData)) {
-    return configBuilderData;
-  }
-  return Object.values(configBuilderData).map((item) => (item as ConfigBuilderData).value ?? item);
-}
-
-/**
  * Maps builder to appropriate array based on its type.
  * @param builder - The builder object
  * @param builders - The builders object containing all arrays
@@ -429,7 +417,7 @@ function processExtraConfigBuilders(
     return;
   }
 
-  const configBuilders = convertConfigBuildersToArray(configBuilderData);
+  const configBuilders = extractConfigBuilders(configBuilderData);
 
   for (const builder of configBuilders) {
     addBuilderToTypedArray(builder, builders);
@@ -910,5 +898,5 @@ export function withTidbHint<
 >(column: AnyMySqlColumn<TPartial>): AnyMySqlColumn<TPartial> {
   // We lie a bit to TypeScript here: at runtime this is a new SQL fragment,
   // but returning TExpr keeps the column type info in downstream inference.
-  return sql`/*+ SET_VAR(tidb_session_alias=${sql.raw(`${SESSION_ALIAS_NAME_ORM}`)}) */ ${column}` as unknown as AnyMySqlColumn<TPartial>;
+  return sql`/*+ SET_VAR(tidb_session_alias=${sql.raw(SESSION_ALIAS_NAME_ORM)}) */ ${column}` as unknown as AnyMySqlColumn<TPartial>;
 }
