@@ -547,6 +547,87 @@ async function handleNonCachedQuery(
  * @param cacheTtl - Optional cache TTL override
  * @returns Select query builder with aliasing and optional caching
  */
+/**
+ * Creates a catch handler for Promise-like objects
+ */
+function createCatchHandler(receiver: any): (onrejected: any) => Promise<any> {
+  return (onrejected: any) => (receiver as any).then(undefined, onrejected);
+}
+
+/**
+ * Creates a finally handler for Promise-like objects
+ */
+function createFinallyHandler(receiver: any): (onfinally: any) => Promise<any> {
+  return (onfinally: any) => {
+    const handleFinally = (value: any) => Promise.resolve(value).finally(onfinally);
+    const handleReject = (reason: any) => Promise.reject(reason).finally(onfinally);
+    return (receiver as any).then(handleFinally, handleReject);
+  };
+}
+
+/**
+ * Creates a then handler for cached or non-cached queries
+ */
+function createThenHandler(
+  target: any,
+  useCache: boolean,
+  options: ForgeSqlOrmOptions,
+  cacheTtl: number | undefined,
+  selections: any,
+  aliasMap: any,
+): (onfulfilled?: any, onrejected?: any) => Promise<any> {
+  return (onfulfilled?: any, onrejected?: any) => {
+    if (useCache) {
+      const ttl = cacheTtl ?? options.cacheTTL ?? 120;
+      return handleCachedQuery(target, options, ttl, selections, aliasMap, onfulfilled, onrejected);
+    } else {
+      return handleNonCachedQuery(target, options, selections, aliasMap, onfulfilled, onrejected);
+    }
+  };
+}
+
+/**
+ * Creates an execute handler that transforms results
+ */
+function createExecuteHandler(
+  target: any,
+  selections: any,
+  aliasMap: any,
+): (...args: any[]) => Promise<any> {
+  return async (...args: any[]) => {
+    const rows = await target.execute(...args);
+    return applyFromDriverTransform(rows, selections, aliasMap);
+  };
+}
+
+/**
+ * Creates a function call handler that wraps results
+ */
+function createFunctionCallHandler(
+  value: Function,
+  target: any,
+  wrapBuilder: (rawBuilder: any) => any,
+): (...args: any[]) => any {
+  return (...args: any[]) => {
+    const result = value.apply(target, args);
+    if (typeof result === "object" && result !== null && "execute" in result) {
+      return wrapBuilder(result);
+    }
+    return result;
+  };
+}
+
+/**
+ * Creates a select query builder with field aliasing and optional caching support.
+ *
+ * @param db - The database instance
+ * @param fields - The fields to select with aliases
+ * @param selectFn - Function to create the base select query
+ * @param useCache - Whether to enable caching for this query
+ * @param options - ForgeSQL ORM options
+ * @param cacheTtl - Optional cache TTL override
+ * @returns Select query builder with aliasing and optional caching
+ */
 function createAliasedSelectBuilder<TSelection extends SelectedFields>(
   db: MySqlRemoteDatabase<any>,
   fields: TSelection,
@@ -562,61 +643,25 @@ function createAliasedSelectBuilder<TSelection extends SelectedFields>(
     return new Proxy(rawBuilder, {
       get(target, prop, receiver) {
         if (prop === "execute") {
-          return async (...args: any[]) => {
-            const rows = await target.execute(...args);
-            return applyFromDriverTransform(rows, selections, aliasMap);
-          };
+          return createExecuteHandler(target, selections, aliasMap);
         }
 
         if (prop === "then") {
-          return (onfulfilled?: any, onrejected?: any) => {
-            if (useCache) {
-              const ttl = cacheTtl ?? options.cacheTTL ?? 120;
-              return handleCachedQuery(
-                target,
-                options,
-                ttl,
-                selections,
-                aliasMap,
-                onfulfilled,
-                onrejected,
-              );
-            } else {
-              return handleNonCachedQuery(
-                target,
-                options,
-                selections,
-                aliasMap,
-                onfulfilled,
-                onrejected,
-              );
-            }
-          };
+          return createThenHandler(target, useCache, options, cacheTtl, selections, aliasMap);
         }
+
         if (prop === "catch") {
-          return (onrejected: any) => (receiver as any).then(undefined, onrejected);
+          return createCatchHandler(receiver);
         }
 
         if (prop === "finally") {
-          return (onfinally: any) =>
-            (receiver as any).then(
-              (value: any) => Promise.resolve(value).finally(onfinally),
-              (reason: any) => Promise.reject(reason).finally(onfinally),
-            );
+          return createFinallyHandler(receiver);
         }
 
         const value = Reflect.get(target, prop, receiver);
 
         if (typeof value === "function") {
-          return (...args: any[]) => {
-            const result = value.apply(target, args);
-
-            if (typeof result === "object" && result !== null && "execute" in result) {
-              return wrapBuilder(result);
-            }
-
-            return result;
-          };
+          return createFunctionCallHandler(value, target, wrapBuilder);
         }
 
         return value;

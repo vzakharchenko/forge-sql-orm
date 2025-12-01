@@ -168,7 +168,8 @@ class RovoIntegrationSettingCreatorImpl implements RovoIntegrationSettingCreator
    * ```
    */
   useRLS(): RlsSettings {
-    const _this = this;
+    // Store reference to parent builder for use in nested class
+    const parentBuilder = this;
     /**
      * Internal implementation of RlsSettings interface.
      * Provides fluent API for configuring Row-Level Security settings.
@@ -255,11 +256,11 @@ class RovoIntegrationSettingCreatorImpl implements RovoIntegrationSettingCreator
        * @returns {RovoIntegrationSettingCreator} The parent settings builder
        */
       finish(): RovoIntegrationSettingCreator {
-        _this.isUseRls = true;
-        this.rlsFieldsSettings.forEach((columnName) => _this.rlsFields.push(columnName));
-        _this.wherePart = this.wherePartSettings;
-        _this.isUseRlsConditional = this.isUseRlsConditionalSettings;
-        return _this;
+        parentBuilder.isUseRls = true;
+        this.rlsFieldsSettings.forEach((columnName) => parentBuilder.rlsFields.push(columnName));
+        parentBuilder.wherePart = this.wherePartSettings;
+        parentBuilder.isUseRlsConditional = this.isUseRlsConditionalSettings;
+        return parentBuilder;
       }
     })();
   }
@@ -371,6 +372,34 @@ export class Rovo implements RovoIntegration {
   }
 
   /**
+   * Recursively processes array or single node and extracts tables
+   * @param items - Array of nodes or single node
+   * @param tables - Accumulator array for table names
+   */
+  private extractTablesFromItems(items: any | any[], tables: string[]): void {
+    if (Array.isArray(items)) {
+      items.forEach((item: any) => {
+        tables.push(...this.extractTables(item));
+      });
+    } else {
+      tables.push(...this.extractTables(items));
+    }
+  }
+
+  /**
+   * Extracts table name from table node
+   * @param node - AST node with table information
+   * @returns Table name in uppercase or null if not applicable
+   */
+  private extractTableName(node: any): string | null {
+    if (!node.table) {
+      return null;
+    }
+    const tableName = node.table === "dual" ? "dual" : node.table.name || node.table;
+    return tableName && tableName !== "dual" ? tableName.toUpperCase() : null;
+  }
+
+  /**
    * Recursively extracts all table names from SQL AST node
    * @param node - AST node to extract tables from
    * @returns Array of table names (uppercase)
@@ -378,33 +407,22 @@ export class Rovo implements RovoIntegration {
   private extractTables(node: any): string[] {
     const tables: string[] = [];
 
+    // Extract table name if node is a table type
     if (node.type === "table" || node.type === "dual") {
-      if (node.table) {
-        const tableName = node.table === "dual" ? "dual" : node.table.name || node.table;
-        if (tableName && tableName !== "dual") {
-          tables.push(tableName.toUpperCase());
-        }
+      const tableName = this.extractTableName(node);
+      if (tableName) {
+        tables.push(tableName);
       }
     }
 
+    // Extract tables from FROM clause
     if (node.from) {
-      if (Array.isArray(node.from)) {
-        node.from.forEach((fromItem: any) => {
-          tables.push(...this.extractTables(fromItem));
-        });
-      } else {
-        tables.push(...this.extractTables(node.from));
-      }
+      this.extractTablesFromItems(node.from, tables);
     }
 
+    // Extract tables from JOIN clause
     if (node.join) {
-      if (Array.isArray(node.join)) {
-        node.join.forEach((joinItem: any) => {
-          tables.push(...this.extractTables(joinItem));
-        });
-      } else {
-        tables.push(...this.extractTables(node.join));
-      }
+      this.extractTablesFromItems(node.join, tables);
     }
 
     return tables;
@@ -491,14 +509,10 @@ export class Rovo implements RovoIntegration {
    * console.log(result.metadata); // Query metadata
    * ```
    */
-  async dynamicIsolatedQuery(
-    dynamicSql: string,
-    settings: RovoIntegrationSetting,
-  ): Promise<Result<unknown>> {
-    const query: string = dynamicSql;
-    const tableName = settings.getTableName();
-    const accountId = settings.getActiveUser();
-    const parameters = settings.getParameters();
+  /**
+   * Validates basic input parameters
+   */
+  private validateInputs(query: string, tableName: string): string {
     if (!query || !query.trim()) {
       throw new Error("SQL query is required. Please provide a valid SELECT query.");
     }
@@ -506,8 +520,6 @@ export class Rovo implements RovoIntegration {
       throw new Error("Table Name is required. Please provide a valid Table Name.");
     }
 
-    // Quick validation: check if query starts with SELECT (case-insensitive)
-    // This allows us to fail fast for non-SELECT queries before normalization
     const trimmedQuery = query.trim();
     const quickUpper = trimmedQuery.toUpperCase();
     if (!quickUpper.startsWith("SELECT")) {
@@ -516,78 +528,50 @@ export class Rovo implements RovoIntegration {
       );
     }
 
-    /**
-     * Normalizes SQL query using AST parsing and stringification.
-     * This approach is safer than regex-based normalization as it:
-     * - Avoids regex backtracking vulnerabilities
-     * - Preserves SQL semantics correctly
-     * - Handles complex SQL structures properly
-     *
-     * @param sql - SQL query string to normalize (must be a valid SELECT query)
-     * @returns Normalized SQL string
-     * @throws Error if parsing fails or query is invalid
-     */
-    const normalizeSqlString = (sql: string): string => {
-      try {
-        const parser = new Parser();
-        // Parse SQL to AST
-        const ast = parser.astify(sql.trim());
-        // Validate it's a SELECT query before normalizing
-        if (Array.isArray(ast)) {
-          if (ast.length !== 1 || ast[0].type !== "select") {
-            throw new Error(
-              "Only a single SELECT query is allowed. Multiple statements or non-SELECT statements are not permitted.",
-            );
-          }
-        } else if (ast && ast.type !== "select") {
-          throw new Error("Only SELECT queries are allowed.");
-        }
-        // Convert AST back to SQL (this normalizes formatting)
-        const normalized = parser.sqlify(Array.isArray(ast) ? ast[0] : ast);
-        // trim
-        return normalized.trim();
-      } catch (error: any) {
-        // If it's a validation error we threw, re-throw it
-        if (
-          error.message &&
-          (error.message.includes("Only") || error.message.includes("single SELECT"))
-        ) {
-          throw error;
-        }
-        // For parsing errors, wrap them in a more user-friendly message
-        // Check if error is already wrapped to avoid double wrapping
-        if (error.message && error.message.includes("SQL parsing error")) {
-          throw error;
-        }
-        throw new Error(
-          `SQL parsing error: ${error.message || "Invalid SQL syntax"}. Please check your query syntax.`,
-        );
-      }
-    };
-    let normalized: string;
+    return trimmedQuery;
+  }
+
+  /**
+   * Normalizes SQL query using AST parsing and stringification
+   */
+  private normalizeSqlString(sql: string): string {
     try {
-      normalized = normalizeSqlString(trimmedQuery);
+      const parser = new Parser();
+      const ast = parser.astify(sql.trim());
+
+      if (Array.isArray(ast)) {
+        if (ast.length !== 1 || ast[0].type !== "select") {
+          throw new Error(
+            "Only a single SELECT query is allowed. Multiple statements or non-SELECT statements are not permitted.",
+          );
+        }
+      } else if (ast && ast.type !== "select") {
+        throw new Error("Only SELECT queries are allowed.");
+      }
+
+      const normalized = parser.sqlify(Array.isArray(ast) ? ast[0] : ast);
+      return normalized.trim();
     } catch (error: any) {
-      // Re-throw validation errors as-is
       if (
         error.message &&
         (error.message.includes("Only") || error.message.includes("single SELECT"))
       ) {
         throw error;
       }
-      // Check if error is already wrapped to avoid double wrapping
       if (error.message && error.message.includes("SQL parsing error")) {
         throw error;
       }
-      // For other errors, wrap them
       throw new Error(
         `SQL parsing error: ${error.message || "Invalid SQL syntax"}. Please check your query syntax.`,
       );
     }
+  }
 
+  /**
+   * Validates that query targets the correct table
+   */
+  private validateTableName(normalized: string, tableName: string): void {
     const upperTableName = tableName.toUpperCase();
-    // Validate table name
-    // sqlify may add backticks, so we check for both formats: FROM table_name and FROM `table_name`
     const tableNamePattern = new RegExp(`FROM\\s+[\`]?${upperTableName}[\`]?`, "i");
     if (!tableNamePattern.test(normalized)) {
       throw new Error(
@@ -596,25 +580,15 @@ export class Rovo implements RovoIntegration {
           "' table only. Other tables are not accessible.",
       );
     }
+  }
 
-    if (!accountId) {
-      throw new Error(
-        "Authentication error: User account ID is missing. Please ensure you are logged in.",
-      );
-    }
-    normalized = normalized.replaceAll("ari:cloud:identity::user/", "");
-    Object.entries(parameters).forEach(([key, value]) => {
-      normalized = normalized.replaceAll(key, value);
-    });
-
-    // Parse SQL query to validate structure before execution
-    const selectAst = this.parseSqlQuery(normalized);
-
-    // Extract all tables from the query
+  /**
+   * Validates query structure (tables, subqueries)
+   */
+  private validateQueryStructure(selectAst: Select, tableName: string): void {
+    const upperTableName = tableName.toUpperCase();
     const tablesInQuery = this.extractTables(selectAst);
     const uniqueTables = [...new Set(tablesInQuery)];
-
-    // Check that only table is used
     const invalidTables = uniqueTables.filter((table) => table !== upperTableName);
 
     if (invalidTables.length > 0) {
@@ -625,7 +599,6 @@ export class Rovo implements RovoIntegration {
       );
     }
 
-    // Check for scalar subqueries in SELECT columns
     if (selectAst.columns && Array.isArray(selectAst.columns)) {
       const hasSubqueryInColumns = selectAst.columns.some((col: any) => {
         if (col.expr) {
@@ -642,8 +615,12 @@ export class Rovo implements RovoIntegration {
         );
       }
     }
+  }
 
-    // Check for JOIN operations using EXPLAIN
+  /**
+   * Validates query execution plan for security violations
+   */
+  private async validateExecutionPlan(normalized: string, tableName: string): Promise<void> {
     const explainRows = await this.forgeOperations.analyze().explainRaw(normalized, []);
 
     const hasJoin = explainRows.some((row) => {
@@ -664,9 +641,6 @@ export class Rovo implements RovoIntegration {
       );
     }
 
-    // Detect window functions (e.g., COUNT(*) OVER(...), ROW_NUMBER() OVER(...))
-    // Window functions are not allowed for security
-    // Users should use regular aggregate functions with GROUP BY instead
     const hasWindow = explainRows.some((row) => {
       const id = row.id.toUpperCase();
       const info = (row.operatorInfo ?? "").toUpperCase();
@@ -680,8 +654,6 @@ export class Rovo implements RovoIntegration {
       );
     }
 
-    // Check for references to other tables in the query execution plan
-    // This detects JOINs, subqueries, or any other references to tables other than expected
     const tablesInPlan = explainRows.filter(
       (row) =>
         row.accessObject?.startsWith("table:") &&
@@ -694,70 +666,142 @@ export class Rovo implements RovoIntegration {
           "JOINs, subqueries, or references to other tables are not permitted for security reasons.",
       );
     }
+  }
 
-    // row-level security protection
-    const isUseRLSFiltering = settings.isUseRLS();
-    if (isUseRLSFiltering) {
-      if (normalized.endsWith(";")) {
-        normalized = normalized.slice(0, -1);
-      }
+  /**
+   * Applies row-level security filtering to query
+   */
+  private applyRLSFiltering(normalized: string, settings: RovoIntegrationSetting): string {
+    if (normalized.endsWith(";")) {
+      normalized = normalized.slice(0, -1);
+    }
 
-      normalized = `
+    return `
             SELECT *
             FROM (
                      ${normalized}
                      ) AS t
             WHERE (${settings.userScopeWhere("t")})
         `;
+  }
+
+  /**
+   * Validates query results for RLS compliance
+   */
+  private validateQueryResults(
+    result: Result<unknown>,
+    settings: RovoIntegrationSetting,
+    upperTableName: string,
+  ): void {
+    if (!result?.metadata?.fields) {
+      return;
     }
+
+    const fields = result.metadata.fields as Array<{
+      name: string;
+      schema?: string;
+      table?: string;
+      orgTable?: string;
+    }>;
+
+    settings.userScopeFields().forEach((field) => {
+      const actualFields = fields.filter((f) => f.name.toLowerCase() === field?.toLowerCase());
+      if (actualFields.length === 0) {
+        throw new Error(
+          `Security validation failed: The query must include ${field} as a raw column in the SELECT statement. This field is required for row-level security enforcement.`,
+        );
+      }
+      const actualField = actualFields.find(
+        (f) => !f.orgTable || f.orgTable.toUpperCase() !== upperTableName,
+      );
+      if (actualField) {
+        throw new Error(
+          `Security validation failed: '${field}' must come directly from the ${upperTableName} table. Joins, subqueries, or table aliases that change the origin of this column are not allowed.`,
+        );
+      }
+    });
+
+    const fieldsFromOtherTables = fields.filter(
+      (f) => f.orgTable && f.orgTable.toUpperCase() !== upperTableName,
+    );
+    if (fieldsFromOtherTables.length > 0) {
+      throw new Error(
+        `Security validation failed: All fields must come from the ${upperTableName} table. ` +
+          "Fields from other tables detected, which indicates the use of JOINs, subqueries, or references to other tables. " +
+          "This is not allowed for security reasons.",
+      );
+    }
+  }
+
+  async dynamicIsolatedQuery(
+    dynamicSql: string,
+    settings: RovoIntegrationSetting,
+  ): Promise<Result<unknown>> {
+    const tableName = settings.getTableName();
+    const accountId = settings.getActiveUser();
+    const parameters = settings.getParameters();
+
+    // Validate inputs
+    const trimmedQuery = this.validateInputs(dynamicSql, tableName);
+
+    // Normalize SQL
+    let normalized: string;
+    try {
+      normalized = this.normalizeSqlString(trimmedQuery);
+    } catch (error: any) {
+      if (
+        error.message &&
+        (error.message.includes("Only") || error.message.includes("single SELECT"))
+      ) {
+        throw error;
+      }
+      if (error.message && error.message.includes("SQL parsing error")) {
+        throw error;
+      }
+      throw new Error(
+        `SQL parsing error: ${error.message || "Invalid SQL syntax"}. Please check your query syntax.`,
+      );
+    }
+
+    // Validate table name and account
+    this.validateTableName(normalized, tableName);
+
+    if (!accountId) {
+      throw new Error(
+        "Authentication error: User account ID is missing. Please ensure you are logged in.",
+      );
+    }
+
+    // Replace parameters in query
+    normalized = normalized.replaceAll("ari:cloud:identity::user/", "");
+    Object.entries(parameters).forEach(([key, value]) => {
+      normalized = normalized.replaceAll(key, value);
+    });
+
+    // Validate query structure
+    const selectAst = this.parseSqlQuery(normalized);
+    this.validateQueryStructure(selectAst, tableName);
+
+    // Validate execution plan
+    await this.validateExecutionPlan(normalized, tableName);
+
+    // Apply RLS filtering if needed
+    const isUseRLSFiltering = settings.isUseRLS();
+    if (isUseRLSFiltering) {
+      normalized = this.applyRLSFiltering(normalized, settings);
+    }
+
     if (this.options.logRawSqlQuery) {
       // eslint-disable-next-line no-console
       console.debug("Rovo query: " + normalized);
     }
+
     const result = await sql.executeRaw(normalized);
 
-    // Post-execution validation for non-admin users
-    // Verify that required security fields exist and come from table
-    // Also ensure all fields with orgTable come from (no JOINs or subqueries)
-    if (isUseRLSFiltering && result?.metadata?.fields) {
-      const fields = result.metadata.fields as Array<{
-        name: string;
-        schema?: string;
-        table?: string;
-        orgTable?: string;
-      }>;
-
-      settings.userScopeFields().forEach((field) => {
-        const actualFields = fields.filter((f) => f.name.toLowerCase() === field?.toLowerCase());
-        if (actualFields.length === 0) {
-          throw new Error(
-            `Security validation failed: The query must include ${field} as a raw column in the SELECT statement. This field is required for row-level security enforcement.`,
-          );
-        }
-        const actualField = actualFields.find(
-          (f) => !f.orgTable || f.orgTable.toUpperCase() !== upperTableName,
-        );
-        if (actualField) {
-          throw new Error(
-            `Security validation failed: '${field}' must come directly from the ${upperTableName} table. Joins, subqueries, or table aliases that change the origin of this column are not allowed.`,
-          );
-        }
-      });
-
-      // Check that all fields with orgTable come from table
-      // (This prevents JOINs or subqueries that reference other tables)
-      // Note: Fields without orgTable (empty/undefined) are allowed - these are computed/calculated fields
-      // We only check fields that have orgTable set - if orgTable exists, it must be table
-      const fieldsFromOtherTables = fields.filter(
-        (f) => f.orgTable && f.orgTable.toUpperCase() !== upperTableName,
-      );
-      if (fieldsFromOtherTables.length > 0) {
-        throw new Error(
-          `Security validation failed: All fields must come from the ${upperTableName} table. ` +
-            "Fields from other tables detected, which indicates the use of JOINs, subqueries, or references to other tables. " +
-            "This is not allowed for security reasons.",
-        );
-      }
+    // Validate query results for RLS compliance
+    if (isUseRLSFiltering) {
+      const upperTableName = tableName.toUpperCase();
+      this.validateQueryResults(result, settings, upperTableName);
     }
 
     return result;

@@ -100,37 +100,37 @@ export const parseDateTime = (value: string | Date, format: string): Date => {
 };
 
 /**
- * Helper function to validate and format a date-like value using Luxon DateTime.
- * @param value - Date object, ISO/RFC2822/SQL/HTTP string, or timestamp (number|string).
- * @param format - DateTime format string (Luxon format tokens).
- * @returns Formatted date string.
- * @throws Error if value cannot be parsed as a valid date.
+ * Parses a string value into DateTime using multiple format parsers
  */
-export function formatDateTime(
-  value: Date | string | number,
-  format: string,
-  isTimeStamp: boolean,
-): string {
+function parseStringToDateTime(value: string): DateTime | null {
+  const parsers = [DateTime.fromISO, DateTime.fromRFC2822, DateTime.fromSQL, DateTime.fromHTTP];
+
+  for (const parser of parsers) {
+    const dt = parser(value);
+    if (dt.isValid) {
+      return dt;
+    }
+  }
+
+  // Try parsing as number string
+  const parsed = Number(value);
+  if (!Number.isNaN(parsed)) {
+    return DateTime.fromMillis(parsed);
+  }
+
+  return null;
+}
+
+/**
+ * Converts a value to DateTime
+ */
+function valueToDateTime(value: Date | string | number): DateTime {
   let dt: DateTime | null = null;
 
   if (value instanceof Date) {
     dt = DateTime.fromJSDate(value);
   } else if (typeof value === "string") {
-    for (const parser of [
-      DateTime.fromISO,
-      DateTime.fromRFC2822,
-      DateTime.fromSQL,
-      DateTime.fromHTTP,
-    ]) {
-      dt = parser(value);
-      if (dt.isValid) break;
-    }
-    if (!dt?.isValid) {
-      const parsed = Number(value);
-      if (!Number.isNaN(parsed)) {
-        dt = DateTime.fromMillis(parsed);
-      }
-    }
+    dt = parseStringToDateTime(value);
   } else if (typeof value === "number") {
     dt = DateTime.fromMillis(value);
   } else {
@@ -140,20 +140,47 @@ export function formatDateTime(
   if (!dt?.isValid) {
     throw new Error("Invalid Date");
   }
+
+  return dt;
+}
+
+/**
+ * Validates timestamp range for Atlassian Forge compatibility
+ */
+function validateTimestampRange(dt: DateTime): void {
   const minDate = DateTime.fromSeconds(1);
   const maxDate = DateTime.fromMillis(2147483647 * 1000); // 2038-01-19 03:14:07.999 UTC
 
+  if (dt < minDate) {
+    throw new Error(
+      "Atlassian Forge does not support zero or negative timestamps. Allowed range: from '1970-01-01 00:00:01.000000' to '2038-01-19 03:14:07.999999'.",
+    );
+  }
+
+  if (dt > maxDate) {
+    throw new Error(
+      "Atlassian Forge does not support timestamps beyond 2038-01-19 03:14:07.999999. Please use a smaller date within the supported range.",
+    );
+  }
+}
+
+/**
+ * Helper function to validate and format a date-like value using Luxon DateTime.
+ * @param value - Date object, ISO/RFC2822/SQL/HTTP string, or timestamp (number|string).
+ * @param format - DateTime format string (Luxon format tokens).
+ * @param isTimeStamp - Whether to validate timestamp range
+ * @returns Formatted date string.
+ * @throws Error if value cannot be parsed as a valid date.
+ */
+export function formatDateTime(
+  value: Date | string | number,
+  format: string,
+  isTimeStamp: boolean,
+): string {
+  const dt = valueToDateTime(value);
+
   if (isTimeStamp) {
-    if (dt < minDate) {
-      throw new Error(
-        "Atlassian Forge does not support zero or negative timestamps. Allowed range: from '1970-01-01 00:00:01.000000' to '2038-01-19 03:14:07.999999'.",
-      );
-    }
-    if (dt > maxDate) {
-      throw new Error(
-        "Atlassian Forge does not support timestamps beyond 2038-01-19 03:14:07.999999. Please use a smaller date within the supported range.",
-      );
-    }
+    validateTimestampRange(dt);
   }
 
   return dt.toFormat(format);
@@ -200,6 +227,85 @@ export function getPrimaryKeys<T extends AnyMySqlTable>(table: T): [string, AnyC
 }
 
 /**
+ * Processes foreign keys from foreignKeysSymbol
+ */
+function processForeignKeysFromSymbol(
+  table: AnyMySqlTable,
+  foreignKeysSymbol: symbol,
+): ForeignKeyBuilder[] {
+  const foreignKeys: ForeignKeyBuilder[] = [];
+  // @ts-ignore
+  const fkArray: any[] = table[foreignKeysSymbol];
+
+  if (!fkArray) {
+    return foreignKeys;
+  }
+
+  for (const fk of fkArray) {
+    if (fk.reference) {
+      const item = fk.reference(fk);
+      foreignKeys.push(item);
+    }
+  }
+
+  return foreignKeys;
+}
+
+/**
+ * Extracts config builders from config builder data
+ */
+function extractConfigBuilders(configBuilderData: any): any[] {
+  if (Array.isArray(configBuilderData)) {
+    return configBuilderData;
+  }
+
+  return Object.values(configBuilderData).map((item) => (item as ConfigBuilderData).value ?? item);
+}
+
+/**
+ * Checks if a builder is a ForeignKeyBuilder
+ */
+function isForeignKeyBuilder(builder: any): boolean {
+  if (!builder?.constructor) {
+    return false;
+  }
+
+  const builderName = builder.constructor.name.toLowerCase();
+  return builderName.includes("foreignkeybuilder");
+}
+
+/**
+ * Processes foreign keys from extraSymbol
+ */
+function processForeignKeysFromExtra(
+  table: AnyMySqlTable,
+  extraSymbol: symbol,
+): ForeignKeyBuilder[] {
+  const foreignKeys: ForeignKeyBuilder[] = [];
+  // @ts-ignore
+  const extraConfigBuilder = table[extraSymbol];
+
+  if (!extraConfigBuilder || typeof extraConfigBuilder !== "function") {
+    return foreignKeys;
+  }
+
+  const configBuilderData = extraConfigBuilder(table);
+  if (!configBuilderData) {
+    return foreignKeys;
+  }
+
+  const configBuilders = extractConfigBuilders(configBuilderData);
+
+  for (const builder of configBuilders) {
+    if (isForeignKeyBuilder(builder)) {
+      foreignKeys.push(builder);
+    }
+  }
+
+  return foreignKeys;
+}
+
+/**
  * Processes foreign keys from both foreignKeysSymbol and extraSymbol
  * @param table - The table schema
  * @param foreignKeysSymbol - Symbol for foreign keys
@@ -215,41 +321,12 @@ function processForeignKeys(
 
   // Process foreign keys from foreignKeysSymbol
   if (foreignKeysSymbol) {
-    // @ts-ignore
-    const fkArray: any[] = table[foreignKeysSymbol];
-    if (fkArray) {
-      for (const fk of fkArray) {
-        if (fk.reference) {
-          const item = fk.reference(fk);
-          foreignKeys.push(item);
-        }
-      }
-    }
+    foreignKeys.push(...processForeignKeysFromSymbol(table, foreignKeysSymbol));
   }
 
   // Process foreign keys from extraSymbol
   if (extraSymbol) {
-    // @ts-ignore
-    const extraConfigBuilder = table[extraSymbol];
-    if (extraConfigBuilder && typeof extraConfigBuilder === "function") {
-      const configBuilderData = extraConfigBuilder(table);
-      if (configBuilderData) {
-        const configBuilders = Array.isArray(configBuilderData)
-          ? configBuilderData
-          : Object.values(configBuilderData).map(
-              (item) => (item as ConfigBuilderData).value ?? item,
-            );
-
-        for (const builder of configBuilders) {
-          if (!builder?.constructor) continue;
-
-          const builderName = builder.constructor.name.toLowerCase();
-          if (builderName.includes("foreignkeybuilder")) {
-            foreignKeys.push(builder);
-          }
-        }
-      }
-    }
+    foreignKeys.push(...processForeignKeysFromExtra(table, extraSymbol));
   }
 
   return foreignKeys;
