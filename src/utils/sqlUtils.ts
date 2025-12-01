@@ -196,10 +196,7 @@ export function getPrimaryKeys<T extends AnyMySqlTable>(table: T): [string, AnyC
   const { columns, primaryKeys } = getTableMetadata(table);
 
   // First try to find primary keys in columns
-  const columnPrimaryKeys = Object.entries(columns).filter(([, column]) => column.primary) as [
-    string,
-    AnyColumn,
-  ][];
+  const columnPrimaryKeys = Object.entries(columns).filter(([, column]) => column.primary);
 
   if (columnPrimaryKeys.length > 0) {
     return columnPrimaryKeys;
@@ -498,7 +495,7 @@ function mapSelectTableToAlias(
   const { columns, tableName } = getTableMetadata(table);
   const selectionsTableFields: Record<string, unknown> = {};
   for (const name of Object.keys(columns)) {
-    const column = columns[name] as AnyColumn;
+    const column = columns[name];
     const uniqName = `a_${uniqPrefix}_${tableName}_${column.name}`.toLowerCase();
     const fieldAlias = sql.raw(uniqName);
     selectionsTableFields[name] = sql`${column} as \`${fieldAlias}\``;
@@ -663,7 +660,7 @@ export function applyFromDriverTransform<T, TSelection>(
       row as Record<string, unknown>,
       selections as Record<string, unknown>,
       aliasMap,
-    ) as Record<string, unknown>;
+    );
 
     return processNullBranches(transformed) as unknown as T;
   });

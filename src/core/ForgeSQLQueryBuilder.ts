@@ -1025,7 +1025,7 @@ export interface SchemaSqlForgeSql {
    * @returns {Promise<T[]>} A list of results as objects
    * @throws {Error} If the query execution fails
    */
-  executeRawSQL<T extends object | unknown>(query: string, params?: SqlParameters[]): Promise<T[]>;
+  executeRawSQL<T>(query: string, params?: SqlParameters[]): Promise<T[]>;
 
   /**
    * Executes a raw SQL update query.

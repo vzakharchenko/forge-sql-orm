@@ -4,6 +4,7 @@ import {
   AnyMySqlSelectQueryBuilder,
   MySqlSelectDynamic,
 } from "drizzle-orm/mysql-core/query-builders/select.types";
+import { SqlParameters } from "@forge/sql/out/sql-statement";
 
 /**
  * Class implementing SQL select operations for ForgeSQL ORM.
@@ -55,7 +56,7 @@ export class ForgeSQLSelectOperations implements SchemaSqlForgeSql {
    * @param {SqlParameters[]} [params] - Optional SQL parameters
    * @returns {Promise<T[]>} A list of results as objects
    */
-  async executeRawSQL<T extends object | unknown>(query: string, params?: unknown[]): Promise<T[]> {
+  async executeRawSQL<T>(query: string, params?: SqlParameters[]): Promise<T[]> {
     if (this.options.logRawSqlQuery) {
       const paramsStr = params ? `, with params: ${JSON.stringify(params)}` : "";
       // eslint-disable-next-line no-console
