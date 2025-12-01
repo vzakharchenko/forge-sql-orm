@@ -561,7 +561,7 @@ function createFinallyHandler(receiver: any): (onfinally: any) => Promise<any> {
   return (onfinally: any) => {
     const handleFinally = (value: any) => Promise.resolve(value).finally(onfinally);
     const handleReject = (reason: any) => Promise.reject(reason).finally(onfinally);
-    return (receiver as any).then(handleFinally, handleReject);
+    return receiver.then(handleFinally, handleReject);
   };
 }
 
