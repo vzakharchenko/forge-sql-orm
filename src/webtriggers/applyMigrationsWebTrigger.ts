@@ -50,7 +50,7 @@ export const applySchemaMigrations = async (
       );
 
       migrationHistory = sortedMigrations
-        .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toUTCString()}`)
+        .map((y) => `${y.id}, ${y.name}, ${y.migratedAt.toISOString()}`)
         .join("\n");
     }
     // eslint-disable-next-line no-console
