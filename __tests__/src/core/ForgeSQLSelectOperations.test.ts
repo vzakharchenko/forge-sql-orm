@@ -20,11 +20,39 @@ vi.mock("../../../src/utils/cacheUtils", () => ({
   hashKey: () => "key",
 }));
 
+const mockGetOperationType = vi.fn().mockResolvedValue("QUERY");
+vi.mock("../../../src/utils/requestTypeContextUtils", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../src/utils/requestTypeContextUtils")>();
+  return {
+    ...actual,
+    getOperationType: (...args: any[]) => mockGetOperationType(...args),
+  };
+});
+
+const mockWithTimeout = vi.fn((promise) => promise);
+vi.mock("../../../src/utils/sqlUtils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../src/utils/sqlUtils")>();
+  return {
+    ...actual,
+    withTimeout: (...args: any[]) => mockWithTimeout(...args),
+  };
+});
+
+const mockSaveMetaDataToContext = vi.fn().mockResolvedValue(undefined);
+vi.mock("../../../src/utils/metadataContextUtils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../src/utils/metadataContextUtils")>();
+  return {
+    ...actual,
+    saveMetaDataToContext: (...args: any[]) => mockSaveMetaDataToContext(...args),
+  };
+});
+
 vi.useFakeTimers();
 vi.setSystemTime(new Date("2023-04-12 00:00:01"));
 vi.mock("@forge/sql", () => ({
   sql: {
-    prepare: vi.fn((query: string) => {
+    prepare: vi.fn((query: string, endpoint?: string) => {
       let procedureMock = vi.fn().mockResolvedValue({
         rows: [{ id: 1, data: "t", name: "Test" }],
         metadata: {
@@ -45,16 +73,24 @@ vi.mock("@forge/sql", () => ({
         });
       }
       const executeMock = procedureMock;
-      return {
+      const mockBindParams = vi.fn();
+      const mockStatement = {
         query: query || "MOCK_QUERY",
         _params: [],
         remoteSqlApi: "",
         params: [],
-        bindParams: vi.fn(),
+        bindParams: mockBindParams,
         execute: executeMock,
       };
+      mockBindParams.mockReturnValue(mockStatement);
+      return mockStatement;
     }),
-    executeDDL: vi.fn(),
+  },
+}));
+
+vi.mock("@forge/sql/out/sql", () => ({
+  SQL_API_ENDPOINTS: {
+    EXECUTE_DDL: "EXECUTE_DDL",
   },
 }));
 
@@ -107,7 +143,8 @@ describe("ForgeSQLSelectOperations", () => {
     expect(result).toEqual([[{ id: 1, name: "Test", data: "t" }]]);
   });
   it("test drizzle executeDDL", async () => {
-    vi.mocked(sql.executeDDL).mockResolvedValue({
+    mockGetOperationType.mockResolvedValueOnce("DDL");
+    const mockExecute = vi.fn().mockResolvedValue({
       rows: {
         affectedRows: 0,
         fieldCount: 0,
@@ -121,12 +158,25 @@ describe("ForgeSQLSelectOperations", () => {
         responseSize: 525,
       },
     });
+    const mockBindParams = vi.fn();
+    const mockStatement = {
+      query: "MOCK_QUERY",
+      params: [],
+      bindParams: mockBindParams,
+      execute: mockExecute,
+    };
+    mockBindParams.mockReturnValue(mockStatement);
+    vi.mocked(sql.prepare).mockImplementationOnce(() => mockStatement);
+
     const result = await forgeSqlOperation.executeDDL<{ affectedRows: number }>(
       rawSql`CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
     );
-    expect(sql.executeDDL).toHaveBeenCalledWith(
+    expect(sql.prepare).toHaveBeenCalledWith(
       `CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
+      "EXECUTE_DDL",
     );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith([]);
     expect(result).toEqual([
       {
         affectedRows: 0,
@@ -140,7 +190,8 @@ describe("ForgeSQLSelectOperations", () => {
   });
 
   it("test drizzle executeDDL string", async () => {
-    vi.mocked(sql.executeDDL).mockResolvedValue({
+    mockGetOperationType.mockResolvedValueOnce("DDL");
+    const mockExecute = vi.fn().mockResolvedValue({
       rows: {
         affectedRows: 0,
         fieldCount: 0,
@@ -154,12 +205,25 @@ describe("ForgeSQLSelectOperations", () => {
         responseSize: 525,
       },
     });
+    const mockBindParams = vi.fn();
+    const mockStatement = {
+      query: "MOCK_QUERY",
+      params: [],
+      bindParams: mockBindParams,
+      execute: mockExecute,
+    };
+    mockBindParams.mockReturnValue(mockStatement);
+    vi.mocked(sql.prepare).mockImplementationOnce(() => mockStatement);
+
     const result = await forgeSqlOperation.executeDDL<{ affectedRows: number }>(
       `CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
     );
-    expect(sql.executeDDL).toHaveBeenCalledWith(
+    expect(sql.prepare).toHaveBeenCalledWith(
       `CREATE TABLE users ( id INT PRIMARY KEY,  name VARCHAR(255));`,
+      "EXECUTE_DDL",
     );
+    const preparedStatement = vi.mocked(sql.prepare).mock.results[0].value;
+    expect(preparedStatement.bindParams).toHaveBeenCalledWith([]);
     expect(result).toEqual([
       {
         affectedRows: 0,

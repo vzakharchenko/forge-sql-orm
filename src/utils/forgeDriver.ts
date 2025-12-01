@@ -2,6 +2,7 @@ import { sql, UpdateQueryResponse } from "@forge/sql";
 import { saveMetaDataToContext } from "./metadataContextUtils";
 import { getOperationType } from "./requestTypeContextUtils";
 import { withTimeout } from "./sqlUtils";
+import { SQL_API_ENDPOINTS } from "@forge/sql/out/sql";
 
 const timeoutMs = 10000;
 const timeoutMessage = `Atlassian @forge/sql did not return a response within ${timeoutMs}ms (${timeoutMs / 1000} seconds), so the request is blocked. Possible causes: slow query, network issues, or exceeding Forge SQL limits.`;
@@ -64,16 +65,6 @@ export function isUpdateQueryResponse(obj: unknown): obj is UpdateQueryResponse 
     typeof (obj as any).affectedRows === "number" &&
     typeof (obj as any).insertId === "number"
   );
-}
-
-function inlineParams(sql: string, params: unknown[]): string {
-  let i = 0;
-  return sql.replace(/\?/g, () => {
-    const val = params[i++];
-    if (val === null) return "NULL";
-    if (typeof val === "number") return val.toString();
-    return `'${String(val).replace(/'/g, "''")}'`;
-  });
 }
 
 /**
@@ -204,7 +195,10 @@ export const forgeDriver = async (
   // Handle DDL operations
   if (operationType === "DDL") {
     const result = await withTimeout(
-      sql.executeDDL(inlineParams(query, params ?? [])),
+      sql
+        .prepare(query, SQL_API_ENDPOINTS.EXECUTE_DDL)
+        .bindParams(params ?? [])
+        .execute(),
       timeoutMessage,
       timeoutMs,
     );

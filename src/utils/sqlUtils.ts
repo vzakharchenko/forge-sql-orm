@@ -568,7 +568,7 @@ function getAliasNameChunk(queryChunks: any[]): SQL | undefined {
     return undefined;
   }
 
-  const aliasNameChunk = queryChunks[queryChunks.length - 2];
+  const aliasNameChunk = queryChunks.at(-2);
   if (isSQLWrapper(aliasNameChunk) && "queryChunks" in aliasNameChunk) {
     return aliasNameChunk as SQL;
   }

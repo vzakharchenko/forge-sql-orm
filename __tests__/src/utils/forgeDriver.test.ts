@@ -12,7 +12,6 @@ const mockWithTimeout = vi.fn();
 
 // Mock @forge/sql
 const mockSqlPrepare = vi.fn();
-const mockSqlExecuteDDL = vi.fn();
 const mockBindParams = vi.fn();
 const mockExecute = vi.fn();
 
@@ -36,7 +35,12 @@ vi.mock("../../../src/utils/sqlUtils", () => ({
 vi.mock("@forge/sql", () => ({
   sql: {
     prepare: (...args: any[]) => mockSqlPrepare(...args),
-    executeDDL: (...args: any[]) => mockSqlExecuteDDL(...args),
+  },
+}));
+
+vi.mock("@forge/sql/out/sql", () => ({
+  SQL_API_ENDPOINTS: {
+    EXECUTE_DDL: "EXECUTE_DDL",
   },
 }));
 
@@ -67,7 +71,12 @@ describe("forgeDriver", () => {
     mockWithTimeout.mockImplementation(async (promise) => promise);
     // For execute method: sql.prepare returns synchronously
     // For all method: sql.prepare returns a promise
-    mockSqlPrepare.mockImplementation((query: string) => {
+    // For DDL: sql.prepare(query, SQL_API_ENDPOINTS.EXECUTE_DDL) returns object with bindParams and execute
+    mockSqlPrepare.mockImplementation((query: string, endpoint?: string) => {
+      // DDL operations use sql.prepare(query, SQL_API_ENDPOINTS.EXECUTE_DDL)
+      if (endpoint === "EXECUTE_DDL") {
+        return createMockSqlStatement();
+      }
       // Check if it's a SELECT query (all method) - return promise
       if (query.trim().toUpperCase().startsWith("SELECT")) {
         return Promise.resolve(createMockSqlStatement());
@@ -75,7 +84,7 @@ describe("forgeDriver", () => {
       // For execute method (UPDATE/INSERT/DELETE) - return synchronously
       return createMockSqlStatement();
     });
-    mockBindParams.mockReturnValue(undefined);
+    mockBindParams.mockReturnValue(createMockSqlStatement());
     mockExecute.mockResolvedValue({
       rows: [{ id: 1, name: "Test" }],
       metadata: mockMetadata,
@@ -123,7 +132,7 @@ describe("forgeDriver", () => {
   describe("forgeDriver - DDL operations", () => {
     it("should handle DDL operations with executeDDL", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
@@ -132,7 +141,9 @@ describe("forgeDriver", () => {
 
       expect(result).toEqual({ rows: [] });
       expect(mockGetOperationType).toHaveBeenCalled();
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith("CREATE TABLE users (id INT)");
+      expect(mockSqlPrepare).toHaveBeenCalledWith("CREATE TABLE users (id INT)", "EXECUTE_DDL");
+      expect(mockBindParams).toHaveBeenCalledWith([]);
+      expect(mockExecute).toHaveBeenCalled();
       expect(mockSaveMetaDataToContext).toHaveBeenCalledWith(
         "CREATE TABLE users (id INT)",
         [],
@@ -140,52 +151,58 @@ describe("forgeDriver", () => {
       );
     });
 
-    it("should inline params for DDL operations", async () => {
+    it("should handle params for DDL operations", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
 
       await forgeDriver("CREATE TABLE users (id INT, name VARCHAR(?))", ["255"], "all");
 
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith(
-        "CREATE TABLE users (id INT, name VARCHAR('255'))",
+      expect(mockSqlPrepare).toHaveBeenCalledWith(
+        "CREATE TABLE users (id INT, name VARCHAR(?))",
+        "EXECUTE_DDL",
       );
+      expect(mockBindParams).toHaveBeenCalledWith(["255"]);
     });
 
     it("should handle null params in DDL operations", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
 
       await forgeDriver("CREATE TABLE users (id INT, name VARCHAR(?))", [null], "all");
 
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith(
-        "CREATE TABLE users (id INT, name VARCHAR(NULL))",
+      expect(mockSqlPrepare).toHaveBeenCalledWith(
+        "CREATE TABLE users (id INT, name VARCHAR(?))",
+        "EXECUTE_DDL",
       );
+      expect(mockBindParams).toHaveBeenCalledWith([null]);
     });
 
     it("should handle string params with quotes in DDL operations", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
 
       await forgeDriver("CREATE TABLE users (name VARCHAR(?))", ["O'Brien"], "all");
 
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith(
-        "CREATE TABLE users (name VARCHAR('O''Brien'))",
+      expect(mockSqlPrepare).toHaveBeenCalledWith(
+        "CREATE TABLE users (name VARCHAR(?))",
+        "EXECUTE_DDL",
       );
+      expect(mockBindParams).toHaveBeenCalledWith(["O'Brien"]);
     });
 
     it("should handle DDL result with UpdateQueryResponse rows", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
       const updateResponse = { affectedRows: 1, insertId: 123 };
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: updateResponse,
         metadata: mockMetadata,
       });
@@ -201,7 +218,7 @@ describe("forgeDriver", () => {
 
     it("should handle DDL result with array rows and execute method", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [{ id: 1 }],
         metadata: mockMetadata,
       });
@@ -213,7 +230,7 @@ describe("forgeDriver", () => {
 
     it("should handle DDL result with array rows and all method", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [{ id: 1, name: "Test" }],
         metadata: mockMetadata,
       });
@@ -225,7 +242,7 @@ describe("forgeDriver", () => {
 
     it("should handle DDL result without rows", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         metadata: mockMetadata,
       });
 
@@ -236,7 +253,7 @@ describe("forgeDriver", () => {
 
     it("should handle DDL result without metadata", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
       });
 
@@ -442,31 +459,36 @@ describe("forgeDriver", () => {
   describe("edge cases", () => {
     it("should handle undefined params for DDL", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
 
       await forgeDriver("CREATE TABLE users (id INT)", undefined, "all");
 
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith("CREATE TABLE users (id INT)");
+      expect(mockSqlPrepare).toHaveBeenCalledWith("CREATE TABLE users (id INT)", "EXECUTE_DDL");
+      expect(mockBindParams).toHaveBeenCalledWith([]);
     });
 
     it("should handle numeric params in DDL", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
 
       await forgeDriver("CREATE TABLE users (id INT, count INT(?))", [100], "all");
 
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith("CREATE TABLE users (id INT, count INT(100))");
+      expect(mockSqlPrepare).toHaveBeenCalledWith(
+        "CREATE TABLE users (id INT, count INT(?))",
+        "EXECUTE_DDL",
+      );
+      expect(mockBindParams).toHaveBeenCalledWith([100]);
     });
 
     it("should handle multiple params in DDL", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: [],
         metadata: mockMetadata,
       });
@@ -477,14 +499,16 @@ describe("forgeDriver", () => {
         "all",
       );
 
-      expect(mockSqlExecuteDDL).toHaveBeenCalledWith(
-        "CREATE TABLE users (id INT, name VARCHAR('255'), age INT(50))",
+      expect(mockSqlPrepare).toHaveBeenCalledWith(
+        "CREATE TABLE users (id INT, name VARCHAR(?), age INT(?))",
+        "EXECUTE_DDL",
       );
+      expect(mockBindParams).toHaveBeenCalledWith(["255", 50]);
     });
 
     it("should handle DDL result with non-array, non-UpdateQueryResponse rows", async () => {
       mockGetOperationType.mockResolvedValue("DDL");
-      mockSqlExecuteDDL.mockResolvedValue({
+      mockExecute.mockResolvedValue({
         rows: "some string" as any,
         metadata: mockMetadata,
       });
