@@ -45,7 +45,7 @@
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.7",
-    "drizzle-orm": "^0.44.7",
+    "drizzle-orm": "^0.45.0",
     "forge-sql-orm": "^2.1.15",
     "inquirer": "^13.0.2",
     "mysql2": "^3.15.3",
