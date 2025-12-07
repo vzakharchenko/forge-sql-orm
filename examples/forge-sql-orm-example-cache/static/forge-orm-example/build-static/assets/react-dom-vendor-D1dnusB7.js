@@ -4527,9 +4527,7 @@ function Nc() {
               (t.interleaved = l));
             return;
           }
-        } catch {
-        } finally {
-        }
+        } catch {}
       ((n = bo(e, t, l, r)), n !== null && ((l = Se()), rt(n, e, r, l), _s(n, t, r)));
     }
   }

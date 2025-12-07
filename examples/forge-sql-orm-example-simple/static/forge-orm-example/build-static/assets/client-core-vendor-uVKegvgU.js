@@ -3356,7 +3356,11 @@ function ce() {
         };
         function l(r) {
           const o = e.Storage.getItem(r);
-          return JSON.parse(o ?? "null");
+          try {
+            return JSON.parse(o ?? "null");
+          } catch {
+            return (m.Log.error(`Failed to parse value for key "${r}"`), null);
+          }
         }
         e._getObjectFromStorage = l;
         function u(r, o) {
@@ -3763,7 +3767,7 @@ function at() {
       (function (e) {
         (Object.defineProperty(e, "__esModule", { value: !0 }),
           (e.StatsigMetadataProvider = e.SDK_VERSION = void 0),
-          (e.SDK_VERSION = "3.30.1"));
+          (e.SDK_VERSION = "3.30.2"));
         let m = { sdkVersion: e.SDK_VERSION, sdkType: "js-mono" };
         e.StatsigMetadataProvider = {
           get: () => m,

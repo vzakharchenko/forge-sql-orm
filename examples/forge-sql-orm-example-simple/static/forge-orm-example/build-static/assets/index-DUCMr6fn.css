@@ -2512,16 +2512,6 @@ button {
     sans-serif
   );
 }
-._11c81u0j {
-  font: var(
-    --ds-font-code,
-    normal 400 0.875em/1 ui-monospace,
-    Menlo,
-    "Segoe UI Mono",
-    "Ubuntu Mono",
-    monospace
-  );
-}
 ._2rkolb4i {
   border-radius: var(--ds-radius-xsmall, 2px);
 }

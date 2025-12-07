@@ -1,4 +1,4 @@
-import { c as f } from "./client-core-vendor-YgpeLpmJ.js";
+import { c as f } from "./client-core-vendor-B82q9aJI.js";
 var d, ye;
 function le() {
   if (ye) return d;
