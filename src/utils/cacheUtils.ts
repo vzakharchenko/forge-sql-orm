@@ -6,6 +6,7 @@ import { getTableName } from "drizzle-orm/table";
 import { Filter, FilterConditions, kvs, WhereConditions } from "@forge/kvs";
 import { ForgeSqlOrmOptions } from "../core/ForgeSQLQueryBuilder";
 import { cacheApplicationContext, isTableContainsTableInCacheContext } from "./cacheContextUtils";
+import { extractBacktickedValues } from "./cacheTableUtils";
 
 // Constants for better maintainability
 const CACHE_CONSTANTS = {
@@ -45,29 +46,6 @@ function getCurrentTime(): number {
 function nowPlusSeconds(secondsToAdd: number): number {
   const dt = DateTime.now().plus({ seconds: secondsToAdd });
   return Math.floor(dt.toSeconds());
-}
-
-/**
- * Extracts all table/column names between backticks from SQL query and returns them as comma-separated string.
- *
- * @param sql - SQL query string
- * @returns Comma-separated string of unique backticked values
- */
-function extractBacktickedValues(sql: string): string {
-  const regex = /`([^`]+)`/g;
-  const matches = new Set<string>();
-  let match;
-
-  while ((match = regex.exec(sql.toLowerCase())) !== null) {
-    if (!match[1].startsWith("a_")) {
-      matches.add(`\`${match[1]}\``);
-    }
-  }
-
-  // Sort to ensure consistent order for the same input
-  return Array.from(matches)
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base", numeric: true }))
-    .join(",");
 }
 
 /**
@@ -362,7 +340,7 @@ export async function getFromCache<T>(
     if (
       cacheResult &&
       (cacheResult[expirationName] as number) >= getCurrentTime() &&
-      extractBacktickedValues(sqlQuery.sql) === cacheResult[entityQueryName]
+      extractBacktickedValues(sqlQuery.sql, options) === cacheResult[entityQueryName]
     ) {
       if (options.logCache) {
         // eslint-disable-next-line no-console
@@ -423,7 +401,7 @@ export async function setCacheResult(
       .set(
         key,
         {
-          [entityQueryName]: extractBacktickedValues(sqlQuery.sql),
+          [entityQueryName]: extractBacktickedValues(sqlQuery.sql, options),
           [expirationName]: nowPlusSeconds(cacheTtl),
           [dataName]: JSON.stringify(results),
         },

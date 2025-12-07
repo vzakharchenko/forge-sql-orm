@@ -285,7 +285,7 @@ describe("cacheUtils", () => {
       );
     });
 
-    it("should ignore tables starting with a_", async () => {
+    it("should ignore tables starting with a_ in fallback mode", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
       const { isTableContainsTableInCacheContext } =
         await import("../../../src/utils/cacheContextUtils");
@@ -298,9 +298,10 @@ describe("cacheUtils", () => {
       };
       mockKvs.transact.mockReturnValue(mockTransact);
 
+      // Use invalid SQL to trigger fallback mode where a_ filtering works
       const queryWithA_Table = {
         toSQL: vi.fn(() => ({
-          sql: "SELECT * FROM `users`, `a_temp_table`, `orders` WHERE id = ?",
+          sql: "INVALID SQL `users` `a_temp_table` `orders`",
           params: [1],
         })),
       };
@@ -310,13 +311,13 @@ describe("cacheUtils", () => {
       expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          sql: "`orders`,`users`", // a_temp_table is filtered out, sorted
+          sql: "`orders`,`users`", // a_temp_table is filtered out in fallback mode, sorted
         }),
         { entityName: "cache" },
       );
     });
 
-    it("should handle case-insensitive filtering of a_ tables", async () => {
+    it("should handle case-insensitive filtering of a_ tables in fallback mode", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
       const { isTableContainsTableInCacheContext } =
         await import("../../../src/utils/cacheContextUtils");
@@ -329,9 +330,10 @@ describe("cacheUtils", () => {
       };
       mockKvs.transact.mockReturnValue(mockTransact);
 
+      // Use invalid SQL to trigger fallback mode where a_ filtering works
       const queryWithA_TableUpperCase = {
         toSQL: vi.fn(() => ({
-          sql: "SELECT * FROM `users`, `A_TEMP_TABLE`, `orders` WHERE id = ?",
+          sql: "INVALID SQL `users` `A_TEMP_TABLE` `orders`",
           params: [1],
         })),
       };
@@ -341,13 +343,13 @@ describe("cacheUtils", () => {
       expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          sql: "`orders`,`users`", // A_TEMP_TABLE is filtered out (case-insensitive)
+          sql: "`orders`,`users`", // A_TEMP_TABLE is filtered out in fallback mode (case-insensitive)
         }),
         { entityName: "cache" },
       );
     });
 
-    it("should return empty string when no backticked values found", async () => {
+    it("should extract table name even without backticks using parser", async () => {
       const { setCacheResult } = await import("../../../src/utils/cacheUtils");
       const { isTableContainsTableInCacheContext } =
         await import("../../../src/utils/cacheContextUtils");
@@ -372,10 +374,37 @@ describe("cacheUtils", () => {
       expect(mockTransact.set).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          sql: "", // Empty string when no backticks
+          sql: "`users`", // Parser extracts table name even without backticks
         }),
         { entityName: "cache" },
       );
+    });
+
+    it("should return empty string when no tables found", async () => {
+      const { setCacheResult } = await import("../../../src/utils/cacheUtils");
+      const { isTableContainsTableInCacheContext } =
+        await import("../../../src/utils/cacheContextUtils");
+      (isTableContainsTableInCacheContext as any).mockResolvedValue(false);
+
+      const mockTransact = {
+        set: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue(undefined),
+      };
+      mockKvs.transact.mockReturnValue(mockTransact);
+
+      const queryWithoutTables = {
+        toSQL: vi.fn(() => ({
+          sql: "SELECT 1",
+          params: [],
+        })),
+      };
+
+      await setCacheResult(queryWithoutTables, defaultOptions, { id: 1 }, 300);
+
+      // When parser finds no tables, it returns empty string, fallback also returns empty
+      const setCall = mockTransact.set.mock.calls[0];
+      expect(setCall[1].sql).toBe("");
     });
 
     it("should match extracted values in getFromCache", async () => {
