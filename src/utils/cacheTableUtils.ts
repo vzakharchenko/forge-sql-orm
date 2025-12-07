@@ -139,31 +139,20 @@ function extractTablesFromNode(node: any, tables: Set<string>): void {
   // Extract table name if node is a table type
   // Filter out a_ prefixed names (these are field aliases, not table names)
   const tableName = extractTableName(node);
-  if (tableName) {
-    if (typeof tableName === "string" && tableName.length > 0) {
-      // Filter out a_ prefixed names (field aliases)
-      if (tableName.startsWith("a_")) {
-        return;
-      }
-
-      // Filter out short names that are likely table aliases (u, us, o, oi, etc.)
-      // Only filter if it's not a real table node (type === "table" or "dual")
-      const isRealTableNode = node.type === "table" || node.type === "dual";
-      if (!isRealTableNode && tableName.length <= 2) {
-        return;
-      }
-
-      tables.add(tableName);
-    } else {
-      // Log when extractTableName returns something unexpected
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[cacheTableUtils] extractTableName returned non-string value:`,
-        typeof tableName,
-        tableName,
-        `(node type: ${node.type})`,
-      );
+  if (tableName && tableName.length > 0) {
+    // Filter out a_ prefixed names (field aliases)
+    if (tableName.startsWith("a_")) {
+      return;
     }
+
+    // Filter out short names that are likely table aliases (u, us, o, oi, etc.)
+    // Only filter if it's not a real table node (type === "table" or "dual")
+    const isRealTableNode = node.type === "table" || node.type === "dual";
+    if (!isRealTableNode && tableName.length <= 2) {
+      return;
+    }
+
+    tables.add(tableName);
   }
 
   // Handle CTE (Common Table Expressions) - WITH clause
@@ -330,7 +319,7 @@ function extractTablesFromNode(node: any, tables: Set<string>): void {
           }
         }
       });
-    } else if (node.union && typeof node.union === "object") {
+    } else if (typeof node.union === "object") {
       // Single union node
       if (
         node.union.type === "select" ||
@@ -396,7 +385,7 @@ function extractTablesFromNode(node: any, tables: Set<string>): void {
       node.type !== "dual" &&
       node.name.length <= 2);
 
-  if (!isLikelyAlias && typeof node === "object" && !Array.isArray(node)) {
+  if (!isLikelyAlias && !Array.isArray(node)) {
     Object.values(node).forEach((value) => {
       if (value && typeof value === "object") {
         if (Array.isArray(value)) {
