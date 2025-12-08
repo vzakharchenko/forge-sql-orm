@@ -1,4 +1,5 @@
-function st($, M) {
+import { g as ut } from "./client-core-vendor-uVKegvgU.js";
+function ct($, M) {
   for (var W = 0; W < M.length; W++) {
     const D = M[W];
     if (typeof D != "string" && !Array.isArray(D)) {
@@ -13,7 +14,7 @@ function st($, M) {
 }
 var Ke = { exports: {} },
   it;
-function ut() {
+function ft() {
   return (
     it ||
       ((it = 1),
@@ -42,7 +43,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
               xe = ve.length,
               ce = "[iFrameSizer]",
               re = ce.length,
-              L = null,
+              C = null,
               X = window.requestAnimationFrame,
               qe = Object.freeze({ max: 1, scroll: 1, bodyScroll: 1, documentElementScroll: 1 }),
               n = {},
@@ -127,7 +128,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
             function g(e, r) {
               Me("log", e, r, ye(e));
             }
-            function Le(e, r) {
+            function Ce(e, r) {
               Me("info", e, r, ye(e));
             }
             function H(e, r) {
@@ -136,7 +137,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
             function Me(e, r, m, u) {
               u === !0 && typeof window.console == "object" && console[e](Pe(r), m);
             }
-            function Ce(e) {
+            function Le(e) {
               function r() {
                 function a() {
                   (Ae(b), Ne(f), oe("onResized", b));
@@ -175,22 +176,22 @@ Please see https://iframe-resizer.com/upgrade for more details.
               function U() {
                 function a() {
                   function y() {
-                    var C = 0,
+                    var L = 0,
                       N = !1;
                     for (
                       g(f, "Checking connection is from allowed list of origins: " + p);
-                      C < p.length;
-                      C++
+                      L < p.length;
+                      L++
                     )
-                      if (p[C] === l) {
+                      if (p[L] === l) {
                         N = !0;
                         break;
                       }
                     return N;
                   }
                   function k() {
-                    var C = n[f] && n[f].remoteHost;
-                    return (g(f, "Checking connection is from: " + C), l === C);
+                    var L = n[f] && n[f].remoteHost;
+                    return (g(f, "Checking connection is from: " + L), l === L);
                   }
                   return p.constructor === Array ? y() : k();
                 }
@@ -254,12 +255,12 @@ Please see https://iframe-resizer.com/upgrade for more details.
                 Ve(p, 32, l);
               }
               function ze() {
-                function a(k, C) {
+                function a(k, L) {
                   function N() {
                     n[y] ? pe(n[y].iframe, y) : l();
                   }
                   ["scroll", "resize"].forEach(function (Be) {
-                    (g(y, k + Be + " listener for sendPageInfo"), C(window, Be, N));
+                    (g(y, k + Be + " listener for sendPageInfo"), L(window, Be, N));
                   });
                 }
                 function l() {
@@ -286,36 +287,36 @@ Please see https://iframe-resizer.com/upgrade for more details.
                 return (
                   ge(f),
                   {
-                    x: Math.floor(Number(l.left) + Number(L.x)),
-                    y: Math.floor(Number(l.top) + Number(L.y)),
+                    x: Math.floor(Number(l.left) + Number(C.x)),
+                    y: Math.floor(Number(l.top) + Number(C.y)),
                   }
                 );
               }
               function c(a) {
                 function l() {
-                  ((L = C), I(), g(f, "--"));
+                  ((C = L), I(), g(f, "--"));
                 }
                 function p() {
                   return { x: Number(b.width) + k.x, y: Number(b.height) + k.y };
                 }
                 function y() {
                   window.parentIFrame
-                    ? window.parentIFrame["scrollTo" + (a ? "Offset" : "")](C.x, C.y)
+                    ? window.parentIFrame["scrollTo" + (a ? "Offset" : "")](L.x, L.y)
                     : H(f, "Unable to scroll to requested position, window.parentIFrame not found");
                 }
                 var k = a ? s(b.iframe) : { x: 0, y: 0 },
-                  C = p();
+                  L = p();
                 (g(f, "Reposition requested from iFrame (offset x:" + k.x + " y:" + k.y + ")"),
                   window.top === window.self ? l() : y());
               }
               function I() {
-                oe("onScroll", L) === !1 ? se() : Ne(f);
+                oe("onScroll", C) === !1 ? se() : Ne(f);
               }
               function S(a) {
                 function l() {
-                  var N = s(C);
+                  var N = s(L);
                   (g(f, "Moving to in page link (#" + y + ") at x: " + N.x + " y: " + N.y),
-                    (L = { x: N.x, y: N.y }),
+                    (C = { x: N.x, y: N.y }),
                     I(),
                     g(f, "--"));
                 }
@@ -326,8 +327,8 @@ Please see https://iframe-resizer.com/upgrade for more details.
                 }
                 var y = a.split("#")[1] || "",
                   k = decodeURIComponent(y),
-                  C = document.getElementById(k) || document.getElementsByName(k)[0];
-                C
+                  L = document.getElementById(k) || document.getElementsByName(k)[0];
+                L
                   ? l()
                   : window.top === window.self
                     ? g(f, "In page link #" + y + " not found")
@@ -432,7 +433,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
                     (f = b.id),
                     n[f] && (n[f].loaded = !0),
                     !K() && He(f) && (g(f, "Received: " + q), Re() && U() && we()))
-                  : Le(f, "Ignored: " + q);
+                  : Ce(f, "Ignored: " + q);
             }
             function Te(e, r, m) {
               var u = null,
@@ -461,8 +462,8 @@ Please see https://iframe-resizer.com/upgrade for more details.
               (Te(r, "onClosed", r), g(r, "--"), ae(e), D && (D.disconnect(), (D = null)));
             }
             function ge(e) {
-              L === null &&
-                ((L = {
+              C === null &&
+                ((C = {
                   x:
                     window.pageXOffset === M
                       ? document.documentElement.scrollLeft
@@ -472,14 +473,14 @@ Please see https://iframe-resizer.com/upgrade for more details.
                       ? document.documentElement.scrollTop
                       : window.pageYOffset,
                 }),
-                g(e, "Get page position: " + L.x + "," + L.y));
+                g(e, "Get page position: " + C.x + "," + C.y));
             }
             function Ne(e) {
-              L !== null &&
-                (window.scrollTo(L.x, L.y), g(e, "Set page position: " + L.x + "," + L.y), se());
+              C !== null &&
+                (window.scrollTo(C.x, C.y), g(e, "Set page position: " + C.x + "," + C.y), se());
             }
             function se() {
-              L = null;
+              C = null;
             }
             function ue(e) {
               function r() {
@@ -811,7 +812,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
               });
             }
             function Qe() {
-              (te(window, "message", Ce),
+              (te(window, "message", Le),
                 te(window, "resize", function () {
                   Je("resize");
                 }),
@@ -869,7 +870,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
                     }
                     return this.filter("iframe").each(u).end();
                   })
-                : Le("", "Unable to bind to jQuery, it is not fully loaded.");
+                : Ce("", "Unable to bind to jQuery, it is not fully loaded.");
             }
             (window.jQuery !== M && Ye(window.jQuery),
               ($.exports = Xe()),
@@ -881,7 +882,7 @@ Please see https://iframe-resizer.com/upgrade for more details.
 }
 var Ze = { exports: {} },
   ot;
-function ct() {
+function lt() {
   return (
     ot ||
       ((ot = 1),
@@ -896,7 +897,7 @@ function ct() {
             xe = null,
             ce = "",
             re = !1,
-            L = { resize: 1, click: 1 },
+            C = { resize: 1, click: 1 },
             X = 128,
             qe = !0,
             n = 1,
@@ -910,10 +911,10 @@ function ct() {
             Pe = !1,
             ye = !1,
             g = "[iFrameSizer]",
-            Le = g.length,
+            Ce = g.length,
             H = "",
             Me = { max: 1, min: 1, bodyScroll: 1, documentElementScroll: 1 },
-            Ce = "child",
+            Le = "child",
             Te = window.parent,
             ae = "*",
             de = 0,
@@ -1025,7 +1026,7 @@ function ct() {
             function t(o) {
               return o === "true";
             }
-            var i = te.slice(Le).split(":");
+            var i = te.slice(Ce).split(":");
             ((H = i[0]),
               (ee = M === i[1] ? ee : Number(i[1])),
               (re = M === i[2] ? re : t(i[2])),
@@ -1038,7 +1039,7 @@ function ct() {
               (ce = i[10]),
               (de = M === i[11] ? de : Number(i[11])),
               (le.enable = M === i[12] ? !1 : t(i[12])),
-              (Ce = M === i[13] ? Ce : i[13]),
+              (Le = M === i[13] ? Le : i[13]),
               (j = M === i[14] ? j : i[14]),
               (ye = M === i[15] ? ye : t(i[15])));
           }
@@ -1176,7 +1177,7 @@ function ct() {
                   "otransitionend",
                 ],
               }),
-              Ce === "child" && F({ method: t, eventType: "IFrame Resized", eventName: "resize" }));
+              Le === "child" && F({ method: t, eventType: "IFrame Resized", eventName: "resize" }));
           }
           function pe(t, i, o, d) {
             return (
@@ -1526,8 +1527,8 @@ function ct() {
             }
             function x() {
               function _(G, ke) {
-                var at = Math.abs(G - ke) <= de;
-                return !at;
+                var st = Math.abs(G - ke) <= de;
+                return !st;
               }
               return (
                 (O = M === o ? p[R]() : o),
@@ -1550,17 +1551,17 @@ function ct() {
             var O, v;
             x() || t === "init" ? (Be(), T()) : z();
           }
-          var C = Xe(k);
+          var L = Xe(k);
           function N(t, i, o, d) {
             function T() {
               t in { reset: 1, resetPage: 1, init: 1 } || e("Trigger event: " + i);
             }
             function x() {
-              return ge && t in L;
+              return ge && t in C;
             }
             x()
               ? e("Trigger event cancelled: " + t)
-              : (T(), t === "init" ? k(t, i, o, d) : C(t, i, o, d));
+              : (T(), t === "init" ? k(t, i, o, d) : L(t, i, o, d));
           }
           function Be() {
             (ge || ((ge = !0), e("Trigger event lock on")),
@@ -1622,7 +1623,7 @@ function ct() {
               },
             };
             function o() {
-              return g === ("" + t.data).slice(0, Le);
+              return g === ("" + t.data).slice(0, Ce);
             }
             function d() {
               return t.data.split("]")[1].split(":")[0];
@@ -1669,12 +1670,13 @@ function ct() {
   );
 }
 var Ge, rt;
-function ft() {
+function dt() {
   if (rt) return Ge;
   rt = 1;
-  const $ = ut();
-  return ((Ge = { iframeResize: $, iframeResizer: $, contentWindow: ct() }), Ge);
+  const $ = ft();
+  return ((Ge = { iframeResize: $, iframeResizer: $, contentWindow: lt() }), Ge);
 }
-var lt = ft();
-const dt = st({ __proto__: null }, [lt]);
-export { dt as i };
+var at = dt();
+const gt = ut(at),
+  ht = ct({ __proto__: null, default: gt }, [at]);
+export { ht as i };
