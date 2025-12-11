@@ -54,12 +54,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.2",
+    "@types/node": "^25.0.0",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "knip": "^5.73.1",
+    "knip": "^5.73.3",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.7"
