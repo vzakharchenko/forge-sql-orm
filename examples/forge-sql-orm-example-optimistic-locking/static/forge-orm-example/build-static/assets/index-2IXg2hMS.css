@@ -2453,6 +2453,9 @@ button {
 ._14mj1kw7:after {
   border-radius: inherit;
 }
+._2rko1qi0 {
+  border-radius: var(--ds-radius-medium, 6px);
+}
 ._2rko1rr0 {
   border-radius: var(--ds-radius-full, 9999px);
 }
@@ -2893,6 +2896,9 @@ button {
 }
 ._p12f1osq {
   max-width: 100%;
+}
+._qwyt1qi0 [role="tab"] {
+  border-radius: var(--ds-radius-medium, 6px);
 }
 ._1b8d1mrt [role="tab"]:active:after {
   border-block-end: 3px solid var(--ds-border, transparent);

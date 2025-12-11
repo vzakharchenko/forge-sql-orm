@@ -37,7 +37,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vitest": "^0.5.4",
     "husky": "^9.1.7",
-    "knip": "^5.72.0",
+    "knip": "^5.73.1",
     "patch-package": "^8.0.1",
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
@@ -72,7 +72,7 @@
   ],
   "peerDependencies": {
     "@forge/sql": "^3.0.13",
-    "drizzle-orm": "^0.45.0"
+    "drizzle-orm": "^0.45.1"
   },
   "optionalDependencies": {
     "@forge/kvs": "^1.2.0"
